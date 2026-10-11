@@ -1,7 +1,7 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import { invoke, isTauri } from '@tauri-apps/api/core';
 import { listen, type Event } from '@tauri-apps/api/event';
-import { applyEdit, beginPairing, enumerateChromeUserData, exportHtml, getBridgeState, getMirrorTree, openHttpUrl, previewEdit, readCacheCount, readCacheList, readCacheNode, readCacheSearch, readCacheTree, startBridge, subscribeBridgeState } from './backend';
+import { applyEdit, applyTitleEncoding, beginPairing, enumerateChromeUserData, exportHtml, getBridgeState, getMirrorTree, openHttpUrl, previewEdit, previewTitleEncoding, readCacheCount, readCacheList, readCacheNode, readCacheSearch, readCacheTree, readTagState, startBridge, subscribeBridgeState, tagCommand } from './backend';
 
 vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn(), isTauri: vi.fn() }));
 vi.mock('@tauri-apps/api/event', () => ({ listen: vi.fn() }));
@@ -24,6 +24,10 @@ it('browser preview never invokes or subscribes to native endpoints', async () =
   await expect(previewEdit('profile-a', 1, { kind: 'delete', chromeId: '10' })).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
   await expect(applyEdit('profile-a', 1, { kind: 'delete', chromeId: '10' }, false)).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
   await expect(exportHtml('profile-a')).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
+  await expect(readTagState('profile-a', ['10'], null)).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
+  await expect(tagCommand('profile-a', { kind: 'add', chromeIds: ['10'], name: '工作' })).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
+  await expect(previewTitleEncoding('profile-a', 1, ['10'], false)).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
+  await expect(applyTitleEncoding('profile-a', 1, ['10'], false)).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
   expect(invoke).not.toHaveBeenCalled();
   expect(listen).not.toHaveBeenCalled();
 });

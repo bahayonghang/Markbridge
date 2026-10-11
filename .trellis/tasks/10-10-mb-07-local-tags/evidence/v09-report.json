@@ -1,0 +1,168 @@
+{
+  "runId": "7d423b1d-da25-4dbb-87dc-b2bff7181433",
+  "startedAt": "2026-10-11T18:36:42.478Z",
+  "scope": "disposable Chrome user-data-dir + tag harness, no daily profile",
+  "credentialNamespace": "Markbridge.Task07.7d423b1d-da25-4dbb-87dc-b2bff7181433",
+  "controls": [
+    {
+      "control": "pairing_namespace_rejected",
+      "status": "PASS",
+      "exitCode": 1,
+      "pairingTargetsUnchanged": true
+    },
+    {
+      "control": "extension_loaded",
+      "status": "PASS",
+      "chrome": "Chrome/155.0.8059.39",
+      "loadExtensionFlag": true,
+      "loadUnpacked": true
+    },
+    {
+      "control": "paired_tree",
+      "status": "PASS",
+      "nodes": 3,
+      "hash": "94dbe05f9b2651b7",
+      "chrome": "Chrome/155.0.8059.39"
+    },
+    {
+      "control": "obs1_local_unchanged",
+      "status": "PASS",
+      "titlesUnchanged": true,
+      "urlsUnchanged": true,
+      "emptyRejected": true,
+      "noteStored": true,
+      "operationsUnchanged": true,
+      "cacheMatched": true,
+      "chromeGets": 8
+    },
+    {
+      "control": "obs2_selected_scope",
+      "status": "PASS",
+      "encodingEnabled": true,
+      "titlesUnchangedAfterEnable": true,
+      "previewBeforeApply": true,
+      "changeCount": 2,
+      "titleChangesOnly": true,
+      "pipeDiff": true,
+      "plainDiff": true,
+      "keepAbsent": true,
+      "conflictCount": 0,
+      "pipeTitle": true,
+      "plainTitle": true,
+      "keepTitle": true,
+      "linkTitle": true,
+      "urlsUnchanged": true,
+      "chromeGets": 15
+    },
+    {
+      "control": "obs3_no_second_copy",
+      "status": "PASS",
+      "secondChangeCount": 0,
+      "secondCode": "BACKEND_INVALID_MESSAGE",
+      "pipeUnchanged": true,
+      "plainUnchanged": true,
+      "pipeNotDoubled": true,
+      "plainNotDoubled": true,
+      "chromeGets": 17
+    },
+    {
+      "control": "obs4_round_trip",
+      "status": "PASS",
+      "pipeTagSet": true,
+      "pipeParts": true,
+      "plainParts": true,
+      "noEmptyFragment": true,
+      "emptyRejected": true,
+      "restoreDiff": true,
+      "restoredTitle": true,
+      "restoredUrl": true,
+      "plainStillEncoded": true,
+      "chromeGets": 19
+    },
+    {
+      "control": "obs5_disable_and_restore",
+      "status": "PASS",
+      "encodingOff": true,
+      "disableDidNotRename": true,
+      "operationsUnchangedByDisable": true,
+      "restoreDiff": true,
+      "restoredTitle": true,
+      "restoredUrl": true,
+      "keepUnchanged": true,
+      "chromeGets": 27
+    },
+    {
+      "control": "obs6_external_conflict",
+      "status": "PASS",
+      "reenabled": true,
+      "conflictFlag": true,
+      "previewConflicts": [
+        "6"
+      ],
+      "previewChangeCount": 0,
+      "applyCode": "BACKEND_CONFLICT",
+      "externalPreserved": true,
+      "keepUnchanged": true,
+      "chromeGets": 32
+    },
+    {
+      "control": "obs7_tag_restore",
+      "status": "PASS",
+      "mergedAway": true,
+      "mergeRestored": true,
+      "deletedAway": true,
+      "deleteRestored": true,
+      "titlesUnchanged": true,
+      "urlsUnchanged": true,
+      "chromeGets": 38
+    }
+  ],
+  "browserProduct": "Google Chrome",
+  "chromeVersion": "155.0.8059.39",
+  "hostBefore": {
+    "dpi": "120",
+    "hklmNames": "ChromeCleanupEnabled,ChromeCleanupReportingEnabled,DeviceMetricsReportingEnabled,MetricsReportingEnabled,UserFeedbackAllowed",
+    "hklmSubs": "0",
+    "policyRoot": "True",
+    "googlePolicy": "False",
+    "chromiumPolicy": "False",
+    "dailyHash": "DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82",
+    "dailyLen": 849515,
+    "chromeLen": "4586648",
+    "chromeTicks": "639268609564417310"
+  },
+  "credentialCountsBefore": {
+    "pairing": 0,
+    "task07": 0
+  },
+  "dataDirectory": "temp",
+  "chromeDirectory": "temp",
+  "hostAfter": {
+    "dpi": "120",
+    "hklmNames": "ChromeCleanupEnabled,ChromeCleanupReportingEnabled,DeviceMetricsReportingEnabled,MetricsReportingEnabled,UserFeedbackAllowed",
+    "hklmSubs": "0",
+    "policyRoot": "True",
+    "googlePolicy": "False",
+    "chromiumPolicy": "False",
+    "dailyHash": "DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82",
+    "dailyLen": 849515,
+    "chromeLen": "4586648",
+    "chromeTicks": "639268609564417310"
+  },
+  "cleanup": {
+    "dataRemoved": true,
+    "chromeRemoved": true,
+    "pairingTargets": 0,
+    "task07Targets": 0,
+    "pairingUnchanged": true,
+    "dailyBookmarksUnchanged": true,
+    "dpiUnchanged": true,
+    "hklmUnchanged": true,
+    "policiesUnchanged": true,
+    "hostUnchanged": true,
+    "chromeUnchanged": true,
+    "ok": true
+  },
+  "status": "PASS",
+  "exitCode": 0
+}

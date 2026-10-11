@@ -11,6 +11,8 @@ import validateEditPreview from './generated/edit-preview.validator.js';
 import validateApplyResult from './generated/apply-result.validator.js';
 import validateOperationList from './generated/operation-list.validator.js';
 import validateEditDocument from './generated/edit-document.validator.js';
+import validateTagCatalog from './generated/tag-catalog.validator.js';
+import validateTitleEncoding from './generated/title-encoding.validator.js';
 import type { BridgeState } from './generated/bridge-state';
 import type { PairingOffer } from './generated/pairing-offer';
 import type { MirrorTree } from './generated/mirror-tree';
@@ -24,6 +26,8 @@ import type { EditPreview } from './generated/edit-preview';
 import type { ApplyResult } from './generated/apply-result';
 import type { OperationList } from './generated/operation-list';
 import type { EditDocument } from './generated/edit-document';
+import type { TagCatalog } from './generated/tag-catalog';
+import type { TitleEncodingPreview } from './generated/title-encoding';
 
 export type { BridgeState } from './generated/bridge-state';
 export type { PairingOffer } from './generated/pairing-offer';
@@ -38,6 +42,8 @@ export type { EditPreview } from './generated/edit-preview';
 export type { ApplyResult } from './generated/apply-result';
 export type { OperationList } from './generated/operation-list';
 export type { EditDocument } from './generated/edit-document';
+export type { TagCatalog, TagEntry, TagItem } from './generated/tag-catalog';
+export type { TitleEncodingPreview, EncodingConflict } from './generated/title-encoding';
 
 export function parseBridgeState(value: unknown): BridgeState {
   if (!validateBridge(value)) throw new Error('INVALID_BRIDGE_STATE');
@@ -101,5 +107,15 @@ export function parseOperationList(value: unknown): OperationList {
 
 export function parseEditDocument(value: unknown): EditDocument {
   if (!validateEditDocument(value)) throw new Error('INVALID_EDIT_DOCUMENT');
+  return value;
+}
+
+export function parseTagCatalog(value: unknown): TagCatalog {
+  if (!validateTagCatalog(value)) throw new Error('INVALID_TAG_CATALOG');
+  return value;
+}
+
+export function parseTitleEncoding(value: unknown): TitleEncodingPreview {
+  if (!validateTitleEncoding(value)) throw new Error('INVALID_TITLE_ENCODING');
   return value;
 }

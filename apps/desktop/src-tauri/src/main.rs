@@ -4,7 +4,8 @@ use markbridge_core::bridge::{Bridge, CacheTreeNode, credentials::OsCredentialSt
 use markbridge_protocol::{
     ApplyResult, BookmarkNode, BridgeState, ChromeProfileList, Counter, EditAction, EditDocument,
     EditPreview, ErrorCode, Id, LibraryCount, LibraryDetail, LibraryNodes, LibraryPage,
-    LibrarySearch, MirrorTree, OperationList, PairingOffer,
+    LibrarySearch, MirrorTree, OperationList, PairingOffer, TagCatalog, TagCommand,
+    TitleEncodingPreview,
 };
 use std::sync::Arc;
 use tauri::{Emitter, Manager};
@@ -360,6 +361,61 @@ async fn export_sidecar(
 }
 
 #[tauri::command]
+async fn tag_state(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    profile_id: Id,
+    chrome_ids: Vec<Id>,
+    filter_tag_id: Option<Id>,
+) -> Result<TagCatalog, ErrorCode> {
+    trusted(&window)?;
+    bridge
+        .tag_catalog(profile_id, chrome_ids, filter_tag_id)
+        .await
+}
+
+#[tauri::command]
+async fn tag_command(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    profile_id: Id,
+    command: TagCommand,
+) -> Result<TagCatalog, ErrorCode> {
+    trusted(&window)?;
+    bridge.mutate_tags(profile_id, command).await
+}
+
+#[tauri::command]
+async fn preview_title_encoding(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    profile_id: Id,
+    expected_revision: u64,
+    chrome_ids: Vec<Id>,
+    restore: bool,
+) -> Result<TitleEncodingPreview, ErrorCode> {
+    trusted(&window)?;
+    bridge
+        .preview_title_encoding(profile_id, expected_revision, chrome_ids, restore)
+        .await
+}
+
+#[tauri::command]
+async fn apply_title_encoding(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    profile_id: Id,
+    expected_revision: u64,
+    chrome_ids: Vec<Id>,
+    restore: bool,
+) -> Result<ApplyResult, ErrorCode> {
+    trusted(&window)?;
+    bridge
+        .apply_title_encoding(profile_id, expected_revision, chrome_ids, restore)
+        .await
+}
+
+#[tauri::command]
 fn open_http_url(window: tauri::WebviewWindow, url: String) -> Result<(), ErrorCode> {
     trusted(&window)?;
     open_http(&url)
@@ -462,6 +518,10 @@ fn main() {
             refresh_operations,
             export_html,
             export_sidecar,
+            tag_state,
+            tag_command,
+            preview_title_encoding,
+            apply_title_encoding,
             open_http_url
         ])
         .build(tauri::generate_context!());

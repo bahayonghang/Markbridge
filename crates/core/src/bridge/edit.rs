@@ -1,8 +1,10 @@
 use super::{Bridge, Inner, Result, envelope, now, random_id};
 use crate::editing::{self, ChildOrder, LocalRef, Plan, StoredEdit, StoredStep};
 use crate::storage::{
-    AfterBody, BeforeBody, IdMapBody, OperationRecord, OrderBody, RestoreBody, StepRecord,
+    AfterBody, BeforeBody, EncodingBody, IdMapBody, OperationRecord, OrderBody, RestoreBody,
+    StepRecord,
 };
+use crate::tags::last_title_after_receipt;
 use markbridge_protocol::*;
 use tokio::sync::mpsc;
 
@@ -95,104 +97,21 @@ impl Bridge {
         if plan.steps.is_empty() {
             return record_conflict_only(&mut inner, self, &profile_id, &plan).await;
         }
-        let operation = editing::operation_id()?;
-        let message = apply_message(
-            &profile_id,
-            &session,
-            &operation,
-            epoch,
-            revision,
-            &plan.steps,
-        )?;
-        let rows = inner
-            .storage()?
-            .sidecar_rows(profile_id.clone(), epoch)
-            .await?;
-        let locals = to_locals(rows);
-        let html = editing::render_netscape(&nodes)?;
-        let sidecar = editing::render_sidecar(&profile_id, epoch.get(), &locals)?;
-        let backup_dir = inner.backup_dir.clone();
-        let (html_path, sidecar_path) =
-            editing::write_backup_pair(&backup_dir, &operation, &html, &sidecar)?;
-        let created = now()?;
-        let before = before_body(&plan, &nodes);
-        let before_json = serde_json::to_string(&before).map_err(|_| ErrorCode::StorageError)?;
-        let tree_before = serde_json::to_string(&nodes).map_err(|_| ErrorCode::StorageError)?;
-        let record = OperationRecord {
-            operation_id: operation.clone(),
-            profile_id: profile_id.clone(),
-            source_epoch: epoch,
-            state: OperationState::Applying,
-            before_json,
-            after_json: None,
-            steps: plan
-                .steps
-                .iter()
-                .enumerate()
-                .map(|(ordinal, step)| StepRecord {
-                    ordinal: ordinal as u64,
-                    request_id: step.request_id.clone(),
-                    target: step.target.clone(),
-                    payload: step.payload.clone(),
-                    expected_before: step.expected_before.clone(),
-                    expected_child_ids: step.expected_child_ids.clone(),
-                    receipt: None,
-                })
-                .collect(),
-        };
-        if let Err(error) = inner
-            .storage()?
-            .insert_operation(
-                record,
-                tree_before,
-                sidecar,
-                html_path.to_string_lossy().into_owned(),
-                sidecar_path.to_string_lossy().into_owned(),
-                created,
-            )
-            .await
-        {
-            let _ = std::fs::remove_file(html_path);
-            let _ = std::fs::remove_file(sidecar_path);
-            return Err(error);
-        }
-        if let Some(original) = &plan.undo_of {
-            inner
-                .storage()?
-                .set_operation_state(original.clone(), OperationState::RollingBack, None)
-                .await?;
-        }
-        if let Some(profile) = inner.profiles.get_mut(profile_id.as_str()) {
-            profile.busy = true;
-        }
-        if sender.send(message).is_err() {
-            let _ = inner
-                .storage()?
-                .set_operation_state(operation.clone(), OperationState::Failed, None)
-                .await;
-            if let Some(original) = &plan.undo_of {
-                let _ = inner
-                    .storage()?
-                    .set_operation_state(original.clone(), OperationState::Applied, None)
-                    .await;
-            }
-            if let Some(profile) = inner.profiles.get_mut(profile_id.as_str()) {
-                profile.busy = false;
-            }
-            self.publish(&mut inner);
-            return Err(ErrorCode::ReadOnly);
-        }
-        self.publish(&mut inner);
-        Ok(ApplyResult {
-            operation_id: operation,
-            state: if plan.undo_of.is_some() {
-                OperationState::RollingBack
-            } else {
-                OperationState::Applying
+        commit_planned(
+            self,
+            &mut inner,
+            PlannedCommit {
+                profile_id: &profile_id,
+                epoch,
+                revision,
+                nodes: &nodes,
+                session: &session,
+                sender,
+                plan,
+                encodings: Vec::new(),
             },
-            error_code: RequiredNullable(None),
-            conflicts: plan.conflicts,
-        })
+        )
+        .await
     }
 
     pub async fn list_operations(&self, profile_id: Id) -> Result<OperationList> {
@@ -346,6 +265,34 @@ pub(super) async fn accept_receipt(
             .storage()?
             .copy_mapped_metadata(profile_id.clone(), epoch, super::now()?)
             .await?;
+    }
+    if matches!(receipt.state, OperationState::Applied)
+        && let Some(intent) = before
+            .encodings
+            .iter()
+            .find(|item| item.request_id == receipt.request_id)
+        && let Some(after_node) = &receipt.after
+    {
+        let matched = if intent.restore {
+            after_node.title.as_str() == intent.raw_title
+        } else {
+            after_node.title.as_str() == intent.encoded_title
+        };
+        if matched {
+            inner
+                .storage()?
+                .record_title_encoding(
+                    intent.bookmark_id.clone(),
+                    intent.raw_title.clone(),
+                    Some(last_title_after_receipt(
+                        intent.restore,
+                        &intent.raw_title,
+                        &intent.encoded_title,
+                    )),
+                    super::now()?,
+                )
+                .await?;
+        }
     }
     let record = inner
         .storage()?
@@ -532,6 +479,7 @@ fn to_stored(
         restores: vec![],
         undo_of: None,
         conflicts: vec![],
+        encodings: vec![],
     });
     Ok(StoredEdit {
         operation_id: record.operation_id,
@@ -590,7 +538,133 @@ fn to_locals(rows: Vec<crate::storage::SidecarRow>) -> Vec<LocalRef> {
         .collect()
 }
 
-fn before_body(plan: &Plan, nodes: &[BookmarkNode]) -> BeforeBody {
+pub(super) struct PlannedCommit<'a> {
+    pub profile_id: &'a Id,
+    pub epoch: SourceEpoch,
+    pub revision: Counter,
+    pub nodes: &'a [BookmarkNode],
+    pub session: &'a Id,
+    pub sender: mpsc::UnboundedSender<WireMessage>,
+    pub plan: Plan,
+    pub encodings: Vec<EncodingBody>,
+}
+
+pub(super) async fn commit_planned(
+    bridge: &Bridge,
+    inner: &mut Inner,
+    commit: PlannedCommit<'_>,
+) -> Result<ApplyResult> {
+    let PlannedCommit {
+        profile_id,
+        epoch,
+        revision,
+        nodes,
+        session,
+        sender,
+        plan,
+        encodings,
+    } = commit;
+    let operation = editing::operation_id()?;
+    let message = apply_message(
+        profile_id,
+        session,
+        &operation,
+        epoch,
+        revision,
+        &plan.steps,
+    )?;
+    let rows = inner
+        .storage()?
+        .sidecar_rows(profile_id.clone(), epoch)
+        .await?;
+    let locals = to_locals(rows);
+    let html = editing::render_netscape(nodes)?;
+    let sidecar = editing::render_sidecar(profile_id, epoch.get(), &locals)?;
+    let backup_dir = inner.backup_dir.clone();
+    let (html_path, sidecar_path) =
+        editing::write_backup_pair(&backup_dir, &operation, &html, &sidecar)?;
+    let created = now()?;
+    let before = before_body(&plan, nodes, encodings);
+    let before_json = serde_json::to_string(&before).map_err(|_| ErrorCode::StorageError)?;
+    let tree_before = serde_json::to_string(nodes).map_err(|_| ErrorCode::StorageError)?;
+    let record = OperationRecord {
+        operation_id: operation.clone(),
+        profile_id: profile_id.clone(),
+        source_epoch: epoch,
+        state: OperationState::Applying,
+        before_json,
+        after_json: None,
+        steps: plan
+            .steps
+            .iter()
+            .enumerate()
+            .map(|(ordinal, step)| StepRecord {
+                ordinal: ordinal as u64,
+                request_id: step.request_id.clone(),
+                target: step.target.clone(),
+                payload: step.payload.clone(),
+                expected_before: step.expected_before.clone(),
+                expected_child_ids: step.expected_child_ids.clone(),
+                receipt: None,
+            })
+            .collect(),
+    };
+    if let Err(error) = inner
+        .storage()?
+        .insert_operation(
+            record,
+            tree_before,
+            sidecar,
+            html_path.to_string_lossy().into_owned(),
+            sidecar_path.to_string_lossy().into_owned(),
+            created,
+        )
+        .await
+    {
+        let _ = std::fs::remove_file(html_path);
+        let _ = std::fs::remove_file(sidecar_path);
+        return Err(error);
+    }
+    if let Some(original) = &plan.undo_of {
+        inner
+            .storage()?
+            .set_operation_state(original.clone(), OperationState::RollingBack, None)
+            .await?;
+    }
+    if let Some(profile) = inner.profiles.get_mut(profile_id.as_str()) {
+        profile.busy = true;
+    }
+    if sender.send(message).is_err() {
+        let _ = inner
+            .storage()?
+            .set_operation_state(operation.clone(), OperationState::Failed, None)
+            .await;
+        if let Some(original) = &plan.undo_of {
+            let _ = inner
+                .storage()?
+                .set_operation_state(original.clone(), OperationState::Applied, None)
+                .await;
+        }
+        if let Some(profile) = inner.profiles.get_mut(profile_id.as_str()) {
+            profile.busy = false;
+        }
+        bridge.publish(inner);
+        return Err(ErrorCode::ReadOnly);
+    }
+    bridge.publish(inner);
+    Ok(ApplyResult {
+        operation_id: operation,
+        state: if plan.undo_of.is_some() {
+            OperationState::RollingBack
+        } else {
+            OperationState::Applying
+        },
+        error_code: RequiredNullable(None),
+        conflicts: plan.conflicts,
+    })
+}
+
+fn before_body(plan: &Plan, nodes: &[BookmarkNode], encodings: Vec<EncodingBody>) -> BeforeBody {
     let touched = plan
         .steps
         .iter()
@@ -624,6 +698,7 @@ fn before_body(plan: &Plan, nodes: &[BookmarkNode]) -> BeforeBody {
             .collect(),
         undo_of: plan.undo_of.clone(),
         conflicts: plan.conflicts.clone(),
+        encodings,
     }
 }
 

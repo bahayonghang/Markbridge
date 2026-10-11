@@ -3,7 +3,7 @@
   "name": "mb-07-local-tags",
   "title": "本地标签与可选标题编码",
   "description": "本地标签与可选标题编码；属于 Markbridge 父规划，独立验收并记录失败与恢复边界",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": "fullstack",
   "scope": "markbridge",
   "package": null,
@@ -12,7 +12,7 @@
   "assignee": "lyh",
   "createdAt": "2026-10-10",
   "completedAt": null,
-  "branch": null,
+  "branch": "main",
   "base_branch": "main",
   "worktree_path": null,
   "commit": null,
@@ -21,11 +21,25 @@
   "children": [],
   "parent": "10-10-markbridge-workspace",
   "relatedFiles": [
-    "crates/core tags/title codec",
-    "SQLite metadata 查询",
-    "apps/desktop/src/features/tags 与编辑面板"
+    "crates/core/src/tags/mod.rs",
+    "crates/core/src/tags/tests.rs",
+    "crates/core/src/storage/tags.rs",
+    "crates/core/src/storage/migrations/004_tags.sql",
+    "crates/core/src/bridge/tags.rs",
+    "crates/core/src/bridge/edit.rs",
+    "crates/core/src/editing/mod.rs",
+    "crates/protocol/src/bridge.rs",
+    "packages/protocol/src/bridge.ts",
+    "apps/desktop/src/features/tags/TagDesk.tsx",
+    "apps/desktop/src/features/tags/tags.test.tsx",
+    "apps/desktop/src/features/library/LibraryWorkspace.tsx",
+    "apps/desktop/src/backend.ts",
+    "apps/desktop/src-tauri/src/main.rs",
+    "crates/core/examples/tag_harness.rs",
+    ".trellis/spec/backend/database-guidelines.md",
+    ".trellis/spec/frontend/component-guidelines.md"
   ],
-  "notes": "Planning only. Dependency order is documented and is not enforced automatically by Trellis. No product implementation or runtime validation has started.",
+  "notes": "Local tags and notes stay in SQLite. A Chrome title write still uses the child 06 confirmed apply path. V09 PASS on disposable Chrome run 7d423b1d-da25-4dbb-87dc-b2bff7181433.",
   "meta": {
     "sequence": "07",
     "milestone": "M2",
@@ -35,8 +49,9 @@
     "requirements": [
       "R06"
     ],
-    "implementation_approval": "not_granted",
-    "planning_status": "ready_for_review",
-    "delivery_scope": "windows_v1"
+    "implementation_approval": "granted",
+    "planning_status": "approved",
+    "delivery_scope": "windows_v1",
+    "approval_evidence": "Parent approval_evidence; dependencies and per-child acceptance remain required"
   }
 }

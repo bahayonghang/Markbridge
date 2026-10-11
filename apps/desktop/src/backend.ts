@@ -3,10 +3,10 @@ import { listen } from '@tauri-apps/api/event';
 import {
   parseApplyResult, parseBridgeState, parseChromeProfileList, parseEditDocument, parseEditPreview,
   parseLibraryCount, parseLibraryDetail, parseLibraryNodes, parseLibraryPage, parseLibrarySearch,
-  parseMirrorTree, parseOperationList, parsePairingOffer, parseStartupState,
+  parseMirrorTree, parseOperationList, parsePairingOffer, parseStartupState, parseTagCatalog, parseTitleEncoding,
   type ApplyResult, type BridgeState, type ChromeProfileList, type EditDocument, type EditPreview,
   type LibraryCount, type LibraryDetail, type LibraryNodes, type LibraryPage, type LibrarySearch,
-  type MirrorTree, type OperationList, type PairingOffer, type StartupState,
+  type MirrorTree, type OperationList, type PairingOffer, type StartupState, type TagCatalog, type TitleEncodingPreview,
 } from '@markbridge/protocol';
 
 export type EditAction =
@@ -162,4 +162,34 @@ export async function exportHtml(profileId: string): Promise<EditDocument> {
 export async function exportSidecar(profileId: string): Promise<EditDocument> {
   if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
   return parseEditDocument(await invoke<unknown>('export_sidecar', { profileId }));
+}
+
+export type TagCommand =
+  | { kind: 'set_note'; chromeIds: string[]; note: string }
+  | { kind: 'add'; chromeIds: string[]; name: string }
+  | { kind: 'remove'; chromeIds: string[]; tagId: string }
+  | { kind: 'rename'; tagId: string; name: string }
+  | { kind: 'merge'; sourceId: string; targetId: string }
+  | { kind: 'delete'; tagId: string }
+  | { kind: 'undo'; journalId: string }
+  | { kind: 'set_encoding'; enabled: boolean };
+
+export async function readTagState(profileId: string, chromeIds: string[], filterTagId: string | null): Promise<TagCatalog> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseTagCatalog(await invoke<unknown>('tag_state', { profileId, chromeIds, filterTagId }));
+}
+
+export async function tagCommand(profileId: string, command: TagCommand): Promise<TagCatalog> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseTagCatalog(await invoke<unknown>('tag_command', { profileId, command }));
+}
+
+export async function previewTitleEncoding(profileId: string, expectedRevision: number, chromeIds: string[], restore: boolean): Promise<TitleEncodingPreview> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseTitleEncoding(await invoke<unknown>('preview_title_encoding', { profileId, expectedRevision, chromeIds, restore }));
+}
+
+export async function applyTitleEncoding(profileId: string, expectedRevision: number, chromeIds: string[], restore: boolean): Promise<ApplyResult> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseApplyResult(await invoke<unknown>('apply_title_encoding', { profileId, expectedRevision, chromeIds, restore }));
 }

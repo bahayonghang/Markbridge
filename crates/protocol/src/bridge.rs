@@ -301,3 +301,115 @@ pub struct PairingOffer {
     pub pairing_code: String,
     pub expires_at: Counter,
 }
+
+/// Local tag and note command. It never authorizes a Chrome title write.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(
+    tag = "kind",
+    rename_all = "snake_case",
+    rename_all_fields = "camelCase",
+    deny_unknown_fields
+)]
+pub enum TagCommand {
+    SetNote {
+        #[schemars(length(max = 1000))]
+        chrome_ids: Vec<Id>,
+        #[schemars(length(max = 4096))]
+        note: String,
+    },
+    Add {
+        #[schemars(length(max = 1000))]
+        chrome_ids: Vec<Id>,
+        #[schemars(length(max = 32))]
+        name: String,
+    },
+    Remove {
+        #[schemars(length(max = 1000))]
+        chrome_ids: Vec<Id>,
+        tag_id: Id,
+    },
+    Rename {
+        tag_id: Id,
+        #[schemars(length(max = 32))]
+        name: String,
+    },
+    Merge {
+        source_id: Id,
+        target_id: Id,
+    },
+    Delete {
+        tag_id: Id,
+    },
+    Undo {
+        journal_id: Id,
+    },
+    SetEncoding {
+        enabled: bool,
+    },
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct TagItem {
+    pub tag_id: Id,
+    #[schemars(length(max = 32))]
+    pub name: String,
+    pub count: Counter,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct TagEntry {
+    pub bookmark_id: Id,
+    pub chrome_id: Id,
+    #[schemars(length(max = 4096))]
+    pub note: String,
+    #[schemars(length(max = 50))]
+    pub tag_ids: Vec<Id>,
+    pub raw_title: RequiredNullable<String>,
+    pub last_encoded_title: RequiredNullable<String>,
+    pub conflict: bool,
+}
+
+/// Tags, notes, and encoding state for one profile. Matches are empty when no tag filter is set.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct TagCatalog {
+    pub profile_id: Id,
+    pub encoding_enabled: bool,
+    pub journal_id: RequiredNullable<Id>,
+    pub affected: Counter,
+    pub merge_required: bool,
+    pub source_tag_id: RequiredNullable<Id>,
+    pub target_tag_id: RequiredNullable<Id>,
+    pub filter_tag_id: RequiredNullable<Id>,
+    #[schemars(length(max = 100000))]
+    pub tags: Vec<TagItem>,
+    #[schemars(length(max = 1000))]
+    pub entries: Vec<TagEntry>,
+    #[schemars(length(max = 100000))]
+    pub matches: Vec<BookmarkNode>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct EncodingConflict {
+    pub chrome_id: Id,
+    pub error_code: ErrorCode,
+}
+
+/// Full title diff for a confirmed encoding or restore. An empty change list writes nothing.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct TitleEncodingPreview {
+    pub profile_id: Id,
+    pub expected_revision: Counter,
+    pub enabled: bool,
+    pub restore: bool,
+    pub writable: bool,
+    pub error_code: RequiredNullable<ErrorCode>,
+    #[schemars(length(max = 1000))]
+    pub changes: Vec<EditFieldChange>,
+    #[schemars(length(max = 1000))]
+    pub conflicts: Vec<EncodingConflict>,
+}

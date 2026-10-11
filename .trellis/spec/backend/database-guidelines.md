@@ -17,6 +17,8 @@ Child 02 owns SQLite identity, cache, local metadata and migrations. Source live
 
 Numbered SQL sources are `migrations/001_identity.sql` and `migrations/002_history.sql` under the storage directory. `SCHEMA_VERSION` follows the migration list. Migration 001 owns profiles, mirror sources, cache, metadata, tags and cursors. Migration 002 owns durable operation, receipt, snapshot and derived-data fields. Child 02 does not execute browser operations.
 
+Child 07 adds `crates/core/src/storage/migrations/004_tags.sql` for `raw_title`, `last_encoded_title`, and `tag_journal`. `crates/core/src/storage/tags.rs` writes notes, tag links, merge, delete, and undo. `crates/core/src/tags/mod.rs` owns normalization and the reversible title codec. Those paths do not write Chrome.
+
 ## 3. Contracts
 
 Use `(profile_id, source_epoch, chrome_id)` as the unique browser cache key. Keep chrome IDs as strings. A new cache entry receives an independent random bookmark_id. Refresh updates the same entry; an epoch reset creates a new entry. Duplicate URLs remain separate bookmarks. File mirror cache uses `(mirror_source_id, chrome_id)` in a separate table; association requires the later explicit workflow.

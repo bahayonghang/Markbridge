@@ -38,12 +38,24 @@ pub struct OperationRecord {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct EncodingBody {
+    pub request_id: Id,
+    pub bookmark_id: Id,
+    pub raw_title: String,
+    pub encoded_title: String,
+    pub restore: bool,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct BeforeBody {
     pub nodes: Vec<BookmarkNode>,
     pub orders: Vec<OrderBody>,
     pub restores: Vec<RestoreBody>,
     pub undo_of: Option<Id>,
     pub conflicts: Vec<markbridge_protocol::OperationConflict>,
+    #[serde(default)]
+    pub encodings: Vec<EncodingBody>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -262,8 +274,12 @@ impl Storage {
                     ).optional().map_err(storage_error)?;
                     let Some(new_id) = new_id else { remaining.push(map); continue };
                     conn.execute(
-                        "INSERT INTO bookmark_metadata(bookmark_id,display_title,summary,note,updated_at) SELECT ?2,display_title,summary,note,?3 FROM bookmark_metadata WHERE bookmark_id=?1 ON CONFLICT(bookmark_id) DO UPDATE SET display_title=excluded.display_title,summary=excluded.summary,note=excluded.note,updated_at=excluded.updated_at",
+                        "INSERT INTO bookmark_metadata(bookmark_id,display_title,summary,note,raw_title,last_encoded_title,updated_at) SELECT ?2,display_title,summary,note,raw_title,last_encoded_title,?3 FROM bookmark_metadata WHERE bookmark_id=?1 ON CONFLICT(bookmark_id) DO UPDATE SET display_title=excluded.display_title,summary=excluded.summary,note=excluded.note,raw_title=excluded.raw_title,last_encoded_title=excluded.last_encoded_title,updated_at=excluded.updated_at",
                         params![map.old_bookmark_id.as_str(), new_id, now as i64],
+                    ).map_err(storage_error)?;
+                    conn.execute(
+                        "INSERT INTO bookmark_tags(bookmark_id,tag_id) SELECT ?2,tag_id FROM bookmark_tags WHERE bookmark_id=?1 ON CONFLICT(bookmark_id,tag_id) DO NOTHING",
+                        params![map.old_bookmark_id.as_str(), new_id],
                     ).map_err(storage_error)?;
                 }
                 body.maps = remaining;

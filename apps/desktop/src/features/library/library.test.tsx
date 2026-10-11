@@ -52,6 +52,11 @@ function install(extra?: (command: string, args: Args) => unknown) {
     }
     if (command === 'cache_search') return args.query === 'Alpha' ? { items: [alpha] } : { items: [] };
     if (command === 'open_http_url') return null;
+    if (command === 'tag_state' || command === 'tag_command') return {
+      profileId: typeof args.profileId === 'string' ? args.profileId : 'profile-a',
+      encodingEnabled: false, journalId: null, affected: 0, mergeRequired: false,
+      sourceTagId: null, targetTagId: null, filterTagId: null, tags: [], entries: [], matches: [],
+    };
     if (command === 'list_operations' || command === 'refresh_operations' || command === 'review_operation') return { operations: [] };
     if (command === 'get_mirror_tree') return { mirrorSourceId: 'mirror-a', displayName: 'Personal', fileStatus: 'stale', association: 'independent', revision: 2, lastSyncedAt: null, errorCode: 'INVALID_TREE', canWriteBrowser: false, nodes: [root, { ...firstDup, parentId: '0' }, { ...secondDup, parentId: '0' }] };
     return {};

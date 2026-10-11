@@ -3,6 +3,7 @@ pub mod credentials;
 mod edit;
 mod file_mirror;
 mod sync;
+mod tags;
 mod transport;
 
 use crate::storage::{PairedOrigin, Profile, Storage};

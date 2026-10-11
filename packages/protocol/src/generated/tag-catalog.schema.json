@@ -1,0 +1,306 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TagCatalog",
+  "description": "Tags, notes, and encoding state for one profile. Matches are empty when no tag filter is set.",
+  "type": "object",
+  "properties": {
+    "affected": {
+      "$ref": "#/$defs/Counter"
+    },
+    "encodingEnabled": {
+      "type": "boolean"
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/TagEntry"
+      },
+      "maxItems": 1000
+    },
+    "filterTagId": {
+      "$ref": "#/$defs/RequiredNullable"
+    },
+    "journalId": {
+      "$ref": "#/$defs/RequiredNullable"
+    },
+    "matches": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/BookmarkNode"
+      },
+      "maxItems": 100000
+    },
+    "mergeRequired": {
+      "type": "boolean"
+    },
+    "profileId": {
+      "$ref": "#/$defs/Id"
+    },
+    "sourceTagId": {
+      "$ref": "#/$defs/RequiredNullable"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/TagItem"
+      },
+      "maxItems": 100000
+    },
+    "targetTagId": {
+      "$ref": "#/$defs/RequiredNullable"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "profileId",
+    "encodingEnabled",
+    "journalId",
+    "affected",
+    "mergeRequired",
+    "sourceTagId",
+    "targetTagId",
+    "filterTagId",
+    "tags",
+    "entries",
+    "matches"
+  ],
+  "$defs": {
+    "BookmarkNode": {
+      "type": "object",
+      "properties": {
+        "chromeId": {
+          "$ref": "#/$defs/Id"
+        },
+        "dateAdded": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourceTime"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dateLastUsed": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourceTime"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "folderType": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FolderType"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "kind": {
+          "$ref": "#/$defs/NodeKind"
+        },
+        "parentId": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "position": {
+          "$ref": "#/$defs/Position"
+        },
+        "title": {
+          "$ref": "#/$defs/Title"
+        },
+        "unmodifiable": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Unmodifiable"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "url": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Url"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "chromeId",
+        "position",
+        "kind",
+        "title"
+      ]
+    },
+    "Counter": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 9007199254740991,
+      "minimum": 0
+    },
+    "FolderType": {
+      "type": "string",
+      "enum": [
+        "bookmarks-bar",
+        "other",
+        "mobile",
+        "managed"
+      ]
+    },
+    "Id": {
+      "type": "string",
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*(?![\\s\\S])"
+    },
+    "NodeKind": {
+      "type": "string",
+      "enum": [
+        "folder",
+        "bookmark"
+      ]
+    },
+    "Position": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 100000,
+      "minimum": 0
+    },
+    "RequiredNullable": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Id"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "RequiredNullable2": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "SourceTime": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "$ref": "#/$defs/TimeSource"
+        },
+        "unixMillis": {
+          "$ref": "#/$defs/Counter"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "unixMillis"
+      ]
+    },
+    "TagEntry": {
+      "type": "object",
+      "properties": {
+        "bookmarkId": {
+          "$ref": "#/$defs/Id"
+        },
+        "chromeId": {
+          "$ref": "#/$defs/Id"
+        },
+        "conflict": {
+          "type": "boolean"
+        },
+        "lastEncodedTitle": {
+          "$ref": "#/$defs/RequiredNullable2"
+        },
+        "note": {
+          "type": "string",
+          "maxLength": 4096
+        },
+        "rawTitle": {
+          "$ref": "#/$defs/RequiredNullable2"
+        },
+        "tagIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          },
+          "maxItems": 50
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "bookmarkId",
+        "chromeId",
+        "note",
+        "tagIds",
+        "rawTitle",
+        "lastEncodedTitle",
+        "conflict"
+      ]
+    },
+    "TagItem": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "$ref": "#/$defs/Counter"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "tagId": {
+          "$ref": "#/$defs/Id"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "tagId",
+        "name",
+        "count"
+      ]
+    },
+    "TimeSource": {
+      "type": "string",
+      "enum": [
+        "chrome_api",
+        "chrome_file"
+      ]
+    },
+    "Title": {
+      "type": "string",
+      "maxLength": 4096,
+      "minLength": 0
+    },
+    "Unmodifiable": {
+      "type": "string",
+      "enum": [
+        "managed"
+      ]
+    },
+    "Url": {
+      "type": "string",
+      "maxLength": 16384,
+      "minLength": 1
+    }
+  }
+}

@@ -25,3 +25,4 @@ pub mod bridge;
 pub mod editing;
 pub mod mirror;
 pub mod storage;
+pub mod tags;

@@ -10,15 +10,17 @@ use std::{
 use tokio::sync::{mpsc, oneshot};
 
 mod operations;
+mod tags;
 pub(crate) use operations::{
-    AfterBody, BeforeBody, IdMapBody, OperationRecord, OrderBody, RestoreBody, SidecarRow,
-    StepRecord,
+    AfterBody, BeforeBody, EncodingBody, IdMapBody, OperationRecord, OrderBody, RestoreBody,
+    SidecarRow, StepRecord,
 };
 
 const MIGRATIONS: &[&str] = &[
     include_str!("migrations/001_identity.sql"),
     include_str!("migrations/002_history.sql"),
     include_str!("migrations/003_mirror.sql"),
+    include_str!("migrations/004_tags.sql"),
 ];
 pub const SCHEMA_VERSION: u32 = MIGRATIONS.len() as u32;
 type Result<T> = std::result::Result<T, ErrorCode>;

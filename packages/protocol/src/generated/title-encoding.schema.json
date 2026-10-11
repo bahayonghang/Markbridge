@@ -1,0 +1,162 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TitleEncodingPreview",
+  "description": "Full title diff for a confirmed encoding or restore. An empty change list writes nothing.",
+  "type": "object",
+  "properties": {
+    "changes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/EditFieldChange"
+      },
+      "maxItems": 1000
+    },
+    "conflicts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/EncodingConflict"
+      },
+      "maxItems": 1000
+    },
+    "enabled": {
+      "type": "boolean"
+    },
+    "errorCode": {
+      "$ref": "#/$defs/RequiredNullable"
+    },
+    "expectedRevision": {
+      "$ref": "#/$defs/Counter"
+    },
+    "profileId": {
+      "$ref": "#/$defs/Id"
+    },
+    "restore": {
+      "type": "boolean"
+    },
+    "writable": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "profileId",
+    "expectedRevision",
+    "enabled",
+    "restore",
+    "writable",
+    "errorCode",
+    "changes",
+    "conflicts"
+  ],
+  "$defs": {
+    "Counter": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 9007199254740991,
+      "minimum": 0
+    },
+    "EditField": {
+      "type": "string",
+      "enum": [
+        "title",
+        "url",
+        "parent",
+        "position",
+        "order",
+        "existence"
+      ]
+    },
+    "EditFieldChange": {
+      "type": "object",
+      "properties": {
+        "after": {
+          "$ref": "#/$defs/RequiredNullable2"
+        },
+        "before": {
+          "$ref": "#/$defs/RequiredNullable2"
+        },
+        "field": {
+          "$ref": "#/$defs/EditField"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "field",
+        "before",
+        "after"
+      ]
+    },
+    "EncodingConflict": {
+      "type": "object",
+      "properties": {
+        "chromeId": {
+          "$ref": "#/$defs/Id"
+        },
+        "errorCode": {
+          "$ref": "#/$defs/ErrorCode"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "chromeId",
+        "errorCode"
+      ]
+    },
+    "ErrorCode": {
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "INVALID_MESSAGE",
+            "UNSUPPORTED_VERSION",
+            "FRAME_TOO_LARGE",
+            "LIMIT_EXCEEDED",
+            "INVALID_TREE",
+            "UNPAIRED",
+            "READ_ONLY",
+            "WRONG_PROFILE",
+            "STALE_PROPOSAL",
+            "PROTECTED_NODE",
+            "UNCERTAIN_WRITE",
+            "FETCH_DENIED",
+            "INVALID_AI_OUTPUT",
+            "STORAGE_ERROR",
+            "STORAGE_NEWER_SCHEMA",
+            "MIGRATION_FAILED",
+            "CONFLICT",
+            "CANCELLED"
+          ]
+        },
+        {
+          "description": "The selected Chrome directory is missing, unreadable, or not a User Data directory.",
+          "type": "string",
+          "const": "PATH_UNAVAILABLE"
+        }
+      ]
+    },
+    "Id": {
+      "type": "string",
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*(?![\\s\\S])"
+    },
+    "RequiredNullable": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ErrorCode"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "RequiredNullable2": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

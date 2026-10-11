@@ -419,6 +419,59 @@ fn plan_update(
     Ok(base(vec![step], 1, false, changes))
 }
 
+pub fn title_blocked(nodes: &[BookmarkNode], chrome_id: &Id) -> Result<(), ErrorCode> {
+    let index = index(nodes)?;
+    let node = index
+        .by_id
+        .get(chrome_id.as_str())
+        .copied()
+        .ok_or(ErrorCode::InvalidTree)?;
+    if permanently_fixed(node) || under_managed(&index, node) {
+        Err(ErrorCode::ProtectedNode)
+    } else {
+        Ok(())
+    }
+}
+
+/// One confirmed title update per selected id. Equal titles produce no step and no Chrome write.
+pub fn plan_title_updates(
+    nodes: &[BookmarkNode],
+    updates: &[(Id, String)],
+) -> Result<Plan, ErrorCode> {
+    let index = index(nodes)?;
+    let mut steps = Vec::new();
+    let mut changes = Vec::new();
+    for (chrome_id, title) in updates {
+        let node = index
+            .by_id
+            .get(chrome_id.as_str())
+            .copied()
+            .ok_or(ErrorCode::InvalidTree)?;
+        if permanently_fixed(node) || under_managed(&index, node) {
+            return Err(ErrorCode::ProtectedNode);
+        }
+        if title == node.title.as_str() {
+            continue;
+        }
+        let next = markbridge_protocol::Title::new(title.clone())?;
+        changes.push(change(
+            EditField::Title,
+            Some(node.title.as_str()),
+            Some(title),
+        )?);
+        steps.push(step(
+            Some(chrome_id.clone()),
+            Some(node.clone()),
+            None,
+            Mutation::Update {
+                title: Some(next),
+                url: None,
+            },
+        )?);
+    }
+    Ok(base(steps, changes.len() as u64, false, changes))
+}
+
 fn plan_move(
     nodes: &[BookmarkNode],
     chrome_id: &Id,

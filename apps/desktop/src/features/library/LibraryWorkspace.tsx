@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
-import type { BookmarkNode, BridgeState, LibraryDetail } from '@markbridge/protocol';
+import type { BookmarkNode, BridgeState, LibraryDetail, TagCatalog } from '@markbridge/protocol';
 import {
   getMirrorTree, openHttpUrl, readCacheCount, readCacheList, readCacheNode, readCacheSearch, readCacheTree,
   type EditAction,
 } from '../../backend';
 import { EditDesk } from './EditDesk';
+import { TagDesk } from '../tags/TagDesk';
 import { VirtualRows } from './VirtualRows';
 import {
   LIST_LIMIT, SEARCH_DEBOUNCE_MS, SEARCH_LIMIT, ancestorTitles, countSnapshot, directChildren, displayTitle,
@@ -116,6 +117,9 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId }: {
   const [openFailed, setOpenFailed] = useState(false);
   const [syncedNodes, setSyncedNodes] = useState<BookmarkNode[] | null>(null);
   const [editRequest, setEditRequest] = useState<{ id: number; action: EditAction } | null>(null);
+  const [picked, setPicked] = useState<Set<string>>(new Set());
+  const [filterTagId, setFilterTagId] = useState<string | null>(null);
+  const [tagMatches, setTagMatches] = useState<BookmarkNode[]>([]);
   const editSeq = useRef(0);
   const expandedRef = useRef(expanded);
   const seenRevision = useRef<number | null>(null);
@@ -149,6 +153,9 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId }: {
     setOpenFailed(false);
     setSyncedNodes(null);
     setEditRequest(null);
+    setPicked(new Set());
+    setFilterTagId(null);
+    setTagMatches([]);
     seenRevision.current = null;
     setSeenCommitted('');
     treeGen.current += 1;
@@ -341,8 +348,22 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId }: {
   const mirrorTruncated = searchHits.length > SEARCH_LIMIT;
   const profileTruncated = rustReady ? truncated : loadedHits.length > SEARCH_LIMIT;
   const folderNodes = folderId ? (profile ? list : directChildren(mirrorIndex, folderId)) : looseBookmarks(mirror ? mirrorNodes : []);
-  const visibleNodes = !searching ? folderNodes : profile ? profileHits.slice(0, SEARCH_LIMIT) : searchHits.slice(0, SEARCH_LIMIT);
+  const filtering = profile != null && filterTagId != null;
+  const visibleNodes = filtering ? tagMatches : !searching ? folderNodes : profile ? profileHits.slice(0, SEARCH_LIMIT) : searchHits.slice(0, SEARCH_LIMIT);
   const visible = visibleNodes.map(toListRow);
+  const pickedIds = [...picked].sort();
+  const tagIds = pickedIds.length > 0 ? pickedIds : bookmarkId ? [bookmarkId] : [];
+  function togglePick(chromeId: string) {
+    setPicked((current) => {
+      const next = new Set(current);
+      if (next.has(chromeId)) next.delete(chromeId);
+      else next.add(chromeId);
+      return next;
+    });
+  }
+  function acceptCatalog(catalog: TagCatalog) {
+    setTagMatches(catalog.matches);
+  }
   const selectedId = bookmarkId ?? folderId;
   const selectedNode = profile && detail && detail.node.chromeId === selectedId ? detail.node : null;
   const mirrorNode = !profile && selectedId ? mirrorIndex.nodes.get(selectedId) ?? null : null;
@@ -546,17 +567,17 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId }: {
           )}
         </div>
         <div className="library-pane">
-          <h3>{searching ? '搜索结果' : '书签列表'}</h3>
+          <h3>{filtering ? '标签筛选' : searching ? '搜索结果' : '书签列表'}</h3>
           <p className="secondary">
-            {searching ? `${visible.length} 条匹配` : shownCount ? `下级文件夹 ${shownCount.folders} · 下级书签 ${shownCount.bookmarks}` : '正在计数'}
+            {filtering ? `${visible.length} 条带此标签` : searching ? `${visible.length} 条匹配` : shownCount ? `下级文件夹 ${shownCount.folders} · 下级书签 ${shownCount.bookmarks}` : '正在计数'}
             {showSearchTruncation ? '。只显示前 200 条。' : ''}
             {!searching && total > list.length ? `。列表已截断，显示前 ${list.length} 条。` : ''}
           </p>
-          {visible.length === 0 ? <p>{searching ? '没有匹配的标题或网址。' : '此文件夹没有书签。'}</p> : (
+          {visible.length === 0 ? <p>{filtering ? '没有带这个标签的书签。' : searching ? '没有匹配的标题或网址。' : '此文件夹没有书签。'}</p> : (
             <VirtualRows
               rows={visible}
               rowKey={(row) => rowKey(sourceKey, row.chromeId)}
-              label={searching ? '搜索结果' : '书签列表'}
+              label={filtering ? '标签筛选' : searching ? '搜索结果' : '书签列表'}
               role="listbox"
               itemRole="option"
               activeKey={bookmarkId ? rowKey(sourceKey, bookmarkId) : null}
@@ -574,7 +595,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId }: {
               onKeyDown={onListKey}
               dragId={profile?.connection === 'live' ? (row) => row.chromeId : undefined}
               onDropRow={profile?.connection === 'live' ? (row, sourceId) => dropBookmark(row.chromeId, sourceId) : undefined}
-              render={(row: ListRow) => <span className="library-label"><span className="library-kind">{row.kind === 'folder' ? '文件夹' : '书签'}</span><span className="library-title">{row.title}</span>{row.url && <span className="library-url">{row.url}</span>}</span>}
+              render={(row: ListRow) => <span className="library-label">{profile && <input type="checkbox" aria-label={`选择 ${row.title}`} checked={picked.has(row.chromeId)} onClick={(event) => event.stopPropagation()} onChange={() => togglePick(row.chromeId)} />}<span className="library-kind">{row.kind === 'folder' ? '文件夹' : '书签'}</span><span className="library-title">{row.title}</span>{row.url && <span className="library-url">{row.url}</span>}</span>}
             />
           )}
         </div>
@@ -601,6 +622,15 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId }: {
             insertParentId={selectedNode ? (selectedNode.kind === 'folder' ? selectedNode.chromeId : selectedNode.parentId ?? null) : null}
             insertPosition={(selectedNode?.kind === 'folder' ? activeIndex.children.get(selectedNode.chromeId)?.length : selectedNode?.parentId ? activeIndex.children.get(selectedNode.parentId)?.length : 0) ?? 0}
             request={editRequest}
+          />}
+          {profile && <TagDesk
+            profileId={profile.profileId}
+            revision={profile.revision}
+            live={profile.connection === 'live'}
+            chromeIds={tagIds}
+            filterTagId={filterTagId}
+            onFilter={setFilterTagId}
+            onCatalog={acceptCatalog}
           />}
         </div>
       </div>}

@@ -8,4 +8,6 @@ Show original and proposed values. Apply shows target profile and item count. Di
 
 Provide keyboard navigation, visible focus, accessible labels, and a keyboard alternative to drag-and-drop. Preview affected items before deletion or bulk changes.
 
-Preserve user drafts when external edits cause conflict. These contracts have no component implementation yet. UI tasks must add native screenshot and interaction evidence.
+`apps/desktop/src/features/tags/TagDesk.tsx` keeps notes and tags editable while the profile is disconnected. Title encoding lists every selected title change before `apply_title_encoding`. A local tag command, an encoding toggle, a selection change, or a revision change drops that diff, including a preview that returns late. Turning the encoding control off does not send a title write.
+
+Preserve user drafts when external edits cause conflict. UI tasks must add native screenshot and interaction evidence.
