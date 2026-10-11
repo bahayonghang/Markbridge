@@ -1,6 +1,7 @@
 # Frontend Quality Guidelines
 
-No package manifest or UI tests exist. The foundation task must create commands before later tasks can report them as gates.
+
+Child 02 wire tests are in `packages/protocol/src/wire.test.ts`. These tests serialize typed DTOs in each language, invoke the Rust fixture executable, and compare runtime acceptance of valid and invalid frames. They also check field, frame, tree, Unicode and operation bounds. The protocol module has no GUI database or Chrome connection.
 
 Validate keyboard navigation, moving, profile switching, edits, proposal review, read-only states, and conflicts. Fixtures include duplicate URLs, equal IDs across profiles, long titles, deep folders, and non-ASCII tags.
 

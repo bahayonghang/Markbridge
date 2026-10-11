@@ -6,3 +6,11 @@ rust-version.workspace = true
 
 [dependencies]
 markbridge-protocol.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+rusqlite = { version = "0.40.2", features = ["bundled", "backup"] }
+tokio = { version = "1", features = ["sync", "net", "time", "rt", "macros", "io-util", "io-std"] }
+
+[dev-dependencies]
+tempfile = "3"
+tokio = { version = "1", features = ["macros", "rt", "time"] }

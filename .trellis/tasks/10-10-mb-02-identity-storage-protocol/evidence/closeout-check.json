@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "documentsChecked": 15,
+  "missingRelativeLinks": [],
+  "frozenSourceFiles": 22,
+  "changedSinceIndependentReview": [],
+  "taskJson": "PASS",
+  "gitDiffCheckExitCode": 0,
+  "nativeArtifactBytes": 8848896,
+  "nativeArtifactSha256": "23ae31e88e4b98f432db2d180d1b2cd3d1470da6f42fc5c10bd5a5c9ace364f0"
+}

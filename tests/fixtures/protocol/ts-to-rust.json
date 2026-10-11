@@ -1,0 +1,22 @@
+{
+  "protocolVersion": 1,
+  "type": "apply_operation",
+  "profileId": "profile-ts",
+  "sessionId": "session-ts",
+  "requestId": "request-apply",
+  "seq": null,
+  "payload": {
+    "operationId": "operation-ts",
+    "sourceEpoch": 1,
+    "expectedRevision": 42,
+    "steps": [
+      {
+        "requestId": "step-create",
+        "target": null,
+        "expectedBefore": null,
+        "expectedChildIds": null,
+        "payload": {"kind": "create", "parentId": "0", "position": 0, "title": "TS 合成 🦢", "url": "https://example.invalid/ts"}
+      }
+    ]
+  }
+}

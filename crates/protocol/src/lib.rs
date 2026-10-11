@@ -39,3 +39,9 @@ mod tests {
         );
     }
 }
+
+pub mod wire;
+pub use wire::*;
+
+#[cfg(test)]
+mod wire_tests;

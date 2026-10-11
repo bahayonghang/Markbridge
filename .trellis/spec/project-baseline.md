@@ -2,9 +2,9 @@
 
 ## Evidence and status
 
-The repository contains Trellis tooling and `ref/Markbridge-实施方案.md`. No application manifest, source, database, or product test suite exists as of 2026-10-10. Git ignores `ref/`; tracked task documents must preserve all requirements needed for implementation.
+The repository contains Trellis tooling, child 01 foundation source and child 02 protocol/storage source. Desktop source is in `apps/desktop`, extension source is in `apps/extension`, and shared startup/wire DTOs are in `crates/protocol` and `packages/protocol`. Child 01 native acceptance remains UNVERIFIED under the approved 01-to-02 startup exception. Child 02 storage source and temporary-database tests live under crates/core/src/storage. The desktop startup does not open a database. No pairing, bookmark mutation or AI feature exists yet. Git ignores `ref/`; tracked task documents must preserve all requirements needed for implementation.
 
-These guidelines define greenfield constraints. They do not report existing runtime behavior. JSON examples are documentation fixtures, not source excerpts. Add real implementation and test references when product code exists. Never invent source evidence or report planned checks as executed.
+These guidelines distinguish foundation source from later design constraints. JSON examples remain documentation fixtures unless linked to an existing fixture. Runtime results belong in task evidence. Never report planned checks as executed.
 
 ## Product boundaries
 
@@ -37,6 +37,6 @@ A proposal is unapplied. An operation is confirmed for execution. A snapshot rec
 
 ## Authorization and evidence
 
-The current request authorizes bootstrap specs and product planning. Keep product tasks in `planning` until implementation approval. Do not commit, publish, install extensions, or modify real browser profiles during planning.
+The user approved implementation of the current parent and child plans on 2026-10-10. Activate one child only after prerequisite acceptance passes. The user approved one exception on 2026-10-10: start child02 after child01 automated checks, with child01 native acceptance UNVERIFIED until Windows delivery. Other dependency gates remain required. The parent coordinates requirements and integration. Commits, archives, publication, system installation, and changes to daily browser profiles require separate authorization.
 
 Separate document checks, unit tests, browser tests, native desktop tests, and external synchronization tests. Preserve failures and label absent evidence `NOT_RUN` or `UNVERIFIED`.

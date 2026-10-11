@@ -3,7 +3,7 @@
   "name": "mb-02-identity-storage-protocol",
   "title": "Profile 身份、存储与共享协议",
   "description": "Profile 身份、存储与共享协议；属于 Markbridge 父规划，独立验收并记录失败与恢复边界",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": "fullstack",
   "scope": "markbridge",
   "package": null,
@@ -12,7 +12,7 @@
   "assignee": "lyh",
   "createdAt": "2026-10-10",
   "completedAt": null,
-  "branch": null,
+  "branch": "main",
   "base_branch": "main",
   "worktree_path": null,
   "commit": null,
@@ -22,12 +22,16 @@
   "parent": "10-10-markbridge-workspace",
   "relatedFiles": [
     "crates/protocol",
-    "crates/core",
+    "crates/core/src/storage",
+    "crates/core/src/lib.rs",
+    "crates/core/Cargo.toml",
+    "Cargo.lock",
     "packages/protocol",
-    "apps/desktop/src-tauri/storage 与 migrations",
-    "tests/fixtures"
+    "scripts/protocol.mjs",
+    "scripts/protocol.test.mjs",
+    "tests/fixtures/protocol"
   ],
-  "notes": "Planning only. Dependency order is documented and is not enforced automatically by Trellis. No product implementation or runtime validation has started.",
+  "notes": "Implementation and local acceptance passed on 2026-10-11. Lifecycle remains in_progress because commit/archive were not authorized. Task 01 native acceptance remains UNVERIFIED under the approved exception; real Chrome identity/authentication remains task 03 NOT_RUN.",
   "meta": {
     "sequence": "02",
     "milestone": "M1",
@@ -38,8 +42,17 @@
       "R02",
       "R03"
     ],
-    "implementation_approval": "not_granted",
-    "planning_status": "ready_for_review",
-    "delivery_scope": "windows_v1"
+    "implementation_approval": "granted",
+    "planning_status": "approved",
+    "delivery_scope": "windows_v1",
+    "approval_evidence": "Parent approval_evidence; dependencies and per-child acceptance remain required",
+    "dependency_exception": "2026-10-10 用户批准仅调整 01→02 启动门槛：01 自动检查通过，原生验收保留 UNVERIFIED，Windows 交付前补齐。其他依赖门槛不变。",
+    "implementation_complete": true,
+    "acceptance_status": "PASS",
+    "acceptance_date": "2026-10-11",
+    "acceptance_scope": "AC02-1..4; V01 local automated checks; V02 storage/protocol only",
+    "acceptance_evidence": "evidence/receipts.md",
+    "independent_review": "evidence/check-review.md",
+    "native_artifact_sha256": "23ae31e88e4b98f432db2d180d1b2cd3d1470da6f42fc5c10bd5a5c9ace364f0"
   }
 }

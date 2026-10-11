@@ -8,7 +8,7 @@ Documentation fixture:
 {"code":"STALE_PROPOSAL","requestId":"request-a","message":"Bookmarks changed. Refresh the proposal.","retryable":false}
 ```
 
-Distinguish unpaired, read-only, wrong-profile, stale-proposal, protected-node, uncertain-write, fetch-denied, invalid-AI-output, and storage errors. The protocol task owns the final enum.
+Distinguish unpaired, read-only, wrong-profile, stale-proposal, protected-node, uncertain-write, fetch-denied, invalid-AI-output, and storage errors. Child 02 defines ErrorCode in crates/protocol/src/wire.rs. Use the shared enum; storage and protocol boundaries return safe codes. Detailed storage failure behavior is in database-guidelines.md.
 
 A lost acknowledgment does not prove failure. A successful send does not prove application. Reconcile before repeating non-idempotent commands. Stop batches on conflicts or uncertain results and retain successful receipts.
 

@@ -1,0 +1,1333 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "WireMessage",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "payload": {
+          "$ref": "#/$defs/PairPayload"
+        },
+        "profileId": {
+          "$ref": "#/$defs/Id"
+        },
+        "protocolVersion": {
+          "$ref": "#/$defs/Version"
+        },
+        "requestId": {
+          "$ref": "#/$defs/RequiredNullable"
+        },
+        "seq": {
+          "$ref": "#/$defs/RequiredNullable2"
+        },
+        "sessionId": {
+          "$ref": "#/$defs/Id"
+        },
+        "type": {
+          "type": "string",
+          "const": "pair"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "protocolVersion",
+        "profileId",
+        "sessionId",
+        "requestId",
+        "seq",
+        "payload"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "payload": {
+          "$ref": "#/$defs/PairResultPayload"
+        },
+        "profileId": {
+          "$ref": "#/$defs/Id"
+        },
+        "protocolVersion": {
+          "$ref": "#/$defs/Version"
+        },
+        "requestId": {
+          "$ref": "#/$defs/RequiredNullable"
+        },
+        "seq": {
+          "$ref": "#/$defs/RequiredNullable2"
+        },
+        "sessionId": {
+          "$ref": "#/$defs/Id"
+        },
+        "type": {
+          "type": "string",
+          "const": "pair_result"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "protocolVersion",
+        "profileId",
+        "sessionId",
+        "requestId",
+        "seq",
+        "payload"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "payload": {
+          "$ref": "#/$defs/HelloPayload"
+        },
+        "profileId": {
+          "$ref": "#/$defs/Id"
+        },
+        "protocolVersion": {
+          "$ref": "#/$defs/Version"
+        },
+        "requestId": {
+          "$ref": "#/$defs/RequiredNullable"
+        },
+        "seq": {
+          "$ref": "#/$defs/RequiredNullable2"
+        },
+        "sessionId": {
+          "$ref": "#/$defs/Id"
+        },
+        "type": {
+          "type": "string",
+          "const": "hello"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "protocolVersion",
+        "profileId",
+        "sessionId",
+        "requestId",
+        "seq",
+        "payload"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "payload": {
+          "$ref": "#/$defs/HelloResultPayload"
+        },
+        "profileId": {
+          "$ref": "#/$defs/Id"
+        },
+        "protocolVersion": {
+          "$ref": "#/$defs/Version"
+        },
+        "requestId": {
+          "$ref": "#/$defs/RequiredNullable"
+        },
+        "seq": {
+          "$ref": "#/$defs/RequiredNullable2"
+        },
+        "sessionId": {
+          "$ref": "#/$defs/Id"
+        },
+        "type": {
+          "type": "string",
+          "const": "hello_result"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "protocolVersion",
+        "profileId",
+        "sessionId",
+        "requestId",
+        "seq",
+        "payload"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "payload": {
+          "$ref": "#/$defs/EmptyPayload"
+        },
+        "profileId": {
+          "$ref": "#/$defs/Id"
+        },
+        "protocolVersion": {
+          "$ref": "#/$defs/Version"
+        },
+        "requestId": {
+          "$ref": "#/$defs/RequiredNullable"
+        },
+        "seq": {
+          "$ref": "#/$defs/RequiredNullable2"
+        },
+        "sessionId": {
+          "$ref": "#/$defs/Id"
+        },
+        "type": {
+          "type": "string",
+          "const": "ping"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "protocolVersion",
+        "profileId",
+        "sessionId",
+        "requestId",
+        "seq",
+        "payload"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "payload": {
+          "$ref": "#/$defs/EmptyPayload"
+        },
+        "profileId": {
+          "$ref": "#/$defs/Id"
+        },
+        "protocolVersion": {
+          "$ref": "#/$defs/Version"
+        },
+        "requestId": {
+          "$ref": "#/$defs/RequiredNullable"
+        },
+        "seq": {
+          "$ref": "#/$defs/RequiredNullable2"
+        },
+        "sessionId": {
+          "$ref": "#/$defs/Id"
+        },
+        "type": {
+          "type": "string",
+          "const": "pong"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "protocolVersion",
+        "profileId",
+        "sessionId",
+        "requestId",
+        "seq",
+        "payload"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "payload": {
+          "$ref": "#/$defs/EmptyPayload"
+        },
+        "profileId": {
+          "$ref": "#/$defs/Id"
+        },
+        "protocolVersion": {
+          "$ref": "#/$defs/Version"
+        },
+        "requestId": {
+          "$ref": "#/$defs/RequiredNullable"
+        },
+        "seq": {
+          "$ref": "#/$defs/RequiredNullable2"
+        },
+        "sessionId": {
+          "$ref": "#/$defs/Id"
+        },
+        "type": {
+          "type": "string",
+          "const": "get_tree"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "protocolVersion",
+        "profileId",
+        "sessionId",
+        "requestId",
+        "seq",
+        "payload"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "payload": {
+          "$ref": "#/$defs/TreeSnapshot"
+        },
+        "profileId": {
+          "$ref": "#/$defs/Id"
+        },
+        "protocolVersion": {
+          "$ref": "#/$defs/Version"
+        },
+        "requestId": {
+          "$ref": "#/$defs/RequiredNullable"
+        },
+        "seq": {
+          "$ref": "#/$defs/RequiredNullable2"
+        },
+        "sessionId": {
+          "$ref": "#/$defs/Id"
+        },
+        "type": {
+          "type": "string",
+          "const": "tree_full"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "protocolVersion",
+        "profileId",
+        "sessionId",
+        "requestId",
+        "seq",
+        "payload"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "payload": {
+          "$ref": "#/$defs/EventPayload"
+        },
+        "profileId": {
+          "$ref": "#/$defs/Id"
+        },
+        "protocolVersion": {
+          "$ref": "#/$defs/Version"
+        },
+        "requestId": {
+          "$ref": "#/$defs/RequiredNullable"
+        },
+        "seq": {
+          "$ref": "#/$defs/RequiredNullable2"
+        },
+        "sessionId": {
+          "$ref": "#/$defs/Id"
+        },
+        "type": {
+          "type": "string",
+          "const": "event"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "protocolVersion",
+        "profileId",
+        "sessionId",
+        "requestId",
+        "seq",
+        "payload"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "payload": {
+          "$ref": "#/$defs/ResyncPayload"
+        },
+        "profileId": {
+          "$ref": "#/$defs/Id"
+        },
+        "protocolVersion": {
+          "$ref": "#/$defs/Version"
+        },
+        "requestId": {
+          "$ref": "#/$defs/RequiredNullable"
+        },
+        "seq": {
+          "$ref": "#/$defs/RequiredNullable2"
+        },
+        "sessionId": {
+          "$ref": "#/$defs/Id"
+        },
+        "type": {
+          "type": "string",
+          "const": "resync_required"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "protocolVersion",
+        "profileId",
+        "sessionId",
+        "requestId",
+        "seq",
+        "payload"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "payload": {
+          "$ref": "#/$defs/ApplyPayload"
+        },
+        "profileId": {
+          "$ref": "#/$defs/Id"
+        },
+        "protocolVersion": {
+          "$ref": "#/$defs/Version"
+        },
+        "requestId": {
+          "$ref": "#/$defs/RequiredNullable"
+        },
+        "seq": {
+          "$ref": "#/$defs/RequiredNullable2"
+        },
+        "sessionId": {
+          "$ref": "#/$defs/Id"
+        },
+        "type": {
+          "type": "string",
+          "const": "apply_operation"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "protocolVersion",
+        "profileId",
+        "sessionId",
+        "requestId",
+        "seq",
+        "payload"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "payload": {
+          "$ref": "#/$defs/Receipt"
+        },
+        "profileId": {
+          "$ref": "#/$defs/Id"
+        },
+        "protocolVersion": {
+          "$ref": "#/$defs/Version"
+        },
+        "requestId": {
+          "$ref": "#/$defs/RequiredNullable"
+        },
+        "seq": {
+          "$ref": "#/$defs/RequiredNullable2"
+        },
+        "sessionId": {
+          "$ref": "#/$defs/Id"
+        },
+        "type": {
+          "type": "string",
+          "const": "operation_receipt"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "protocolVersion",
+        "profileId",
+        "sessionId",
+        "requestId",
+        "seq",
+        "payload"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "payload": {
+          "$ref": "#/$defs/StatusPayload"
+        },
+        "profileId": {
+          "$ref": "#/$defs/Id"
+        },
+        "protocolVersion": {
+          "$ref": "#/$defs/Version"
+        },
+        "requestId": {
+          "$ref": "#/$defs/RequiredNullable"
+        },
+        "seq": {
+          "$ref": "#/$defs/RequiredNullable2"
+        },
+        "sessionId": {
+          "$ref": "#/$defs/Id"
+        },
+        "type": {
+          "type": "string",
+          "const": "get_operation_status"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "protocolVersion",
+        "profileId",
+        "sessionId",
+        "requestId",
+        "seq",
+        "payload"
+      ]
+    }
+  ],
+  "$defs": {
+    "ApplyPayload": {
+      "type": "object",
+      "properties": {
+        "expectedRevision": {
+          "$ref": "#/$defs/Counter"
+        },
+        "operationId": {
+          "$ref": "#/$defs/Id"
+        },
+        "sourceEpoch": {
+          "$ref": "#/$defs/SourceEpoch"
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/OperationStep"
+          },
+          "maxItems": 1000,
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "operationId",
+        "sourceEpoch",
+        "expectedRevision",
+        "steps"
+      ]
+    },
+    "BookmarkEvent": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "created"
+            },
+            "node": {
+              "$ref": "#/$defs/BookmarkNode"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "node"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "chromeId": {
+              "$ref": "#/$defs/Id"
+            },
+            "kind": {
+              "type": "string",
+              "const": "changed"
+            },
+            "title": {
+              "$ref": "#/$defs/Title"
+            },
+            "url": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Url"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "chromeId",
+            "title"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "chromeId": {
+              "$ref": "#/$defs/Id"
+            },
+            "kind": {
+              "type": "string",
+              "const": "moved"
+            },
+            "oldParentId": {
+              "$ref": "#/$defs/Id"
+            },
+            "oldPosition": {
+              "$ref": "#/$defs/Position"
+            },
+            "parentId": {
+              "$ref": "#/$defs/Id"
+            },
+            "position": {
+              "$ref": "#/$defs/Position"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "chromeId",
+            "oldParentId",
+            "oldPosition",
+            "parentId",
+            "position"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "chromeId": {
+              "$ref": "#/$defs/Id"
+            },
+            "kind": {
+              "type": "string",
+              "const": "removed"
+            },
+            "parentId": {
+              "$ref": "#/$defs/Id"
+            },
+            "position": {
+              "$ref": "#/$defs/Position"
+            },
+            "subtree": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/BookmarkNode"
+              },
+              "maxItems": 100000
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "chromeId",
+            "parentId",
+            "position",
+            "subtree"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "childIds": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Id"
+              },
+              "maxItems": 100000
+            },
+            "kind": {
+              "type": "string",
+              "const": "reordered"
+            },
+            "parentId": {
+              "$ref": "#/$defs/Id"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "parentId",
+            "childIds"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "import_began"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "import_ended"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ]
+        }
+      ]
+    },
+    "BookmarkNode": {
+      "type": "object",
+      "properties": {
+        "chromeId": {
+          "$ref": "#/$defs/Id"
+        },
+        "dateAdded": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourceTime"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dateLastUsed": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourceTime"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "folderType": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FolderType"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "kind": {
+          "$ref": "#/$defs/NodeKind"
+        },
+        "parentId": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "position": {
+          "$ref": "#/$defs/Position"
+        },
+        "title": {
+          "$ref": "#/$defs/Title"
+        },
+        "unmodifiable": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Unmodifiable"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "url": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Url"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "chromeId",
+        "position",
+        "kind",
+        "title"
+      ]
+    },
+    "Counter": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 9007199254740991,
+      "minimum": 0
+    },
+    "Credential": {
+      "type": "string",
+      "maxLength": 1024,
+      "minLength": 32
+    },
+    "DisplayName": {
+      "type": "string",
+      "maxLength": 128,
+      "minLength": 1
+    },
+    "EmptyPayload": {
+      "type": "object",
+      "additionalProperties": false
+    },
+    "ErrorCode": {
+      "type": "string",
+      "enum": [
+        "INVALID_MESSAGE",
+        "UNSUPPORTED_VERSION",
+        "FRAME_TOO_LARGE",
+        "LIMIT_EXCEEDED",
+        "INVALID_TREE",
+        "UNPAIRED",
+        "READ_ONLY",
+        "WRONG_PROFILE",
+        "STALE_PROPOSAL",
+        "PROTECTED_NODE",
+        "UNCERTAIN_WRITE",
+        "FETCH_DENIED",
+        "INVALID_AI_OUTPUT",
+        "STORAGE_ERROR",
+        "STORAGE_NEWER_SCHEMA",
+        "MIGRATION_FAILED",
+        "CONFLICT",
+        "CANCELLED"
+      ]
+    },
+    "EventPayload": {
+      "type": "object",
+      "properties": {
+        "event": {
+          "$ref": "#/$defs/BookmarkEvent"
+        },
+        "sourceEpoch": {
+          "$ref": "#/$defs/SourceEpoch"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "sourceEpoch",
+        "event"
+      ]
+    },
+    "FolderType": {
+      "type": "string",
+      "enum": [
+        "bookmarks-bar",
+        "other",
+        "mobile"
+      ]
+    },
+    "HelloPayload": {
+      "type": "object",
+      "properties": {
+        "credential": {
+          "$ref": "#/$defs/Credential"
+        },
+        "instanceId": {
+          "$ref": "#/$defs/Id"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "instanceId",
+        "credential"
+      ]
+    },
+    "HelloResultPayload": {
+      "type": "object",
+      "properties": {
+        "accepted": {
+          "type": "boolean"
+        },
+        "errorCode": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ErrorCode"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sourceEpoch": {
+          "$ref": "#/$defs/SourceEpoch"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "accepted",
+        "sourceEpoch"
+      ]
+    },
+    "Id": {
+      "type": "string",
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*(?![\\s\\S])"
+    },
+    "Mutation": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "create"
+            },
+            "parentId": {
+              "$ref": "#/$defs/Id"
+            },
+            "position": {
+              "$ref": "#/$defs/Position"
+            },
+            "title": {
+              "$ref": "#/$defs/Title"
+            },
+            "url": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Url"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "parentId",
+            "position",
+            "title"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "update"
+            },
+            "title": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Title"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "url": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Url"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "move"
+            },
+            "parentId": {
+              "$ref": "#/$defs/Id"
+            },
+            "position": {
+              "$ref": "#/$defs/Position"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "parentId",
+            "position"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "childIds": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Id"
+              },
+              "maxItems": 100000
+            },
+            "kind": {
+              "type": "string",
+              "const": "reorder"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "childIds"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "delete"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ]
+        }
+      ]
+    },
+    "NodeKind": {
+      "type": "string",
+      "enum": [
+        "folder",
+        "bookmark"
+      ]
+    },
+    "OperationState": {
+      "type": "string",
+      "enum": [
+        "planned",
+        "applying",
+        "applied",
+        "uncertain",
+        "partial",
+        "failed",
+        "rolling_back",
+        "rolled_back",
+        "rollback_conflict"
+      ]
+    },
+    "OperationStep": {
+      "type": "object",
+      "properties": {
+        "expectedBefore": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BookmarkNode"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "expectedChildIds": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/Id"
+          },
+          "maxItems": 100000
+        },
+        "payload": {
+          "$ref": "#/$defs/Mutation"
+        },
+        "requestId": {
+          "$ref": "#/$defs/Id"
+        },
+        "target": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "requestId",
+        "payload"
+      ]
+    },
+    "PairPayload": {
+      "type": "object",
+      "properties": {
+        "credential": {
+          "$ref": "#/$defs/Credential"
+        },
+        "displayName": {
+          "$ref": "#/$defs/DisplayName"
+        },
+        "instanceId": {
+          "$ref": "#/$defs/Id"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "instanceId",
+        "credential",
+        "displayName"
+      ]
+    },
+    "PairResultPayload": {
+      "type": "object",
+      "properties": {
+        "accepted": {
+          "type": "boolean"
+        },
+        "credential": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Credential"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "errorCode": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ErrorCode"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "accepted"
+      ]
+    },
+    "Position": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 100000,
+      "minimum": 0
+    },
+    "Receipt": {
+      "type": "object",
+      "properties": {
+        "after": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BookmarkNode"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "afterChildIds": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/Id"
+          },
+          "maxItems": 100000
+        },
+        "before": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BookmarkNode"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "beforeChildIds": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/Id"
+          },
+          "maxItems": 100000
+        },
+        "errorCode": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ErrorCode"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "operationId": {
+          "$ref": "#/$defs/Id"
+        },
+        "requestId": {
+          "$ref": "#/$defs/Id"
+        },
+        "state": {
+          "$ref": "#/$defs/OperationState"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "operationId",
+        "requestId",
+        "state"
+      ]
+    },
+    "RequiredNullable": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Id"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "RequiredNullable2": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Counter"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "ResyncPayload": {
+      "type": "object",
+      "properties": {
+        "reason": {
+          "$ref": "#/$defs/ErrorCode"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "reason"
+      ]
+    },
+    "SourceEpoch": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 9007199254740991,
+      "minimum": 1
+    },
+    "SourceTime": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "$ref": "#/$defs/TimeSource"
+        },
+        "unixMillis": {
+          "$ref": "#/$defs/Counter"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "unixMillis"
+      ]
+    },
+    "StatusPayload": {
+      "type": "object",
+      "properties": {
+        "operationId": {
+          "$ref": "#/$defs/Id"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "operationId"
+      ]
+    },
+    "TimeSource": {
+      "type": "string",
+      "enum": [
+        "chrome_api",
+        "chrome_file"
+      ]
+    },
+    "Title": {
+      "type": "string",
+      "maxLength": 4096,
+      "minLength": 0
+    },
+    "TreeSnapshot": {
+      "type": "object",
+      "properties": {
+        "barrierSeq": {
+          "$ref": "#/$defs/Counter"
+        },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/BookmarkNode"
+          },
+          "maxItems": 100000
+        },
+        "revision": {
+          "$ref": "#/$defs/Counter"
+        },
+        "sourceEpoch": {
+          "$ref": "#/$defs/SourceEpoch"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "sourceEpoch",
+        "revision",
+        "barrierSeq",
+        "nodes"
+      ]
+    },
+    "Unmodifiable": {
+      "type": "string",
+      "enum": [
+        "managed"
+      ]
+    },
+    "Url": {
+      "type": "string",
+      "maxLength": 16384,
+      "minLength": 1
+    },
+    "Version": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 1,
+      "minimum": 1
+    }
+  }
+}

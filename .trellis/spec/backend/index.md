@@ -1,6 +1,6 @@
 # Backend Guidelines
 
-Read [Project baseline](../project-baseline.md) first. No backend code exists. These documents define initial contracts from the reference plan and verified API constraints.
+Read [Project baseline](../project-baseline.md) first. Child 01 provides the Rust workspace and startup IPC. Child 02 adds shared protocol and the SQLite storage worker. Browser mutations remain child 06 contracts. Runtime acceptance results belong in child evidence.
 
 | Guide | Scope |
 |---|---|
