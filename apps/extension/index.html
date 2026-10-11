@@ -10,7 +10,13 @@
       <h1>Markbridge · 签桥</h1>
       <p id="status" role="status">正在读取连接状态</p>
       <p id="details"></p>
-      <p>扩展只读取书签。浏览器写入功能尚未启用。</p>
+      <p>扩展读取书签，不写入书签。</p>
+      <section>
+        <h2>采集当前页</h2>
+        <p>只在你点击下面的按钮之后，读取当前标签页里的可见文字。不读取密码框、Cookie，也不读取其他标签页。</p>
+        <button id="capture" type="button">采集当前页可见文字</button>
+        <p id="capture-result"></p>
+      </section>
       <button id="options" type="button">打开配对设置</button>
     </main>
     <script type="module" src="/src/main.ts"></script>

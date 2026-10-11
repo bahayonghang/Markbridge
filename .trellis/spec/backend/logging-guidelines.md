@@ -15,3 +15,5 @@ Use error for unavailable capabilities requiring intervention, warn for recovera
 Exclude tokens, keys, headers, page text, full titles, query strings, fragments, and bookmark trees in every mode. Recovery snapshots are protected user data, separate from logs.
 
 Require redacted user-selected diagnostic exports. Record app, browser, protocol, and schema versions in receipts. Bound log size and retention. Do not add telemetry.
+
+Public page fetch does not log the URL, query, fragment, headers, title, page text, or image bytes.

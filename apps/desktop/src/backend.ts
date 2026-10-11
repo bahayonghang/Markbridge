@@ -3,8 +3,8 @@ import { listen } from '@tauri-apps/api/event';
 import {
   parseApplyResult, parseBridgeState, parseChromeProfileList, parseEditDocument, parseEditPreview,
   parseLibraryCount, parseLibraryDetail, parseLibraryNodes, parseLibraryPage, parseLibrarySearch,
-  parseMirrorTree, parseOperationList, parsePairingOffer, parseStartupState, parseTagCatalog, parseTitleEncoding,
-  type ApplyResult, type BridgeState, type ChromeProfileList, type EditDocument, type EditPreview,
+  parseContentPreview, parseMirrorTree, parseOperationList, parsePairingOffer, parseStartupState, parseTagCatalog, parseTitleEncoding,
+  type ApplyResult, type BridgeState, type ChromeProfileList, type ContentPreview, type EditDocument, type EditPreview,
   type LibraryCount, type LibraryDetail, type LibraryNodes, type LibraryPage, type LibrarySearch,
   type MirrorTree, type OperationList, type PairingOffer, type StartupState, type TagCatalog, type TitleEncodingPreview,
 } from '@markbridge/protocol';
@@ -187,6 +187,16 @@ export async function tagCommand(profileId: string, command: TagCommand): Promis
 export async function previewTitleEncoding(profileId: string, expectedRevision: number, chromeIds: string[], restore: boolean): Promise<TitleEncodingPreview> {
   if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
   return parseTitleEncoding(await invoke<unknown>('preview_title_encoding', { profileId, expectedRevision, chromeIds, restore }));
+}
+
+export async function readContentPreview(profileId: string, chromeId: string, requestId: string): Promise<ContentPreview> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseContentPreview(await invoke<unknown>('content_preview', { profileId, chromeId, requestId }));
+}
+
+export async function cancelContentPreview(requestId: string): Promise<void> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  await invoke('cancel_content_preview', { requestId });
 }
 
 export async function applyTitleEncoding(profileId: string, expectedRevision: number, chromeIds: string[], restore: boolean): Promise<ApplyResult> {

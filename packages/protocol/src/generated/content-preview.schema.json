@@ -1,0 +1,218 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ContentPreview",
+  "type": "object",
+  "properties": {
+    "bookmarkId": {
+      "$ref": "#/$defs/Id"
+    },
+    "cacheLabel": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 80
+    },
+    "chromeId": {
+      "$ref": "#/$defs/Id"
+    },
+    "failure": {
+      "$ref": "#/$defs/RequiredNullable3"
+    },
+    "failureMessage": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 80
+    },
+    "fetchedAt": {
+      "$ref": "#/$defs/RequiredNullable4"
+    },
+    "image": {
+      "$ref": "#/$defs/RequiredNullable2"
+    },
+    "imageFailure": {
+      "$ref": "#/$defs/RequiredNullable3"
+    },
+    "imageFailureMessage": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 80
+    },
+    "profileId": {
+      "$ref": "#/$defs/Id"
+    },
+    "requestId": {
+      "$ref": "#/$defs/Id"
+    },
+    "status": {
+      "$ref": "#/$defs/PreviewStatus"
+    },
+    "summary": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 1000
+    },
+    "summarySource": {
+      "$ref": "#/$defs/RequiredNullable"
+    },
+    "title": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 300
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "requestId",
+    "profileId",
+    "chromeId",
+    "bookmarkId",
+    "status",
+    "title",
+    "summary",
+    "summarySource",
+    "image",
+    "imageFailure",
+    "imageFailureMessage",
+    "fetchedAt",
+    "cacheLabel",
+    "failure",
+    "failureMessage"
+  ],
+  "$defs": {
+    "Counter": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 9007199254740991,
+      "minimum": 0
+    },
+    "Id": {
+      "type": "string",
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*(?![\\s\\S])"
+    },
+    "ImageMediaType": {
+      "type": "string",
+      "enum": [
+        "image/png",
+        "image/jpeg",
+        "image/gif",
+        "image/webp"
+      ]
+    },
+    "PreviewFailure": {
+      "type": "string",
+      "enum": [
+        "SCHEME_DENIED",
+        "ADDRESS_DENIED",
+        "USERINFO_DENIED",
+        "REDIRECT_DENIED",
+        "REBIND_DENIED",
+        "BODY_TOO_LARGE",
+        "TIMED_OUT",
+        "UNREACHABLE",
+        "NOT_HTML",
+        "INVALID_RESPONSE",
+        "LOGIN_REQUIRED",
+        "NOT_FOUND",
+        "NO_URL"
+      ]
+    },
+    "PreviewImage": {
+      "type": "object",
+      "properties": {
+        "dataBase64": {
+          "type": "string",
+          "maxLength": 2800000
+        },
+        "mediaType": {
+          "$ref": "#/$defs/ImageMediaType"
+        },
+        "sourceLabel": {
+          "type": "string",
+          "maxLength": 32
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "mediaType",
+        "dataBase64",
+        "sourceLabel"
+      ]
+    },
+    "PreviewStatus": {
+      "type": "string",
+      "enum": [
+        "ready",
+        "cached",
+        "failed",
+        "cancelled"
+      ]
+    },
+    "RequiredNullable": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SummarySource"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "RequiredNullable2": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PreviewImage"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "RequiredNullable3": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PreviewFailure"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "RequiredNullable4": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Counter"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "SummarySource": {
+      "type": "string",
+      "enum": [
+        "description",
+        "excerpt"
+      ]
+    }
+  }
+}

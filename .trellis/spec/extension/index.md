@@ -33,3 +33,5 @@ Verify profile, request ID, expected before-state, and protected status before m
 Native tests use disposable profiles and cover wrong token/profile, worker restart, duplicate commands, missing acknowledgments, import, reorder, protected nodes, and interrupted apply.
 
 Child 03 behavior tests: apps/extension/src/bridge.test.ts. The task-local chrome-native-harness.mjs uses Google Chrome through CDP pipes and the production Rust Bridge example. Close extension pages and do not attach a worker debugger during idle acceptance. Report actual Chrome, mocked API, OS credential and Tauri GUI evidence separately.
+
+Child 08 capture is `apps/extension/src/capture.ts`. It runs from the popup button after the click. It queries one active tab and does not read cookies, input values, or other tabs. The worker `command` path rejects `{ "type": "capture" }`. Manifest permissions are `bookmarks`, `storage`, `alarms`, `scripting`, and `activeTab`, with no host permission.

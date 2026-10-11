@@ -6,6 +6,7 @@ mod sync;
 mod tags;
 mod transport;
 
+use crate::preview::Gate;
 use crate::storage::{PairedOrigin, Profile, Storage};
 use credentials::CredentialStore;
 use markbridge_protocol::*;
@@ -28,6 +29,7 @@ pub struct Bridge {
     credentials: Arc<dyn CredentialStore>,
     lifecycle: Arc<Mutex<()>>,
     watches: Arc<Mutex<BTreeMap<String, file_mirror::Watch>>>,
+    preview: Gate,
 }
 struct Pending {
     view: PendingPairing,
@@ -174,6 +176,7 @@ impl Bridge {
             credentials,
             lifecycle: Arc::new(Mutex::new(())),
             watches: Arc::new(Mutex::new(BTreeMap::new())),
+            preview: Gate::default(),
         };
         bridge.arm_saved_watches().await;
         Ok(bridge)
@@ -324,8 +327,40 @@ impl Bridge {
         self.publish(&mut inner);
         Ok(inner.view())
     }
+    pub async fn content_preview(
+        &self,
+        profile_id: Id,
+        chrome_id: Id,
+        request_id: Id,
+    ) -> Result<markbridge_protocol::ContentPreview> {
+        if !self
+            .inner
+            .lock()
+            .await
+            .profiles
+            .contains_key(profile_id.as_str())
+        {
+            return Err(ErrorCode::WrongProfile);
+        }
+        let flag = self.preview.begin(&request_id).await;
+        let storage = self.inner.lock().await.storage()?.share();
+        crate::preview::load_content_preview(
+            &storage,
+            profile_id,
+            chrome_id,
+            request_id,
+            &flag,
+            &crate::preview::SystemNetwork,
+        )
+        .await
+    }
+    pub async fn cancel_content_preview(&self, request_id: Id) -> Result<()> {
+        self.preview.cancel(&request_id).await;
+        Ok(())
+    }
     pub async fn shutdown(&self) -> Result<()> {
         let _lifecycle = self.lifecycle.lock().await;
+        self.preview.cancel_all().await;
         self.stop_watches().await;
         let listener = {
             let mut inner = self.inner.lock().await;

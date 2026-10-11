@@ -2,9 +2,9 @@
 
 ## 当前与边界
 
-当前仓库没有产品代码。以下是目标设计，路径为拟新增或修改位置，不代表已经存在。
+实现位于下列路径。01 已创建的基础源码以当前工作树为准。
 
-apps/desktop/src-tauri fetch/extract/cache、crates/core preview model、apps/desktop/src/features/preview、apps/extension capture UI/script
+`crates/core/src/preview/`、`crates/core/src/storage/preview.rs`、`crates/protocol/src/preview.rs`、`apps/desktop/src/features/preview/`、`apps/extension/src/capture.ts`
 
 ## 技术合同
 

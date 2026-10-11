@@ -2,9 +2,9 @@
 
 use markbridge_core::bridge::{Bridge, CacheTreeNode, credentials::OsCredentialStore};
 use markbridge_protocol::{
-    ApplyResult, BookmarkNode, BridgeState, ChromeProfileList, Counter, EditAction, EditDocument,
-    EditPreview, ErrorCode, Id, LibraryCount, LibraryDetail, LibraryNodes, LibraryPage,
-    LibrarySearch, MirrorTree, OperationList, PairingOffer, TagCatalog, TagCommand,
+    ApplyResult, BookmarkNode, BridgeState, ChromeProfileList, ContentPreview, Counter, EditAction,
+    EditDocument, EditPreview, ErrorCode, Id, LibraryCount, LibraryDetail, LibraryNodes,
+    LibraryPage, LibrarySearch, MirrorTree, OperationList, PairingOffer, TagCatalog, TagCommand,
     TitleEncodingPreview,
 };
 use std::sync::Arc;
@@ -416,6 +416,30 @@ async fn apply_title_encoding(
 }
 
 #[tauri::command]
+async fn content_preview(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    profile_id: Id,
+    chrome_id: Id,
+    request_id: Id,
+) -> Result<ContentPreview, ErrorCode> {
+    trusted(&window)?;
+    bridge
+        .content_preview(profile_id, chrome_id, request_id)
+        .await
+}
+
+#[tauri::command]
+async fn cancel_content_preview(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    request_id: Id,
+) -> Result<(), ErrorCode> {
+    trusted(&window)?;
+    bridge.cancel_content_preview(request_id).await
+}
+
+#[tauri::command]
 fn open_http_url(window: tauri::WebviewWindow, url: String) -> Result<(), ErrorCode> {
     trusted(&window)?;
     open_http(&url)
@@ -522,6 +546,8 @@ fn main() {
             tag_command,
             preview_title_encoding,
             apply_title_encoding,
+            content_preview,
+            cancel_content_preview,
             open_http_url
         ])
         .build(tauri::generate_context!());

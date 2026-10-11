@@ -52,6 +52,12 @@ function install(extra?: (command: string, args: Args) => unknown) {
     }
     if (command === 'cache_search') return args.query === 'Alpha' ? { items: [alpha] } : { items: [] };
     if (command === 'open_http_url') return null;
+    if (command === 'cancel_content_preview') return null;
+    if (command === 'content_preview') return {
+      requestId: args.requestId, profileId: args.profileId, chromeId: args.chromeId, bookmarkId: 'bookmark-a',
+      status: 'cancelled', title: null, summary: null, summarySource: null, image: null,
+      imageFailure: null, imageFailureMessage: null, fetchedAt: null, cacheLabel: null, failure: null, failureMessage: null,
+    };
     if (command === 'tag_state' || command === 'tag_command') return {
       profileId: typeof args.profileId === 'string' ? args.profileId : 'profile-a',
       encodingEnabled: false, journalId: null, affected: 0, mergeRequired: false,

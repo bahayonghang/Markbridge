@@ -16,6 +16,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Some("edit-document") => schemars::schema_for!(markbridge_protocol::EditDocument),
         Some("tag-catalog") => schemars::schema_for!(markbridge_protocol::TagCatalog),
         Some("title-encoding") => schemars::schema_for!(markbridge_protocol::TitleEncodingPreview),
+        Some("content-preview") => schemars::schema_for!(markbridge_protocol::ContentPreview),
         _ => schemars::schema_for!(markbridge_protocol::StartupState),
     };
     println!("{}", serde_json::to_string_pretty(&schema)?);

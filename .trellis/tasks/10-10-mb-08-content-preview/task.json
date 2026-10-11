@@ -3,7 +3,7 @@
   "name": "mb-08-content-preview",
   "title": "网页抽取、摘要预览与缩略图",
   "description": "网页抽取、摘要预览与缩略图；属于 Markbridge 父规划，独立验收并记录失败与恢复边界",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": "fullstack",
   "scope": "markbridge",
   "package": null,
@@ -12,7 +12,7 @@
   "assignee": "lyh",
   "createdAt": "2026-10-10",
   "completedAt": null,
-  "branch": null,
+  "branch": "main",
   "base_branch": "main",
   "worktree_path": null,
   "commit": null,
@@ -21,12 +21,20 @@
   "children": [],
   "parent": "10-10-markbridge-workspace",
   "relatedFiles": [
-    "apps/desktop/src-tauri fetch/extract/cache",
-    "crates/core preview model",
-    "apps/desktop/src/features/preview",
-    "apps/extension capture UI/script"
+    "crates/core/src/preview/",
+    "crates/core/src/storage/preview.rs",
+    "crates/core/src/storage/migrations/005_preview.sql",
+    "crates/protocol/src/preview.rs",
+    "apps/desktop/src/features/preview/",
+    "apps/desktop/src-tauri/src/main.rs",
+    "apps/extension/src/capture.ts",
+    "apps/extension/public/manifest.json",
+    ".trellis/spec/backend/error-handling.md",
+    ".trellis/spec/backend/logging-guidelines.md",
+    ".trellis/spec/extension/index.md",
+    ".trellis/spec/project-baseline.md"
   ],
-  "notes": "Planning only. Dependency order is documented and is not enforced automatically by Trellis. No product implementation or runtime validation has started.",
+  "notes": "Public fetch rejects forbidden addresses. V10 PASS is the Rust HTTP fixture. AC08-4 PASS on disposable Chrome run f0edec26-610a-4405-9100-222fd727e127. Desktop window stays NOT_RUN.",
   "meta": {
     "sequence": "08",
     "milestone": "M2",
@@ -37,8 +45,9 @@
       "R07",
       "R12"
     ],
-    "implementation_approval": "not_granted",
-    "planning_status": "ready_for_review",
-    "delivery_scope": "windows_v1"
+    "implementation_approval": "granted",
+    "planning_status": "approved",
+    "delivery_scope": "windows_v1",
+    "approval_evidence": "Parent approval_evidence; dependencies and per-child acceptance remain required"
   }
 }

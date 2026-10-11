@@ -1,5 +1,6 @@
 import './style.css';
 import type { ExtensionStatus } from './bridge';
+import { CAPTURE_FAILURE, captureActivePage } from './capture';
 
 const labels: Record<ExtensionStatus['state'], string> = {
   unpaired: '未配对', connecting: '正在连接本机桌面', pending: '等待桌面确认扩展身份',
@@ -27,6 +28,15 @@ async function send(message: Record<string, unknown>): Promise<void> {
   }
 }
 document.querySelector('#options')?.addEventListener('click', () => { void chrome.runtime.openOptionsPage(); });
+document.querySelector('#capture')?.addEventListener('click', () => {
+  const output = document.querySelector<HTMLElement>('#capture-result');
+  if (!output) return;
+  output.textContent = '';
+  void captureActivePage(chrome).then(
+    (page) => { output.textContent = page.title ? `${page.title}\n${page.text}` : page.text; },
+    () => { output.textContent = CAPTURE_FAILURE; },
+  );
+});
 document.querySelector('#pair-form')?.addEventListener('submit', event => {
   event.preventDefault();
   const input = document.querySelector<HTMLTextAreaElement>('#pairing-code')!;

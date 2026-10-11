@@ -13,6 +13,7 @@ import validateOperationList from './generated/operation-list.validator.js';
 import validateEditDocument from './generated/edit-document.validator.js';
 import validateTagCatalog from './generated/tag-catalog.validator.js';
 import validateTitleEncoding from './generated/title-encoding.validator.js';
+import validateContentPreview from './generated/content-preview.validator.js';
 import type { BridgeState } from './generated/bridge-state';
 import type { PairingOffer } from './generated/pairing-offer';
 import type { MirrorTree } from './generated/mirror-tree';
@@ -28,6 +29,7 @@ import type { OperationList } from './generated/operation-list';
 import type { EditDocument } from './generated/edit-document';
 import type { TagCatalog } from './generated/tag-catalog';
 import type { TitleEncodingPreview } from './generated/title-encoding';
+import type { ContentPreview } from './generated/content-preview';
 
 export type { BridgeState } from './generated/bridge-state';
 export type { PairingOffer } from './generated/pairing-offer';
@@ -44,6 +46,7 @@ export type { OperationList } from './generated/operation-list';
 export type { EditDocument } from './generated/edit-document';
 export type { TagCatalog, TagEntry, TagItem } from './generated/tag-catalog';
 export type { TitleEncodingPreview, EncodingConflict } from './generated/title-encoding';
+export type { ContentPreview, PreviewImage, PreviewStatus, PreviewFailure, SummarySource } from './generated/content-preview';
 
 export function parseBridgeState(value: unknown): BridgeState {
   if (!validateBridge(value)) throw new Error('INVALID_BRIDGE_STATE');
@@ -117,5 +120,10 @@ export function parseTagCatalog(value: unknown): TagCatalog {
 
 export function parseTitleEncoding(value: unknown): TitleEncodingPreview {
   if (!validateTitleEncoding(value)) throw new Error('INVALID_TITLE_ENCODING');
+  return value;
+}
+
+export function parseContentPreview(value: unknown): ContentPreview {
+  if (!validateContentPreview(value)) throw new Error('INVALID_CONTENT_PREVIEW');
   return value;
 }

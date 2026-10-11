@@ -15,3 +15,5 @@ A lost acknowledgment does not prove failure. A successful send does not prove a
 Keep the last valid cache when a file is temporarily invalid. Show source freshness. Require authentication and reconciliation before re-enabling writes.
 
 AI and page failures must not disable local browsing or tags. Cancellation prevents late results from applying. Avoid duplicate retry layers.
+
+Content preview failures use `failure` and `failureMessage` on `ContentPreview`. The 10 second timeout message is `抓取超过 10 秒`. `cancel_content_preview` returns no page body. A cancelled preview has null title, summary, and image.

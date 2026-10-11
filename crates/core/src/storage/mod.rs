@@ -10,6 +10,7 @@ use std::{
 use tokio::sync::{mpsc, oneshot};
 
 mod operations;
+pub(crate) mod preview;
 mod tags;
 pub(crate) use operations::{
     AfterBody, BeforeBody, EncodingBody, IdMapBody, OperationRecord, OrderBody, RestoreBody,
@@ -21,6 +22,7 @@ const MIGRATIONS: &[&str] = &[
     include_str!("migrations/002_history.sql"),
     include_str!("migrations/003_mirror.sql"),
     include_str!("migrations/004_tags.sql"),
+    include_str!("migrations/005_preview.sql"),
 ];
 pub const SCHEMA_VERSION: u32 = MIGRATIONS.len() as u32;
 type Result<T> = std::result::Result<T, ErrorCode>;
@@ -83,7 +85,7 @@ pub struct Metadata {
 
 pub struct Storage {
     sender: mpsc::Sender<Job>,
-    finished: oneshot::Receiver<()>,
+    finished: Option<oneshot::Receiver<()>>,
     /// Local-only path. Never serialize the path into a frontend or transport DTO.
     pub migration_backup: Option<PathBuf>,
 }
@@ -126,9 +128,17 @@ impl Storage {
         let migration_backup = ready_rx.await.map_err(|_| ErrorCode::StorageError)??;
         Ok(Self {
             sender,
-            finished,
+            finished: Some(finished),
             migration_backup,
         })
+    }
+    /// Extra handle for a short database call. Drop it before a network wait so shutdown can close the worker.
+    pub(crate) fn share(&self) -> Self {
+        Self {
+            sender: self.sender.clone(),
+            finished: None,
+            migration_backup: None,
+        }
     }
     pub(super) async fn call<T: Send + 'static>(
         &self,
@@ -145,7 +155,10 @@ impl Storage {
     }
     pub async fn close(self) -> Result<()> {
         drop(self.sender);
-        self.finished.await.map_err(|_| ErrorCode::StorageError)
+        if let Some(finished) = self.finished {
+            finished.await.map_err(|_| ErrorCode::StorageError)?;
+        }
+        Ok(())
     }
     pub async fn create_profile(&self, profile: Profile) -> Result<()> {
         self.call(move |conn| {
@@ -282,7 +295,7 @@ pub struct StoredMirror {
     pub error_code: Option<ErrorCode>,
     pub nodes: Vec<BookmarkNode>,
 }
-fn storage_error(_: rusqlite::Error) -> ErrorCode {
+pub(super) fn storage_error(_: rusqlite::Error) -> ErrorCode {
     ErrorCode::StorageError
 }
 fn cursor(conn: &Connection, profile_id: &Id) -> Result<Option<Cursor>> {

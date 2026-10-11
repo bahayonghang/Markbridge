@@ -268,4 +268,8 @@ describe('persistent recovery', () => {
     await ctx.bridge.command({ type: 'forget' }); ctx.api.alarms.onAlarm.emit({ name: RECOVERY_ALARM }); await flush();
     expect(ctx.bridge.getStatus()).toMatchObject({ state: 'unpaired', profileId: null }); expect(ctx.localData['markbridge-auth']).toBeUndefined();
   });
+  it('rejects capture commands that do not come from the popup gesture', async () => {
+    const ctx = setup(); await ctx.bridge.start();
+    await expect(ctx.bridge.command({ type: 'capture' })).rejects.toThrow('INVALID_MESSAGE');
+  });
 });

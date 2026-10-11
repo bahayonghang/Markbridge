@@ -1,0 +1,196 @@
+{
+  "runId": "f0edec26-610a-4405-9100-222fd727e127",
+  "startedAt": "2026-10-11T20:02:17.789Z",
+  "scope": "disposable Chrome user-data-dir, unpacked extension, no daily profile",
+  "loadExtensionFlag": false,
+  "paired": false,
+  "desktopStarted": false,
+  "controls": [
+    {
+      "control": "extension_loaded",
+      "status": "PASS",
+      "chrome": "Chrome/155.0.8059.39",
+      "loadExtensionFlag": false,
+      "loadUnpacked": true,
+      "hostPermissions": 0
+    },
+    {
+      "control": "toolbar",
+      "status": "RUN",
+      "count": 15,
+      "names": [
+        "Minimize",
+        "Maximize",
+        "Close",
+        "Back",
+        "Forward",
+        "Reload",
+        "View site information",
+        "Bookmark this tab",
+        "Extensions",
+        "You",
+        "Chrome",
+        "Tab search",
+        "Close",
+        "Close",
+        "New Tab"
+      ],
+      "hasAction": false,
+      "hasMenu": true
+    },
+    {
+      "control": "extension_menu",
+      "status": "RUN",
+      "count": 6
+    },
+    {
+      "control": "gesture_attempt",
+      "status": "RUN",
+      "actionGesture": "menu-click",
+      "shortcutUsed": false,
+      "actionClick": "skipped",
+      "menuClick": "opened"
+    },
+    {
+      "control": "obs1_before_gesture",
+      "status": "PASS",
+      "popupBefore": false,
+      "workerExecute": "NO_PERMISSION",
+      "activeCount": 1,
+      "inactiveCount": 1,
+      "secretHits": 0,
+      "markerHits": 0,
+      "hasAuth": false,
+      "hasPending": false,
+      "localKeys": [
+        "markbridge-instance"
+      ],
+      "sessionKeys": [],
+      "popupResultEmpty": true,
+      "actionGesture": "menu-click",
+      "shortcutAssigned": false
+    },
+    {
+      "control": "obs2_visible_text",
+      "status": "PASS",
+      "actionGesture": "menu-click",
+      "shortcutUsed": false,
+      "captureClick": "clicked",
+      "trusted": true,
+      "onlyVisible": true,
+      "failure": false,
+      "remainderLength": 0,
+      "length": 39,
+      "callCount": 1,
+      "execCode": "ok"
+    },
+    {
+      "control": "obs3_sensitive_inputs",
+      "status": "PASS",
+      "secretHits": 0,
+      "passwordAbsent": true,
+      "sensitiveAbsent": true
+    },
+    {
+      "control": "obs4_cookies",
+      "status": "PASS",
+      "cookieAbsentFromResult": true,
+      "extensionSecretHits": 0,
+      "extensionMarkerHits": 0,
+      "hasAuth": false,
+      "hasPending": false,
+      "loopbackSockets": 0,
+      "cookieNameSet": true,
+      "httpOnlyHidden": true
+    },
+    {
+      "control": "obs5_other_tab",
+      "status": "PASS",
+      "otherHidden": true,
+      "activeVisible": true,
+      "inactiveCount": 1,
+      "callCount": 1,
+      "callIsActive": true,
+      "callIsInactive": false,
+      "otherMarkerPresent": false
+    }
+  ],
+  "browserProduct": "Google Chrome",
+  "chromeVersion": "155.0.8059.39",
+  "hostBefore": {
+    "dpi": "120",
+    "hklmNames": "ChromeCleanupEnabled,ChromeCleanupReportingEnabled,DeviceMetricsReportingEnabled,MetricsReportingEnabled,UserFeedbackAllowed",
+    "hklmSubs": "0",
+    "policyRoot": "True",
+    "googlePolicy": "False",
+    "chromiumPolicy": "False",
+    "dailyHash": "DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82",
+    "dailyLen": 849515,
+    "chromeLen": "4586648",
+    "chromeTicks": "639268609564417310"
+  },
+  "desktopBefore": [
+    {
+      "path": "roaming",
+      "exists": true,
+      "length": 143360,
+      "hash": "1448cd23a82c1038a1705f9cefbdfc8749807e6c199a7e56d75d3143dbf64d87",
+      "mtimeMs": 1791710100693.6306,
+      "secret": false
+    },
+    {
+      "path": "local",
+      "exists": false,
+      "length": 0,
+      "hash": "",
+      "mtimeMs": 0,
+      "secret": false
+    }
+  ],
+  "pairingBefore": 0,
+  "chromeDirectory": "temp",
+  "hostAfter": {
+    "dpi": "120",
+    "hklmNames": "ChromeCleanupEnabled,ChromeCleanupReportingEnabled,DeviceMetricsReportingEnabled,MetricsReportingEnabled,UserFeedbackAllowed",
+    "hklmSubs": "0",
+    "policyRoot": "True",
+    "googlePolicy": "False",
+    "chromiumPolicy": "False",
+    "dailyHash": "DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82",
+    "dailyLen": 849515,
+    "chromeLen": "4586648",
+    "chromeTicks": "639268609564417310"
+  },
+  "desktopAfter": [
+    {
+      "path": "roaming",
+      "exists": true,
+      "length": 143360,
+      "hash": "1448cd23a82c1038a1705f9cefbdfc8749807e6c199a7e56d75d3143dbf64d87",
+      "mtimeMs": 1791710100693.6306,
+      "secret": false
+    },
+    {
+      "path": "local",
+      "exists": false,
+      "length": 0,
+      "hash": "",
+      "mtimeMs": 0,
+      "secret": false
+    }
+  ],
+  "pairingAfter": 0,
+  "cleanup": {
+    "chromeRemoved": true,
+    "pairingUnchanged": true,
+    "dailyBookmarksUnchanged": true,
+    "policiesUnchanged": true,
+    "chromeUnchanged": true,
+    "desktopSqliteUnchanged": true,
+    "desktopSqliteHasSecret": false,
+    "ok": true
+  },
+  "status": "PASS",
+  "exitCode": 0,
+  "finishedAt": "2026-10-11T20:02:27.039Z"
+}

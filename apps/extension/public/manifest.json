@@ -7,6 +7,6 @@
   "action": { "default_popup": "index.html", "default_title": "Markbridge · 签桥" },
   "options_ui": { "page": "options.html", "open_in_tab": true },
   "background": { "service_worker": "worker.js", "type": "module" },
-  "permissions": ["bookmarks", "storage", "alarms"],
+  "permissions": ["bookmarks", "storage", "alarms", "scripting", "activeTab"],
   "content_security_policy": { "extension_pages": "script-src 'self'; object-src 'none'; connect-src ws://127.0.0.1:*" }
 }
