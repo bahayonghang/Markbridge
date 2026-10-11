@@ -37,3 +37,28 @@
 | `pnpm typecheck` | 1，修复后 0 | 首次 `executor.test.ts` 把闭包赋值收窄成 `never`。改为对象字段后退出码 0。 |
 | `pnpm protocol:check` | 0 | PASS |
 | `node .trellis/tasks/10-10-mb-06-safe-editing/evidence/chrome-edit-harness.mjs` | 0 | 报告 `evidence/v07-v08-report.json`，run `1f4ba946-621b-47a1-b214-821a791037ce`。状态 PASS。`protected_managed` PASS，`managedPresent` true，`descendantChecked` true。`Markbridge.Pairing` 与 Task06 目标数量都是 0。这一轮执行了 V07 和 V08 控制，全部 PASS。清理五个布尔值都是 true。 |
+
+## V07 policy file
+
+上面的 V07 行仍是注册表来源，不是这一轮的结果。
+
+| 命令 | 退出码 | 结果 |
+|---|---|---|
+| `node .trellis/tasks/archive/2026-10/10-10-mb-06-safe-editing/evidence/v07-policy-file.mjs` | 0 | PASS |
+| `node .trellis/tasks/archive/2026-10/10-10-mb-06-safe-editing/evidence/v07-policy-file.mjs` | 0 | PASS。检查重跑。 |
+
+报告 `evidence/v07-policy-file-report.json`，run `9d7b4289-ec72-480e-b9ee-0d26a6a980eb`。浏览器是 stock Chromium 157.0.8100.0，ProductName 为 Chromium，路径 `%TEMP%\markbridge-06-filepolicy\chrome-win\chrome.exe`。没有使用 `%TEMP%\markbridge-06-chromium`，没有改 `chrome.exe` 或 `chrome.dll`。两个文件的 SHA256 前后都是 `6b92945a2d3da600a99a0d14c0fb2ff32538037d4ca8933c839313497be4c234` 和 `81582b6200295c7de89109f71edcf8c1332e98df63dbd2a94bc647f9986ade31`。
+
+策略文件 `C:\Users\lyh\AppData\Local\Temp\markbridge-06-filepolicy\chrome-win\policies\managed\mb06.json`，109 字节，SHA256 `8b53ab17c7733820897efe91fa0dcb6fa3709ac25d0708505dedcd3f67f12745`。Chromium 进程退出码 0。`chrome.bookmarks` 没有 managed 节点，`markerPresent` 为 false，`chrome://policy` 正文没有 `ManagedBookmarks`。stock Windows Chromium 没有从该 JSON 文件加载托管书签。第二次启动前该文件已移走。
+
+隔离用户数据目录 `C:\Users\lyh\AppData\Local\Temp\markbridge-06-userdata-PZrh6i` 是 managed 节点的来源。`Local State` 里的 `local_test_policies_for_next_startup` 提供 `ManagedBookmarks`。Chromium 进程退出码 0。`managedPresent` 与 `markerPresent` 都是 true。`chrome://policy` 正文仍然没有 `ManagedBookmarks`；节点来自扩展页的 `chrome.bookmarks.getTree`。
+
+managed 节点和它的一个后代，delete 与 move 都被产品拒绝，代码都是 `BACKEND_PROTECTED_NODE`。树摘要不变：节点数 5，摘要 `c0beed9b9e917afb`。后代仍在。
+
+脚本没有调用注册表写入。前后快照的 `registryChangedKeys` 为空，`noRegistryKeyWritten` 为 true。`HKCU\Software\MBPolicy` 不存在。已有的 `HKCU\Software\Chromium` 没有 `ManagedBookmarks` 值，哈希未变。日常书签长度 849515，SHA256 `DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82`。已安装 Chrome 的 `chrome.exe` 哈希未变。`Markbridge.Pairing` 目标数 0。凭据命名空间 `Markbridge.Task06.7ecfa3`，结束时目标数 0。
+
+检查重跑同一命令，退出码 0，PASS。报告仍是 `evidence/v07-policy-file-report.json`，run `1df7c034-1d6a-4dee-978a-030758275fa2`。策略 JSON 阶段 `managedPresent` 与 `markerPresent` 都是 false，`policyPageListsManagedBookmarks` 为 false，Chromium 退出码 0。managed 节点来自隔离用户数据目录，机制是 `local_test_policies_for_next_startup`，`cause` 为 `user-data`。该阶段 `managedPresent` 与 `markerPresent` 都是 true。脚本把 `markerPresent` 记为 true 的条件是：根的一个子节点 `folderType` 为 `managed` 或 `unmodifiable` 为 `managed`，并且它的后代 URL 等于探测地址 `https://example.invalid/mb06/managed`。
+
+该节点和它的一个后代，delete 与 move 的产品调用都返回 `BACKEND_PROTECTED_NODE`。树摘要未变：节点数 5，摘要 `c0beed9b9e917afb`。后代仍在。
+
+`registryChangedKeys` 为空。`registryWriteApiCalled` 为 false，脚本源码没有注册表写入调用。`chrome.exe` 与 `chrome.dll` 的 SHA256 前后都是 `6b92945a2d3da600a99a0d14c0fb2ff32538037d4ca8933c839313497be4c234` 和 `81582b6200295c7de89109f71edcf8c1332e98df63dbd2a94bc647f9986ade31`。浏览器路径是 `%TEMP%\markbridge-06-filepolicy\chrome-win\chrome.exe`，没有使用 `%TEMP%\markbridge-06-chromium`，没有改二进制。日常书签长度 849515，SHA256 `DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82`。`Markbridge.Pairing` 目标数前后都是 0。任务命名空间结束时目标数 0。

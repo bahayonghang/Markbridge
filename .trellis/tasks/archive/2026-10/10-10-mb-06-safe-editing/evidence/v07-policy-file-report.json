@@ -1,0 +1,464 @@
+{
+  "runId": "1df7c034-1d6a-4dee-978a-030758275fa2",
+  "startedAt": "2026-10-11T23:46:18.579Z",
+  "command": "node .trellis/tasks/archive/2026-10/10-10-mb-06-safe-editing/evidence/v07-policy-file.mjs",
+  "scope": "stock Chromium policy JSON file, then one isolated user-data directory",
+  "credentialNamespace": "Markbridge.Task06.861552",
+  "registryWriteApiCalled": false,
+  "policyFile": {
+    "path": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-06-filepolicy\\chrome-win\\policies\\managed\\mb06.json",
+    "sha256": "8b53ab17c7733820897efe91fa0dcb6fa3709ac25d0708505dedcd3f67f12745",
+    "bytes": 109,
+    "userDataDir": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-06-chrome-wcEocX",
+    "managedPresent": false,
+    "markerPresent": false,
+    "policyPageListsManagedBookmarks": false,
+    "chrome": "Chrome/157.0.8100.0",
+    "chromiumArgs": [
+      "--headless=new",
+      "--remote-debugging-pipe",
+      "--enable-unsafe-extension-debugging",
+      "--user-data-dir=C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-06-chrome-wcEocX",
+      "--no-first-run",
+      "--no-default-browser-check",
+      "--disable-background-networking",
+      "--disable-component-update",
+      "--disable-sync",
+      "about:blank"
+    ],
+    "observation": "Stock Windows Chromium did not show the managed bookmark from the policy JSON file.",
+    "chromiumExitCode": 0
+  },
+  "userData": {
+    "directory": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-06-userdata-5a2ab4",
+    "attempted": true,
+    "mechanism": "local_test_policies_for_next_startup",
+    "managedPresent": true,
+    "markerPresent": true,
+    "policyPageListsManagedBookmarks": false,
+    "chrome": "Chrome/157.0.8100.0",
+    "chromiumArgs": [
+      "--headless=new",
+      "--remote-debugging-pipe",
+      "--enable-unsafe-extension-debugging",
+      "--user-data-dir=C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-06-userdata-5a2ab4",
+      "--no-first-run",
+      "--no-default-browser-check",
+      "--disable-background-networking",
+      "--disable-component-update",
+      "--disable-sync",
+      "about:blank"
+    ],
+    "chromiumExitCode": 0
+  },
+  "cause": "user-data",
+  "controls": [
+    {
+      "control": "pairing_namespace_rejected",
+      "status": "PASS",
+      "exitCode": 1,
+      "pairingTargetsUnchanged": true
+    },
+    {
+      "control": "policy_file_not_loaded",
+      "status": "OBSERVED",
+      "chromiumExitCode": 0,
+      "managedPresent": false
+    },
+    {
+      "control": "protected_managed_delete",
+      "status": "PASS",
+      "code": "BACKEND_PROTECTED_NODE"
+    },
+    {
+      "control": "protected_managed_move",
+      "status": "PASS",
+      "code": "BACKEND_PROTECTED_NODE"
+    },
+    {
+      "control": "protected_descendant_delete",
+      "status": "PASS",
+      "code": "BACKEND_PROTECTED_NODE"
+    },
+    {
+      "control": "protected_descendant_move",
+      "status": "PASS",
+      "code": "BACKEND_PROTECTED_NODE"
+    },
+    {
+      "control": "tree_digest",
+      "status": "PASS",
+      "count": 5,
+      "hash": "c0beed9b9e917afb",
+      "unchanged": true
+    },
+    {
+      "control": "descendant_present",
+      "status": "PASS",
+      "present": true
+    }
+  ],
+  "browserProduct": "Chromium",
+  "chromeVersion": "157.0.8100.0",
+  "chromiumExe": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-06-filepolicy\\chrome-win\\chrome.exe",
+  "binaryHashBefore": {
+    "exe": "6b92945a2d3da600a99a0d14c0fb2ff32538037d4ca8933c839313497be4c234",
+    "dll": "81582b6200295c7de89109f71edcf8c1332e98df63dbd2a94bc647f9986ade31"
+  },
+  "hostBefore": {
+    "keys": [
+      {
+        "id": "HKCU\\Software",
+        "present": true,
+        "hash": "A84D76123A389532730999DE65064B88426C1C0090AECC4E4E4DF388F66BAAF4",
+        "names": 0,
+        "subs": 138,
+        "managedBookmarks": false,
+        "denied": false
+      },
+      {
+        "id": "HKCU\\Software\\Chromium",
+        "present": true,
+        "hash": "90BFBEEB411111AA4CBA3CB90BE5D0EA2BD67D1F3FA1A70E53B73ACCEB518467",
+        "names": 6,
+        "subs": 5,
+        "managedBookmarks": false,
+        "denied": false
+      },
+      {
+        "id": "HKCU\\Software\\Google",
+        "present": true,
+        "hash": "E3FB471A5DD4C767E327DCF7CD4C24084D000C3B623C77D271B94906DBA1B25C",
+        "names": 0,
+        "subs": 4,
+        "managedBookmarks": false,
+        "denied": false
+      },
+      {
+        "id": "HKCU\\Software\\Google\\Chrome",
+        "present": true,
+        "hash": "53091089303517DE6C083B43529B7C8C7D58FF1AF8A5272234B9B6D553B11C73",
+        "names": 2,
+        "subs": 6,
+        "managedBookmarks": false,
+        "denied": false
+      },
+      {
+        "id": "HKCU\\Software\\MBPolicy",
+        "present": false,
+        "hash": "",
+        "names": 0,
+        "subs": 0,
+        "managedBookmarks": false,
+        "denied": false
+      },
+      {
+        "id": "HKCU\\Software\\MBPolicy\\Chromium",
+        "present": false,
+        "hash": "",
+        "names": 0,
+        "subs": 0,
+        "managedBookmarks": false,
+        "denied": false
+      },
+      {
+        "id": "HKCU\\Software\\Policies",
+        "present": true,
+        "hash": "C7BA9F146160D76EF3C0B9A755588C6CDAAC053981C0B3F50C42772DFD245A76",
+        "names": 0,
+        "subs": 2,
+        "managedBookmarks": false,
+        "denied": false
+      },
+      {
+        "id": "HKCU\\Software\\Policies\\Chromium",
+        "present": false,
+        "hash": "",
+        "names": 0,
+        "subs": 0,
+        "managedBookmarks": false,
+        "denied": false
+      },
+      {
+        "id": "HKCU\\Software\\Policies\\Google",
+        "present": false,
+        "hash": "",
+        "names": 0,
+        "subs": 0,
+        "managedBookmarks": false,
+        "denied": false
+      },
+      {
+        "id": "HKCU\\Software\\Policies\\Google\\Chrome",
+        "present": false,
+        "hash": "",
+        "names": 0,
+        "subs": 0,
+        "managedBookmarks": false,
+        "denied": false
+      },
+      {
+        "id": "HKLM\\SOFTWARE\\Chromium",
+        "present": false,
+        "hash": "",
+        "names": 0,
+        "subs": 0,
+        "managedBookmarks": false,
+        "denied": false
+      },
+      {
+        "id": "HKLM\\SOFTWARE\\Google",
+        "present": true,
+        "hash": "AD23DB92A377B997F0E490C8A26A64A2E7B5F9B77F0B15B6CD6A7EE3A0E6FBC1",
+        "names": 0,
+        "subs": 1,
+        "managedBookmarks": false,
+        "denied": false
+      },
+      {
+        "id": "HKLM\\SOFTWARE\\Google\\Chrome",
+        "present": true,
+        "hash": "CB41BF22D4C3B341D9B4C3E65BF7F4548C62C8BC134B61D9741523F0AD13B523",
+        "names": 0,
+        "subs": 2,
+        "managedBookmarks": false,
+        "denied": false
+      },
+      {
+        "id": "HKLM\\SOFTWARE\\MBPolicy",
+        "present": false,
+        "hash": "",
+        "names": 0,
+        "subs": 0,
+        "managedBookmarks": false,
+        "denied": false
+      },
+      {
+        "id": "HKLM\\SOFTWARE\\Policies",
+        "present": true,
+        "hash": "16A1796B82E386FB4E5C51D9A5E5591ACE3FB0BC3194F694F262088F6C7F9928",
+        "names": 0,
+        "subs": 4,
+        "managedBookmarks": false,
+        "denied": false
+      },
+      {
+        "id": "HKLM\\SOFTWARE\\Policies\\Chromium",
+        "present": false,
+        "hash": "",
+        "names": 0,
+        "subs": 0,
+        "managedBookmarks": false,
+        "denied": false
+      },
+      {
+        "id": "HKLM\\SOFTWARE\\Policies\\Google",
+        "present": true,
+        "hash": "AD23DB92A377B997F0E490C8A26A64A2E7B5F9B77F0B15B6CD6A7EE3A0E6FBC1",
+        "names": 0,
+        "subs": 1,
+        "managedBookmarks": false,
+        "denied": false
+      },
+      {
+        "id": "HKLM\\SOFTWARE\\Policies\\Google\\Chrome",
+        "present": true,
+        "hash": "591F5868B55BCB0FF430CF2CB358745D67E0D80696AD867A78549A1D5BA43748",
+        "names": 5,
+        "subs": 0,
+        "managedBookmarks": false,
+        "denied": false
+      }
+    ],
+    "dailyHash": "DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82",
+    "dailyLength": 849515,
+    "officialChromeHash": "D3784FFBF1F6109348416064B3E4CD739B06FA61D89A81B262C780DF9F32270C"
+  },
+  "pairingTargetsBefore": 0,
+  "dataDirectory": "temp",
+  "status": "PASS",
+  "credentialTargets": {
+    "pairing": 0,
+    "task06": 0
+  },
+  "binaryHashAfter": {
+    "exe": "6b92945a2d3da600a99a0d14c0fb2ff32538037d4ca8933c839313497be4c234",
+    "dll": "81582b6200295c7de89109f71edcf8c1332e98df63dbd2a94bc647f9986ade31"
+  },
+  "hostAfter": {
+    "keys": [
+      {
+        "id": "HKCU\\Software",
+        "present": true,
+        "hash": "A84D76123A389532730999DE65064B88426C1C0090AECC4E4E4DF388F66BAAF4",
+        "names": 0,
+        "subs": 138,
+        "managedBookmarks": false,
+        "denied": false
+      },
+      {
+        "id": "HKCU\\Software\\Chromium",
+        "present": true,
+        "hash": "90BFBEEB411111AA4CBA3CB90BE5D0EA2BD67D1F3FA1A70E53B73ACCEB518467",
+        "names": 6,
+        "subs": 5,
+        "managedBookmarks": false,
+        "denied": false
+      },
+      {
+        "id": "HKCU\\Software\\Google",
+        "present": true,
+        "hash": "E3FB471A5DD4C767E327DCF7CD4C24084D000C3B623C77D271B94906DBA1B25C",
+        "names": 0,
+        "subs": 4,
+        "managedBookmarks": false,
+        "denied": false
+      },
+      {
+        "id": "HKCU\\Software\\Google\\Chrome",
+        "present": true,
+        "hash": "53091089303517DE6C083B43529B7C8C7D58FF1AF8A5272234B9B6D553B11C73",
+        "names": 2,
+        "subs": 6,
+        "managedBookmarks": false,
+        "denied": false
+      },
+      {
+        "id": "HKCU\\Software\\MBPolicy",
+        "present": false,
+        "hash": "",
+        "names": 0,
+        "subs": 0,
+        "managedBookmarks": false,
+        "denied": false
+      },
+      {
+        "id": "HKCU\\Software\\MBPolicy\\Chromium",
+        "present": false,
+        "hash": "",
+        "names": 0,
+        "subs": 0,
+        "managedBookmarks": false,
+        "denied": false
+      },
+      {
+        "id": "HKCU\\Software\\Policies",
+        "present": true,
+        "hash": "C7BA9F146160D76EF3C0B9A755588C6CDAAC053981C0B3F50C42772DFD245A76",
+        "names": 0,
+        "subs": 2,
+        "managedBookmarks": false,
+        "denied": false
+      },
+      {
+        "id": "HKCU\\Software\\Policies\\Chromium",
+        "present": false,
+        "hash": "",
+        "names": 0,
+        "subs": 0,
+        "managedBookmarks": false,
+        "denied": false
+      },
+      {
+        "id": "HKCU\\Software\\Policies\\Google",
+        "present": false,
+        "hash": "",
+        "names": 0,
+        "subs": 0,
+        "managedBookmarks": false,
+        "denied": false
+      },
+      {
+        "id": "HKCU\\Software\\Policies\\Google\\Chrome",
+        "present": false,
+        "hash": "",
+        "names": 0,
+        "subs": 0,
+        "managedBookmarks": false,
+        "denied": false
+      },
+      {
+        "id": "HKLM\\SOFTWARE\\Chromium",
+        "present": false,
+        "hash": "",
+        "names": 0,
+        "subs": 0,
+        "managedBookmarks": false,
+        "denied": false
+      },
+      {
+        "id": "HKLM\\SOFTWARE\\Google",
+        "present": true,
+        "hash": "AD23DB92A377B997F0E490C8A26A64A2E7B5F9B77F0B15B6CD6A7EE3A0E6FBC1",
+        "names": 0,
+        "subs": 1,
+        "managedBookmarks": false,
+        "denied": false
+      },
+      {
+        "id": "HKLM\\SOFTWARE\\Google\\Chrome",
+        "present": true,
+        "hash": "CB41BF22D4C3B341D9B4C3E65BF7F4548C62C8BC134B61D9741523F0AD13B523",
+        "names": 0,
+        "subs": 2,
+        "managedBookmarks": false,
+        "denied": false
+      },
+      {
+        "id": "HKLM\\SOFTWARE\\MBPolicy",
+        "present": false,
+        "hash": "",
+        "names": 0,
+        "subs": 0,
+        "managedBookmarks": false,
+        "denied": false
+      },
+      {
+        "id": "HKLM\\SOFTWARE\\Policies",
+        "present": true,
+        "hash": "16A1796B82E386FB4E5C51D9A5E5591ACE3FB0BC3194F694F262088F6C7F9928",
+        "names": 0,
+        "subs": 4,
+        "managedBookmarks": false,
+        "denied": false
+      },
+      {
+        "id": "HKLM\\SOFTWARE\\Policies\\Chromium",
+        "present": false,
+        "hash": "",
+        "names": 0,
+        "subs": 0,
+        "managedBookmarks": false,
+        "denied": false
+      },
+      {
+        "id": "HKLM\\SOFTWARE\\Policies\\Google",
+        "present": true,
+        "hash": "AD23DB92A377B997F0E490C8A26A64A2E7B5F9B77F0B15B6CD6A7EE3A0E6FBC1",
+        "names": 0,
+        "subs": 1,
+        "managedBookmarks": false,
+        "denied": false
+      },
+      {
+        "id": "HKLM\\SOFTWARE\\Policies\\Google\\Chrome",
+        "present": true,
+        "hash": "591F5868B55BCB0FF430CF2CB358745D67E0D80696AD867A78549A1D5BA43748",
+        "names": 5,
+        "subs": 0,
+        "managedBookmarks": false,
+        "denied": false
+      }
+    ],
+    "dailyHash": "DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82",
+    "dailyLength": 849515,
+    "officialChromeHash": "D3784FFBF1F6109348416064B3E4CD739B06FA61D89A81B262C780DF9F32270C"
+  },
+  "dailyBookmarksUnchanged": true,
+  "officialChromeUnchanged": true,
+  "registryChangedKeys": [],
+  "binariesUnchanged": true,
+  "noRegistryKeyWritten": true,
+  "exitCode": 0,
+  "endedAt": "2026-10-11T23:46:39.827Z"
+}
