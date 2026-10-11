@@ -33,7 +33,7 @@
     "README.md",
     ".github/workflows"
   ],
-  "notes": "Foundation implemented; native rendering and normal-close acceptance remains UNVERIFIED. On2026-10-10 user explicitly approved starting02 after automated checks, with01 native acceptance required before Windows delivery.",
+  "notes": "2026-10-11 native empty state, size, startup-error alert, and two WM_CLOSE exits PASS on the pnpm build:native exe. AC01-2 checked. Task stays in_progress; not archived. On2026-10-10 user explicitly approved starting02 after automated checks, with01 native acceptance required before Windows delivery.",
   "meta": {
     "sequence": "01",
     "milestone": "M1",

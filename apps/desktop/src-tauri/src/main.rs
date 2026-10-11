@@ -576,14 +576,26 @@ fn open_http_url(window: tauri::WebviewWindow, url: String) -> Result<(), ErrorC
     open_http(&url)
 }
 
+/// Opened local storage. The flag has no error text.
+struct StorageReady(bool);
+
+fn startup_response(ready: bool) -> Result<markbridge_protocol::StartupState, &'static str> {
+    if ready {
+        Ok(markbridge_core::startup_state())
+    } else {
+        Err("STARTUP_UNAVAILABLE")
+    }
+}
+
 #[tauri::command]
 fn get_startup_state(
     window: tauri::WebviewWindow,
+    storage: tauri::State<'_, StorageReady>,
 ) -> Result<markbridge_protocol::StartupState, &'static str> {
     if !preview::caller_may_control(window.label()) {
         return Err("UNTRUSTED_WINDOW");
     }
-    Ok(markbridge_core::startup_state())
+    startup_response(storage.0)
 }
 
 /// Daily pairing stays `Markbridge.Pairing`. An acceptance process may set
@@ -632,22 +644,29 @@ fn main() {
             let directory = database_directory(app)?;
             app.manage(preview::PreviewHost::new(directory.clone())?);
             let namespace = credential_namespace()?;
-            let bridge = tauri::async_runtime::block_on(Bridge::open_with_model_store(
+            // A failed open must leave the window up. Do not forward the cause.
+            let storage_ready = match tauri::async_runtime::block_on(Bridge::open_with_model_store(
                 directory.join("markbridge.sqlite"),
                 Arc::new(OsCredentialStore::new(namespace)),
                 Arc::new(OsCredentialStore::new(
                     markbridge_core::ai::MODEL_CREDENTIAL_SERVICE.to_owned(),
                 )),
-            ))?;
-            let mut states = bridge.subscribe();
-            let handle = app.handle().clone();
-            tauri::async_runtime::spawn(async move {
-                while states.changed().await.is_ok() {
-                    let state = states.borrow_and_update().clone();
-                    let _ = handle.emit_to("main", "bridge-state", state);
+            )) {
+                Ok(bridge) => {
+                    let mut states = bridge.subscribe();
+                    let handle = app.handle().clone();
+                    tauri::async_runtime::spawn(async move {
+                        while states.changed().await.is_ok() {
+                            let state = states.borrow_and_update().clone();
+                            let _ = handle.emit_to("main", "bridge-state", state);
+                        }
+                    });
+                    app.manage(bridge);
+                    true
                 }
-            });
-            app.manage(bridge);
+                Err(_) => false,
+            };
+            app.manage(StorageReady(storage_ready));
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -711,11 +730,11 @@ fn main() {
                 let _ = bridge.rescan_file_mirrors().await;
             });
         }
-        if matches!(event, tauri::RunEvent::Exit) {
-            let bridge = app.state::<Bridge>();
-            if tauri::async_runtime::block_on(bridge.shutdown()).is_err() {
-                eprintln!("SHUTDOWN_FAILED");
-            }
+        if matches!(event, tauri::RunEvent::Exit)
+            && let Some(bridge) = app.try_state::<Bridge>()
+            && tauri::async_runtime::block_on(bridge.shutdown()).is_err()
+        {
+            eprintln!("SHUTDOWN_FAILED");
         }
     });
 }
@@ -724,8 +743,23 @@ fn main() {
 mod tests {
     use super::{
         CREATE_NO_WINDOW, CREATE_SUSPENDED, absolute_pidfile, credential_namespace, flatten_cache,
-        open_http_creation_flags, suspend_requested, validate_http_url,
+        open_http_creation_flags, startup_response, suspend_requested, validate_http_url,
     };
+
+    #[test]
+    fn storage_open_failure_does_not_return_the_open_error() {
+        let failed = startup_response(false).unwrap_err();
+        assert_eq!(failed, "STARTUP_UNAVAILABLE");
+        for token in ["STORAGE_NEWER_SCHEMA", "STORAGE_ERROR", "sqlite", "\\", "/"] {
+            assert!(!failed.contains(token), "{token}");
+        }
+        let ready = startup_response(true).unwrap();
+        assert_eq!(ready.protocol_version, 1);
+        assert_eq!(
+            ready.state,
+            markbridge_protocol::StartupConnection::Unpaired
+        );
+    }
 
     #[test]
     fn acceptance_namespace_never_selects_the_daily_store() {
