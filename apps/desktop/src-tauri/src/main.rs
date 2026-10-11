@@ -1,7 +1,9 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use markbridge_core::bridge::{Bridge, credentials::OsCredentialStore};
-use markbridge_protocol::{BridgeState, ErrorCode, Id, PairingOffer};
+use markbridge_protocol::{
+    BridgeState, ChromeProfileList, ErrorCode, Id, MirrorTree, PairingOffer,
+};
 use std::sync::Arc;
 use tauri::{Emitter, Manager};
 
@@ -76,6 +78,65 @@ async fn reconnect_profile(
     trusted(&window)?;
     bridge.reconnect_profile(profile_id).await
 }
+#[tauri::command]
+async fn enumerate_chrome_user_data(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    user_data_path: String,
+) -> Result<ChromeProfileList, ErrorCode> {
+    trusted(&window)?;
+    bridge.enumerate_chrome_user_data(user_data_path).await
+}
+#[tauri::command]
+async fn attach_file_mirror(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    user_data_path: String,
+    directory_key: String,
+) -> Result<BridgeState, ErrorCode> {
+    trusted(&window)?;
+    bridge
+        .attach_file_mirror(user_data_path, directory_key)
+        .await
+}
+#[tauri::command]
+async fn rescan_file_mirrors(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+) -> Result<BridgeState, ErrorCode> {
+    trusted(&window)?;
+    bridge.rescan_file_mirrors().await
+}
+#[tauri::command]
+async fn detach_file_mirror(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    mirror_source_id: Id,
+) -> Result<BridgeState, ErrorCode> {
+    trusted(&window)?;
+    bridge.detach_file_mirror(mirror_source_id).await
+}
+#[tauri::command]
+async fn associate_file_mirror(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    mirror_source_id: Id,
+    profile_id: Id,
+) -> Result<BridgeState, ErrorCode> {
+    trusted(&window)?;
+    bridge
+        .associate_file_mirror(mirror_source_id, profile_id)
+        .await
+}
+#[tauri::command]
+async fn get_mirror_tree(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    mirror_source_id: Id,
+) -> Result<MirrorTree, ErrorCode> {
+    trusted(&window)?;
+    bridge.mirror_tree(mirror_source_id).await
+}
 
 #[tauri::command]
 fn get_startup_state(
@@ -129,7 +190,13 @@ fn main() {
             confirm_pairing,
             cancel_pairing,
             revoke_pairing,
-            reconnect_profile
+            reconnect_profile,
+            enumerate_chrome_user_data,
+            attach_file_mirror,
+            rescan_file_mirrors,
+            detach_file_mirror,
+            associate_file_mirror,
+            get_mirror_tree
         ])
         .build(tauri::generate_context!());
     let Ok(app) = app else {
@@ -137,6 +204,14 @@ fn main() {
         std::process::exit(1);
     };
     app.run(|app, event| {
+        if matches!(event, tauri::RunEvent::Resumed)
+            && let Some(bridge) = app.try_state::<Bridge>()
+        {
+            let bridge = Bridge::clone(&bridge);
+            tauri::async_runtime::spawn(async move {
+                let _ = bridge.rescan_file_mirrors().await;
+            });
+        }
         if matches!(event, tauri::RunEvent::Exit) {
             let bridge = app.state::<Bridge>();
             if tauri::async_runtime::block_on(bridge.shutdown()).is_err() {

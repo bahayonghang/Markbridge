@@ -7,7 +7,7 @@ async function mockBridge(page: Page, scenario: 'connected' | 'startup-error' | 
   await page.route('**/src/backend.ts*', (route) => route.fulfill({
     contentType: 'application/javascript',
     body: `
-      const initial = { protocolVersion: 1, revision: 1, port: null, errorCode: null, profiles: [], pending: [] };
+      const initial = { protocolVersion: 1, revision: 1, port: null, errorCode: null, profiles: [], pending: [], mirrors: [] };
       let receive;
       let state = initial;
       let starts = 0;

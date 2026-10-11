@@ -22,4 +22,5 @@ mod tests {
 }
 
 pub mod bridge;
+pub mod mirror;
 pub mod storage;

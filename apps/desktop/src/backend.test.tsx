@@ -1,18 +1,20 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import { invoke, isTauri } from '@tauri-apps/api/core';
 import { listen, type Event } from '@tauri-apps/api/event';
-import { beginPairing, getBridgeState, startBridge, subscribeBridgeState } from './backend';
+import { beginPairing, enumerateChromeUserData, getBridgeState, getMirrorTree, startBridge, subscribeBridgeState } from './backend';
 
 vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn(), isTauri: vi.fn() }));
 vi.mock('@tauri-apps/api/event', () => ({ listen: vi.fn() }));
 afterEach(() => { vi.resetAllMocks(); });
-const state = { protocolVersion: 1, revision: 1, port: null, errorCode: null, profiles: [], pending: [] };
+const state = { protocolVersion: 1, revision: 1, port: null, errorCode: null, profiles: [], pending: [], mirrors: [] };
 
 it('browser preview never invokes or subscribes to native endpoints', async () => {
   vi.mocked(isTauri).mockReturnValue(false);
   expect(await getBridgeState()).toMatchObject({ profiles: [], port: null });
   await subscribeBridgeState(vi.fn(), vi.fn());
   await expect(startBridge(49153)).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
+  await expect(enumerateChromeUserData('D:\\User Data')).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
+  await expect(getMirrorTree('mirror-a')).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
   expect(invoke).not.toHaveBeenCalled();
   expect(listen).not.toHaveBeenCalled();
 });

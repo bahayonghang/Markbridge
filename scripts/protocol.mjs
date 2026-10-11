@@ -32,7 +32,7 @@ export const generatedDir = new URL('../packages/protocol/src/generated/', impor
 
 export async function generateProtocol() {
   const outputs = new Map();
-  for (const [name, title, argument] of [['startup-state', 'StartupState', 'startup'], ['wire-message', 'WireMessage', 'wire'], ['bridge-state', 'BridgeState', 'bridge'], ['pairing-offer', 'PairingOffer', 'pairing']]) {
+  for (const [name, title, argument] of [['startup-state', 'StartupState', 'startup'], ['wire-message', 'WireMessage', 'wire'], ['bridge-state', 'BridgeState', 'bridge'], ['pairing-offer', 'PairingOffer', 'pairing'], ['mirror-tree', 'MirrorTree', 'mirror-tree'], ['chrome-profiles', 'ChromeProfileList', 'chrome-profiles']]) {
     const result = spawnSync('cargo', ['run', '--quiet', '--locked', '-p', 'markbridge-protocol', '--bin', 'export-schema', '--', argument], {
       cwd: root, encoding: 'utf8', maxBuffer: 4 * 1024 * 1024,
     });

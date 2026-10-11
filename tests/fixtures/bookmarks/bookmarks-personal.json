@@ -1,0 +1,46 @@
+{
+  "checksum": "fixture",
+  "version": 1,
+  "roots": {
+    "bookmark_bar": {
+      "children": [
+        {
+          "date_added": "13300000000000000",
+          "id": "5",
+          "name": "示例",
+          "type": "url",
+          "url": "https://example.com/a"
+        },
+        {
+          "children": [
+            {
+              "id": "7",
+              "name": "Nested",
+              "type": "url",
+              "url": "https://example.com/nested"
+            }
+          ],
+          "id": "6",
+          "name": "Folder",
+          "type": "folder"
+        }
+      ],
+      "date_added": "13200000000000000",
+      "id": "1",
+      "name": "Bookmarks bar",
+      "type": "folder"
+    },
+    "other": {
+      "children": [],
+      "id": "2",
+      "name": "Other bookmarks",
+      "type": "folder"
+    },
+    "synced": {
+      "children": [],
+      "id": "3",
+      "name": "Mobile bookmarks",
+      "type": "folder"
+    }
+  }
+}

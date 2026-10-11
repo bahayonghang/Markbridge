@@ -1,0 +1,284 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MirrorTree",
+  "type": "object",
+  "properties": {
+    "association": {
+      "$ref": "#/$defs/MirrorAssociation"
+    },
+    "canWriteBrowser": {
+      "type": "boolean",
+      "const": false
+    },
+    "displayName": {
+      "$ref": "#/$defs/DisplayName"
+    },
+    "errorCode": {
+      "$ref": "#/$defs/RequiredNullable2"
+    },
+    "fileStatus": {
+      "$ref": "#/$defs/MirrorFileStatus"
+    },
+    "lastSyncedAt": {
+      "$ref": "#/$defs/RequiredNullable"
+    },
+    "mirrorSourceId": {
+      "$ref": "#/$defs/Id"
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/BookmarkNode"
+      },
+      "maxItems": 100000
+    },
+    "revision": {
+      "$ref": "#/$defs/Counter"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "mirrorSourceId",
+    "displayName",
+    "fileStatus",
+    "association",
+    "revision",
+    "lastSyncedAt",
+    "errorCode",
+    "canWriteBrowser",
+    "nodes"
+  ],
+  "$defs": {
+    "BookmarkNode": {
+      "type": "object",
+      "properties": {
+        "chromeId": {
+          "$ref": "#/$defs/Id"
+        },
+        "dateAdded": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourceTime"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dateLastUsed": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourceTime"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "folderType": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FolderType"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "kind": {
+          "$ref": "#/$defs/NodeKind"
+        },
+        "parentId": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "position": {
+          "$ref": "#/$defs/Position"
+        },
+        "title": {
+          "$ref": "#/$defs/Title"
+        },
+        "unmodifiable": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Unmodifiable"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "url": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Url"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "chromeId",
+        "position",
+        "kind",
+        "title"
+      ]
+    },
+    "Counter": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 9007199254740991,
+      "minimum": 0
+    },
+    "DisplayName": {
+      "type": "string",
+      "maxLength": 128,
+      "minLength": 1
+    },
+    "ErrorCode": {
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "INVALID_MESSAGE",
+            "UNSUPPORTED_VERSION",
+            "FRAME_TOO_LARGE",
+            "LIMIT_EXCEEDED",
+            "INVALID_TREE",
+            "UNPAIRED",
+            "READ_ONLY",
+            "WRONG_PROFILE",
+            "STALE_PROPOSAL",
+            "PROTECTED_NODE",
+            "UNCERTAIN_WRITE",
+            "FETCH_DENIED",
+            "INVALID_AI_OUTPUT",
+            "STORAGE_ERROR",
+            "STORAGE_NEWER_SCHEMA",
+            "MIGRATION_FAILED",
+            "CONFLICT",
+            "CANCELLED"
+          ]
+        },
+        {
+          "description": "The selected Chrome directory is missing, unreadable, or not a User Data directory.",
+          "type": "string",
+          "const": "PATH_UNAVAILABLE"
+        }
+      ]
+    },
+    "FolderType": {
+      "type": "string",
+      "enum": [
+        "bookmarks-bar",
+        "other",
+        "mobile",
+        "managed"
+      ]
+    },
+    "Id": {
+      "type": "string",
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*(?![\\s\\S])"
+    },
+    "MirrorAssociation": {
+      "type": "string",
+      "enum": [
+        "independent",
+        "confirmed"
+      ]
+    },
+    "MirrorFileStatus": {
+      "type": "string",
+      "enum": [
+        "current",
+        "stale",
+        "unavailable"
+      ]
+    },
+    "NodeKind": {
+      "type": "string",
+      "enum": [
+        "folder",
+        "bookmark"
+      ]
+    },
+    "Position": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 100000,
+      "minimum": 0
+    },
+    "RequiredNullable": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Counter"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "RequiredNullable2": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ErrorCode"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "SourceTime": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "$ref": "#/$defs/TimeSource"
+        },
+        "unixMillis": {
+          "$ref": "#/$defs/Counter"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "unixMillis"
+      ]
+    },
+    "TimeSource": {
+      "type": "string",
+      "enum": [
+        "chrome_api",
+        "chrome_file"
+      ]
+    },
+    "Title": {
+      "type": "string",
+      "maxLength": 4096,
+      "minLength": 0
+    },
+    "Unmodifiable": {
+      "type": "string",
+      "enum": [
+        "managed"
+      ]
+    },
+    "Url": {
+      "type": "string",
+      "maxLength": 16384,
+      "minLength": 1
+    }
+  }
+}

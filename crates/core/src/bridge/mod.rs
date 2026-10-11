@@ -1,5 +1,6 @@
 //! Authenticated, read-only loopback bridge. No browser mutation API exists here.
 pub mod credentials;
+mod file_mirror;
 mod sync;
 mod transport;
 
@@ -24,6 +25,7 @@ pub struct Bridge {
     state: watch::Sender<BridgeState>,
     credentials: Arc<dyn CredentialStore>,
     lifecycle: Arc<Mutex<()>>,
+    watches: Arc<Mutex<BTreeMap<String, file_mirror::Watch>>>,
 }
 struct Pending {
     view: PendingPairing,
@@ -61,6 +63,7 @@ struct Inner {
     storage: Option<Storage>,
     profiles: BTreeMap<String, ActiveProfile>,
     pending: BTreeMap<String, Pending>,
+    mirrors: BTreeMap<String, file_mirror::ActiveMirror>,
     listener: Option<Listener>,
     revision: u64,
     port: Option<u16>,
@@ -135,22 +138,27 @@ impl Bridge {
                 },
             );
         }
+        let mirrors = file_mirror::load_mirrors(&storage).await?;
         let inner = Inner {
             storage: Some(storage),
             profiles,
             pending: BTreeMap::new(),
+            mirrors,
             listener: None,
             revision: 0,
             port: None,
             error: None,
         };
-        let (state, _) = watch::channel(inner.view());
-        Ok(Self {
+        let (state_tx, _) = watch::channel(inner.view());
+        let bridge = Self {
             inner: Arc::new(Mutex::new(inner)),
-            state,
+            state: state_tx,
             credentials,
             lifecycle: Arc::new(Mutex::new(())),
-        })
+            watches: Arc::new(Mutex::new(BTreeMap::new())),
+        };
+        bridge.arm_saved_watches().await;
+        Ok(bridge)
     }
     pub fn subscribe(&self) -> watch::Receiver<BridgeState> {
         self.state.subscribe()
@@ -300,6 +308,7 @@ impl Bridge {
     }
     pub async fn shutdown(&self) -> Result<()> {
         let _lifecycle = self.lifecycle.lock().await;
+        self.stop_watches().await;
         let listener = {
             let mut inner = self.inner.lock().await;
             inner.port = None;
@@ -690,6 +699,11 @@ impl Inner {
             error_code: RequiredNullable(self.error),
             profiles: self.profiles.values().map(|p| p.view.clone()).collect(),
             pending: self.pending.values().map(|p| p.view.clone()).collect(),
+            mirrors: self
+                .mirrors
+                .values()
+                .map(|mirror| mirror.view.clone())
+                .collect(),
         }
     }
 }

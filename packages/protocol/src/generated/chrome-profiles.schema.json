@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ChromeProfileList",
+  "type": "object",
+  "properties": {
+    "profiles": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ChromeProfileChoice"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "profiles"
+  ],
+  "$defs": {
+    "ChromeProfileChoice": {
+      "type": "object",
+      "properties": {
+        "bookmarksPresent": {
+          "type": "boolean"
+        },
+        "directoryKey": {
+          "type": "string"
+        },
+        "displayName": {
+          "$ref": "#/$defs/DisplayName"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "directoryKey",
+        "displayName",
+        "bookmarksPresent"
+      ]
+    },
+    "DisplayName": {
+      "type": "string",
+      "maxLength": 128,
+      "minLength": 1
+    }
+  }
+}

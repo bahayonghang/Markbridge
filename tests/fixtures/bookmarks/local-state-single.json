@@ -1,0 +1,13 @@
+{
+  "os_crypt": {"encrypted_key": "not-exported"},
+  "profile": {
+    "info_cache": {
+      "Default": {
+        "name": "Only",
+        "gaia_id": "not-exported",
+        "user_name": "only@example.com"
+      }
+    },
+    "last_used": "Default"
+  }
+}

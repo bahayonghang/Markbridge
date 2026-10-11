@@ -1,0 +1,21 @@
+{
+  "checksum": "fixture",
+  "version": 1,
+  "roots": {
+    "bookmark_bar": {
+      "children": [
+        {
+          "id": "9",
+          "name": "Work link",
+          "type": "url",
+          "url": "https://example.com/work"
+        }
+      ],
+      "id": "1",
+      "name": "Bookmarks bar",
+      "type": "folder"
+    },
+    "other": {"children": [], "id": "2", "name": "Other bookmarks", "type": "folder"},
+    "synced": {"children": [], "id": "3", "name": "Mobile bookmarks", "type": "folder"}
+  }
+}

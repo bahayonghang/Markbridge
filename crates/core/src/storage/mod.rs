@@ -1,6 +1,6 @@
 //! Rust owns this serial SQLite worker. No caller receives a Connection or raw SQL API.
 use markbridge_protocol::{
-    BookmarkNode, Counter, DisplayName, ErrorCode, Id, SourceEpoch, TreeSnapshot,
+    BookmarkNode, Counter, DisplayName, ErrorCode, Id, MirrorFileStatus, SourceEpoch, TreeSnapshot,
 };
 use rusqlite::{Connection, OptionalExtension, params};
 use std::{
@@ -12,6 +12,7 @@ use tokio::sync::{mpsc, oneshot};
 const MIGRATIONS: &[&str] = &[
     include_str!("migrations/001_identity.sql"),
     include_str!("migrations/002_history.sql"),
+    include_str!("migrations/003_mirror.sql"),
 ];
 pub const SCHEMA_VERSION: u32 = MIGRATIONS.len() as u32;
 type Result<T> = std::result::Result<T, ErrorCode>;
@@ -248,6 +249,30 @@ impl Storage {
             row.map(|(display_title, summary, note, updated)| Ok(Metadata { display_title, summary, note, updated_at: Counter::new(updated as u64)? })).transpose()
         }).await
     }
+    pub async fn mirrors(&self) -> Result<Vec<StoredMirror>> {
+        self.call(|conn| load_mirrors(conn)).await
+    }
+    /// Writes mirror identity and, when requested, replaces only `mirror_bookmarks`.
+    /// Profile cache, metadata, and tags are not updated.
+    pub async fn put_mirror(&self, mirror: StoredMirror, replace_nodes: bool) -> Result<()> {
+        self.call(move |conn| write_mirror(conn, &mirror, replace_nodes))
+            .await
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct StoredMirror {
+    pub id: Id,
+    pub path: String,
+    pub display_name: DisplayName,
+    pub paired_profile_id: Option<Id>,
+    pub confirmed: bool,
+    pub watching: bool,
+    pub file_status: MirrorFileStatus,
+    pub revision: u64,
+    pub last_read_at: Option<u64>,
+    pub error_code: Option<ErrorCode>,
+    pub nodes: Vec<BookmarkNode>,
 }
 fn storage_error(_: rusqlite::Error) -> ErrorCode {
     ErrorCode::StorageError
@@ -391,6 +416,138 @@ fn commit_tree(
     transaction.commit().map_err(storage_error)
 }
 
+fn status_label(status: MirrorFileStatus) -> &'static str {
+    match status {
+        MirrorFileStatus::Current => "current",
+        MirrorFileStatus::Stale => "stale",
+        MirrorFileStatus::Unavailable => "unavailable",
+    }
+}
+fn parse_status(value: &str) -> MirrorFileStatus {
+    match value {
+        "current" => MirrorFileStatus::Current,
+        "unavailable" => MirrorFileStatus::Unavailable,
+        _ => MirrorFileStatus::Stale,
+    }
+}
+fn error_label(error: &ErrorCode) -> Result<String> {
+    let value = serde_json::to_value(error).map_err(|_| ErrorCode::StorageError)?;
+    value
+        .as_str()
+        .map(str::to_owned)
+        .ok_or(ErrorCode::StorageError)
+}
+fn parse_error_label(value: Option<String>) -> Result<Option<ErrorCode>> {
+    value
+        .map(|value| {
+            serde_json::from_value(serde_json::Value::String(value))
+                .map_err(|_| ErrorCode::StorageError)
+        })
+        .transpose()
+}
+fn load_mirrors(conn: &Connection) -> Result<Vec<StoredMirror>> {
+    let sources = {
+        let mut statement = conn
+            .prepare("SELECT id,selected_path,display_name,paired_profile_id,association_status,watching,file_status,revision,last_read_at,error_code FROM mirror_sources ORDER BY id")
+            .map_err(storage_error)?;
+        let rows = statement
+            .query_map([], |row| {
+                Ok((
+                    row.get::<_, String>(0)?,
+                    row.get::<_, String>(1)?,
+                    row.get::<_, String>(2)?,
+                    row.get::<_, Option<String>>(3)?,
+                    row.get::<_, String>(4)?,
+                    row.get::<_, i64>(5)?,
+                    row.get::<_, String>(6)?,
+                    row.get::<_, i64>(7)?,
+                    row.get::<_, Option<i64>>(8)?,
+                    row.get::<_, Option<String>>(9)?,
+                ))
+            })
+            .map_err(storage_error)?;
+        rows.collect::<std::result::Result<Vec<_>, _>>()
+            .map_err(storage_error)?
+    };
+    let mut mirrors = Vec::new();
+    for (id, path, name, paired, association, watching, status, revision, read_at, error) in sources
+    {
+        let id = Id::new(id)?;
+        let mut nodes = Vec::new();
+        {
+            let mut node_rows = conn
+                .prepare("SELECT node_json FROM mirror_bookmarks WHERE mirror_source_id=?1 ORDER BY chrome_id")
+                .map_err(storage_error)?;
+            let json_rows = node_rows
+                .query_map([id.as_str()], |row| row.get::<_, String>(0))
+                .map_err(storage_error)?;
+            for json in json_rows {
+                let json = json.map_err(storage_error)?;
+                if let Ok(node) = serde_json::from_str::<BookmarkNode>(&json) {
+                    nodes.push(node);
+                }
+            }
+        }
+        let display_name = DisplayName::new(name).or_else(|_| DisplayName::new("文件来源"))?;
+        mirrors.push(StoredMirror {
+            id,
+            path,
+            display_name,
+            paired_profile_id: paired.map(Id::new).transpose()?,
+            confirmed: association == "confirmed",
+            watching: watching != 0,
+            file_status: parse_status(&status),
+            revision: u64::try_from(revision).map_err(|_| ErrorCode::StorageError)?,
+            last_read_at: read_at
+                .map(|value| u64::try_from(value).map_err(|_| ErrorCode::StorageError))
+                .transpose()?,
+            error_code: parse_error_label(error)?,
+            nodes,
+        });
+    }
+    Ok(mirrors)
+}
+fn write_mirror(conn: &mut Connection, mirror: &StoredMirror, replace_nodes: bool) -> Result<()> {
+    let transaction = conn.transaction().map_err(storage_error)?;
+    transaction
+        .execute(
+            "INSERT INTO mirror_sources(id,selected_path,paired_profile_id,association_status,display_name,file_status,revision,last_read_at,error_code,watching) VALUES(?1,?2,?3,?4,?5,?6,?7,?8,?9,?10) ON CONFLICT(id) DO UPDATE SET selected_path=excluded.selected_path,paired_profile_id=excluded.paired_profile_id,association_status=excluded.association_status,display_name=excluded.display_name,file_status=excluded.file_status,revision=excluded.revision,last_read_at=excluded.last_read_at,error_code=excluded.error_code,watching=excluded.watching",
+            params![
+                mirror.id.as_str(),
+                mirror.path,
+                mirror.paired_profile_id.as_ref().map(Id::as_str),
+                if mirror.confirmed { "confirmed" } else { "independent" },
+                mirror.display_name.as_str(),
+                status_label(mirror.file_status),
+                i64::try_from(mirror.revision).map_err(|_| ErrorCode::StorageError)?,
+                mirror.last_read_at.map(|value| i64::try_from(value).map_err(|_| ErrorCode::StorageError)).transpose()?,
+                mirror.error_code.as_ref().map(error_label).transpose()?,
+                if mirror.watching { 1 } else { 0 },
+            ],
+        )
+        .map_err(storage_error)?;
+    if replace_nodes {
+        transaction
+            .execute(
+                "DELETE FROM mirror_bookmarks WHERE mirror_source_id=?1",
+                [mirror.id.as_str()],
+            )
+            .map_err(storage_error)?;
+        let mut insert = transaction
+            .prepare("INSERT INTO mirror_bookmarks(mirror_source_id,chrome_id,node_json) VALUES(?1,?2,?3)")
+            .map_err(storage_error)?;
+        for node in &mirror.nodes {
+            insert
+                .execute(params![
+                    mirror.id.as_str(),
+                    node.chrome_id.as_str(),
+                    serde_json::to_string(node).map_err(|_| ErrorCode::StorageError)?,
+                ])
+                .map_err(storage_error)?;
+        }
+    }
+    transaction.commit().map_err(storage_error)
+}
 fn migrate(conn: &mut Connection, path: &Path, migrations: &[&str]) -> Result<Option<PathBuf>> {
     let version: u32 = conn
         .pragma_query_value(None, "user_version", |row| row.get(0))

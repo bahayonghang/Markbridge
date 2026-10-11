@@ -2,24 +2,30 @@
 
 ## 当前与边界
 
-当前仓库没有产品代码。以下是目标设计，路径为拟新增或修改位置，不代表已经存在。
+实现落在 `crates/core/src/mirror/`、`crates/core/src/bridge/file_mirror.rs`、`crates/core/src/storage/migrations/003_mirror.sql`、`apps/desktop/src/App.tsx`、`apps/desktop/src-tauri/src/main.rs` 和 `tests/fixtures/bookmarks/`。完整列表在 `task.json` 的 `relatedFiles`。
 
-apps/desktop/src-tauri/profile discovery/watcher、crates/core mirror、连接/来源选择 UI、tests/fixtures/bookmarks files
+只读取用户给出的 Chrome User Data 绝对路径。枚举只打开该目录的 `Local State`，并查看所列资料目录下 `Bookmarks` 的元数据。枚举不读取 History、Cookies、Login Data，也不进入兄弟浏览器目录。目录键拒绝空串、超过 128 字符、含 `/ \ \0 :`、`.` 和 `..`。`Local State` 只提供目录键和显示名。
 
-## 技术合同
+扩展 API 身份与磁盘目录保持分开。`associate_file_mirror` 仅在 `file_status` 为 `current` 且 `same_identity` 成立时把关联记为 confirmed。比较 chrome id、parent、position、kind、url、folder_type。标题不参与比较。文件陈旧、不可用或结构不一致时，已有 confirmed 降为 independent。
 
-只读取用户选择的 Chrome User Data 路径及必要 Local State profile 元信息。Profile API 身份与目录不能自动对应；用户选择并通过结构验证后关联，否则独立只读。监听父目录处理原子替换，300 ms 去抖、30 s 元数据核验、唤醒重扫。解析失败保留最后有效树。在线事件源优先，文件不能覆盖 live 状态；缓存状态、文件状态和最后同步时间分别可见。
+监听 `Bookmarks` 的父目录，非递归。去抖 300 ms，元数据间隔 30 s。`RunEvent::Resumed` 调用 `rescan_file_mirrors`。解析失败保留最后有效树，并把 `file_status` 标为 stale 或 unavailable。
 
-公共协议、数据模型、来源优先级、操作状态和安全边界遵循 [父设计](../10-10-markbridge-workspace/design.md)。若发现需要改变跨任务合同，先修改父设计及受影响子任务，再进入实现；不得建立第二套不兼容协议。
+在线 profile 缓存优先。文件重载只写 `mirror_sources` 与 `mirror_bookmarks`。文件重载不写 `bookmarks_cache`，也不写 Chrome 的 Bookmarks 或 Local State。`can_write_browser` 恒为 false。`authorize_browser_write` 对 mirrorSourceId 返回 ReadOnly。对 profileId，仅当连接为 live 且未吊销时返回 Ok。该方法不执行写入。离线浏览器写命令不排队。
+
+文件来源状态在 `BridgeState.mirrors` 的 `MirrorSourceState`，字段为 `file_status`、`association`、`watching`、`can_write_browser`。`BridgeConnection` 保持 unpaired、connecting、reconciling、live、cached_read_only、error。本地绝对路径不进入 IPC 状态。所选目录缺失、不是目录、为相对路径，或 Local State 不可读时，返回 `ErrorCode::PathUnavailable`。Display 为 `PATH_UNAVAILABLE`，不含路径。
+
+父设计文件未改。`.trellis/spec` 未改。
+
+公共协议、数据模型、来源优先级、操作状态和安全边界遵循 [父设计](../10-10-markbridge-workspace/design.md)。
 
 ## 数据与兼容
 
-输入和输出使用 02 的版本化 DTO；Profile、sourceEpoch、requestId 和 revision 不在边界隐式丢弃。数据库改动必须编号 migration，保留旧库及回退证据。当前 task.json 的 relatedFiles 记录目标路径，实施时先检查真实目录再编辑。
+输入和输出使用 02 的版本化 DTO。身份字段沿用 profileId、chromeId、bookmarkId、sourceEpoch、mirrorSourceId。新增列在 migration `003_mirror.sql`，不改 001。`mirror_sources` 插入必须写出列名。`selected_path` 有唯一索引。
 
 ## 验证边界
 
-打开/关闭 Chrome 后修改测试书签，观察来源状态和重连；采集应用对文件的访问证据与文件哈希，排除 Chrome 自己正常写入的时间段。
+行为测试调用 `enumerate_user_data`、`attach_file_mirror`、`rescan_file_mirrors`、`mirror_tree`、`associate_file_mirror`、`authorize_browser_write`。fixture 在 `tests/fixtures/bookmarks/`。本轮没有打开桌面窗口，没有挂起主机，没有使用日常 Chrome Profile。命令和退出码在 `evidence/receipts.md`。
 
 ## 故障与回退
 
-停止 watcher、取消路径关联；保留已缓存来源与侧车，不删除 Chrome 文件。
+`detach_file_mirror` 停止 watcher，并把关联降为 independent。已缓存节点保留。不删除 Chrome 文件。

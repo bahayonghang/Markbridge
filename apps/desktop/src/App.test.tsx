@@ -9,8 +9,10 @@ vi.mock('./backend', () => ({
   getStartupState: vi.fn(), getBridgeState: vi.fn(), subscribeBridgeState: vi.fn(),
   hasNativeBridge: vi.fn(), startBridge: vi.fn(), beginPairing: vi.fn(),
   confirmPairing: vi.fn(), cancelPairing: vi.fn(), revokePairing: vi.fn(), reconnectProfile: vi.fn(),
+  enumerateChromeUserData: vi.fn(), attachFileMirror: vi.fn(), rescanFileMirrors: vi.fn(),
+  detachFileMirror: vi.fn(), associateFileMirror: vi.fn(), getMirrorTree: vi.fn(),
 }));
-const initial: BridgeState = { protocolVersion: 1, revision: 1, port: null, errorCode: null, profiles: [], pending: [] };
+const initial: BridgeState = { protocolVersion: 1, revision: 1, port: null, errorCode: null, profiles: [], pending: [], mirrors: [] };
 const profile: BridgeState['profiles'][number] = {
   profileId: 'profile-a', instanceId: 'instance-a', displayName: '研究资料', connection: 'live',
   nodeCount: 17, revision: 4, lastSyncedAt: null, errorCode: null,
@@ -30,6 +32,31 @@ beforeEach(() => {
   });
 });
 afterEach(() => { cleanup(); vi.useRealTimers(); vi.resetAllMocks(); });
+
+it('browses a stale file mirror without offering a browser write', async () => {
+  const mirror: BridgeState['mirrors'][number] = {
+    mirrorSourceId: 'mirror-a', displayName: 'Personal', association: 'independent', pairedProfileId: null,
+    fileStatus: 'stale', watching: true, nodeCount: 4, revision: 2, lastSyncedAt: null, errorCode: 'INVALID_TREE', canWriteBrowser: false,
+  };
+  vi.mocked(backend.getBridgeState).mockResolvedValue({ ...initial, mirrors: [mirror] });
+  vi.mocked(backend.getMirrorTree).mockResolvedValue({
+    mirrorSourceId: 'mirror-a', displayName: 'Personal', fileStatus: 'stale', association: 'independent',
+    revision: 2, lastSyncedAt: null, errorCode: 'INVALID_TREE', canWriteBrowser: false,
+    nodes: [{
+      chromeId: '5', parentId: '1', position: 0, kind: 'bookmark', title: '示例', url: 'https://example.com/a',
+      folderType: null, unmodifiable: null, dateAdded: null, dateLastUsed: null,
+    }],
+  });
+  render(<App />);
+  expect(await screen.findByText('文件陈旧 · 保留缓存')).toBeVisible();
+  expect(screen.getByText('独立只读 · 正在监听')).toBeVisible();
+  expect(screen.getByText('浏览器写入已禁用。在线资料优先于已关联的文件来源。')).toBeVisible();
+  expect(screen.queryByRole('button', { name: /写入|应用/ })).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: '浏览缓存' }));
+  expect(await screen.findByText('示例')).toBeVisible();
+  expect(screen.getByText('https://example.com/a')).toBeVisible();
+  expect(backend.getMirrorTree).toHaveBeenCalledExactlyOnceWith('mirror-a');
+});
 
 it('keeps browser preview unpaired and disables native actions', async () => {
   vi.mocked(backend.hasNativeBridge).mockReturnValue(false);

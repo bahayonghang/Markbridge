@@ -37,6 +37,8 @@ test('generated validators run with string code generation disabled, as required
     import wire from ${JSON.stringify(new URL('wire-message.validator.js', generated).href)};
     import bridge from ${JSON.stringify(new URL('bridge-state.validator.js', generated).href)};
     import pairing from ${JSON.stringify(new URL('pairing-offer.validator.js', generated).href)};
+    import mirrorTree from ${JSON.stringify(new URL('mirror-tree.validator.js', generated).href)};
+    import chromeProfiles from ${JSON.stringify(new URL('chrome-profiles.validator.js', generated).href)};
     try {
     assert.throws(() => Function('return 1'), /Code generation from strings disallowed/);
     assert.equal(startup({protocolVersion:1,state:'unpaired'}), true);
@@ -44,8 +46,14 @@ test('generated validators run with string code generation disabled, as required
     const fixture = JSON.parse(readFileSync(new URL(${JSON.stringify(new URL('../tests/fixtures/protocol/rust-to-ts.json', import.meta.url).href)}), 'utf8'));
     assert.equal(wire(fixture), true);
     assert.equal(wire({...fixture, protocolVersion:2}), false);
-    assert.equal(bridge({protocolVersion:1,revision:0,port:49153,errorCode:null,profiles:[],pending:[]}), true);
-    assert.equal(bridge({protocolVersion:1,revision:0.5,port:49153,errorCode:null,profiles:[],pending:[]}), false);
+    assert.equal(bridge({protocolVersion:1,revision:0,port:49153,errorCode:null,profiles:[],pending:[],mirrors:[]}), true);
+    assert.equal(bridge({protocolVersion:1,revision:0,port:49153,errorCode:null,profiles:[],pending:[]}), false);
+    assert.equal(bridge({protocolVersion:1,revision:0.5,port:49153,errorCode:null,profiles:[],pending:[],mirrors:[]}), false);
+    const mirror = {mirrorSourceId:'mirror-a',displayName:'Personal',fileStatus:'stale',association:'independent',revision:1,lastSyncedAt:null,errorCode:null,canWriteBrowser:false,nodes:[]};
+    assert.equal(mirrorTree(mirror), true);
+    assert.equal(mirrorTree({...mirror, canWriteBrowser:true}), false);
+    assert.equal(chromeProfiles({profiles:[{directoryKey:'Default',displayName:'Personal',bookmarksPresent:true}]}), true);
+    assert.equal(chromeProfiles({profiles:[{directoryKey:'Default',displayName:'Personal'}]}), false);
     assert.equal(pairing({profileId:'profile-test',pairingCode:'fixture',expiresAt:1}), true);
     assert.equal(pairing({profileId:'profile-test',pairingCode:'fixture',expiresAt:-1}), false);
     } catch (error) { console.error(error.name + ': ' + error.message); process.exit(1); }

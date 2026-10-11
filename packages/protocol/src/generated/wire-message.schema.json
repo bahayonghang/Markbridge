@@ -788,26 +788,35 @@
       "additionalProperties": false
     },
     "ErrorCode": {
-      "type": "string",
-      "enum": [
-        "INVALID_MESSAGE",
-        "UNSUPPORTED_VERSION",
-        "FRAME_TOO_LARGE",
-        "LIMIT_EXCEEDED",
-        "INVALID_TREE",
-        "UNPAIRED",
-        "READ_ONLY",
-        "WRONG_PROFILE",
-        "STALE_PROPOSAL",
-        "PROTECTED_NODE",
-        "UNCERTAIN_WRITE",
-        "FETCH_DENIED",
-        "INVALID_AI_OUTPUT",
-        "STORAGE_ERROR",
-        "STORAGE_NEWER_SCHEMA",
-        "MIGRATION_FAILED",
-        "CONFLICT",
-        "CANCELLED"
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "INVALID_MESSAGE",
+            "UNSUPPORTED_VERSION",
+            "FRAME_TOO_LARGE",
+            "LIMIT_EXCEEDED",
+            "INVALID_TREE",
+            "UNPAIRED",
+            "READ_ONLY",
+            "WRONG_PROFILE",
+            "STALE_PROPOSAL",
+            "PROTECTED_NODE",
+            "UNCERTAIN_WRITE",
+            "FETCH_DENIED",
+            "INVALID_AI_OUTPUT",
+            "STORAGE_ERROR",
+            "STORAGE_NEWER_SCHEMA",
+            "MIGRATION_FAILED",
+            "CONFLICT",
+            "CANCELLED"
+          ]
+        },
+        {
+          "description": "The selected Chrome directory is missing, unreadable, or not a User Data directory.",
+          "type": "string",
+          "const": "PATH_UNAVAILABLE"
+        }
       ]
     },
     "EventPayload": {

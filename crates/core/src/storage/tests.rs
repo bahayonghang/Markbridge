@@ -500,7 +500,7 @@ async fn mirror_namespace_and_operation_snapshot_fields_survive_reopen() {
         .unwrap();
     let before = storage.bookmarks(id("a"), epoch(1)).await.unwrap();
     storage.call(|conn| {
-        conn.execute("INSERT INTO mirror_sources VALUES('a','synthetic-file-path',NULL,'independent')", []).unwrap();
+        conn.execute("INSERT INTO mirror_sources(id,selected_path,paired_profile_id,association_status) VALUES('a','synthetic-file-path',NULL,'independent')", []).unwrap();
         conn.execute("INSERT INTO mirror_bookmarks VALUES('a','42','{}')", []).unwrap();
         conn.execute("INSERT INTO operations VALUES('op','a',1,'planned','{}',NULL,1)", []).unwrap();
         conn.execute("INSERT INTO operation_steps VALUES('op',0,'step',NULL,'create',NULL,NULL,'{}',NULL)", []).unwrap();
@@ -519,4 +519,98 @@ async fn mirror_namespace_and_operation_snapshot_fields_survive_reopen() {
     storage.close().await.unwrap();
     assert!(PairedOrigin::new("https://example.invalid").is_err());
     assert!(PairedOrigin::new("chrome-extension://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/path").is_err());
+}
+
+#[tokio::test]
+async fn mirror_storage_does_not_copy_tags_or_metadata_by_url() {
+    use markbridge_protocol::MirrorFileStatus;
+    let directory = tempfile::tempdir().unwrap();
+    let storage = Storage::open(directory.path().join("app.sqlite"))
+        .await
+        .unwrap();
+    for name in ["profile-a", "profile-b"] {
+        storage.create_profile(profile(name)).await.unwrap();
+        storage
+            .replace_tree(id(name), id("session"), tree(1))
+            .await
+            .unwrap();
+    }
+    let a = storage.bookmarks(id("profile-a"), epoch(1)).await.unwrap();
+    let b = storage.bookmarks(id("profile-b"), epoch(1)).await.unwrap();
+    let a_mark = a.iter().find(|row| row.node.url.is_some()).unwrap().clone();
+    let b_mark = b
+        .iter()
+        .find(|row| row.node.url == a_mark.node.url)
+        .unwrap()
+        .clone();
+    assert_ne!(a_mark.bookmark_id, b_mark.bookmark_id);
+    storage
+        .set_metadata(a_mark.bookmark_id.clone(), metadata())
+        .await
+        .unwrap();
+    let tagged = a_mark.bookmark_id.as_str().to_owned();
+    storage
+        .call(move |conn| {
+            conn.execute(
+                "INSERT INTO tags(id,name,normalized_name) VALUES('tag-1','工作','工作')",
+                [],
+            )
+            .unwrap();
+            conn.execute(
+                "INSERT INTO bookmark_tags(bookmark_id,tag_id) VALUES(?1,'tag-1')",
+                [tagged],
+            )
+            .unwrap();
+            Ok(())
+        })
+        .await
+        .unwrap();
+    storage
+        .put_mirror(
+            StoredMirror {
+                id: id("mirror-a"),
+                path: "C:/synthetic/Default".into(),
+                display_name: DisplayName::new("Personal").unwrap(),
+                paired_profile_id: Some(id("profile-a")),
+                confirmed: true,
+                watching: false,
+                file_status: MirrorFileStatus::Current,
+                revision: 1,
+                last_read_at: Some(1),
+                error_code: None,
+                nodes: vec![a_mark.node.clone()],
+            },
+            true,
+        )
+        .await
+        .unwrap();
+    let tags = storage
+        .call(|conn| {
+            let mut statement = conn
+                .prepare("SELECT bookmark_id FROM bookmark_tags ORDER BY bookmark_id")
+                .unwrap();
+            let rows = statement
+                .query_map([], |row| row.get::<_, String>(0))
+                .unwrap();
+            rows.collect::<std::result::Result<Vec<_>, _>>()
+                .map_err(storage_error)
+        })
+        .await
+        .unwrap();
+    assert_eq!(tags, vec![a_mark.bookmark_id.as_str().to_owned()]);
+    assert!(
+        storage
+            .metadata(b_mark.bookmark_id)
+            .await
+            .unwrap()
+            .is_none()
+    );
+    assert!(
+        storage
+            .metadata(a_mark.bookmark_id)
+            .await
+            .unwrap()
+            .is_some()
+    );
+    storage.close().await.unwrap();
 }

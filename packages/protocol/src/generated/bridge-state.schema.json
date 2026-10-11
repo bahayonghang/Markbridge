@@ -6,6 +6,12 @@
     "errorCode": {
       "$ref": "#/$defs/RequiredNullable2"
     },
+    "mirrors": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/MirrorSourceState"
+      }
+    },
     "pending": {
       "type": "array",
       "items": {
@@ -35,7 +41,8 @@
     "port",
     "errorCode",
     "profiles",
-    "pending"
+    "pending",
+    "mirrors"
   ],
   "$defs": {
     "BridgeConnection": {
@@ -101,26 +108,35 @@
       "minLength": 1
     },
     "ErrorCode": {
-      "type": "string",
-      "enum": [
-        "INVALID_MESSAGE",
-        "UNSUPPORTED_VERSION",
-        "FRAME_TOO_LARGE",
-        "LIMIT_EXCEEDED",
-        "INVALID_TREE",
-        "UNPAIRED",
-        "READ_ONLY",
-        "WRONG_PROFILE",
-        "STALE_PROPOSAL",
-        "PROTECTED_NODE",
-        "UNCERTAIN_WRITE",
-        "FETCH_DENIED",
-        "INVALID_AI_OUTPUT",
-        "STORAGE_ERROR",
-        "STORAGE_NEWER_SCHEMA",
-        "MIGRATION_FAILED",
-        "CONFLICT",
-        "CANCELLED"
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "INVALID_MESSAGE",
+            "UNSUPPORTED_VERSION",
+            "FRAME_TOO_LARGE",
+            "LIMIT_EXCEEDED",
+            "INVALID_TREE",
+            "UNPAIRED",
+            "READ_ONLY",
+            "WRONG_PROFILE",
+            "STALE_PROPOSAL",
+            "PROTECTED_NODE",
+            "UNCERTAIN_WRITE",
+            "FETCH_DENIED",
+            "INVALID_AI_OUTPUT",
+            "STORAGE_ERROR",
+            "STORAGE_NEWER_SCHEMA",
+            "MIGRATION_FAILED",
+            "CONFLICT",
+            "CANCELLED"
+          ]
+        },
+        {
+          "description": "The selected Chrome directory is missing, unreadable, or not a User Data directory.",
+          "type": "string",
+          "const": "PATH_UNAVAILABLE"
+        }
       ]
     },
     "Id": {
@@ -128,6 +144,75 @@
       "maxLength": 128,
       "minLength": 1,
       "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*(?![\\s\\S])"
+    },
+    "MirrorAssociation": {
+      "type": "string",
+      "enum": [
+        "independent",
+        "confirmed"
+      ]
+    },
+    "MirrorFileStatus": {
+      "type": "string",
+      "enum": [
+        "current",
+        "stale",
+        "unavailable"
+      ]
+    },
+    "MirrorSourceState": {
+      "description": "File-mirror status. `can_write_browser` is always false: a file source is not a write path.",
+      "type": "object",
+      "properties": {
+        "association": {
+          "$ref": "#/$defs/MirrorAssociation"
+        },
+        "canWriteBrowser": {
+          "type": "boolean",
+          "const": false
+        },
+        "displayName": {
+          "$ref": "#/$defs/DisplayName"
+        },
+        "errorCode": {
+          "$ref": "#/$defs/RequiredNullable2"
+        },
+        "fileStatus": {
+          "$ref": "#/$defs/MirrorFileStatus"
+        },
+        "lastSyncedAt": {
+          "$ref": "#/$defs/RequiredNullable3"
+        },
+        "mirrorSourceId": {
+          "$ref": "#/$defs/Id"
+        },
+        "nodeCount": {
+          "$ref": "#/$defs/Counter"
+        },
+        "pairedProfileId": {
+          "$ref": "#/$defs/RequiredNullable4"
+        },
+        "revision": {
+          "$ref": "#/$defs/Counter"
+        },
+        "watching": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "mirrorSourceId",
+        "displayName",
+        "association",
+        "pairedProfileId",
+        "fileStatus",
+        "watching",
+        "nodeCount",
+        "revision",
+        "lastSyncedAt",
+        "errorCode",
+        "canWriteBrowser"
+      ]
     },
     "PendingPairing": {
       "type": "object",

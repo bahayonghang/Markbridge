@@ -29,6 +29,8 @@ pub enum ErrorCode {
     MigrationFailed,
     Conflict,
     Cancelled,
+    /// The selected Chrome directory is missing, unreadable, or not a User Data directory.
+    PathUnavailable,
 }
 impl std::fmt::Display for ErrorCode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

@@ -132,24 +132,27 @@ export type RequiredNullable = Id | null;
 export type RequiredNullable2 = Counter | null;
 export type Counter = number;
 export type ErrorCode =
-  | 'INVALID_MESSAGE'
-  | 'UNSUPPORTED_VERSION'
-  | 'FRAME_TOO_LARGE'
-  | 'LIMIT_EXCEEDED'
-  | 'INVALID_TREE'
-  | 'UNPAIRED'
-  | 'READ_ONLY'
-  | 'WRONG_PROFILE'
-  | 'STALE_PROPOSAL'
-  | 'PROTECTED_NODE'
-  | 'UNCERTAIN_WRITE'
-  | 'FETCH_DENIED'
-  | 'INVALID_AI_OUTPUT'
-  | 'STORAGE_ERROR'
-  | 'STORAGE_NEWER_SCHEMA'
-  | 'MIGRATION_FAILED'
-  | 'CONFLICT'
-  | 'CANCELLED';
+  | (
+      | 'INVALID_MESSAGE'
+      | 'UNSUPPORTED_VERSION'
+      | 'FRAME_TOO_LARGE'
+      | 'LIMIT_EXCEEDED'
+      | 'INVALID_TREE'
+      | 'UNPAIRED'
+      | 'READ_ONLY'
+      | 'WRONG_PROFILE'
+      | 'STALE_PROPOSAL'
+      | 'PROTECTED_NODE'
+      | 'UNCERTAIN_WRITE'
+      | 'FETCH_DENIED'
+      | 'INVALID_AI_OUTPUT'
+      | 'STORAGE_ERROR'
+      | 'STORAGE_NEWER_SCHEMA'
+      | 'MIGRATION_FAILED'
+      | 'CONFLICT'
+      | 'CANCELLED'
+    )
+  | 'PATH_UNAVAILABLE';
 export type SourceEpoch = number;
 export type TimeSource = 'chrome_api' | 'chrome_file';
 export type FolderType = 'bookmarks-bar' | 'other' | 'mobile' | 'managed';

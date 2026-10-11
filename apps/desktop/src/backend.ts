@@ -1,8 +1,8 @@
 import { invoke, isTauri } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import {
-  parseBridgeState, parsePairingOffer, parseStartupState,
-  type BridgeState, type PairingOffer, type StartupState,
+  parseBridgeState, parseChromeProfileList, parseMirrorTree, parsePairingOffer, parseStartupState,
+  type BridgeState, type ChromeProfileList, type MirrorTree, type PairingOffer, type StartupState,
 } from '@markbridge/protocol';
 
 export function hasNativeBridge(): boolean { return isTauri(); }
@@ -17,7 +17,7 @@ export async function getStartupState(): Promise<StartupState> {
 export async function getBridgeState(): Promise<BridgeState> {
   const value: unknown = isTauri()
     ? await invoke('get_bridge_state')
-    : { protocolVersion: 1, revision: 0, port: null, errorCode: null, profiles: [], pending: [] };
+    : { protocolVersion: 1, revision: 0, port: null, errorCode: null, profiles: [], pending: [], mirrors: [] };
   return parseBridgeState(value);
 }
 
@@ -59,4 +59,30 @@ export function revokePairing(profileId: string): Promise<BridgeState> {
 
 export function reconnectProfile(profileId: string): Promise<BridgeState> {
   return bridgeCommand('reconnect_profile', { profileId });
+}
+
+export async function enumerateChromeUserData(userDataPath: string): Promise<ChromeProfileList> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseChromeProfileList(await invoke<unknown>('enumerate_chrome_user_data', { userDataPath }));
+}
+
+export function attachFileMirror(userDataPath: string, directoryKey: string): Promise<BridgeState> {
+  return bridgeCommand('attach_file_mirror', { userDataPath, directoryKey });
+}
+
+export function rescanFileMirrors(): Promise<BridgeState> {
+  return bridgeCommand('rescan_file_mirrors', {});
+}
+
+export function detachFileMirror(mirrorSourceId: string): Promise<BridgeState> {
+  return bridgeCommand('detach_file_mirror', { mirrorSourceId });
+}
+
+export function associateFileMirror(mirrorSourceId: string, profileId: string): Promise<BridgeState> {
+  return bridgeCommand('associate_file_mirror', { mirrorSourceId, profileId });
+}
+
+export async function getMirrorTree(mirrorSourceId: string): Promise<MirrorTree> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseMirrorTree(await invoke<unknown>('get_mirror_tree', { mirrorSourceId }));
 }

@@ -31,7 +31,8 @@ footer { padding: 14px 28px; border-top: 1px solid #d9dfda; }
 .panel-heading h2 { margin: 0 0 14px; font-size: 17px; }
 .inline-form, .actions { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 12px; }
 label { display: grid; gap: 5px; font-size: 13px; }
-input, textarea, button { font: inherit; border: 1px solid #8c9b90; border-radius: 4px; }
+input, textarea, select, button { font: inherit; border: 1px solid #8c9b90; border-radius: 4px; }
+select { min-height: 40px; padding: 6px 10px; background: #ffffff; color: #242c29; }
 input, textarea { padding: 7px 10px; color: #242c29; background: #ffffff; }
 input { width: 240px; max-width: 100%; }
 #bridge-port { width: 140px; }
@@ -54,6 +55,9 @@ dd { margin: 0; overflow-wrap: anywhere; }
 .profile-metrics dd { font-variant-numeric: tabular-nums; color: #242c29; }
 .source-state { font-size: 13px; color: #384d3f; }
 .profile .actions { margin-top: 12px; }
+.mirror-tree { list-style: none; padding: 0; margin: 12px 0 0; }
+.mirror-tree li { padding: 2px 0; }
+.mirror-url { margin-left: 8px; overflow-wrap: anywhere; }
 @media (max-width: 720px) {
   main { padding: 22px 24px; }
   .connection-panel { padding: 18px 20px; }

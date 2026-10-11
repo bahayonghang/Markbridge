@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import type { BridgeState, PairingOffer } from '@markbridge/protocol';
+import type { BridgeState, ChromeProfileList, MirrorTree, PairingOffer } from '@markbridge/protocol';
 import {
-  beginPairing, cancelPairing, confirmPairing, hasNativeBridge,
-  reconnectProfile, revokePairing, startBridge,
+  associateFileMirror, attachFileMirror, beginPairing, cancelPairing, confirmPairing,
+  detachFileMirror, enumerateChromeUserData, getMirrorTree, hasNativeBridge,
+  reconnectProfile, rescanFileMirrors, revokePairing, startBridge,
 } from './backend';
 import { useBridge } from './useBridge';
 
@@ -10,6 +11,36 @@ const connectionLabels: Record<BridgeState['profiles'][number]['connection'], st
   unpaired: '未配对 · 只读', connecting: '连接中 · 只读', reconciling: '核对中 · 只读',
   live: '实时同步', cached_read_only: '缓存 · 只读', error: '连接错误 · 只读',
 };
+
+const fileLabels: Record<BridgeState['mirrors'][number]['fileStatus'], string> = {
+  current: '文件已同步', stale: '文件陈旧 · 保留缓存', unavailable: '文件不可用 · 保留缓存',
+};
+const associationLabels: Record<BridgeState['mirrors'][number]['association'], string> = {
+  independent: '独立只读', confirmed: '已关联 · 只读',
+};
+
+function mirrorProblem(code: string | null): string | null {
+  if (!code) return null;
+  if (code === 'PATH_UNAVAILABLE') return '无法读取所选 Chrome 目录。请重新选择后重试。';
+  if (code === 'INVALID_TREE' || code === 'LIMIT_EXCEEDED') return '书签文件暂不可解析。已保留上次有效缓存。';
+  return '文件来源暂不可用。已保留上次有效缓存。';
+}
+
+function treeRows(nodes: MirrorTree['nodes']) {
+  const parents = new Map(nodes.map((node) => [node.chromeId, node.parentId]));
+  const depthOf = (id: string) => {
+    let depth = 0;
+    let current = parents.get(id) ?? null;
+    const seen = new Set<string>();
+    while (current) {
+      if (!seen.add(current) || depth > 32) break;
+      depth += 1;
+      current = parents.get(current) ?? null;
+    }
+    return depth;
+  };
+  return nodes.map((node) => ({ ...node, depth: depthOf(node.chromeId) }));
+}
 
 function safeError(code: string | null): string | null {
   if (!code) return null;
@@ -26,6 +57,10 @@ export function App() {
   const [offer, setOffer] = useState<PairingOffer | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [userDataPath, setUserDataPath] = useState('');
+  const [choices, setChoices] = useState<ChromeProfileList['profiles']>([]);
+  const [tree, setTree] = useState<MirrorTree | null>(null);
+  const [profileChoice, setProfileChoice] = useState('');
   const mounted = useRef(false);
   const actionGeneration = useRef(0);
 
@@ -148,6 +183,63 @@ export function App() {
                   <button disabled={unavailable || profile.connection === 'unpaired'} onClick={() => { void act(async () => { accept(await reconnectProfile(profile.profileId)); }); }}>重新连接</button>
                   <button className="secondary-button" disabled={unavailable || profile.connection === 'unpaired'} onClick={() => { void act(async () => { accept(await revokePairing(profile.profileId)); }); }}>吊销配对</button>
                 </div>
+              </article>)}
+            </section>
+            <section className="connection-panel" aria-labelledby="mirrors-title">
+              <div className="panel-heading"><h2 id="mirrors-title">只读文件来源</h2><span className="secondary">{state?.mirrors.length ?? 0} 个来源</span></div>
+              <form className="inline-form" onSubmit={(event) => {
+                event.preventDefault();
+                const path = userDataPath.trim();
+                if (!path) { setMessage('请输入 Chrome 用户数据目录的绝对路径。'); return; }
+                void act(async () => {
+                  const listed = await enumerateChromeUserData(path);
+                  if (!mounted.current) return;
+                  setChoices(listed.profiles);
+                  setTree(null);
+                }, '无法读取所选 Chrome 目录。请选择本机 User Data 路径后重试。');
+              }} noValidate>
+                <label htmlFor="user-data-path">用户数据目录<input id="user-data-path" value={userDataPath} onChange={(event) => setUserDataPath(event.target.value)} disabled={unavailable} spellCheck={false} /></label>
+                <button type="submit" disabled={unavailable}>枚举资料</button>
+                <button type="button" disabled={unavailable || !state?.mirrors.some((mirror) => mirror.watching)} onClick={() => { void act(async () => { accept(await rescanFileMirrors()); }); }}>重新读取</button>
+              </form>
+              <p className="secondary">只读取 Local State 的资料名称和所选资料的 Bookmarks 文件。文件来源不能写入 Chrome。</p>
+              {choices.length > 0 && <ul className="mirror-tree">{choices.map((choice) => <li key={choice.directoryKey}>
+                <span>{choice.displayName}</span>
+                <span className="secondary"> {choice.directoryKey}</span>
+                <button type="button" disabled={unavailable || !choice.bookmarksPresent} onClick={() => { void act(async () => { accept(await attachFileMirror(userDataPath.trim(), choice.directoryKey)); }); }}>{choice.bookmarksPresent ? '接入只读镜像' : '未找到书签文件'}</button>
+              </li>)}</ul>}
+              {!state?.mirrors.length && <p className="secondary">尚未接入只读文件来源。Chrome 关闭后，已接入的最后有效树仍可浏览。</p>}
+              {state?.mirrors.map((mirror) => <article className="profile" key={mirror.mirrorSourceId}>
+                <div className="panel-heading"><h3>{mirror.displayName}</h3><span className="source-state">{associationLabels[mirror.association]} · {mirror.watching ? '正在监听' : '已停止监听'}</span></div>
+                <dl className="profile-metrics">
+                  <div><dt>文件状态</dt><dd>{fileLabels[mirror.fileStatus]}</dd></div>
+                  <div><dt>缓存节点</dt><dd>{mirror.nodeCount}</dd></div>
+                  <div><dt>缓存版本</dt><dd>{mirror.revision}</dd></div>
+                  <div><dt>最近读取</dt><dd>{mirror.lastSyncedAt === null ? '尚未读取' : new Date(mirror.lastSyncedAt).toLocaleString('zh-CN', { hour12: false })}</dd></div>
+                </dl>
+                {mirror.errorCode && <p className="secondary">{mirrorProblem(mirror.errorCode)}</p>}
+                <p className="secondary">浏览器写入已禁用。在线资料优先于已关联的文件来源。</p>
+                <div className="actions">
+                  <button type="button" disabled={unavailable} onClick={() => { void act(async () => { const next = await getMirrorTree(mirror.mirrorSourceId); if (mounted.current) setTree(next); }); }}>浏览缓存</button>
+                  <button type="button" className="secondary-button" disabled={unavailable || !mirror.watching} onClick={() => { void act(async () => { accept(await detachFileMirror(mirror.mirrorSourceId)); }); }}>停止监听</button>
+                </div>
+                {!!state.profiles.length && <form className="inline-form" onSubmit={(event) => {
+                  event.preventDefault();
+                  if (!profileChoice) { setMessage('请选择要验证的已配对资料。'); return; }
+                  void act(async () => { accept(await associateFileMirror(mirror.mirrorSourceId, profileChoice)); }, '文件与在线资料不一致，保持独立只读。');
+                }}>
+                  <label htmlFor={`associate-${mirror.mirrorSourceId}`}>已配对资料<select id={`associate-${mirror.mirrorSourceId}`} value={profileChoice} onChange={(event) => setProfileChoice(event.target.value)} disabled={unavailable || mirror.fileStatus !== 'current'}>
+                    <option value="">选择已配对资料</option>
+                    {state.profiles.map((profile) => <option key={profile.profileId} value={profile.profileId}>{profile.displayName}</option>)}
+                  </select></label>
+                  <button type="submit" disabled={unavailable || mirror.fileStatus !== 'current' || !profileChoice}>验证关联</button>
+                </form>}
+                {tree?.mirrorSourceId === mirror.mirrorSourceId && <ul className="mirror-tree" aria-label={`${mirror.displayName} 缓存`}>
+                  {treeRows(tree.nodes).map((node) => <li key={node.chromeId} style={{ paddingLeft: node.depth * 12 }}>
+                    <span>{node.title || '未命名'}</span>
+                    {node.url && <span className="mirror-url secondary">{node.url}</span>}
+                  </li>)}
+                </ul>}
               </article>)}
             </section>
           </>

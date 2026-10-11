@@ -850,3 +850,130 @@ async fn cache_reads_use_local_nodes_and_see_applied_creates() {
     assert_eq!(found[0].parent_id.as_ref().unwrap().as_str(), "1");
     bridge.shutdown().await.unwrap();
 }
+
+#[tokio::test]
+async fn live_profile_cache_wins_over_a_changed_file_mirror() {
+    let personal = include_str!("../../../../tests/fixtures/bookmarks/bookmarks-personal.json");
+    let updated = include_str!("../../../../tests/fixtures/bookmarks/bookmarks-updated.json");
+    let local_state = include_str!("../../../../tests/fixtures/bookmarks/local-state-single.json");
+    let (bridge, directory, _credentials) = fixture().await;
+    let root = directory.path().join("User Data");
+    let profile_dir = root.join("Default");
+    std::fs::create_dir_all(&profile_dir).unwrap();
+    std::fs::write(root.join("Local State"), local_state).unwrap();
+    let bookmarks = profile_dir.join("Bookmarks");
+    std::fs::write(&bookmarks, personal).unwrap();
+    let nodes = crate::mirror::parse_bookmarks(personal.as_bytes()).unwrap();
+    let (profile, secret) = paired(&bridge, "instance").await;
+    bridge
+        .authenticate(&origin(), &hello(&profile, "instance", "s", &secret))
+        .await
+        .unwrap();
+    accept_tree(&bridge, &profile, "s", 0, nodes.clone()).await;
+    assert_eq!(
+        bridge
+            .state()
+            .await
+            .profiles
+            .iter()
+            .find(|item| item.profile_id == profile)
+            .unwrap()
+            .connection,
+        BridgeConnection::Live
+    );
+    let before = std::fs::read(&bookmarks).unwrap();
+    let before_modified = std::fs::metadata(&bookmarks).unwrap().modified().unwrap();
+    let local_state_file = snapshot_file(&root.join("Local State"));
+    let attached = bridge
+        .attach_file_mirror(root.to_str().unwrap().to_owned(), "Default".into())
+        .await
+        .unwrap();
+    let mirror_id = attached.mirrors[0].mirror_source_id.clone();
+    assert!(!attached.mirrors[0].can_write_browser);
+    let associated = bridge
+        .associate_file_mirror(mirror_id.clone(), profile.clone())
+        .await
+        .unwrap();
+    assert_eq!(
+        associated.mirrors[0].association,
+        MirrorAssociation::Confirmed
+    );
+    assert!(!associated.mirrors[0].can_write_browser);
+    assert_eq!(
+        bridge
+            .authorize_browser_write(mirror_id.clone())
+            .await
+            .unwrap_err(),
+        ErrorCode::ReadOnly
+    );
+    assert!(
+        bridge
+            .authorize_browser_write(profile.clone())
+            .await
+            .is_ok()
+    );
+    assert_eq!(std::fs::read(&bookmarks).unwrap(), before);
+    assert_eq!(
+        std::fs::metadata(&bookmarks).unwrap().modified().unwrap(),
+        before_modified
+    );
+    assert_eq!(snapshot_file(&root.join("Local State")), local_state_file);
+    std::fs::write(&bookmarks, updated).unwrap();
+    let written = std::fs::read(&bookmarks).unwrap();
+    let written_modified = std::fs::metadata(&bookmarks).unwrap().modified().unwrap();
+    bridge.rescan_file_mirrors().await.unwrap();
+    assert_eq!(std::fs::read(&bookmarks).unwrap(), written);
+    assert_eq!(
+        std::fs::metadata(&bookmarks).unwrap().modified().unwrap(),
+        written_modified
+    );
+    assert_eq!(snapshot_file(&root.join("Local State")), local_state_file);
+    assert_eq!(cached_tree(&bridge, &profile).await, sorted_tree(nodes));
+    let tree = bridge.mirror_tree(mirror_id.clone()).await.unwrap();
+    assert_eq!(tree.association, MirrorAssociation::Independent);
+    assert!(!tree.can_write_browser);
+    assert!(tree.nodes.iter().any(|node| {
+        node.url
+            .as_ref()
+            .is_some_and(|url| url.as_str() == "https://example.com/b")
+    }));
+    assert_eq!(
+        bridge
+            .associate_file_mirror(mirror_id, profile.clone())
+            .await
+            .unwrap_err(),
+        ErrorCode::WrongProfile
+    );
+    bridge
+        .disconnected(&profile, &Id::new("s").unwrap(), None)
+        .await;
+    assert_eq!(
+        bridge.authorize_browser_write(profile).await.unwrap_err(),
+        ErrorCode::ReadOnly
+    );
+    assert_no_bookmarks_bak(&root);
+    bridge.shutdown().await.unwrap();
+}
+
+fn snapshot_file(path: &std::path::Path) -> (Vec<u8>, std::time::SystemTime) {
+    let meta = std::fs::metadata(path).unwrap();
+    (std::fs::read(path).unwrap(), meta.modified().unwrap())
+}
+
+fn assert_no_bookmarks_bak(root: &std::path::Path) {
+    let mut pending = vec![root.to_path_buf()];
+    while let Some(directory) = pending.pop() {
+        for entry in std::fs::read_dir(&directory).unwrap() {
+            let entry = entry.unwrap();
+            assert_ne!(
+                entry.file_name(),
+                std::ffi::OsString::from("Bookmarks.bak"),
+                "{}",
+                entry.path().display()
+            );
+            if entry.file_type().unwrap().is_dir() {
+                pending.push(entry.path());
+            }
+        }
+    }
+}
