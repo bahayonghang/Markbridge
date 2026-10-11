@@ -32,6 +32,14 @@ main { width: 100%; max-width: 1440px; margin: 0 auto; }
 .library-url { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #5e6861; font-size: 12px; }
 .library-detail-title { margin: 0 0 8px; font-size: 16px; }
 .library-path { margin: 0 0 8px; padding-left: 18px; }
+.edit-desk { margin-top: 16px; }
+.edit-desk label { display: block; margin-bottom: 8px; }
+.edit-desk input { width: min(100%, 280px); }
+.edit-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+.edit-dialog { margin-top: 8px; padding: 12px; border: 1px solid #38684b; background: #f7f8f6; }
+.edit-dialog h4, .edit-history h4 { margin: 0 0 8px; font-size: 16px; }
+.edit-change { margin: 0 0 8px; overflow-wrap: anywhere; }
+.edit-history li { margin-bottom: 8px; }
 @media (max-width: 960px) {
   .library-panes { grid-template-columns: 1fr; }
   .virtual-rows { height: 240px; }

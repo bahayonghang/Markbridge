@@ -171,15 +171,47 @@ describe('stable read-only synchronization', () => {
     expect(socket.sent.at(-1)).toMatchObject({ type: 'tree_full', requestId: 'desktop-import-tree' });
     for (const method of ['create', 'update', 'move', 'remove', 'removeTree'] as const) expect(ctx.api.bookmarks[method]).not.toHaveBeenCalled();
   });
-  it('reconciles resync requests and rejects apply_operation without browser writes', async () => {
+  it('rejects apply_operation while reconciling and writes only after the snapshot is live', async () => {
     const ctx = setup({ 'markbridge-auth': auth }); const socket = await synchronize(ctx);
     socket.reply('resync_required', { reason: 'INVALID_TREE' }); await flush();
     expect(socket.sent.filter(message => message.type === 'tree_full')).toHaveLength(1);
     expect(ctx.bridge.getStatus().state).toBe('reconciling');
+    const create = { requestId: 'step-a', target: null, expectedBefore: null, expectedChildIds: null, payload: { kind: 'create' as const, parentId: '1', position: 0, title: 'Added', url: 'https://added.test/' } };
+    socket.receive({ ...socket.sent[0], type: 'apply_operation', payload: { expectedRevision: 0, operationId: 'op-a', sourceEpoch: 1, steps: [create] } });
+    await flush();
+    expect(ctx.bridge.getStatus().errorCode).toBe('READ_ONLY');
+    expect(socket.sent.filter(message => message.type === 'operation_receipt')).toEqual([
+      expect.objectContaining({ payload: expect.objectContaining({ requestId: 'step-a', state: 'failed', errorCode: 'READ_ONLY' }) }),
+    ]);
+    expect(ctx.api.bookmarks.create).not.toHaveBeenCalled();
+    expect(ctx.localData['markbridge-auth']).toEqual(auth);
     socket.receive({ ...socket.sent[0], type: 'get_tree', requestId: 'desktop-resync-tree', payload: {} }); await flush();
     expect(socket.sent.at(-1)).toMatchObject({ type: 'tree_full', requestId: 'desktop-resync-tree' });
-    socket.receive({ ...socket.sent[0], type: 'apply_operation', payload: { expectedRevision: 0, operationId: 'op-a', sourceEpoch: 1, steps: [{ requestId: 'step-a', payload: { kind: 'create', parentId: '1', position: 0, title: 'forbidden' } }] } });
-    await flush(); expect(ctx.bridge.getStatus().errorCode).toBe('READ_ONLY'); expect(ctx.api.bookmarks.create).not.toHaveBeenCalled();
+    socket.receive({ ...socket.sent[0], type: 'apply_operation', payload: { expectedRevision: 0, operationId: 'op-a', sourceEpoch: 2, steps: [create] } });
+    await flush();
+    expect(ctx.bridge.getStatus().errorCode).toBe('WRONG_PROFILE');
+    expect(ctx.api.bookmarks.create).not.toHaveBeenCalled();
+    ctx.api.bookmarks.create.mockImplementation(async (details: chrome.bookmarks.CreateDetails) => {
+      const writes = ctx.localData['markbridge-writes'] as { pending?: Array<{ phase?: string; kind?: string }> } | undefined;
+      expect(writes?.pending?.some((item) => item.kind === 'create' && item.phase === 'marker')).toBe(true);
+      return { id: '9', parentId: details.parentId, index: details.index, title: details.title, url: details.url, syncing: false };
+    });
+    socket.receive({ ...socket.sent[0], type: 'apply_operation', payload: { expectedRevision: 0, operationId: 'op-live', sourceEpoch: 1, steps: [{ ...create, requestId: 'step-live' }] } });
+    await flush();
+    expect(ctx.api.bookmarks.create).toHaveBeenCalledTimes(1);
+    expect(socket.sent.filter(message => message.type === 'operation_receipt' && message.payload.requestId === 'step-live')).toEqual([
+      expect.objectContaining({ type: 'operation_receipt', payload: expect.objectContaining({ operationId: 'op-live', requestId: 'step-live', state: 'applied', errorCode: null }) }),
+    ]);
+    expect(ctx.localData['markbridge-writes']).toMatchObject({ receipts: [expect.objectContaining({ requestId: 'step-live', state: 'applied' })] });
+    socket.receive({ ...socket.sent[0], type: 'apply_operation', payload: { expectedRevision: 0, operationId: 'op-live', sourceEpoch: 1, steps: [{ ...create, requestId: 'step-live' }] } });
+    await flush();
+    expect(ctx.api.bookmarks.create).toHaveBeenCalledTimes(1);
+    expect(socket.sent.filter(message => message.type === 'operation_receipt' && message.payload.requestId === 'step-live')).toHaveLength(2);
+    const writes = ctx.api.bookmarks.getTree.mock.calls.length;
+    socket.receive({ ...socket.sent[0], type: 'get_operation_status', requestId: 'status-1', payload: { operationId: 'op-live' } });
+    await flush();
+    expect(ctx.api.bookmarks.getTree).toHaveBeenCalledTimes(writes);
+    expect(socket.sent.at(-1)).toMatchObject({ type: 'operation_receipt', payload: { requestId: 'step-live', state: 'applied' } });
   });
   it('bounds conversion depth and count and preserves dynamic managed roots', () => {
     expect(flattenTree([{ id: 'managed', title: 'managed', syncing: false, folderType: 'managed', unmodifiable: 'managed', children: [] }])[0]).toMatchObject({ folderType: 'managed', unmodifiable: 'managed' });

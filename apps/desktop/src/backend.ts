@@ -1,11 +1,21 @@
 import { invoke, isTauri } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import {
-  parseBridgeState, parseChromeProfileList, parseLibraryCount, parseLibraryDetail, parseLibraryNodes,
-  parseLibraryPage, parseLibrarySearch, parseMirrorTree, parsePairingOffer, parseStartupState,
-  type BridgeState, type ChromeProfileList, type LibraryCount, type LibraryDetail, type LibraryNodes,
-  type LibraryPage, type LibrarySearch, type MirrorTree, type PairingOffer, type StartupState,
+  parseApplyResult, parseBridgeState, parseChromeProfileList, parseEditDocument, parseEditPreview,
+  parseLibraryCount, parseLibraryDetail, parseLibraryNodes, parseLibraryPage, parseLibrarySearch,
+  parseMirrorTree, parseOperationList, parsePairingOffer, parseStartupState,
+  type ApplyResult, type BridgeState, type ChromeProfileList, type EditDocument, type EditPreview,
+  type LibraryCount, type LibraryDetail, type LibraryNodes, type LibraryPage, type LibrarySearch,
+  type MirrorTree, type OperationList, type PairingOffer, type StartupState,
 } from '@markbridge/protocol';
+
+export type EditAction =
+  | { kind: 'create'; parentId: string; position: number; title: string; url?: string | null }
+  | { kind: 'update'; chromeId: string; title?: string | null; url?: string | null }
+  | { kind: 'move'; chromeId: string; parentId: string; position: number }
+  | { kind: 'reorder'; parentId: string; childIds: string[] }
+  | { kind: 'delete'; chromeId: string }
+  | { kind: 'undo'; operationId: string };
 
 export function hasNativeBridge(): boolean { return isTauri(); }
 
@@ -117,4 +127,39 @@ export async function readCacheCount(profileId: string, folderId: string | null)
 export async function openHttpUrl(url: string): Promise<void> {
   if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
   await invoke('open_http_url', { url });
+}
+
+export async function previewEdit(profileId: string, expectedRevision: number, action: EditAction): Promise<EditPreview> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseEditPreview(await invoke<unknown>('preview_edit', { profileId, expectedRevision, action }));
+}
+
+export async function applyEdit(profileId: string, expectedRevision: number, action: EditAction, secondConfirm: boolean): Promise<ApplyResult> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseApplyResult(await invoke<unknown>('apply_edit', { profileId, expectedRevision, action, secondConfirm }));
+}
+
+export async function listOperations(profileId: string): Promise<OperationList> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseOperationList(await invoke<unknown>('list_operations', { profileId }));
+}
+
+export async function reviewOperation(profileId: string, operationId: string): Promise<OperationList> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseOperationList(await invoke<unknown>('review_operation', { profileId, operationId }));
+}
+
+export async function refreshOperations(profileId: string): Promise<OperationList> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseOperationList(await invoke<unknown>('refresh_operations', { profileId }));
+}
+
+export async function exportHtml(profileId: string): Promise<EditDocument> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseEditDocument(await invoke<unknown>('export_html', { profileId }));
+}
+
+export async function exportSidecar(profileId: string): Promise<EditDocument> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseEditDocument(await invoke<unknown>('export_sidecar', { profileId }));
 }

@@ -7,6 +7,10 @@ import validateLibraryPage from './generated/library-page.validator.js';
 import validateLibrarySearch from './generated/library-search.validator.js';
 import validateLibraryDetail from './generated/library-detail.validator.js';
 import validateLibraryCount from './generated/library-count.validator.js';
+import validateEditPreview from './generated/edit-preview.validator.js';
+import validateApplyResult from './generated/apply-result.validator.js';
+import validateOperationList from './generated/operation-list.validator.js';
+import validateEditDocument from './generated/edit-document.validator.js';
 import type { BridgeState } from './generated/bridge-state';
 import type { PairingOffer } from './generated/pairing-offer';
 import type { MirrorTree } from './generated/mirror-tree';
@@ -16,6 +20,10 @@ import type { LibraryPage } from './generated/library-page';
 import type { LibrarySearch } from './generated/library-search';
 import type { LibraryDetail } from './generated/library-detail';
 import type { LibraryCount } from './generated/library-count';
+import type { EditPreview } from './generated/edit-preview';
+import type { ApplyResult } from './generated/apply-result';
+import type { OperationList } from './generated/operation-list';
+import type { EditDocument } from './generated/edit-document';
 
 export type { BridgeState } from './generated/bridge-state';
 export type { PairingOffer } from './generated/pairing-offer';
@@ -26,6 +34,10 @@ export type { LibraryPage } from './generated/library-page';
 export type { LibrarySearch } from './generated/library-search';
 export type { LibraryDetail } from './generated/library-detail';
 export type { LibraryCount } from './generated/library-count';
+export type { EditPreview } from './generated/edit-preview';
+export type { ApplyResult } from './generated/apply-result';
+export type { OperationList } from './generated/operation-list';
+export type { EditDocument } from './generated/edit-document';
 
 export function parseBridgeState(value: unknown): BridgeState {
   if (!validateBridge(value)) throw new Error('INVALID_BRIDGE_STATE');
@@ -69,5 +81,25 @@ export function parseLibraryDetail(value: unknown): LibraryDetail {
 
 export function parseLibraryCount(value: unknown): LibraryCount {
   if (!validateLibraryCount(value)) throw new Error('INVALID_LIBRARY_COUNT');
+  return value;
+}
+
+export function parseEditPreview(value: unknown): EditPreview {
+  if (!validateEditPreview(value)) throw new Error('INVALID_EDIT_PREVIEW');
+  return value;
+}
+
+export function parseApplyResult(value: unknown): ApplyResult {
+  if (!validateApplyResult(value)) throw new Error('INVALID_APPLY_RESULT');
+  return value;
+}
+
+export function parseOperationList(value: unknown): OperationList {
+  if (!validateOperationList(value)) throw new Error('INVALID_OPERATION_LIST');
+  return value;
+}
+
+export function parseEditDocument(value: unknown): EditDocument {
+  if (!validateEditDocument(value)) throw new Error('INVALID_EDIT_DOCUMENT');
   return value;
 }

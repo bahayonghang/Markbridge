@@ -955,6 +955,427 @@ async fn live_profile_cache_wins_over_a_changed_file_mirror() {
     bridge.shutdown().await.unwrap();
 }
 
+#[tokio::test]
+async fn edit_requires_a_live_session_and_keeps_chrome_unchanged_when_backup_or_send_fails() {
+    let (bridge, directory, _credentials) = fixture().await;
+    let (profile, secret) = paired(&bridge, "instance").await;
+    bridge
+        .authenticate(&origin(), &hello(&profile, "instance", "s", &secret))
+        .await
+        .unwrap();
+    let rename = EditAction::Update {
+        chrome_id: Id::new("42").unwrap(),
+        title: Some(Title::new("renamed").unwrap()),
+        url: None,
+    };
+    assert_eq!(
+        bridge
+            .apply_edit(profile.clone(), 0, rename.clone(), false)
+            .await
+            .unwrap_err(),
+        ErrorCode::ReadOnly
+    );
+    accept_tree(&bridge, &profile, "s", 0, nodes()).await;
+    let revision = bridge
+        .state()
+        .await
+        .profiles
+        .iter()
+        .find(|item| item.profile_id == profile)
+        .unwrap()
+        .revision
+        .get();
+    let (tx, mut rx) = mpsc::unbounded_channel();
+    bridge
+        .bind_outbound(&profile, &Id::new("s").unwrap(), tx)
+        .await;
+    let preview = bridge
+        .preview_edit(profile.clone(), revision, rename.clone())
+        .await
+        .unwrap();
+    assert!(preview.writable);
+    assert!(rx.try_recv().is_err());
+    let protected = bridge
+        .preview_edit(
+            profile.clone(),
+            revision,
+            EditAction::Delete {
+                chrome_id: Id::new("0").unwrap(),
+            },
+        )
+        .await
+        .unwrap();
+    assert!(!protected.writable);
+    assert_eq!(protected.error_code.0, Some(ErrorCode::ProtectedNode));
+    assert_eq!(
+        bridge
+            .apply_edit(
+                profile.clone(),
+                revision,
+                EditAction::Delete {
+                    chrome_id: Id::new("0").unwrap(),
+                },
+                false,
+            )
+            .await
+            .unwrap_err(),
+        ErrorCode::ProtectedNode
+    );
+    assert!(rx.try_recv().is_err());
+    {
+        let mut inner = bridge.inner.lock().await;
+        let blocker = directory.path().join("not-a-directory");
+        std::fs::write(&blocker, b"x").unwrap();
+        inner.backup_dir = blocker.join("backups");
+    }
+    assert_eq!(
+        bridge
+            .apply_edit(profile.clone(), revision, rename.clone(), false)
+            .await
+            .unwrap_err(),
+        ErrorCode::StorageError
+    );
+    assert!(rx.try_recv().is_err());
+    assert!(
+        bridge
+            .list_operations(profile.clone())
+            .await
+            .unwrap()
+            .operations
+            .is_empty()
+    );
+    {
+        let mut inner = bridge.inner.lock().await;
+        inner.backup_dir = directory.path().join("backups");
+    }
+    drop(rx);
+    assert_eq!(
+        bridge
+            .apply_edit(profile.clone(), revision, rename.clone(), false)
+            .await
+            .unwrap_err(),
+        ErrorCode::ReadOnly
+    );
+    let failed = bridge.list_operations(profile.clone()).await.unwrap();
+    assert_eq!(failed.operations.len(), 1);
+    assert_eq!(failed.operations[0].state, OperationState::Failed);
+    let (tx, mut rx) = mpsc::unbounded_channel();
+    bridge
+        .bind_outbound(&profile, &Id::new("s").unwrap(), tx)
+        .await;
+    let applied = bridge
+        .apply_edit(profile.clone(), revision, rename, false)
+        .await
+        .unwrap();
+    assert_eq!(applied.state, OperationState::Applying);
+    let WireMessage::ApplyOperation { payload, .. } = rx.try_recv().unwrap() else {
+        panic!("missing apply");
+    };
+    let html = std::fs::read_dir(directory.path().join("backups"))
+        .unwrap()
+        .count();
+    assert!(html >= 2);
+    let stem = payload.operation_id.as_str().replace(':', "-");
+    let html_body = std::fs::read_to_string(
+        directory
+            .path()
+            .join("backups")
+            .join(format!("{stem}.html")),
+    )
+    .unwrap();
+    let sidecar = std::fs::read_to_string(
+        directory
+            .path()
+            .join("backups")
+            .join(format!("{stem}.json")),
+    )
+    .unwrap();
+    assert!(html_body.contains("<!DOCTYPE NETSCAPE-Bookmark-file-1>"));
+    assert!(html_body.contains("<DL><p>"));
+    assert!(sidecar.contains("\"schemaVersion\":1"));
+    assert!(!sidecar.contains("<DL>"));
+    assert_eq!(
+        bridge
+            .apply_edit(
+                profile.clone(),
+                revision,
+                EditAction::Update {
+                    chrome_id: Id::new("42").unwrap(),
+                    title: Some(Title::new("again").unwrap()),
+                    url: None,
+                },
+                false,
+            )
+            .await
+            .unwrap_err(),
+        ErrorCode::Conflict
+    );
+    assert!(rx.try_recv().is_err());
+    bridge.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn undo_conflict_does_not_send_a_browser_write() {
+    let (bridge, _directory, _credentials) = fixture().await;
+    let (profile, secret) = paired(&bridge, "instance").await;
+    bridge
+        .authenticate(&origin(), &hello(&profile, "instance", "s", &secret))
+        .await
+        .unwrap();
+    accept_tree(&bridge, &profile, "s", 0, nodes()).await;
+    let revision = bridge
+        .state()
+        .await
+        .profiles
+        .iter()
+        .find(|item| item.profile_id == profile)
+        .unwrap()
+        .revision
+        .get();
+    let (tx, mut rx) = mpsc::unbounded_channel();
+    bridge
+        .bind_outbound(&profile, &Id::new("s").unwrap(), tx)
+        .await;
+    let rename = EditAction::Update {
+        chrome_id: Id::new("42").unwrap(),
+        title: Some(Title::new("renamed").unwrap()),
+        url: None,
+    };
+    bridge
+        .apply_edit(profile.clone(), revision, rename, false)
+        .await
+        .unwrap();
+    let WireMessage::ApplyOperation { payload, .. } = rx.try_recv().unwrap() else {
+        panic!("missing apply");
+    };
+    let before = payload.steps[0].expected_before.clone().unwrap();
+    let mut after = before.clone();
+    after.title = Title::new("renamed").unwrap();
+    let session = Id::new("s").unwrap();
+    let receipt = envelope(
+        "operation_receipt",
+        &profile,
+        &session,
+        Some(payload.steps[0].request_id.clone()),
+        serde_json::json!({
+            "operationId": payload.operation_id,
+            "requestId": payload.steps[0].request_id,
+            "state": "applied",
+            "before": before,
+            "after": after,
+            "beforeChildIds": null,
+            "afterChildIds": null,
+            "errorCode": null
+        }),
+    )
+    .unwrap();
+    assert!(!bridge.receive(receipt).await.unwrap());
+    for (seq, title) in [(1_u64, "renamed"), (2, "external")] {
+        let event: WireMessage = serde_json::from_value(serde_json::json!({
+            "type": "event",
+            "protocolVersion": 1,
+            "profileId": profile,
+            "sessionId": session,
+            "requestId": null,
+            "seq": seq,
+            "payload": { "sourceEpoch": 1, "event": { "kind": "changed", "chromeId": "42", "title": title, "url": "https://example.com/" } }
+        }))
+        .unwrap();
+        assert!(!bridge.receive(event).await.unwrap());
+    }
+    let revision = bridge
+        .state()
+        .await
+        .profiles
+        .iter()
+        .find(|item| item.profile_id == profile)
+        .unwrap()
+        .revision
+        .get();
+    let undone = bridge
+        .apply_edit(
+            profile.clone(),
+            revision,
+            EditAction::Undo {
+                operation_id: payload.operation_id.clone(),
+            },
+            false,
+        )
+        .await
+        .unwrap();
+    assert_eq!(undone.state, OperationState::RollbackConflict);
+    assert_eq!(undone.error_code.0, Some(ErrorCode::Conflict));
+    assert!(rx.try_recv().is_err());
+    let current = cached_tree(&bridge, &profile).await;
+    assert_eq!(
+        current
+            .iter()
+            .find(|node| node.chrome_id.as_str() == "42")
+            .unwrap()
+            .title
+            .as_str(),
+        "external"
+    );
+    bridge.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn websocket_operation_receipt_stays_applied_and_connected() {
+    let (bridge, _dir, _) = fixture().await;
+    let (profile, secret) = paired(&bridge, "instance").await;
+    let port = bridge.state().await.port.0.unwrap();
+    let url = format!("ws://127.0.0.1:{port}/");
+    let mut request = url.as_str().into_client_request().unwrap();
+    request
+        .headers_mut()
+        .insert("Origin", origin().as_str().parse().unwrap());
+    let (mut ws, _) = connect_async(request).await.unwrap();
+    let hello_message = hello(&profile, "instance", "socket-1", &secret);
+    ws.send(Message::Text(
+        String::from_utf8(encode_frame(&hello_message).unwrap())
+            .unwrap()
+            .into(),
+    ))
+    .await
+    .unwrap();
+    let session = Id::new("socket-1").unwrap();
+    let mut tree_request = None;
+    let deadline = tokio::time::Instant::now() + Duration::from_secs(3);
+    while tree_request.is_none() && tokio::time::Instant::now() < deadline {
+        if let WireMessage::GetTree { request_id, .. } = next_frame(&mut ws).await {
+            tree_request = request_id.0;
+        }
+    }
+    let full = envelope(
+        "tree_full",
+        &profile,
+        &session,
+        Some(tree_request.expect("get_tree")),
+        serde_json::to_value(TreeSnapshot {
+            source_epoch: SourceEpoch::new(1).unwrap(),
+            revision: Counter::new(0).unwrap(),
+            barrier_seq: Counter::new(0).unwrap(),
+            nodes: nodes(),
+        })
+        .unwrap(),
+    )
+    .unwrap();
+    ws.send(Message::Text(
+        String::from_utf8(encode_frame(&full).unwrap())
+            .unwrap()
+            .into(),
+    ))
+    .await
+    .unwrap();
+    let revision = tokio::time::timeout(Duration::from_secs(2), async {
+        loop {
+            if let Some(item) = bridge.state().await.profiles.into_iter().find(|item| {
+                item.profile_id == profile && item.connection == BridgeConnection::Live
+            }) {
+                return item.revision.get();
+            }
+            tokio::time::sleep(Duration::from_millis(20)).await;
+        }
+    })
+    .await
+    .expect("live");
+    let operation = bridge
+        .apply_edit(
+            profile.clone(),
+            revision,
+            EditAction::Update {
+                chrome_id: Id::new("42").unwrap(),
+                title: Some(Title::new("renamed").unwrap()),
+                url: None,
+            },
+            false,
+        )
+        .await
+        .unwrap();
+    let mut steps = None;
+    let deadline = tokio::time::Instant::now() + Duration::from_secs(3);
+    while steps.is_none() && tokio::time::Instant::now() < deadline {
+        if let WireMessage::ApplyOperation { payload, .. } = next_frame(&mut ws).await {
+            steps = Some(payload.steps);
+        }
+    }
+    let steps = steps.expect("apply");
+    let before = steps[0].expected_before.clone().unwrap();
+    let mut after = before.clone();
+    after.title = Title::new("renamed").unwrap();
+    let receipt = envelope(
+        "operation_receipt",
+        &profile,
+        &session,
+        Some(steps[0].request_id.clone()),
+        serde_json::json!({
+            "operationId": operation.operation_id,
+            "requestId": steps[0].request_id,
+            "state": "applied",
+            "before": before,
+            "after": after,
+            "beforeChildIds": null,
+            "afterChildIds": null,
+            "errorCode": null
+        }),
+    )
+    .unwrap();
+    ws.send(Message::Text(
+        String::from_utf8(encode_frame(&receipt).unwrap())
+            .unwrap()
+            .into(),
+    ))
+    .await
+    .unwrap();
+    let state = tokio::time::timeout(Duration::from_secs(2), async {
+        loop {
+            let list = bridge.list_operations(profile.clone()).await.unwrap();
+            if let Some(item) = list
+                .operations
+                .into_iter()
+                .find(|item| item.operation_id == operation.operation_id)
+                && item.state != OperationState::Applying
+            {
+                return item.state;
+            }
+            tokio::time::sleep(Duration::from_millis(20)).await;
+        }
+    })
+    .await
+    .expect("receipt");
+    assert_eq!(state, OperationState::Applied);
+    let ping = envelope(
+        "ping",
+        &profile,
+        &session,
+        Some(Id::new("ping-1").unwrap()),
+        serde_json::json!({}),
+    )
+    .unwrap();
+    ws.send(Message::Text(
+        String::from_utf8(encode_frame(&ping).unwrap())
+            .unwrap()
+            .into(),
+    ))
+    .await
+    .unwrap();
+    let pong = tokio::time::timeout(Duration::from_secs(2), next_frame(&mut ws))
+        .await
+        .expect("session closed");
+    assert!(matches!(pong, WireMessage::Pong { .. }));
+    bridge.shutdown().await.unwrap();
+}
+
+async fn next_frame(
+    ws: &mut (
+             impl StreamExt<Item = std::result::Result<Message, tokio_tungstenite::tungstenite::Error>>
+             + Unpin
+         ),
+) -> WireMessage {
+    let message = ws.next().await.expect("socket closed").unwrap();
+    parse_frame(message.into_text().unwrap().as_bytes()).unwrap()
+}
+
 fn snapshot_file(path: &std::path::Path) -> (Vec<u8>, std::time::SystemTime) {
     let meta = std::fs::metadata(path).unwrap();
     (std::fs::read(path).unwrap(), meta.modified().unwrap())

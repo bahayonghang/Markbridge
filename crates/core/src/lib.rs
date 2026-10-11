@@ -22,5 +22,6 @@ mod tests {
 }
 
 pub mod bridge;
+pub mod editing;
 pub mod mirror;
 pub mod storage;

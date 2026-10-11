@@ -52,6 +52,7 @@ function install(extra?: (command: string, args: Args) => unknown) {
     }
     if (command === 'cache_search') return args.query === 'Alpha' ? { items: [alpha] } : { items: [] };
     if (command === 'open_http_url') return null;
+    if (command === 'list_operations' || command === 'refresh_operations' || command === 'review_operation') return { operations: [] };
     if (command === 'get_mirror_tree') return { mirrorSourceId: 'mirror-a', displayName: 'Personal', fileStatus: 'stale', association: 'independent', revision: 2, lastSyncedAt: null, errorCode: 'INVALID_TREE', canWriteBrowser: false, nodes: [root, { ...firstDup, parentId: '0' }, { ...secondDup, parentId: '0' }] };
     return {};
   });
@@ -321,3 +322,53 @@ it('keeps a ten thousand bookmark mirror consistent across tree, list, and detai
   expect(vi.mocked(invoke).mock.calls.some(([command]) => command === 'cache_tree')).toBe(false);
   expect(invoke).toHaveBeenCalledWith('get_mirror_tree', { mirrorSourceId: 'mirror-b10k' });
 }, 20_000);
+
+function editPreview(second = false) {
+  return {
+    profileId: 'profile-a', expectedRevision: 4, affected: second ? 21 : 1, requiresSecondConfirm: second,
+    writable: true, errorCode: null, changes: [{ field: 'title', before: '根', after: '根 2' }],
+  };
+}
+
+it('requires confirmation before a browser write and a second confirmation for a large delete', async () => {
+  install((command, args) => {
+    const action = args.action as { kind?: string } | undefined;
+    if (command === 'preview_edit') return editPreview(action?.kind === 'delete');
+    if (command === 'apply_edit') return { operationId: 'op-1', state: 'applying', errorCode: null, conflicts: [] };
+    if (command === 'export_html') return { kind: 'html', body: '<!DOCTYPE NETSCAPE-Bookmark-file-1>\n<H3>栏</H3>' };
+    if (command === 'export_sidecar') return { kind: 'sidecar', body: '{"schemaVersion":1,"entries":[]}' };
+    return undefined;
+  });
+  render(<LibraryWorkspace state={state([profile('profile-a', '资料 A')])} invalid={false} native focusMirrorId={null} />);
+  const title = await screen.findByLabelText('新标题');
+  fireEvent.change(title, { target: { value: '根 2' } });
+  expect(vi.mocked(invoke).mock.calls.some(([command]) => command === 'preview_edit' || command === 'apply_edit')).toBe(false);
+  fireEvent.click(screen.getByRole('button', { name: '预览修改' }));
+  expect(await screen.findByRole('dialog', { name: '确认变更' })).toBeVisible();
+  expect(screen.getByText(/根 2/)).toBeVisible();
+  fireEvent.click(screen.getByRole('button', { name: '确认变更' }));
+  await waitFor(() => expect(invoke).toHaveBeenCalledWith('apply_edit', expect.objectContaining({ profileId: 'profile-a', secondConfirm: false, action: expect.objectContaining({ kind: 'update', title: '根 2' }) })));
+  expect(screen.getByText(/等待回执/)).toBeVisible();
+  fireEvent.click(screen.getByRole('button', { name: '预览删除' }));
+  expect(await screen.findByRole('button', { name: '继续确认' })).toBeVisible();
+  fireEvent.click(screen.getByRole('button', { name: '继续确认' }));
+  expect(vi.mocked(invoke).mock.calls.filter(([command]) => command === 'apply_edit')).toHaveLength(1);
+  fireEvent.click(screen.getByRole('button', { name: '确认删除' }));
+  await waitFor(() => expect(invoke).toHaveBeenCalledWith('apply_edit', expect.objectContaining({ secondConfirm: true, action: expect.objectContaining({ kind: 'delete' }) })));
+  fireEvent.click(screen.getByRole('button', { name: '导出 HTML' }));
+  fireEvent.click(screen.getByRole('button', { name: '导出侧车 JSON' }));
+  await waitFor(() => expect(invoke).toHaveBeenCalledWith('export_sidecar', { profileId: 'profile-a' }));
+  expect(invoke).toHaveBeenCalledWith('export_html', { profileId: 'profile-a' });
+  expect(vi.mocked(invoke).mock.calls.filter(([command]) => command === 'apply_edit')).toHaveLength(2);
+});
+
+it('does not offer browser edits for a read-only file mirror', async () => {
+  const mirror = {
+    mirrorSourceId: 'mirror-a', displayName: 'Personal', association: 'independent' as const, pairedProfileId: null,
+    fileStatus: 'stale' as const, watching: true, nodeCount: 1, revision: 2, lastSyncedAt: null, errorCode: null, canWriteBrowser: false as const,
+  };
+  render(<LibraryWorkspace state={state([], [mirror])} invalid={false} native focusMirrorId={null} />);
+  expect(await screen.findByText('中文书签')).toBeVisible();
+  expect(screen.queryByRole('button', { name: '预览修改' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: /写入|应用/ })).not.toBeInTheDocument();
+});

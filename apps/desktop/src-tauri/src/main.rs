@@ -2,8 +2,9 @@
 
 use markbridge_core::bridge::{Bridge, CacheTreeNode, credentials::OsCredentialStore};
 use markbridge_protocol::{
-    BookmarkNode, BridgeState, ChromeProfileList, Counter, ErrorCode, Id, LibraryCount,
-    LibraryDetail, LibraryNodes, LibraryPage, LibrarySearch, MirrorTree, PairingOffer,
+    ApplyResult, BookmarkNode, BridgeState, ChromeProfileList, Counter, EditAction, EditDocument,
+    EditPreview, ErrorCode, Id, LibraryCount, LibraryDetail, LibraryNodes, LibraryPage,
+    LibrarySearch, MirrorTree, OperationList, PairingOffer,
 };
 use std::sync::Arc;
 use tauri::{Emitter, Manager};
@@ -279,6 +280,86 @@ async fn cache_count(
 }
 
 #[tauri::command]
+async fn preview_edit(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    profile_id: Id,
+    expected_revision: u64,
+    action: EditAction,
+) -> Result<EditPreview, ErrorCode> {
+    trusted(&window)?;
+    bridge
+        .preview_edit(profile_id, expected_revision, action)
+        .await
+}
+
+#[tauri::command]
+async fn apply_edit(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    profile_id: Id,
+    expected_revision: u64,
+    action: EditAction,
+    second_confirm: bool,
+) -> Result<ApplyResult, ErrorCode> {
+    trusted(&window)?;
+    bridge
+        .apply_edit(profile_id, expected_revision, action, second_confirm)
+        .await
+}
+
+#[tauri::command]
+async fn list_operations(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    profile_id: Id,
+) -> Result<OperationList, ErrorCode> {
+    trusted(&window)?;
+    bridge.list_operations(profile_id).await
+}
+
+#[tauri::command]
+async fn review_operation(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    profile_id: Id,
+    operation_id: Id,
+) -> Result<OperationList, ErrorCode> {
+    trusted(&window)?;
+    bridge.review_operation(profile_id, operation_id).await
+}
+
+#[tauri::command]
+async fn refresh_operations(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    profile_id: Id,
+) -> Result<OperationList, ErrorCode> {
+    trusted(&window)?;
+    bridge.refresh_operations(profile_id).await
+}
+
+#[tauri::command]
+async fn export_html(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    profile_id: Id,
+) -> Result<EditDocument, ErrorCode> {
+    trusted(&window)?;
+    bridge.export_html(profile_id).await
+}
+
+#[tauri::command]
+async fn export_sidecar(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    profile_id: Id,
+) -> Result<EditDocument, ErrorCode> {
+    trusted(&window)?;
+    bridge.export_sidecar(profile_id).await
+}
+
+#[tauri::command]
 fn open_http_url(window: tauri::WebviewWindow, url: String) -> Result<(), ErrorCode> {
     trusted(&window)?;
     open_http(&url)
@@ -295,7 +376,8 @@ fn get_startup_state(
 }
 
 /// Daily pairing stays `Markbridge.Pairing`. An acceptance process may set
-/// `MARKBRIDGE_CREDENTIAL_NAMESPACE` to `Markbridge.Task05.` plus a disposable id.
+/// `MARKBRIDGE_CREDENTIAL_NAMESPACE` to `Markbridge.Task05.` or
+/// `Markbridge.Task06.` plus a disposable id.
 fn credential_namespace() -> Result<String, Box<dyn std::error::Error>> {
     match std::env::var("MARKBRIDGE_CREDENTIAL_NAMESPACE") {
         Err(std::env::VarError::NotPresent) => Ok("Markbridge.Pairing".to_owned()),
@@ -303,6 +385,7 @@ fn credential_namespace() -> Result<String, Box<dyn std::error::Error>> {
         Ok(value) => {
             let suffix = value
                 .strip_prefix("Markbridge.Task05.")
+                .or_else(|| value.strip_prefix("Markbridge.Task06."))
                 .filter(|suffix| !suffix.is_empty())
                 .ok_or("invalid acceptance credential namespace")?;
             if suffix.len() > 80
@@ -372,6 +455,13 @@ fn main() {
             cache_search,
             cache_get,
             cache_count,
+            preview_edit,
+            apply_edit,
+            list_operations,
+            review_operation,
+            refresh_operations,
+            export_html,
+            export_sidecar,
             open_http_url
         ])
         .build(tauri::generate_context!());
@@ -415,6 +505,13 @@ mod tests {
             )
         };
         assert_eq!(credential_namespace().unwrap(), "Markbridge.Task05.abc-123");
+        unsafe {
+            std::env::set_var(
+                "MARKBRIDGE_CREDENTIAL_NAMESPACE",
+                "Markbridge.Task06.abc-123",
+            )
+        };
+        assert_eq!(credential_namespace().unwrap(), "Markbridge.Task06.abc-123");
         unsafe { std::env::set_var("MARKBRIDGE_CREDENTIAL_NAMESPACE", "Markbridge.Task03.abc") };
         assert!(credential_namespace().is_err());
         match previous {

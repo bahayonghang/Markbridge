@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OperationList",
+  "type": "object",
+  "properties": {
+    "operations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/OperationSummary"
+      },
+      "maxItems": 200
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "operations"
+  ],
+  "$defs": {
+    "Counter": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 9007199254740991,
+      "minimum": 0
+    },
+    "EditField": {
+      "type": "string",
+      "enum": [
+        "title",
+        "url",
+        "parent",
+        "position",
+        "order",
+        "existence"
+      ]
+    },
+    "ErrorCode": {
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "INVALID_MESSAGE",
+            "UNSUPPORTED_VERSION",
+            "FRAME_TOO_LARGE",
+            "LIMIT_EXCEEDED",
+            "INVALID_TREE",
+            "UNPAIRED",
+            "READ_ONLY",
+            "WRONG_PROFILE",
+            "STALE_PROPOSAL",
+            "PROTECTED_NODE",
+            "UNCERTAIN_WRITE",
+            "FETCH_DENIED",
+            "INVALID_AI_OUTPUT",
+            "STORAGE_ERROR",
+            "STORAGE_NEWER_SCHEMA",
+            "MIGRATION_FAILED",
+            "CONFLICT",
+            "CANCELLED"
+          ]
+        },
+        {
+          "description": "The selected Chrome directory is missing, unreadable, or not a User Data directory.",
+          "type": "string",
+          "const": "PATH_UNAVAILABLE"
+        }
+      ]
+    },
+    "Id": {
+      "type": "string",
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*(?![\\s\\S])"
+    },
+    "OperationConflict": {
+      "type": "object",
+      "properties": {
+        "chromeId": {
+          "$ref": "#/$defs/RequiredNullable2"
+        },
+        "field": {
+          "$ref": "#/$defs/EditField"
+        },
+        "requestId": {
+          "$ref": "#/$defs/Id"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "requestId",
+        "chromeId",
+        "field"
+      ]
+    },
+    "OperationState": {
+      "type": "string",
+      "enum": [
+        "planned",
+        "applying",
+        "applied",
+        "uncertain",
+        "partial",
+        "failed",
+        "rolling_back",
+        "rolled_back",
+        "rollback_conflict"
+      ]
+    },
+    "OperationSummary": {
+      "type": "object",
+      "properties": {
+        "affected": {
+          "$ref": "#/$defs/Counter"
+        },
+        "conflicts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/OperationConflict"
+          },
+          "maxItems": 50
+        },
+        "errorCode": {
+          "$ref": "#/$defs/RequiredNullable"
+        },
+        "operationId": {
+          "$ref": "#/$defs/Id"
+        },
+        "state": {
+          "$ref": "#/$defs/OperationState"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "operationId",
+        "state",
+        "affected",
+        "errorCode",
+        "conflicts"
+      ]
+    },
+    "RequiredNullable": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ErrorCode"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "RequiredNullable2": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Id"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

@@ -9,6 +9,12 @@ use std::{
 };
 use tokio::sync::{mpsc, oneshot};
 
+mod operations;
+pub(crate) use operations::{
+    AfterBody, BeforeBody, IdMapBody, OperationRecord, OrderBody, RestoreBody, SidecarRow,
+    StepRecord,
+};
+
 const MIGRATIONS: &[&str] = &[
     include_str!("migrations/001_identity.sql"),
     include_str!("migrations/002_history.sql"),
@@ -122,7 +128,7 @@ impl Storage {
             migration_backup,
         })
     }
-    async fn call<T: Send + 'static>(
+    pub(super) async fn call<T: Send + 'static>(
         &self,
         job: impl FnOnce(&mut Connection) -> Result<T> + Send + 'static,
     ) -> Result<T> {

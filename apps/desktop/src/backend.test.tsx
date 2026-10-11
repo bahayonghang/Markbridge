@@ -1,7 +1,7 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import { invoke, isTauri } from '@tauri-apps/api/core';
 import { listen, type Event } from '@tauri-apps/api/event';
-import { beginPairing, enumerateChromeUserData, getBridgeState, getMirrorTree, openHttpUrl, readCacheCount, readCacheList, readCacheNode, readCacheSearch, readCacheTree, startBridge, subscribeBridgeState } from './backend';
+import { applyEdit, beginPairing, enumerateChromeUserData, exportHtml, getBridgeState, getMirrorTree, openHttpUrl, previewEdit, readCacheCount, readCacheList, readCacheNode, readCacheSearch, readCacheTree, startBridge, subscribeBridgeState } from './backend';
 
 vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn(), isTauri: vi.fn() }));
 vi.mock('@tauri-apps/api/event', () => ({ listen: vi.fn() }));
@@ -21,6 +21,9 @@ it('browser preview never invokes or subscribes to native endpoints', async () =
   await expect(readCacheNode('profile-a', '10')).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
   await expect(readCacheCount('profile-a', null)).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
   await expect(openHttpUrl('https://example.com/a')).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
+  await expect(previewEdit('profile-a', 1, { kind: 'delete', chromeId: '10' })).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
+  await expect(applyEdit('profile-a', 1, { kind: 'delete', chromeId: '10' }, false)).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
+  await expect(exportHtml('profile-a')).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
   expect(invoke).not.toHaveBeenCalled();
   expect(listen).not.toHaveBeenCalled();
 });
@@ -41,6 +44,9 @@ it('rejects a cache page that is not the list contract', async () => {
   await expect(readCacheTree('profile-a', null, 1)).rejects.toThrow('INVALID_LIBRARY_NODES');
   expect(invoke).toHaveBeenCalledWith('cache_list', { profileId: 'profile-a', folderId: '1', offset: 0, limit: 10 });
   expect(invoke).toHaveBeenCalledWith('cache_tree', { profileId: 'profile-a', folderId: null, depth: 1 });
+  vi.mocked(invoke).mockResolvedValue({ profileId: 'profile-a', writable: true });
+  await expect(previewEdit('profile-a', 4, { kind: 'update', chromeId: '10', title: 'Alpha 2' })).rejects.toThrow('INVALID_EDIT_PREVIEW');
+  expect(invoke).toHaveBeenCalledWith('preview_edit', { profileId: 'profile-a', expectedRevision: 4, action: { kind: 'update', chromeId: '10', title: 'Alpha 2' } });
 });
 
 it('validates event payloads and retains a safe invalid-data path', async () => {

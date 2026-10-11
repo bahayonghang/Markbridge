@@ -1,5 +1,6 @@
-//! Authenticated, read-only loopback bridge. No browser mutation API exists here.
+//! Authenticated loopback bridge. Browser mutations are sent to the extension; this process does not call Chrome.
 pub mod credentials;
+mod edit;
 mod file_mirror;
 mod sync;
 mod transport;
@@ -15,7 +16,7 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 use subtle::ConstantTimeEq;
-use tokio::sync::{Mutex, watch};
+use tokio::sync::{Mutex, mpsc, watch};
 
 type Result<T> = std::result::Result<T, ErrorCode>;
 
@@ -41,6 +42,9 @@ struct ActiveProfile {
     nodes: Vec<BookmarkNode>,
     seq: u64,
     awaiting_tree: Option<Id>,
+    outbound: Option<mpsc::UnboundedSender<WireMessage>>,
+    busy: bool,
+    writes_blocked: bool,
 }
 struct Listener {
     stop: watch::Sender<bool>,
@@ -68,6 +72,7 @@ struct Inner {
     revision: u64,
     port: Option<u16>,
     error: Option<ErrorCode>,
+    backup_dir: std::path::PathBuf,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -96,7 +101,14 @@ impl Bridge {
         path: impl AsRef<Path>,
         credentials: Arc<dyn CredentialStore>,
     ) -> Result<Self> {
+        let path = path.as_ref();
+        let backup_dir = path
+            .parent()
+            .unwrap_or_else(|| Path::new("."))
+            .join("backups");
         let storage = Storage::open(path).await?;
+        storage.freeze_inflight().await?;
+        let blocked = storage.blocked_profiles().await?;
         let mut profiles = BTreeMap::new();
         for stored in storage.profiles().await? {
             let profile = stored.profile;
@@ -108,6 +120,7 @@ impl Bridge {
                 .map(|row| row.node)
                 .collect();
             let cursor = storage.cursor(profile.id.clone()).await?;
+            let writes_blocked = blocked.iter().any(|item| item == &profile.id);
             let view = BridgeProfile {
                 profile_id: profile.id.clone(),
                 instance_id: profile.instance_id.clone(),
@@ -135,6 +148,9 @@ impl Bridge {
                     nodes,
                     seq: 0,
                     awaiting_tree: None,
+                    outbound: None,
+                    busy: false,
+                    writes_blocked,
                 },
             );
         }
@@ -148,6 +164,7 @@ impl Bridge {
             revision: 0,
             port: None,
             error: None,
+            backup_dir,
         };
         let (state_tx, _) = watch::channel(inner.view());
         let bridge = Self {
@@ -482,6 +499,9 @@ impl Bridge {
                 nodes: vec![],
                 seq: 0,
                 awaiting_tree: None,
+                outbound: None,
+                busy: false,
+                writes_blocked: false,
             },
         );
         inner.pending.remove(profile_id.as_str());
@@ -562,6 +582,13 @@ impl Bridge {
     async fn receive(&self, message: WireMessage) -> Result<bool> {
         let (profile_id, session_id) = message.identity();
         let mut inner = self.inner.lock().await;
+        if let WireMessage::OperationReceipt { payload, .. } = &message {
+            inner.authenticated(profile_id, session_id)?;
+            let receipt = payload.as_ref().clone();
+            edit::accept_receipt(&mut inner, profile_id, &receipt).await?;
+            self.publish(&mut inner);
+            return Ok(false);
+        }
         let profile = inner.authenticated(profile_id, session_id)?;
         let (mut snapshot, needs_resync) = match &message {
             WireMessage::TreeFull {
@@ -630,30 +657,59 @@ impl Bridge {
                 .replace_tree(id.clone(), session, snapshot.clone())
                 .await?;
         }
-        let profile = inner
-            .profiles
-            .get_mut(id.as_str())
-            .ok_or(ErrorCode::WrongProfile)?;
-        profile.nodes = snapshot.nodes;
-        profile.seq = snapshot.barrier_seq.get();
-        profile.view.node_count = Counter::new(profile.nodes.len() as u64)?;
-        profile.view.revision = snapshot.revision;
-        profile.view.last_synced_at.0 = Some(Counter::new(now()?)?);
-        profile.view.connection = BridgeConnection::Live;
-        profile.view.error_code.0 = None;
-        profile.awaiting_tree = None;
+        let became_live = {
+            let profile = inner
+                .profiles
+                .get_mut(id.as_str())
+                .ok_or(ErrorCode::WrongProfile)?;
+            let became_live = profile.view.connection != BridgeConnection::Live;
+            profile.nodes = snapshot.nodes;
+            profile.seq = snapshot.barrier_seq.get();
+            profile.view.node_count = Counter::new(profile.nodes.len() as u64)?;
+            profile.view.revision = snapshot.revision;
+            profile.view.last_synced_at.0 = Some(Counter::new(now()?)?);
+            profile.view.connection = BridgeConnection::Live;
+            profile.view.error_code.0 = None;
+            profile.awaiting_tree = None;
+            became_live
+        };
+        if let Ok(storage) = inner.storage() {
+            let _ = storage
+                .copy_mapped_metadata(id.clone(), snapshot.source_epoch, now()?)
+                .await;
+        }
+        if became_live {
+            edit::queue_status(&mut inner, &id).await;
+        }
         self.publish(&mut inner);
         Ok(false)
     }
     async fn disconnected(&self, profile_id: &Id, session_id: &Id, error: Option<ErrorCode>) {
         let mut inner = self.inner.lock().await;
-        if let Some(profile) = inner.profiles.get_mut(profile_id.as_str())
-            && profile.session.as_ref() == Some(session_id)
-        {
+        let matched = inner
+            .profiles
+            .get(profile_id.as_str())
+            .is_some_and(|profile| profile.session.as_ref() == Some(session_id));
+        if !matched {
+            return;
+        }
+        if let Some(profile) = inner.profiles.get_mut(profile_id.as_str()) {
             profile.disconnect();
             profile.view.error_code.0 = error;
-            self.publish(&mut inner);
         }
+        let frozen = match inner.storage() {
+            Ok(storage) => storage
+                .freeze_profile(profile_id.clone())
+                .await
+                .unwrap_or(0),
+            Err(_) => 0,
+        };
+        if frozen > 0
+            && let Some(profile) = inner.profiles.get_mut(profile_id.as_str())
+        {
+            profile.writes_blocked = true;
+        }
+        self.publish(&mut inner);
     }
 }
 impl ActiveProfile {
@@ -663,6 +719,8 @@ impl ActiveProfile {
         }
         self.session = None;
         self.awaiting_tree = None;
+        self.outbound = None;
+        self.busy = false;
         self.view.connection = if self.revoked {
             BridgeConnection::Unpaired
         } else {

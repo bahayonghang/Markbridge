@@ -18,7 +18,7 @@
 
 ## 检查命令
 
-以下为实施后的计划命令；当前产品代码尚不存在，全部 NOT_RUN。01 负责提供这些统一入口；命令变更需同步所有引用。
+以下为该子任务验收时执行的命令；该子任务尚未运行这些检查，状态为 NOT_RUN。基础入口由 01 提供；命令变更需同步父计划和受影响任务。
 
 ```text
 pnpm protocol:check
@@ -26,6 +26,7 @@ pnpm test
 cargo test --workspace --locked
 pnpm test:e2e
 pnpm --filter @markbridge/desktop tauri dev
+pnpm build:native
 ```
 
 为 AC06-* 添加行为测试，不写仅复述实现的测试。涉及安全/写入/恢复时保留故障注入与反例。完整检查和原生步骤按父级 V07、V08 执行。

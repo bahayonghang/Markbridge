@@ -32,7 +32,7 @@ export const generatedDir = new URL('../packages/protocol/src/generated/', impor
 
 export async function generateProtocol() {
   const outputs = new Map();
-  for (const [name, title, argument] of [['startup-state', 'StartupState', 'startup'], ['wire-message', 'WireMessage', 'wire'], ['bridge-state', 'BridgeState', 'bridge'], ['pairing-offer', 'PairingOffer', 'pairing'], ['mirror-tree', 'MirrorTree', 'mirror-tree'], ['chrome-profiles', 'ChromeProfileList', 'chrome-profiles'], ['library-nodes', 'LibraryNodes', 'library-nodes'], ['library-page', 'LibraryPage', 'library-page'], ['library-search', 'LibrarySearch', 'library-search'], ['library-detail', 'LibraryDetail', 'library-detail'], ['library-count', 'LibraryCount', 'library-count']]) {
+  for (const [name, title, argument] of [['startup-state', 'StartupState', 'startup'], ['wire-message', 'WireMessage', 'wire'], ['bridge-state', 'BridgeState', 'bridge'], ['pairing-offer', 'PairingOffer', 'pairing'], ['mirror-tree', 'MirrorTree', 'mirror-tree'], ['chrome-profiles', 'ChromeProfileList', 'chrome-profiles'], ['library-nodes', 'LibraryNodes', 'library-nodes'], ['library-page', 'LibraryPage', 'library-page'], ['library-search', 'LibrarySearch', 'library-search'], ['library-detail', 'LibraryDetail', 'library-detail'], ['library-count', 'LibraryCount', 'library-count'], ['edit-preview', 'EditPreview', 'edit-preview'], ['apply-result', 'ApplyResult', 'apply-result'], ['operation-list', 'OperationList', 'operation-list'], ['edit-document', 'EditDocument', 'edit-document']]) {
     const result = spawnSync('cargo', ['run', '--quiet', '--locked', '-p', 'markbridge-protocol', '--bin', 'export-schema', '--', argument], {
       cwd: root, encoding: 'utf8', maxBuffer: 4 * 1024 * 1024,
     });

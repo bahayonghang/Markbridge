@@ -2,7 +2,9 @@ import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import type { BookmarkNode, BridgeState, LibraryDetail } from '@markbridge/protocol';
 import {
   getMirrorTree, openHttpUrl, readCacheCount, readCacheList, readCacheNode, readCacheSearch, readCacheTree,
+  type EditAction,
 } from '../../backend';
+import { EditDesk } from './EditDesk';
 import { VirtualRows } from './VirtualRows';
 import {
   LIST_LIMIT, SEARCH_DEBOUNCE_MS, SEARCH_LIMIT, ancestorTitles, countSnapshot, directChildren, displayTitle,
@@ -45,7 +47,7 @@ function accessNote(source: Source): string {
     return '只读文件来源。此来源不能写入浏览器。';
   }
   switch (source.profile.connection) {
-    case 'live': return '资料正在实时同步。此页不写入 Chrome。';
+    case 'live': return '资料正在实时同步。写入 Chrome 前需要确认。';
     case 'connecting': return '正在连接扩展。当前只读。';
     case 'reconciling': return '正在核对书签。当前只读。';
     case 'cached_read_only': return '扩展未连接。显示本机缓存，当前只读。';
@@ -113,6 +115,8 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId }: {
   const [gap, setGap] = useState(false);
   const [openFailed, setOpenFailed] = useState(false);
   const [syncedNodes, setSyncedNodes] = useState<BookmarkNode[] | null>(null);
+  const [editRequest, setEditRequest] = useState<{ id: number; action: EditAction } | null>(null);
+  const editSeq = useRef(0);
   const expandedRef = useRef(expanded);
   const seenRevision = useRef<number | null>(null);
   const treeGen = useRef(0);
@@ -144,6 +148,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId }: {
     setGap(false);
     setOpenFailed(false);
     setSyncedNodes(null);
+    setEditRequest(null);
     seenRevision.current = null;
     setSeenCommitted('');
     treeGen.current += 1;
@@ -339,6 +344,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId }: {
   const visibleNodes = !searching ? folderNodes : profile ? profileHits.slice(0, SEARCH_LIMIT) : searchHits.slice(0, SEARCH_LIMIT);
   const visible = visibleNodes.map(toListRow);
   const selectedId = bookmarkId ?? folderId;
+  const selectedNode = profile && detail && detail.node.chromeId === selectedId ? detail.node : null;
   const mirrorNode = !profile && selectedId ? mirrorIndex.nodes.get(selectedId) ?? null : null;
   const detailView = profile && detail && detail.node.chromeId === selectedId
     ? { title: detail.node.title, url: detail.node.url ?? null, kind: detail.node.kind, chromeId: detail.node.chromeId, ancestors: detail.ancestors }
@@ -414,6 +420,20 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId }: {
   function onListKey(event: KeyboardEvent<HTMLDivElement>) {
     const ids = visible.map((row) => row.chromeId);
     const currentId = chromeFromTarget(event, `library-row-${sourceKey}:`) ?? bookmarkId;
+    if (event.altKey && (event.key === 'ArrowDown' || event.key === 'ArrowUp') && profile?.connection === 'live') {
+      event.preventDefault();
+      const current = currentId ? activeIndex.nodes.get(currentId) : null;
+      const parentId = current?.parentId;
+      if (!current || !parentId) return;
+      const childIds = [...(activeIndex.children.get(parentId) ?? [])];
+      const index = childIds.indexOf(current.chromeId);
+      const next = index + (event.key === 'ArrowDown' ? 1 : -1);
+      if (index < 0 || next < 0 || next >= childIds.length) return;
+      const [item] = childIds.splice(index, 1);
+      childIds.splice(next, 0, item!);
+      setEditRequest({ id: editSeq.current += 1, action: { kind: 'reorder', parentId, childIds } });
+      return;
+    }
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault();
       const next = neighbor(ids, currentId, event.key === 'ArrowDown' ? 1 : -1);
@@ -437,6 +457,29 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId }: {
         if (current.url && isHttpUrl(current.url)) void open(current.url);
       }
     }
+  }
+
+  function dropBookmark(targetId: string, sourceId: string) {
+    if (profile?.connection !== 'live' || sourceId === targetId) return;
+    const source = activeIndex.nodes.get(sourceId);
+    const target = activeIndex.nodes.get(targetId);
+    if (!source || !target) return;
+    if (target.kind === 'folder' && source.parentId !== target.chromeId) {
+      const position = activeIndex.children.get(target.chromeId)?.length ?? 0;
+      setEditRequest({ id: editSeq.current += 1, action: { kind: 'move', chromeId: sourceId, parentId: target.chromeId, position } });
+      return;
+    }
+    const parentId = target.parentId;
+    if (!parentId || !source.parentId) return;
+    if (source.parentId === parentId) {
+      const childIds = [...(activeIndex.children.get(parentId) ?? [])].filter((id) => id !== sourceId);
+      const index = childIds.indexOf(targetId);
+      if (index < 0) return;
+      childIds.splice(index, 0, sourceId);
+      setEditRequest({ id: editSeq.current += 1, action: { kind: 'reorder', parentId, childIds } });
+      return;
+    }
+    setEditRequest({ id: editSeq.current += 1, action: { kind: 'move', chromeId: sourceId, parentId, position: target.position } });
   }
 
   async function open(url: string) {
@@ -496,6 +539,8 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId }: {
               onActive={(key) => chooseFolder(key.slice('folder:'.length))}
               onKeyDown={onTreeKey}
               rowProps={(row: FolderRow) => row.expandable ? { 'aria-expanded': row.expanded } : {}}
+              dragId={profile?.connection === 'live' ? (row) => row.chromeId : undefined}
+              onDropRow={profile?.connection === 'live' ? (row, sourceId) => dropBookmark(row.chromeId, sourceId) : undefined}
               render={(row) => <span className="library-label"><span className="library-kind">{row.expanded ? '收起' : row.expandable ? '展开' : '文件夹'}</span><span className="library-title" style={{ paddingLeft: row.depth * 16 }}>{row.title}</span></span>}
             />
           )}
@@ -527,6 +572,8 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId }: {
                 } else setBookmarkId(chromeId);
               }}
               onKeyDown={onListKey}
+              dragId={profile?.connection === 'live' ? (row) => row.chromeId : undefined}
+              onDropRow={profile?.connection === 'live' ? (row, sourceId) => dropBookmark(row.chromeId, sourceId) : undefined}
               render={(row: ListRow) => <span className="library-label"><span className="library-kind">{row.kind === 'folder' ? '文件夹' : '书签'}</span><span className="library-title">{row.title}</span>{row.url && <span className="library-url">{row.url}</span>}</span>}
             />
           )}
@@ -545,6 +592,16 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId }: {
             <button type="button" disabled={!native || !isHttpUrl(detailView.url)} onClick={() => { if (detailView.url) void open(detailView.url); }}>在浏览器中打开</button>
             {!isHttpUrl(detailView.url) && <p className="secondary">仅打开 http 或 https 链接。</p>}
           </>}
+          {profile?.connection === 'live' && <EditDesk
+            profileId={profile.profileId}
+            revision={profile.revision}
+            node={selectedNode}
+            siblingIds={selectedNode?.parentId ? [...(activeIndex.children.get(selectedNode.parentId) ?? [])] : []}
+            folderId={folderId}
+            insertParentId={selectedNode ? (selectedNode.kind === 'folder' ? selectedNode.chromeId : selectedNode.parentId ?? null) : null}
+            insertPosition={(selectedNode?.kind === 'folder' ? activeIndex.children.get(selectedNode.chromeId)?.length : selectedNode?.parentId ? activeIndex.children.get(selectedNode.parentId)?.length : 0) ?? 0}
+            request={editRequest}
+          />}
         </div>
       </div>}
     </section>

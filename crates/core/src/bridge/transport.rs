@@ -6,7 +6,7 @@ use std::{
 };
 use tokio::{
     net::{TcpListener, TcpStream},
-    sync::Semaphore,
+    sync::{Semaphore, mpsc},
     task::JoinSet,
     time::{Instant, interval, timeout, timeout_at},
 };
@@ -194,6 +194,9 @@ async fn authenticated_loop(
     closed: &mut watch::Receiver<bool>,
     stopped: &mut watch::Receiver<bool>,
 ) -> Result<()> {
+    let (outbound_tx, mut outbound_rx) = mpsc::unbounded_channel();
+    bridge.bind_outbound(profile, session, outbound_tx).await;
+    let mut outbound_open = true;
     request_sync(bridge, ws, profile, session).await?;
     let mut heartbeat = interval(Duration::from_secs(20));
     heartbeat.tick().await;
@@ -212,6 +215,12 @@ async fn authenticated_loop(
                 send(ws, envelope("ping", profile, session, Some(random_id("ping")?), serde_json::json!({}))?).await?;
             },
             _ = reconcile.tick() => { request_sync(bridge, ws, profile, session).await?; },
+            outgoing = outbound_rx.recv(), if outbound_open => {
+                match outgoing {
+                    Some(message) => send(ws, message).await?,
+                    None => outbound_open = false,
+                }
+            },
             incoming = read_message(ws) => {
                 let message = incoming?;
                 last_received = Instant::now();
@@ -228,6 +237,8 @@ async fn authenticated_loop(
                         if bridge.receive(message).await? { request_sync(bridge, ws, profile, session).await?; }
                     },
                     WireMessage::ResyncRequired { .. } => { request_sync(bridge, ws, profile, session).await?; },
+                    // An operation receipt is the extension's acknowledgement. Treating it as a command closes the session and freezes the write.
+                    WireMessage::OperationReceipt { .. } => { bridge.receive(message).await?; },
                     _ => return Err(ErrorCode::ReadOnly),
                 }
             }

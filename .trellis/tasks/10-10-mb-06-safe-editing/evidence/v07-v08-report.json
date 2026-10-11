@@ -1,0 +1,110 @@
+{
+  "runId": "1f4ba946-621b-47a1-b214-821a791037ce",
+  "startedAt": "2026-10-11T17:18:32.518Z",
+  "scope": "disposable Chromium + edit harness, no daily profile",
+  "credentialNamespace": "Markbridge.Task06.1f4ba946-621b-47a1-b214-821a791037ce",
+  "controls": [
+    {
+      "control": "pairing_namespace_rejected",
+      "status": "PASS",
+      "exitCode": 1,
+      "pairingTargetsUnchanged": true
+    },
+    {
+      "control": "paired_tree",
+      "status": "PASS",
+      "nodes": 6,
+      "hash": "8309c12da20fc686",
+      "chrome": "Chrome/157.0.8099.0",
+      "managedPresent": true
+    },
+    {
+      "control": "crud_create",
+      "status": "PASS",
+      "nodes": 7
+    },
+    {
+      "control": "crud_update",
+      "status": "PASS"
+    },
+    {
+      "control": "same_parent_reorder",
+      "status": "PASS",
+      "children": 2
+    },
+    {
+      "control": "cross_parent_move",
+      "status": "PASS"
+    },
+    {
+      "control": "protected_root_folder_type",
+      "status": "PASS",
+      "managedChecked": false
+    },
+    {
+      "control": "protected_managed",
+      "status": "PASS",
+      "managedPresent": true,
+      "descendantChecked": true
+    },
+    {
+      "control": "external_edit_conflict",
+      "status": "PASS"
+    },
+    {
+      "control": "delete_recovery",
+      "status": "PASS",
+      "newId": true,
+      "order": true,
+      "metadata": true
+    },
+    {
+      "control": "backup_files",
+      "status": "PASS",
+      "escapedAmp": true,
+      "escapedLt": true,
+      "hierarchy": true,
+      "html": true,
+      "sidecar": true
+    },
+    {
+      "control": "concurrent_rollback",
+      "status": "PASS",
+      "serialCode": "BACKEND_CONFLICT"
+    },
+    {
+      "control": "crash_after_apply",
+      "status": "PASS",
+      "state": "applied",
+      "copies": 1
+    },
+    {
+      "control": "lost_ack",
+      "status": "PASS",
+      "state": "applied",
+      "copies": 1
+    },
+    {
+      "control": "final_tree",
+      "status": "PASS",
+      "count": 11,
+      "hash": "da12dc8db94c4e51"
+    }
+  ],
+  "browserProduct": "Chromium",
+  "chromeVersion": "157.0.8099.0",
+  "dataDirectory": "temp",
+  "exitCode": 0,
+  "cleanup": {
+    "mbPolicyAbsent": true,
+    "chromiumPolicyAbsent": true,
+    "googleChromePolicyAbsent": true,
+    "hklmUnchanged": true,
+    "dailyBookmarksUnchanged": true
+  },
+  "status": "PASS",
+  "credentialTargets": {
+    "pairing": 0,
+    "task06": 0
+  }
+}

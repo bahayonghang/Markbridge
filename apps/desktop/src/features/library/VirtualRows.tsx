@@ -12,10 +12,12 @@ type VirtualRowsProps<T> = {
   onActive: (key: string) => void;
   onKeyDown: (event: KeyboardEvent<HTMLDivElement>) => void;
   rowProps?: (row: T) => { 'aria-expanded'?: boolean };
+  dragId?: (row: T) => string;
+  onDropRow?: (row: T, sourceId: string) => void;
   render: (row: T, active: boolean) => ReactNode;
 };
 
-export function VirtualRows<T>({ rows, rowKey, label, role, itemRole, activeKey, onActive, onKeyDown, rowProps, render }: VirtualRowsProps<T>) {
+export function VirtualRows<T>({ rows, rowKey, label, role, itemRole, activeKey, onActive, onKeyDown, rowProps, dragId, onDropRow, render }: VirtualRowsProps<T>) {
   const scroller = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState(320);
   const [scrollTop, setScrollTop] = useState(0);
@@ -77,6 +79,15 @@ export function VirtualRows<T>({ rows, rowKey, label, role, itemRole, activeKey,
               tabIndex={active ? 0 : -1}
               className={active ? 'library-row is-active' : 'library-row'}
               style={{ top: index * ROW_HEIGHT, height: ROW_HEIGHT }}
+              draggable={dragId != null}
+              onDragStart={(event) => { if (dragId) event.dataTransfer.setData('text/plain', dragId(row)); }}
+              onDragOver={(event) => { if (onDropRow) event.preventDefault(); }}
+              onDrop={(event) => {
+                if (!onDropRow) return;
+                event.preventDefault();
+                const sourceId = event.dataTransfer.getData('text/plain');
+                if (sourceId) onDropRow(row, sourceId);
+              }}
               onClick={() => onActive(key)}
               onFocus={() => { if (!active) onActive(key); }}
             >

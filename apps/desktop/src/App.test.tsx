@@ -17,6 +17,13 @@ vi.mock('./backend', () => ({
   readCacheNode: vi.fn(async () => { throw new Error('missing'); }),
   readCacheCount: vi.fn(async () => ({ folders: 0, bookmarks: 0 })),
   openHttpUrl: vi.fn(async () => undefined),
+  listOperations: vi.fn(async () => ({ operations: [] })),
+  refreshOperations: vi.fn(async () => ({ operations: [] })),
+  reviewOperation: vi.fn(async () => ({ operations: [] })),
+  previewEdit: vi.fn(),
+  applyEdit: vi.fn(),
+  exportHtml: vi.fn(async () => ({ kind: 'html', body: '' })),
+  exportSidecar: vi.fn(async () => ({ kind: 'sidecar', body: '{}' })),
 }));
 const initial: BridgeState = { protocolVersion: 1, revision: 1, port: null, errorCode: null, profiles: [], pending: [], mirrors: [] };
 const profile: BridgeState['profiles'][number] = {

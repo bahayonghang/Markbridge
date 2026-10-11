@@ -2,7 +2,7 @@
 
 ## 当前与边界
 
-当前仓库没有产品代码。以下是目标设计，路径为拟新增或修改位置，不代表已经存在。
+该子任务尚未实施。以下为目标设计，路径表示该任务的修改范围；01 已创建的基础源码以当前工作树为准。
 
 crates/core operations/snapshots、apps/desktop/src-tauri commands/export、apps/extension command executor、编辑/历史 UI
 
@@ -23,3 +23,13 @@ crates/core operations/snapshots、apps/desktop/src-tauri commands/export、apps
 ## 故障与回退
 
 先停止未完成队列并导出历史，按匹配 after-state 的条件撤销已执行部分。代码回退保留数据库和所有未决回执；不强制恢复整库。
+
+## 实施约定
+
+一次删除计入的节点数大于 20 时，`apply_edit` 在 `secondConfirm` 为 false 时返回 `CANCELLED`。这次调用不写备份，也不发送 `apply_operation`。阈值 20 记在本任务。
+
+备份在发送之前写入。HTML 与侧车 JSON 分文件保存。文件名只保留字母、数字、连字符和下划线。备份路径留在 SQLite，不进入前端 DTO。
+
+进程启动或连接断开时，`applying` 和 `rolling_back` 记为 `uncertain`。扩展对已有 create 或 delete 标记、以及 effect 阶段但没有回执的步骤，返回 `uncertain`，不再调用 `chrome.bookmarks`。已保存的回执可以重放。丢失 ack 保持未决，发送成功不表示 Chrome 已应用。
+
+日常凭据名仍是 `Markbridge.Pairing`。验收进程只接受 `Markbridge.Task05.{id}` 或 `Markbridge.Task06.{id}`。把变量设成 `Markbridge.Pairing` 必须失败。编辑单元测试使用内存凭据存储。

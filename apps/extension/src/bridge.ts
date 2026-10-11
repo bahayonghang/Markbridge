@@ -1,7 +1,8 @@
 import {
   encodeWireFrame, parseWireFrame, parseWireMessage, MAX_DEPTH, MAX_NODES,
-  type BookmarkEvent, type BookmarkNode, type ErrorCode, type WireMessage,
+  type BookmarkEvent, type BookmarkNode, type ErrorCode, type Receipt, type WireMessage,
 } from '@markbridge/protocol';
+import { parseStore, runSteps, statusReceipts, WRITE_KEY, type BookmarkPort } from './executor';
 
 export const RECOVERY_ALARM = 'markbridge-recovery';
 const AUTH_KEY = 'markbridge-auth';
@@ -233,7 +234,8 @@ export class ExtensionBridge {
       case 'resync_required': this.reconciliationRequested = true; this.snapshotSent = false; this.setStatus('reconciling'); return;
       case 'ping': this.send({ ...this.envelope('pong', message.requestId), payload: {} }); return;
       case 'pong': return;
-      // Child 03 never executes browser mutation commands.
+      case 'apply_operation': await this.applyWrites(message); return;
+      case 'get_operation_status': await this.reportStatus(message); return;
       default: await this.reject('READ_ONLY');
     }
   }
@@ -291,6 +293,45 @@ export class ExtensionBridge {
     const seconds = [1, 2, 4, 8, 16, 30][Math.min(this.retry++, 5)];
     const delay = seconds * 1000 * (0.8 + Math.random() * 0.4);
     this.retryTimer = setTimeout(() => this.connect(), this.pending ? Math.max(0, Math.min(delay, this.pending.expiresAt - Date.now())) : delay);
+  }
+  private canWrite(): boolean {
+    return this.authenticated && this.snapshotSent && !this.importing && this.status.state === 'connected' && this.socket?.readyState === 1;
+  }
+  private sendReceipt(receipt: Receipt): void {
+    try { this.send({ ...this.envelope('operation_receipt', receipt.requestId), payload: receipt }); }
+    catch { /* A lost ack stays unresolved until the desktop queries status. */ }
+  }
+  private async loadWrites() {
+    const stored = await this.api.storage.local.get(WRITE_KEY);
+    return parseStore(stored[WRITE_KEY]);
+  }
+  private failSteps(message: Extract<WireMessage, { type: 'apply_operation' }>, state: 'failed' | 'uncertain', errorCode: ErrorCode): void {
+    this.setStatus(this.status.state, errorCode);
+    for (const step of message.payload.steps) {
+      this.sendReceipt({ operationId: message.payload.operationId, requestId: step.requestId, state, before: null, after: null, beforeChildIds: null, afterChildIds: null, errorCode });
+    }
+  }
+  private async applyWrites(message: Extract<WireMessage, { type: 'apply_operation' }>): Promise<void> {
+    if (!this.canWrite()) { this.failSteps(message, 'failed', 'READ_ONLY'); return; }
+    if (message.payload.sourceEpoch !== this.epoch) { this.failSteps(message, 'failed', 'WRONG_PROFILE'); return; }
+    const store = await this.loadWrites();
+    if (!store) { this.failSteps(message, 'uncertain', 'UNCERTAIN_WRITE'); return; }
+    await runSteps({
+      port: this.api.bookmarks as unknown as BookmarkPort,
+      store,
+      operationId: message.payload.operationId,
+      steps: [...message.payload.steps],
+      save: async () => { await this.api.storage.local.set({ [WRITE_KEY]: store }); },
+      send: (receipt) => this.sendReceipt(receipt),
+    });
+    await this.api.storage.local.set({ [WRITE_KEY]: store });
+  }
+  private async reportStatus(message: Extract<WireMessage, { type: 'get_operation_status' }>): Promise<void> {
+    if (!this.canWrite()) { this.setStatus(this.status.state, 'READ_ONLY'); return; }
+    const store = await this.loadWrites();
+    if (!store) { this.setStatus(this.status.state, 'UNCERTAIN_WRITE'); return; }
+    const requestId = message.requestId ?? message.payload.operationId;
+    for (const receipt of statusReceipts(store, message.payload.operationId, requestId)) this.sendReceipt(receipt);
   }
   private async reject(errorCode: ErrorCode): Promise<void> {
     this.disconnect(); this.stopped = true; this.auth = null; this.pending = null;

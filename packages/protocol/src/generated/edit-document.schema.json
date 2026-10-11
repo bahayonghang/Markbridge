@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EditDocument",
+  "type": "object",
+  "properties": {
+    "body": {
+      "type": "string",
+      "maxLength": 8000000
+    },
+    "kind": {
+      "$ref": "#/$defs/EditDocumentKind"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "kind",
+    "body"
+  ],
+  "$defs": {
+    "EditDocumentKind": {
+      "type": "string",
+      "enum": [
+        "html",
+        "sidecar"
+      ]
+    }
+  }
+}

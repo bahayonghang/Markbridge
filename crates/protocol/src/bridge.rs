@@ -1,5 +1,8 @@
 //! Trusted desktop IPC. Credentials are present only in an explicit pairing offer.
-use crate::{BookmarkNode, Counter, DisplayName, ErrorCode, Id, RequiredNullable, Title, Version};
+use crate::{
+    BookmarkNode, Counter, DisplayName, ErrorCode, Id, OperationState, Position, RequiredNullable,
+    Title, Url, Version,
+};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
@@ -168,6 +171,127 @@ pub struct LibraryDetail {
 pub struct LibraryCount {
     pub folders: Counter,
     pub bookmarks: Counter,
+}
+
+/// A draft is not write authorization. `apply_edit` is the confirmed command.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(
+    tag = "kind",
+    rename_all = "snake_case",
+    rename_all_fields = "camelCase",
+    deny_unknown_fields
+)]
+pub enum EditAction {
+    Create {
+        parent_id: Id,
+        position: Position,
+        title: Title,
+        url: Option<Url>,
+    },
+    Update {
+        chrome_id: Id,
+        title: Option<Title>,
+        url: Option<Url>,
+    },
+    Move {
+        chrome_id: Id,
+        parent_id: Id,
+        position: Position,
+    },
+    Reorder {
+        parent_id: Id,
+        #[schemars(length(max = 100000))]
+        child_ids: Vec<Id>,
+    },
+    Delete {
+        chrome_id: Id,
+    },
+    Undo {
+        operation_id: Id,
+    },
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum EditField {
+    Title,
+    Url,
+    Parent,
+    Position,
+    Order,
+    Existence,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct EditFieldChange {
+    pub field: EditField,
+    pub before: RequiredNullable<String>,
+    pub after: RequiredNullable<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct EditPreview {
+    pub profile_id: Id,
+    pub expected_revision: Counter,
+    pub affected: Counter,
+    pub requires_second_confirm: bool,
+    pub writable: bool,
+    pub error_code: RequiredNullable<ErrorCode>,
+    #[schemars(length(max = 50))]
+    pub changes: Vec<EditFieldChange>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct OperationConflict {
+    pub request_id: Id,
+    pub chrome_id: RequiredNullable<Id>,
+    pub field: EditField,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ApplyResult {
+    pub operation_id: Id,
+    pub state: OperationState,
+    pub error_code: RequiredNullable<ErrorCode>,
+    #[schemars(length(max = 50))]
+    pub conflicts: Vec<OperationConflict>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct OperationSummary {
+    pub operation_id: Id,
+    pub state: OperationState,
+    pub affected: Counter,
+    pub error_code: RequiredNullable<ErrorCode>,
+    #[schemars(length(max = 50))]
+    pub conflicts: Vec<OperationConflict>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct OperationList {
+    #[schemars(length(max = 200))]
+    pub operations: Vec<OperationSummary>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum EditDocumentKind {
+    Html,
+    Sidecar,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct EditDocument {
+    pub kind: EditDocumentKind,
+    #[schemars(length(max = 8000000))]
+    pub body: String,
 }
 
 #[derive(Clone, Serialize, Deserialize, JsonSchema)]
