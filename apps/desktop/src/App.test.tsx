@@ -11,6 +11,12 @@ vi.mock('./backend', () => ({
   confirmPairing: vi.fn(), cancelPairing: vi.fn(), revokePairing: vi.fn(), reconnectProfile: vi.fn(),
   enumerateChromeUserData: vi.fn(), attachFileMirror: vi.fn(), rescanFileMirrors: vi.fn(),
   detachFileMirror: vi.fn(), associateFileMirror: vi.fn(), getMirrorTree: vi.fn(),
+  readCacheTree: vi.fn(async () => ({ nodes: [] })),
+  readCacheList: vi.fn(async () => ({ items: [], total: 0 })),
+  readCacheSearch: vi.fn(async () => ({ items: [] })),
+  readCacheNode: vi.fn(async () => { throw new Error('missing'); }),
+  readCacheCount: vi.fn(async () => ({ folders: 0, bookmarks: 0 })),
+  openHttpUrl: vi.fn(async () => undefined),
 }));
 const initial: BridgeState = { protocolVersion: 1, revision: 1, port: null, errorCode: null, profiles: [], pending: [], mirrors: [] };
 const profile: BridgeState['profiles'][number] = {
@@ -53,8 +59,8 @@ it('browses a stale file mirror without offering a browser write', async () => {
   expect(screen.getByText('浏览器写入已禁用。在线资料优先于已关联的文件来源。')).toBeVisible();
   expect(screen.queryByRole('button', { name: /写入|应用/ })).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: '浏览缓存' }));
-  expect(await screen.findByText('示例')).toBeVisible();
-  expect(screen.getByText('https://example.com/a')).toBeVisible();
+  expect((await screen.findAllByText('示例')).length).toBeGreaterThan(0);
+  expect(screen.getAllByText('https://example.com/a').length).toBeGreaterThan(0);
   expect(backend.getMirrorTree).toHaveBeenCalledExactlyOnceWith('mirror-a');
 });
 

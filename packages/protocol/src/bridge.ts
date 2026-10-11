@@ -2,15 +2,30 @@ import validateBridge from './generated/bridge-state.validator.js';
 import validatePairing from './generated/pairing-offer.validator.js';
 import validateMirrorTree from './generated/mirror-tree.validator.js';
 import validateChromeProfiles from './generated/chrome-profiles.validator.js';
+import validateLibraryNodes from './generated/library-nodes.validator.js';
+import validateLibraryPage from './generated/library-page.validator.js';
+import validateLibrarySearch from './generated/library-search.validator.js';
+import validateLibraryDetail from './generated/library-detail.validator.js';
+import validateLibraryCount from './generated/library-count.validator.js';
 import type { BridgeState } from './generated/bridge-state';
 import type { PairingOffer } from './generated/pairing-offer';
 import type { MirrorTree } from './generated/mirror-tree';
 import type { ChromeProfileList } from './generated/chrome-profiles';
+import type { LibraryNodes } from './generated/library-nodes';
+import type { LibraryPage } from './generated/library-page';
+import type { LibrarySearch } from './generated/library-search';
+import type { LibraryDetail } from './generated/library-detail';
+import type { LibraryCount } from './generated/library-count';
 
 export type { BridgeState } from './generated/bridge-state';
 export type { PairingOffer } from './generated/pairing-offer';
 export type { MirrorTree } from './generated/mirror-tree';
 export type { ChromeProfileList, ChromeProfileChoice } from './generated/chrome-profiles';
+export type { LibraryNodes } from './generated/library-nodes';
+export type { LibraryPage } from './generated/library-page';
+export type { LibrarySearch } from './generated/library-search';
+export type { LibraryDetail } from './generated/library-detail';
+export type { LibraryCount } from './generated/library-count';
 
 export function parseBridgeState(value: unknown): BridgeState {
   if (!validateBridge(value)) throw new Error('INVALID_BRIDGE_STATE');
@@ -29,5 +44,30 @@ export function parseMirrorTree(value: unknown): MirrorTree {
 
 export function parseChromeProfileList(value: unknown): ChromeProfileList {
   if (!validateChromeProfiles(value)) throw new Error('INVALID_CHROME_PROFILES');
+  return value;
+}
+
+export function parseLibraryNodes(value: unknown): LibraryNodes {
+  if (!validateLibraryNodes(value)) throw new Error('INVALID_LIBRARY_NODES');
+  return value;
+}
+
+export function parseLibraryPage(value: unknown): LibraryPage {
+  if (!validateLibraryPage(value)) throw new Error('INVALID_LIBRARY_PAGE');
+  return value;
+}
+
+export function parseLibrarySearch(value: unknown): LibrarySearch {
+  if (!validateLibrarySearch(value)) throw new Error('INVALID_LIBRARY_SEARCH');
+  return value;
+}
+
+export function parseLibraryDetail(value: unknown): LibraryDetail {
+  if (!validateLibraryDetail(value)) throw new Error('INVALID_LIBRARY_DETAIL');
+  return value;
+}
+
+export function parseLibraryCount(value: unknown): LibraryCount {
+  if (!validateLibraryCount(value)) throw new Error('INVALID_LIBRARY_COUNT');
   return value;
 }

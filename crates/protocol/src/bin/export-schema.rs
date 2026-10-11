@@ -5,6 +5,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Some("pairing") => schemars::schema_for!(markbridge_protocol::PairingOffer),
         Some("mirror-tree") => schemars::schema_for!(markbridge_protocol::MirrorTree),
         Some("chrome-profiles") => schemars::schema_for!(markbridge_protocol::ChromeProfileList),
+        Some("library-nodes") => schemars::schema_for!(markbridge_protocol::LibraryNodes),
+        Some("library-page") => schemars::schema_for!(markbridge_protocol::LibraryPage),
+        Some("library-search") => schemars::schema_for!(markbridge_protocol::LibrarySearch),
+        Some("library-detail") => schemars::schema_for!(markbridge_protocol::LibraryDetail),
+        Some("library-count") => schemars::schema_for!(markbridge_protocol::LibraryCount),
         _ => schemars::schema_for!(markbridge_protocol::StartupState),
     };
     println!("{}", serde_json::to_string_pretty(&schema)?);

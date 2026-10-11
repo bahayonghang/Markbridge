@@ -1,8 +1,10 @@
 import { invoke, isTauri } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import {
-  parseBridgeState, parseChromeProfileList, parseMirrorTree, parsePairingOffer, parseStartupState,
-  type BridgeState, type ChromeProfileList, type MirrorTree, type PairingOffer, type StartupState,
+  parseBridgeState, parseChromeProfileList, parseLibraryCount, parseLibraryDetail, parseLibraryNodes,
+  parseLibraryPage, parseLibrarySearch, parseMirrorTree, parsePairingOffer, parseStartupState,
+  type BridgeState, type ChromeProfileList, type LibraryCount, type LibraryDetail, type LibraryNodes,
+  type LibraryPage, type LibrarySearch, type MirrorTree, type PairingOffer, type StartupState,
 } from '@markbridge/protocol';
 
 export function hasNativeBridge(): boolean { return isTauri(); }
@@ -85,4 +87,34 @@ export function associateFileMirror(mirrorSourceId: string, profileId: string): 
 export async function getMirrorTree(mirrorSourceId: string): Promise<MirrorTree> {
   if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
   return parseMirrorTree(await invoke<unknown>('get_mirror_tree', { mirrorSourceId }));
+}
+
+export async function readCacheTree(profileId: string, folderId: string | null, depth: number): Promise<LibraryNodes> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseLibraryNodes(await invoke<unknown>('cache_tree', { profileId, folderId, depth }));
+}
+
+export async function readCacheList(profileId: string, folderId: string, offset: number, limit: number): Promise<LibraryPage> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseLibraryPage(await invoke<unknown>('cache_list', { profileId, folderId, offset, limit }));
+}
+
+export async function readCacheSearch(profileId: string, query: string, folderId: string | null, limit: number): Promise<LibrarySearch> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseLibrarySearch(await invoke<unknown>('cache_search', { profileId, query, folderId, limit }));
+}
+
+export async function readCacheNode(profileId: string, chromeId: string): Promise<LibraryDetail> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseLibraryDetail(await invoke<unknown>('cache_get', { profileId, chromeId }));
+}
+
+export async function readCacheCount(profileId: string, folderId: string | null): Promise<LibraryCount> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseLibraryCount(await invoke<unknown>('cache_count', { profileId, folderId }));
+}
+
+export async function openHttpUrl(url: string): Promise<void> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  await invoke('open_http_url', { url });
 }

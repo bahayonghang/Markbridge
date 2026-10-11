@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import type { BridgeState, ChromeProfileList, MirrorTree, PairingOffer } from '@markbridge/protocol';
+import type { BridgeState, ChromeProfileList, PairingOffer } from '@markbridge/protocol';
 import {
   associateFileMirror, attachFileMirror, beginPairing, cancelPairing, confirmPairing,
-  detachFileMirror, enumerateChromeUserData, getMirrorTree, hasNativeBridge,
+  detachFileMirror, enumerateChromeUserData, hasNativeBridge,
   reconnectProfile, rescanFileMirrors, revokePairing, startBridge,
 } from './backend';
+import { LibraryWorkspace } from './features/library/LibraryWorkspace';
 import { useBridge } from './useBridge';
 
 const connectionLabels: Record<BridgeState['profiles'][number]['connection'], string> = {
@@ -26,22 +27,6 @@ function mirrorProblem(code: string | null): string | null {
   return '文件来源暂不可用。已保留上次有效缓存。';
 }
 
-function treeRows(nodes: MirrorTree['nodes']) {
-  const parents = new Map(nodes.map((node) => [node.chromeId, node.parentId]));
-  const depthOf = (id: string) => {
-    let depth = 0;
-    let current = parents.get(id) ?? null;
-    const seen = new Set<string>();
-    while (current) {
-      if (!seen.add(current) || depth > 32) break;
-      depth += 1;
-      current = parents.get(current) ?? null;
-    }
-    return depth;
-  };
-  return nodes.map((node) => ({ ...node, depth: depthOf(node.chromeId) }));
-}
-
 function safeError(code: string | null): string | null {
   if (!code) return null;
   if (code === 'CONFLICT') return '连接状态发生冲突。请检查端口和扩展后重试。';
@@ -59,7 +44,7 @@ export function App() {
   const [message, setMessage] = useState<string | null>(null);
   const [userDataPath, setUserDataPath] = useState('');
   const [choices, setChoices] = useState<ChromeProfileList['profiles']>([]);
-  const [tree, setTree] = useState<MirrorTree | null>(null);
+  const [focusMirror, setFocusMirror] = useState<string | null>(null);
   const [profileChoice, setProfileChoice] = useState('');
   const mounted = useRef(false);
   const actionGeneration = useRef(0);
@@ -137,6 +122,7 @@ export function App() {
         ) : (
           <>
             {!native && <p className="preview-note">浏览器预览 · 仅显示界面。配对和连接操作需在桌面应用中进行。</p>}
+            <LibraryWorkspace state={state} invalid={error === 'event'} native={native} focusMirrorId={focusMirror} />
             {(message || state?.errorCode || error === 'event') && <p className="notice" role="alert">
               {message ?? (error === 'event' ? '收到无效连接状态。请重新打开应用。' : safeError(state?.errorCode ?? null))}
             </p>}
@@ -195,7 +181,6 @@ export function App() {
                   const listed = await enumerateChromeUserData(path);
                   if (!mounted.current) return;
                   setChoices(listed.profiles);
-                  setTree(null);
                 }, '无法读取所选 Chrome 目录。请选择本机 User Data 路径后重试。');
               }} noValidate>
                 <label htmlFor="user-data-path">用户数据目录<input id="user-data-path" value={userDataPath} onChange={(event) => setUserDataPath(event.target.value)} disabled={unavailable} spellCheck={false} /></label>
@@ -220,7 +205,7 @@ export function App() {
                 {mirror.errorCode && <p className="secondary">{mirrorProblem(mirror.errorCode)}</p>}
                 <p className="secondary">浏览器写入已禁用。在线资料优先于已关联的文件来源。</p>
                 <div className="actions">
-                  <button type="button" disabled={unavailable} onClick={() => { void act(async () => { const next = await getMirrorTree(mirror.mirrorSourceId); if (mounted.current) setTree(next); }); }}>浏览缓存</button>
+                  <button type="button" disabled={unavailable} onClick={() => setFocusMirror(mirror.mirrorSourceId)}>浏览缓存</button>
                   <button type="button" className="secondary-button" disabled={unavailable || !mirror.watching} onClick={() => { void act(async () => { accept(await detachFileMirror(mirror.mirrorSourceId)); }); }}>停止监听</button>
                 </div>
                 {!!state.profiles.length && <form className="inline-form" onSubmit={(event) => {
@@ -234,12 +219,6 @@ export function App() {
                   </select></label>
                   <button type="submit" disabled={unavailable || mirror.fileStatus !== 'current' || !profileChoice}>验证关联</button>
                 </form>}
-                {tree?.mirrorSourceId === mirror.mirrorSourceId && <ul className="mirror-tree" aria-label={`${mirror.displayName} 缓存`}>
-                  {treeRows(tree.nodes).map((node) => <li key={node.chromeId} style={{ paddingLeft: node.depth * 12 }}>
-                    <span>{node.title || '未命名'}</span>
-                    {node.url && <span className="mirror-url secondary">{node.url}</span>}
-                  </li>)}
-                </ul>}
               </article>)}
             </section>
           </>

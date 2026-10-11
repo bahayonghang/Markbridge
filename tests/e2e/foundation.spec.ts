@@ -37,6 +37,18 @@ async function mockBridge(page: Page, scenario: 'connected' | 'startup-error' | 
         state = { ...state, revision: state.revision + 1, profiles: [{ ...profile, connection: 'unpaired' }] };
         return state;
       }
+      export async function enumerateChromeUserData() { return { profiles: [] }; }
+      export async function attachFileMirror() { return state; }
+      export async function rescanFileMirrors() { return state; }
+      export async function detachFileMirror() { return state; }
+      export async function associateFileMirror() { return state; }
+      export async function getMirrorTree() { return { mirrorSourceId: 'mirror-a', displayName: 'Personal', fileStatus: 'current', association: 'independent', revision: 1, lastSyncedAt: null, errorCode: null, canWriteBrowser: false, nodes: [] }; }
+      export async function readCacheTree() { return { nodes: [] }; }
+      export async function readCacheList() { return { items: [], total: 0 }; }
+      export async function readCacheSearch() { return { items: [] }; }
+      export async function readCacheNode() { throw new Error('missing'); }
+      export async function readCacheCount() { return { folders: 0, bookmarks: 0 }; }
+      export async function openHttpUrl() {}
     `,
   }));
 }
@@ -45,7 +57,7 @@ for (const size of [{ width: 1100, height: 760 }, { width: 640, height: 480 }]) 
   test(`browser preview ${size.width}x${size.height}`, async ({ page }) => {
     await page.setViewportSize(size);
     await page.goto('/');
-    await expect(page.getByRole('status')).toHaveText('未连接 · 只读');
+    await expect(page.getByRole('status').filter({ hasText: '未连接 · 只读' })).toHaveText('未连接 · 只读');
     await expect(page.getByText(/浏览器预览/)).toBeVisible();
     await expect(page.getByRole('button', { name: '启动连接' })).toBeDisabled();
     await expect(page.getByRole('button', { name: '生成配对串' })).toBeDisabled();
@@ -59,7 +71,7 @@ for (const size of [{ width: 1100, height: 760 }, { width: 640, height: 480 }]) 
     await mockBridge(page);
     await page.setViewportSize(size);
     await page.goto('/?harness=bridge');
-    await expect(page.getByRole('status')).toHaveText('已连接 Chrome');
+    await expect(page.getByRole('status').filter({ hasText: '已连接 Chrome' })).toHaveText('已连接 Chrome');
     await expect(page.getByText('27', { exact: true })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.screenshot({ path: `${evidence}/browser-diagnostics-mock-${size.width}x${size.height}.png`, fullPage: true });

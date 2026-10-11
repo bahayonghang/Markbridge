@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LibraryCount",
+  "description": "Folder and bookmark totals from a cache `count` read.",
+  "type": "object",
+  "properties": {
+    "bookmarks": {
+      "$ref": "#/$defs/Counter"
+    },
+    "folders": {
+      "$ref": "#/$defs/Counter"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "folders",
+    "bookmarks"
+  ],
+  "$defs": {
+    "Counter": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 9007199254740991,
+      "minimum": 0
+    }
+  }
+}

@@ -1,5 +1,5 @@
 //! Trusted desktop IPC. Credentials are present only in an explicit pairing offer.
-use crate::{Counter, DisplayName, ErrorCode, Id, RequiredNullable, Version};
+use crate::{BookmarkNode, Counter, DisplayName, ErrorCode, Id, RequiredNullable, Title, Version};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
@@ -126,6 +126,48 @@ pub struct MirrorTree {
     pub can_write_browser: bool,
     #[schemars(length(max = 100000))]
     pub nodes: Vec<crate::BookmarkNode>,
+}
+
+/// Flat nodes from a cache `tree` read. `chromeId` and `parentId` are unchanged.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct LibraryNodes {
+    #[schemars(length(max = 100000))]
+    pub nodes: Vec<BookmarkNode>,
+}
+
+/// One page from a cache `list` read.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct LibraryPage {
+    #[schemars(length(max = 100000))]
+    pub items: Vec<BookmarkNode>,
+    pub total: Counter,
+}
+
+/// Hits from a cache `search` read. Matching is the core substring rule.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct LibrarySearch {
+    #[schemars(length(max = 100000))]
+    pub items: Vec<BookmarkNode>,
+}
+
+/// One node from a cache `get` read, with ancestor titles nearest-root first.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct LibraryDetail {
+    pub node: BookmarkNode,
+    #[schemars(length(max = 256))]
+    pub ancestors: Vec<Title>,
+}
+
+/// Folder and bookmark totals from a cache `count` read.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct LibraryCount {
+    pub folders: Counter,
+    pub bookmarks: Counter,
 }
 
 #[derive(Clone, Serialize, Deserialize, JsonSchema)]

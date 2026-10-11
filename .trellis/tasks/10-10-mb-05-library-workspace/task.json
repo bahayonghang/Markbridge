@@ -3,7 +3,7 @@
   "name": "mb-05-library-workspace",
   "title": "书签工作台、搜索与多 Profile",
   "description": "书签工作台、搜索与多 Profile；属于 Markbridge 父规划，独立验收并记录失败与恢复边界",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": "fullstack",
   "scope": "markbridge",
   "package": null,
@@ -12,7 +12,7 @@
   "assignee": "lyh",
   "createdAt": "2026-10-10",
   "completedAt": null,
-  "branch": null,
+  "branch": "main",
   "base_branch": "main",
   "worktree_path": null,
   "commit": null,
@@ -22,11 +22,20 @@
   "parent": "10-10-markbridge-workspace",
   "relatedFiles": [
     "apps/desktop/src/features/library",
-    "connection",
-    "profile",
-    "typed backend adapter；UI fixtures 与组件/性能检查"
+    "apps/desktop/src/App.tsx",
+    "apps/desktop/src/App.test.tsx",
+    "apps/desktop/src/backend.ts",
+    "apps/desktop/src/backend.test.tsx",
+    "apps/desktop/src/styles.css",
+    "apps/desktop/src-tauri/src/main.rs",
+    "crates/protocol/src/bridge.rs",
+    "crates/protocol/src/bin/export-schema.rs",
+    "packages/protocol/src/bridge.ts",
+    "packages/protocol/src/generated",
+    "scripts/protocol.mjs",
+    "tests/e2e/foundation.spec.ts"
   ],
-  "notes": "Planning only. Dependency order is documented and is not enforced automatically by Trellis. No product implementation or runtime validation has started.",
+  "notes": "Workspace implementation is in the worktree and uncommitted. Acceptance status is evidence/receipts.md.",
   "meta": {
     "sequence": "05",
     "milestone": "M1",
@@ -37,8 +46,9 @@
     "requirements": [
       "R04"
     ],
-    "implementation_approval": "not_granted",
-    "planning_status": "ready_for_review",
-    "delivery_scope": "windows_v1"
+    "implementation_approval": "granted",
+    "planning_status": "approved",
+    "delivery_scope": "windows_v1",
+    "approval_evidence": "Parent approval_evidence; dependencies and per-child acceptance remain required"
   }
 }
