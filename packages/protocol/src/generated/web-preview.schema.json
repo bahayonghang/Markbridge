@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "WebPreviewState",
+  "description": "State of the single full-page preview window. `url` is the selected bookmark.\n`current_url` is the page the preview window has navigated to.",
+  "type": "object",
+  "properties": {
+    "canGoBack": {
+      "type": "boolean"
+    },
+    "canGoForward": {
+      "type": "boolean"
+    },
+    "chromeId": {
+      "$ref": "#/$defs/RequiredNullable"
+    },
+    "currentUrl": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 16384
+    },
+    "notice": {
+      "$ref": "#/$defs/RequiredNullable2"
+    },
+    "noticeMessage": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 80
+    },
+    "phase": {
+      "$ref": "#/$defs/WebPreviewPhase"
+    },
+    "profileId": {
+      "$ref": "#/$defs/RequiredNullable"
+    },
+    "requestId": {
+      "$ref": "#/$defs/RequiredNullable"
+    },
+    "url": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 16384
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "requestId",
+    "profileId",
+    "chromeId",
+    "url",
+    "currentUrl",
+    "phase",
+    "canGoBack",
+    "canGoForward",
+    "notice",
+    "noticeMessage"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string",
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*(?![\\s\\S])"
+    },
+    "RequiredNullable": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Id"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "RequiredNullable2": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/WebPreviewNotice"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "WebPreviewNotice": {
+      "type": "string",
+      "enum": [
+        "SCHEME_DENIED",
+        "USERINFO_DENIED",
+        "POPUP_BLOCKED",
+        "DOWNLOAD_BLOCKED",
+        "LOAD_FAILED",
+        "SESSION_CLEARED",
+        "SESSION_BUSY"
+      ]
+    },
+    "WebPreviewPhase": {
+      "type": "string",
+      "enum": [
+        "closed",
+        "loading",
+        "ready",
+        "blocked",
+        "failed"
+      ]
+    }
+  }
+}

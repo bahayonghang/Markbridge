@@ -5,6 +5,7 @@ import {
   type EditAction,
 } from '../../backend';
 import { ContentPreviewPanel } from '../preview/ContentPreview';
+import { WebPreviewPanel } from '../preview/WebPreview';
 import { EditDesk } from './EditDesk';
 import { TagDesk } from '../tags/TagDesk';
 import { VirtualRows } from './VirtualRows';
@@ -613,7 +614,10 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId }: {
             {detailView.ancestors.length === 0 ? <p>位于顶层。</p> : <ol className="library-path" aria-label="所在路径">{detailView.ancestors.map((name, index) => <li key={`${name}-${index}`}>{displayTitle(name)}</li>)}</ol>}
             <button type="button" disabled={!native || !isHttpUrl(detailView.url)} onClick={() => { if (detailView.url) void open(detailView.url); }}>在浏览器中打开</button>
             {!isHttpUrl(detailView.url) && <p className="secondary">仅打开 http 或 https 链接。</p>}
-            {profile && detailView.kind === 'bookmark' && <ContentPreviewPanel profileId={profile.profileId} chromeId={detailView.chromeId} url={detailView.url ?? null} />}
+            {profile && detailView.kind === 'bookmark' && <>
+              <ContentPreviewPanel profileId={profile.profileId} chromeId={detailView.chromeId} url={detailView.url ?? null} />
+              <WebPreviewPanel profileId={profile.profileId} profileName={profile.displayName} chromeId={detailView.chromeId} url={detailView.url ?? null} native={native} />
+            </>}
           </>}
           {profile?.connection === 'live' && <EditDesk
             profileId={profile.profileId}

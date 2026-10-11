@@ -3,7 +3,7 @@
   "name": "mb-09-webpage-preview",
   "title": "应用内完整网页预览与隔离",
   "description": "应用内完整网页预览与隔离；属于 Markbridge 父规划，独立验收并记录失败与恢复边界",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": "fullstack",
   "scope": "markbridge",
   "package": null,
@@ -12,7 +12,7 @@
   "assignee": "lyh",
   "createdAt": "2026-10-10",
   "completedAt": null,
-  "branch": null,
+  "branch": "main",
   "base_branch": "main",
   "worktree_path": null,
   "commit": null,
@@ -21,12 +21,15 @@
   "children": [],
   "parent": "10-10-markbridge-workspace",
   "relatedFiles": [
-    "apps/desktop/src-tauri preview window manager/navigation policy",
-    "capabilities",
-    "apps/desktop/src/features/preview controls",
-    "原生安全测试页"
+    "apps/desktop/src-tauri/src/preview.rs",
+    "apps/desktop/src-tauri/capabilities/main.json",
+    "apps/desktop/src/features/preview/WebPreview.tsx",
+    "crates/protocol/src/preview.rs",
+    "packages/protocol/src/generated/web-preview.schema.json",
+    ".trellis/spec/frontend/component-guidelines.md",
+    ".trellis/spec/project-baseline.md"
   ],
-  "notes": "Planning only. Dependency order is documented and is not enforced automatically by Trellis. No product implementation or runtime validation has started.",
+  "notes": "V11 PASS on the native preview probe, exit 0. AC09-4 handoff image is rundll32.exe with url.dll,FileProtocolHandler. Screenshots are in evidence/.",
   "meta": {
     "sequence": "09",
     "milestone": "M2",
@@ -37,8 +40,9 @@
       "R08",
       "R12"
     ],
-    "implementation_approval": "not_granted",
-    "planning_status": "ready_for_review",
-    "delivery_scope": "windows_v1"
+    "implementation_approval": "granted",
+    "planning_status": "approved",
+    "delivery_scope": "windows_v1",
+    "approval_evidence": "Parent approval_evidence; dependencies and per-child acceptance remain required"
   }
 }

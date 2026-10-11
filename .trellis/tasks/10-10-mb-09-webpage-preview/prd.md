@@ -6,9 +6,9 @@
 
 ## 归属、状态与依赖
 
-父任务：[Markbridge 工作台](../10-10-markbridge-workspace/prd.md)。需求：R08,R12。里程碑：M2。状态：planning，未开始产品实现。
+父任务：[Markbridge 工作台](../10-10-markbridge-workspace/prd.md)。需求：R08,R12。里程碑：M2。状态：in_progress。
 
-前置：[05](../10-10-mb-05-library-workspace/prd.md)。依赖代表前置验收通过，不能仅凭目录存在或任务已创建启动。该任务属于 Windows 首版。
+前置：[05](../archive/2026-10/10-10-mb-05-library-workspace/prd.md)。依赖代表前置验收通过，不能仅凭目录存在或任务已创建启动。该任务属于 Windows 首版。内容卡片见已归档的 [08](../archive/2026-10/10-10-mb-08-content-preview/prd.md)，与本任务的网页预览并存。
 
 ## 范围
 
@@ -16,13 +16,13 @@
 
 ## 验收标准
 
-- [ ] AC09-1：选中书签后可打开应用内网页、刷新、前进/后退，并与当前 Profile/选中 URL 保持清晰关系。
-- [ ] AC09-2：不同 Profile、main 和 preview 的 Cookie/localStorage 相互隔离；关闭后会话是否保留按界面说明，清除按钮有效。
-- [ ] AC09-3：恶意远程页面尝试所有敏感 command 均被拒绝，不能读取凭据、文件、书签或调用写入。
-- [ ] AC09-4：无法在 WebView 正常加载的网站显示可理解状态并能转 Chrome；不承诺所有站点或 Chrome 登录态兼容。
+- [x] AC09-1：选中书签后可打开应用内网页、刷新、前进/后退，并与当前 Profile/选中 URL 保持清晰关系。
+- [x] AC09-2：不同 Profile、main 和 preview 的 Cookie/localStorage 相互隔离；关闭后会话是否保留按界面说明，清除按钮有效。
+- [x] AC09-3：恶意远程页面尝试所有敏感 command 均被拒绝，不能读取凭据、文件、书签或调用写入。
+- [x] AC09-4：无法在 WebView 正常加载的网站显示可理解状态并能转 Chrome；不承诺所有站点或 Chrome 登录态兼容。
 
 对应父级 [验证矩阵](../10-10-markbridge-workspace/verification.md)：V11。未运行环境明确保留 NOT_RUN，不能以源码检查代替原生证据。
 
 ## 完成条件
 
-实现、相关检查和必要原生步骤均满足后才可标完成。检查命令和回退见 [执行计划](implement.md)。任务创建只授权规划，最终方案待用户批准后才进入实现。
+实现、相关检查和必要原生步骤均满足后才可标完成。检查命令和回退见 [执行计划](implement.md)。当前规划已获实施批准；前置验收通过后才可启动该子任务。提交、归档、发布和日常安装仍需单独授权。

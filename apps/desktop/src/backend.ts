@@ -3,10 +3,10 @@ import { listen } from '@tauri-apps/api/event';
 import {
   parseApplyResult, parseBridgeState, parseChromeProfileList, parseEditDocument, parseEditPreview,
   parseLibraryCount, parseLibraryDetail, parseLibraryNodes, parseLibraryPage, parseLibrarySearch,
-  parseContentPreview, parseMirrorTree, parseOperationList, parsePairingOffer, parseStartupState, parseTagCatalog, parseTitleEncoding,
+  parseContentPreview, parseMirrorTree, parseOperationList, parsePairingOffer, parseStartupState, parseTagCatalog, parseTitleEncoding, parseWebPreview,
   type ApplyResult, type BridgeState, type ChromeProfileList, type ContentPreview, type EditDocument, type EditPreview,
   type LibraryCount, type LibraryDetail, type LibraryNodes, type LibraryPage, type LibrarySearch,
-  type MirrorTree, type OperationList, type PairingOffer, type StartupState, type TagCatalog, type TitleEncodingPreview,
+  type MirrorTree, type OperationList, type PairingOffer, type StartupState, type TagCatalog, type TitleEncodingPreview, type WebPreviewState,
 } from '@markbridge/protocol';
 
 export type EditAction =
@@ -202,4 +202,32 @@ export async function cancelContentPreview(requestId: string): Promise<void> {
 export async function applyTitleEncoding(profileId: string, expectedRevision: number, chromeIds: string[], restore: boolean): Promise<ApplyResult> {
   if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
   return parseApplyResult(await invoke<unknown>('apply_title_encoding', { profileId, expectedRevision, chromeIds, restore }));
+}
+
+export async function webPreviewState(): Promise<WebPreviewState> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseWebPreview(await invoke<unknown>('web_preview_state'));
+}
+
+export async function openWebPreview(profileId: string, chromeId: string, requestId: string, url: string): Promise<WebPreviewState> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseWebPreview(await invoke<unknown>('open_web_preview', { profileId, chromeId, requestId, url }));
+}
+
+export async function webPreviewAction(action: 'back' | 'forward' | 'reload' | 'close'): Promise<WebPreviewState> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseWebPreview(await invoke<unknown>('web_preview_action', { action }));
+}
+
+export async function clearWebPreviewSession(profileId: string, requestId: string): Promise<WebPreviewState> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseWebPreview(await invoke<unknown>('clear_web_preview_session', { profileId, requestId }));
+}
+
+export async function subscribeWebPreview(onState: (state: WebPreviewState) => void): Promise<() => void> {
+  if (!isTauri()) return () => {};
+  const stop = await listen<unknown>('web-preview', ({ payload }) => {
+    try { onState(parseWebPreview(payload)); } catch { /* Ignore a malformed preview event. */ }
+  });
+  return () => { stop(); };
 }

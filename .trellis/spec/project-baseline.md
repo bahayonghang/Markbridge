@@ -42,3 +42,5 @@ The user approved implementation of the current parent and child plans on 2026-1
 Separate document checks, unit tests, browser tests, native desktop tests, and external synchronization tests. Preserve failures and label absent evidence `NOT_RUN` or `UNVERIFIED`.
 
 Public preview fetch accepts only HTTP and HTTPS. It rejects userinfo, loopback, private, link-local, multicast, and cloud-metadata addresses, including a resolution that changes to one of those addresses. Parsing does not run page script. A summary is a page description or a visible excerpt. Source images use the same fetch guard. Ollama loopback is not a public-fetch target. Production settings do not contain a switch that allows a forbidden address.
+
+A full-page preview is a separate `preview-*` WebviewWindow. It is not the public fetch path. The preview window has no application capability, file permission, or secret. Ollama loopback is not added to the preview window.

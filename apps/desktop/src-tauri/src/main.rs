@@ -7,11 +7,15 @@ use markbridge_protocol::{
     LibraryPage, LibrarySearch, MirrorTree, OperationList, PairingOffer, TagCatalog, TagCommand,
     TitleEncodingPreview,
 };
+use std::path::PathBuf;
 use std::sync::Arc;
 use tauri::{Emitter, Manager};
 
+mod preview;
+use preview::{clear_web_preview_session, open_web_preview, web_preview_action, web_preview_state};
+
 fn trusted(window: &tauri::WebviewWindow) -> Result<(), ErrorCode> {
-    if window.label() == "main" {
+    if preview::caller_may_control(window.label()) {
         Ok(())
     } else {
         Err(ErrorCode::ReadOnly)
@@ -184,17 +188,60 @@ fn validate_http_url(url: &str) -> Result<(), ErrorCode> {
     Ok(())
 }
 
+const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+const CREATE_SUSPENDED: u32 = 0x0000_0004;
+
+fn suspend_requested(value: Option<&str>) -> bool {
+    value == Some("1")
+}
+
+fn open_http_creation_flags(suspend: bool) -> u32 {
+    if suspend {
+        CREATE_NO_WINDOW | CREATE_SUSPENDED
+    } else {
+        CREATE_NO_WINDOW
+    }
+}
+
+fn absolute_pidfile(value: Option<&str>) -> Option<PathBuf> {
+    let path = PathBuf::from(value?);
+    path.is_absolute().then_some(path)
+}
+
+/// Hands an http(s) URL to `rundll32 url.dll,FileProtocolHandler`.
+/// `MARKBRIDGE_OPEN_HTTP_SUSPEND=1` creates that process suspended and writes its pid
+/// to an absolute `MARKBRIDGE_OPEN_HTTP_PIDFILE`, so acceptance can observe the handoff
+/// and terminate it before `url.dll` runs.
 fn open_http(url: &str) -> Result<(), ErrorCode> {
     validate_http_url(url)?;
     #[cfg(windows)]
     {
         use std::os::windows::process::CommandExt;
-        const CREATE_NO_WINDOW: u32 = 0x0800_0000;
-        std::process::Command::new("rundll32.exe")
+        let suspend = suspend_requested(
+            std::env::var("MARKBRIDGE_OPEN_HTTP_SUSPEND")
+                .ok()
+                .as_deref(),
+        );
+        let mut child = std::process::Command::new("rundll32.exe")
             .args(["url.dll,FileProtocolHandler", url])
-            .creation_flags(CREATE_NO_WINDOW)
+            .creation_flags(open_http_creation_flags(suspend))
             .spawn()
             .map_err(|_| ErrorCode::InvalidMessage)?;
+        if suspend {
+            let pid = child.id();
+            let Some(path) = absolute_pidfile(
+                std::env::var("MARKBRIDGE_OPEN_HTTP_PIDFILE")
+                    .ok()
+                    .as_deref(),
+            ) else {
+                let _ = child.kill();
+                return Err(ErrorCode::InvalidMessage);
+            };
+            if std::fs::write(&path, pid.to_string()).is_err() {
+                let _ = child.kill();
+                return Err(ErrorCode::InvalidMessage);
+            }
+        }
         Ok(())
     }
     #[cfg(not(windows))]
@@ -449,7 +496,7 @@ fn open_http_url(window: tauri::WebviewWindow, url: String) -> Result<(), ErrorC
 fn get_startup_state(
     window: tauri::WebviewWindow,
 ) -> Result<markbridge_protocol::StartupState, &'static str> {
-    if window.label() != "main" {
+    if !preview::caller_may_control(window.label()) {
         return Err("UNTRUSTED_WINDOW");
     }
     Ok(markbridge_core::startup_state())
@@ -499,6 +546,7 @@ fn main() {
     let app = tauri::Builder::default()
         .setup(|app| {
             let directory = database_directory(app)?;
+            app.manage(preview::PreviewHost::new(directory.clone())?);
             let namespace = credential_namespace()?;
             let bridge = tauri::async_runtime::block_on(Bridge::open(
                 directory.join("markbridge.sqlite"),
@@ -548,7 +596,11 @@ fn main() {
             apply_title_encoding,
             content_preview,
             cancel_content_preview,
-            open_http_url
+            open_http_url,
+            open_web_preview,
+            web_preview_action,
+            clear_web_preview_session,
+            web_preview_state
         ])
         .build(tauri::generate_context!());
     let Ok(app) = app else {
@@ -575,7 +627,10 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    use super::{credential_namespace, flatten_cache, validate_http_url};
+    use super::{
+        CREATE_NO_WINDOW, CREATE_SUSPENDED, absolute_pidfile, credential_namespace, flatten_cache,
+        open_http_creation_flags, suspend_requested, validate_http_url,
+    };
 
     #[test]
     fn acceptance_namespace_never_selects_the_daily_store() {
@@ -640,6 +695,55 @@ mod tests {
         assert_eq!(flat[0].chrome_id.as_str(), "root");
         assert_eq!(flat[1].chrome_id.as_str(), "bar");
         assert_eq!(flat[1].parent_id.as_ref().unwrap().as_str(), "root");
+    }
+
+    #[test]
+    fn suspended_handoff_is_opt_in_and_uses_an_absolute_pidfile() {
+        assert!(!suspend_requested(None));
+        assert!(!suspend_requested(Some("")));
+        assert!(!suspend_requested(Some("true")));
+        assert!(suspend_requested(Some("1")));
+        assert_eq!(open_http_creation_flags(false), CREATE_NO_WINDOW);
+        assert_eq!(
+            open_http_creation_flags(true),
+            CREATE_NO_WINDOW | CREATE_SUSPENDED
+        );
+        assert!(absolute_pidfile(None).is_none());
+        assert!(absolute_pidfile(Some("open-http.pid")).is_none());
+        let absolute = std::env::temp_dir().join("mb09-open-http.pid");
+        assert_eq!(
+            absolute_pidfile(Some(absolute.to_str().unwrap())),
+            Some(absolute)
+        );
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn suspended_command_line_stays_readable_until_killed() {
+        use std::os::windows::process::CommandExt;
+        let mut child = std::process::Command::new("cmd.exe")
+            .args(["/c", "exit"])
+            .creation_flags(CREATE_NO_WINDOW | CREATE_SUSPENDED)
+            .spawn()
+            .expect("spawn");
+        let pid = child.id();
+        let output = std::process::Command::new("pwsh")
+            .args([
+                "-NoProfile",
+                "-Command",
+                &format!(
+                    "$p = Get-CimInstance Win32_Process -Filter \"ProcessId = {pid}\"; if ($p) {{ $p.CommandLine }} else {{ 'MISSING' }}"
+                ),
+            ])
+            .output();
+        let _ = child.kill();
+        let _ = child.wait();
+        let output = output.expect("query");
+        let text = String::from_utf8_lossy(&output.stdout);
+        assert!(
+            text.to_ascii_lowercase().contains("cmd.exe") && text.contains("/c"),
+            "command line was not readable"
+        );
     }
 
     #[test]

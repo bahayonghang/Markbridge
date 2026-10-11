@@ -7,7 +7,7 @@ import { LibraryWorkspace } from './LibraryWorkspace';
 import { searchSnapshot } from './model';
 
 vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn(), isTauri: vi.fn(() => true) }));
-vi.mock('@tauri-apps/api/event', () => ({ listen: vi.fn() }));
+vi.mock('@tauri-apps/api/event', () => ({ listen: vi.fn(async () => () => {}) }));
 
 type Args = Record<string, unknown>;
 const longTitle = `长标题${'长'.repeat(180)}`;

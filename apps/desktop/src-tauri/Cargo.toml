@@ -12,5 +12,10 @@ custom-protocol = ["tauri/custom-protocol"]
 
 [dependencies]
 tauri = { version = "2", features = [] }
+tokio = { version = "1", features = ["sync", "time"] }
 markbridge-core.workspace = true
 markbridge-protocol.workspace = true
+
+[target.'cfg(windows)'.dependencies]
+webview2-com = "0.39"
+windows-core = "0.62"

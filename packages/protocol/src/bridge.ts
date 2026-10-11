@@ -14,6 +14,7 @@ import validateEditDocument from './generated/edit-document.validator.js';
 import validateTagCatalog from './generated/tag-catalog.validator.js';
 import validateTitleEncoding from './generated/title-encoding.validator.js';
 import validateContentPreview from './generated/content-preview.validator.js';
+import validateWebPreview from './generated/web-preview.validator.js';
 import type { BridgeState } from './generated/bridge-state';
 import type { PairingOffer } from './generated/pairing-offer';
 import type { MirrorTree } from './generated/mirror-tree';
@@ -30,6 +31,7 @@ import type { EditDocument } from './generated/edit-document';
 import type { TagCatalog } from './generated/tag-catalog';
 import type { TitleEncodingPreview } from './generated/title-encoding';
 import type { ContentPreview } from './generated/content-preview';
+import type { WebPreviewState } from './generated/web-preview';
 
 export type { BridgeState } from './generated/bridge-state';
 export type { PairingOffer } from './generated/pairing-offer';
@@ -47,6 +49,7 @@ export type { EditDocument } from './generated/edit-document';
 export type { TagCatalog, TagEntry, TagItem } from './generated/tag-catalog';
 export type { TitleEncodingPreview, EncodingConflict } from './generated/title-encoding';
 export type { ContentPreview, PreviewImage, PreviewStatus, PreviewFailure, SummarySource } from './generated/content-preview';
+export type { WebPreviewState, WebPreviewPhase, WebPreviewNotice } from './generated/web-preview';
 
 export function parseBridgeState(value: unknown): BridgeState {
   if (!validateBridge(value)) throw new Error('INVALID_BRIDGE_STATE');
@@ -125,5 +128,10 @@ export function parseTitleEncoding(value: unknown): TitleEncodingPreview {
 
 export function parseContentPreview(value: unknown): ContentPreview {
   if (!validateContentPreview(value)) throw new Error('INVALID_CONTENT_PREVIEW');
+  return value;
+}
+
+export function parseWebPreview(value: unknown): WebPreviewState {
+  if (!validateWebPreview(value)) throw new Error('INVALID_WEB_PREVIEW');
   return value;
 }

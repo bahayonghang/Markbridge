@@ -1,0 +1,259 @@
+{
+  "checks": {
+    "profileSelected": true,
+    "bookmarkA": true,
+    "openClicked": true,
+    "relationship": true,
+    "sessionCopy": true,
+    "previewShot": true,
+    "mainShot": true,
+    "previewFocused": true,
+    "distinctPreviewWindow": true,
+    "storedA": true,
+    "probeNotInMain": true,
+    "mainCommandAllowed": true,
+    "commandsDenied": true,
+    "backClicked": true,
+    "forwardClicked": true,
+    "reloadClicked": true,
+    "history": true,
+    "schemeDenied": true,
+    "fileDenied": true,
+    "userinfoDenied": true,
+    "popupBlocked": true,
+    "downloadBlocked": true,
+    "noPopupPage": true,
+    "noFilePage": true,
+    "downloadNotSaved": true,
+    "closeClicked": true,
+    "sessionKept": true,
+    "reopenClicked": true,
+    "sessionRestored": true,
+    "profileBSelected": true,
+    "bookmarkB": true,
+    "openB": true,
+    "isolatedFromA": true,
+    "mainIsolated": true,
+    "twoSessionDirs": true,
+    "backToA": true,
+    "bookmarkA2": true,
+    "otherProfileLabel": true,
+    "clearArmed": true,
+    "clearClicked": true,
+    "clearedA": true,
+    "reopenAfterClear": true,
+    "clearedStorage": true,
+    "failBookmark": true,
+    "failOpen": true,
+    "failStatus": true,
+    "chromeButtonEnabled": true,
+    "failShot": true,
+    "chromeClicked": true,
+    "chromeOpenAccepted": true,
+    "handedToSystem": true,
+    "chromeDataUnchanged": true,
+    "noNewBrowserPid": true,
+    "dailyProfileNotStarted": true,
+    "scriptBookmark": true,
+    "scriptRejected": true,
+    "sessionDirSeparate": true,
+    "noPairingCredential": true
+  },
+  "details": {
+    "cmdkeyBefore": {
+      "markbridgeLines": 1,
+      "hasPairing": false
+    },
+    "appData": "C:\\Users\\lyh\\AppData\\Local\\Temp\\mb09-preview-JFQ4Tm\\app-data",
+    "probePort": 5677,
+    "seed": "SEED_OK",
+    "readyText": "应用内网页\n\n当前资料：资料 A\n\n选中网址：http://127.0.0.1:5677/a\n\n应用内网页会打开所选网址，并运行该站点自己的脚本。这里的登录只保存在当前资料的预览会话里，不读取 Chrome 的登录状态。不是每个网站都能在这里打开。\n\n关闭预览窗口后，当前资料的预览会话会保留。清除后，该资料的预览 Cookie 和本地存储会被删除。主窗口和其他资料使用各自的存储。\n\n应用内网页已打开\n\n预览窗口网址：http://127.0.0.1:5677/a\n\n打开应用内网页\n后退\n前进\n刷新\n关闭预览\n清除此资料的预览会话\n在 Chrome 中打开",
+    "previewTarget": false,
+    "stored": {
+      "kind": "job",
+      "op": "store",
+      "before": null,
+      "now": "/a",
+      "href": "/a",
+      "cookie": "mb09=%2Fa",
+      "mainKey": null,
+      "history": 1
+    },
+    "invokeCounts": {
+      "DENIED": 37
+    },
+    "invokeSample": [
+      {
+        "name": "get_startup_state",
+        "outcome": "DENIED",
+        "message": "get_startup_state not allowed. Plugin not found"
+      },
+      {
+        "name": "get_bridge_state",
+        "outcome": "DENIED",
+        "message": "get_bridge_state not allowed. Plugin not found"
+      },
+      {
+        "name": "start_bridge",
+        "outcome": "DENIED",
+        "message": "start_bridge not allowed. Plugin not found"
+      },
+      {
+        "name": "begin_pairing",
+        "outcome": "DENIED",
+        "message": "begin_pairing not allowed. Plugin not found"
+      }
+    ],
+    "mainInvoke": "MAIN_OK 2",
+    "history": {
+      "helloA2": "/a2",
+      "helloBack": "/a",
+      "helloForward": "/a2",
+      "helloReload": "/a2",
+      "text": "应用内网页\n\n当前资料：资料 A\n\n选中网址：http://127.0.0.1:5677/a\n\n应用内网页会打开所选网址，并运行该站点自己的脚本。这里的登录只保存在当前资料的预览会话里，不读取 Chrome 的登录状态。不是每个网站都能在这里打开。\n\n关闭预览窗口后，当前资料的预览会话会保留。清除后，该资料的预览 Cookie 和本地存储会被删除。主窗口和其他资料使用各自的存储。\n\n应用内网页已打开\n\n预览窗口网址：http://127.0.0.1:5677/a2\n\n打开应用内网页\n后退\n前进\n刷新\n关闭预览\n清除此资料的预览会话\n在 Chrome 中打开"
+    },
+    "reopened": {
+      "kind": "hello",
+      "href": "/a",
+      "prior": "/a",
+      "cookie": "mb09=%2Fa",
+      "mainKey": null,
+      "history": 2
+    },
+    "helloB": {
+      "kind": "hello",
+      "href": "/b",
+      "prior": null,
+      "cookie": "",
+      "mainKey": null,
+      "history": 2
+    },
+    "clearedHello": {
+      "kind": "hello",
+      "href": "/a",
+      "prior": null,
+      "cookie": "",
+      "mainKey": null,
+      "history": 2
+    },
+    "failText": "应用内网页\n\n当前资料：资料 A\n\n选中网址：http://127.0.0.1:1/mb09-fail\n\n应用内网页会打开所选网址，并运行该站点自己的脚本。这里的登录只保存在当前资料的预览会话里，不读取 Chrome 的登录状态。不是每个网站都能在这里打开。\n\n关闭预览窗口后，当前资料的预览会话会保留。清除后，该资料的预览 Cookie 和本地存储会被删除。主窗口和其他资料使用各自的存储。\n\n预览窗口网址：http://127.0.0.1:1/mb09-fail\n\n此网站没有在应用内网页中打开。可以转到 Chrome。应用不保证该网站或 Chrome 登录状态可用。\n\n应用内网页没有打开。可以改用 Chrome。\n\n打开应用内网页\n后退\n前进\n刷新\n关闭预览\n清除此资料的预览会话\n在 Chrome 中打开",
+    "handoff": {
+      "imageName": "rundll32.exe",
+      "commandLine": "\"rundll32.exe\" url.dll,FileProtocolHandler http://127.0.0.1:1/mb09-fail",
+      "handler": true,
+      "urlMatched": true,
+      "createdAfterClick": true,
+      "parentIsDesktop": true,
+      "childCount": 0,
+      "threadCount": 1,
+      "suspendedThreadCount": 1,
+      "threadState": "5:5",
+      "suspendCount": 1,
+      "aliveBeforeKill": true,
+      "goneAfterKill": true,
+      "terminatedBeforeUrlDll": true,
+      "bookmarks": {
+        "present": true,
+        "bytesUnchanged": true,
+        "sha256Unchanged": true,
+        "files": [
+          {
+            "profile": "Default",
+            "bytes": 849515,
+            "sha256": "dd95b7e69602227cac98ceee037dff6dd359bc42aa1d27913d272a0f2da20f82"
+          }
+        ]
+      },
+      "browserCounts": {
+        "before": 22,
+        "after": 21,
+        "added": 0
+      },
+      "dailyProfileNotStarted": true,
+      "extensionStampUnchanged": true
+    },
+    "appDataEntries": [
+      "markbridge.sqlite",
+      "markbridge.sqlite-shm",
+      "markbridge.sqlite-wal",
+      "preview-sessions"
+    ],
+    "sessionDirs": {
+      "beforeClose": [
+        "70613039"
+      ],
+      "afterClose": [
+        "70613039"
+      ],
+      "both": [
+        "70613039",
+        "70623039"
+      ],
+      "afterClear": [
+        "70623039"
+      ]
+    },
+    "cmdkeyAfter": {
+      "markbridgeLines": 1,
+      "hasPairing": false
+    }
+  },
+  "screenshots": [
+    {
+      "file": "native-preview-ready.png",
+      "exitError": null,
+      "line": "PRINT_OK=True TITLE=Markbridge ��ҳԤ�� HWND=8980734 W=1114 H=798 FG=Markbridge ��ҳԤ�� FG_SAME=True"
+    },
+    {
+      "file": "native-main-ready.png",
+      "exitError": null,
+      "line": "PRINT_OK=True TITLE=Markbridge �� ǩ�� HWND=16255782 W=1114 H=798 FG=Markbridge ��ҳԤ�� FG_SAME=False"
+    },
+    {
+      "file": "native-main-failed.png",
+      "exitError": null,
+      "line": "PRINT_OK=True TITLE=Markbridge �� ǩ�� HWND=16255782 W=1114 H=798 FG=Markbridge ��ҳԤ�� FG_SAME=False"
+    }
+  ],
+  "commandsTried": [
+    "get_startup_state",
+    "get_bridge_state",
+    "start_bridge",
+    "begin_pairing",
+    "confirm_pairing",
+    "cancel_pairing",
+    "revoke_pairing",
+    "reconnect_profile",
+    "enumerate_chrome_user_data",
+    "attach_file_mirror",
+    "rescan_file_mirrors",
+    "detach_file_mirror",
+    "associate_file_mirror",
+    "get_mirror_tree",
+    "cache_tree",
+    "cache_list",
+    "cache_search",
+    "cache_get",
+    "cache_count",
+    "preview_edit",
+    "apply_edit",
+    "list_operations",
+    "review_operation",
+    "refresh_operations",
+    "export_html",
+    "export_sidecar",
+    "tag_state",
+    "tag_command",
+    "preview_title_encoding",
+    "apply_title_encoding",
+    "content_preview",
+    "cancel_content_preview",
+    "open_http_url",
+    "open_web_preview",
+    "web_preview_action",
+    "clear_web_preview_session",
+    "web_preview_state"
+  ],
+  "failed": [],
+  "passed": true
+}

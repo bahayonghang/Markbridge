@@ -152,6 +152,66 @@ fn message_schema(_: &mut schemars::SchemaGenerator) -> schemars::Schema {
     nullable_text(80)
 }
 
+fn url_schema(_: &mut schemars::SchemaGenerator) -> schemars::Schema {
+    nullable_text(16_384)
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum WebPreviewPhase {
+    Closed,
+    Loading,
+    Ready,
+    Blocked,
+    Failed,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum WebPreviewNotice {
+    SchemeDenied,
+    UserinfoDenied,
+    PopupBlocked,
+    DownloadBlocked,
+    LoadFailed,
+    SessionCleared,
+    SessionBusy,
+}
+
+impl WebPreviewNotice {
+    pub fn message(self) -> &'static str {
+        match self {
+            Self::SchemeDenied => "只打开 http 或 https 网页",
+            Self::UserinfoDenied => "地址包含登录信息",
+            Self::PopupBlocked => "已拦截预览窗口的弹窗",
+            Self::DownloadBlocked => "已拦截预览窗口的下载",
+            Self::LoadFailed => "应用内网页没有打开。可以改用 Chrome。",
+            Self::SessionCleared => "已清除此资料的预览会话",
+            Self::SessionBusy => "预览会话仍被窗口占用。请先关闭。",
+        }
+    }
+}
+
+/// State of the single full-page preview window. `url` is the selected bookmark.
+/// `current_url` is the page the preview window has navigated to.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct WebPreviewState {
+    pub request_id: RequiredNullable<Id>,
+    pub profile_id: RequiredNullable<Id>,
+    pub chrome_id: RequiredNullable<Id>,
+    #[schemars(schema_with = "url_schema")]
+    pub url: RequiredNullable<String>,
+    #[schemars(schema_with = "url_schema")]
+    pub current_url: RequiredNullable<String>,
+    pub phase: WebPreviewPhase,
+    pub can_go_back: bool,
+    pub can_go_forward: bool,
+    pub notice: RequiredNullable<WebPreviewNotice>,
+    #[schemars(schema_with = "message_schema")]
+    pub notice_message: RequiredNullable<String>,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -160,5 +220,44 @@ mod tests {
     fn timeout_message_names_the_ten_second_budget() {
         assert_eq!(PreviewFailure::TimedOut.message(), "抓取超过 10 秒");
         assert!(PreviewFailure::TimedOut.image_message().contains("10 秒"));
+    }
+
+    #[test]
+    fn web_preview_notices_fit_the_dto_and_roundtrip() {
+        let notices = [
+            WebPreviewNotice::SchemeDenied,
+            WebPreviewNotice::UserinfoDenied,
+            WebPreviewNotice::PopupBlocked,
+            WebPreviewNotice::DownloadBlocked,
+            WebPreviewNotice::LoadFailed,
+            WebPreviewNotice::SessionCleared,
+            WebPreviewNotice::SessionBusy,
+        ];
+        for notice in notices {
+            let message = notice.message();
+            assert!(!message.is_empty());
+            assert!(message.chars().count() <= 80);
+        }
+        let state = WebPreviewState {
+            request_id: RequiredNullable(Some(Id::new("wp1").unwrap())),
+            profile_id: RequiredNullable(Some(Id::new("p:abc").unwrap())),
+            chrome_id: RequiredNullable(Some(Id::new("10").unwrap())),
+            url: RequiredNullable(Some("https://example.com/a".to_owned())),
+            current_url: RequiredNullable(None),
+            phase: WebPreviewPhase::Loading,
+            can_go_back: false,
+            can_go_forward: false,
+            notice: RequiredNullable(Some(WebPreviewNotice::PopupBlocked)),
+            notice_message: RequiredNullable(Some(
+                WebPreviewNotice::PopupBlocked.message().to_owned(),
+            )),
+        };
+        let json = serde_json::to_value(&state).unwrap();
+        let parsed: WebPreviewState = serde_json::from_value(json.clone()).unwrap();
+        assert_eq!(parsed, state);
+        assert!(json.get("token").is_none());
+        let mut extra = json;
+        extra["token"] = serde_json::json!("secret");
+        assert!(serde_json::from_value::<WebPreviewState>(extra).is_err());
     }
 }

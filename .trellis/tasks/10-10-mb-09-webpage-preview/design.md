@@ -2,7 +2,7 @@
 
 ## 当前与边界
 
-当前仓库没有产品代码。以下是目标设计，路径为拟新增或修改位置，不代表已经存在。
+窗口管理在 `apps/desktop/src-tauri/src/preview.rs`。主窗口控件在 `apps/desktop/src/features/preview/WebPreview.tsx`。原生结果见 `evidence/receipts.md`。路径表示该任务的修改范围。
 
 apps/desktop/src-tauri preview window manager/navigation policy、capabilities、apps/desktop/src/features/preview controls、原生安全测试页
 

@@ -1,7 +1,7 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import { invoke, isTauri } from '@tauri-apps/api/core';
 import { listen, type Event } from '@tauri-apps/api/event';
-import { applyEdit, applyTitleEncoding, beginPairing, enumerateChromeUserData, exportHtml, getBridgeState, getMirrorTree, openHttpUrl, previewEdit, previewTitleEncoding, readCacheCount, readCacheList, readCacheNode, readCacheSearch, readCacheTree, readTagState, startBridge, subscribeBridgeState, tagCommand } from './backend';
+import { applyEdit, applyTitleEncoding, beginPairing, clearWebPreviewSession, enumerateChromeUserData, exportHtml, getBridgeState, getMirrorTree, openHttpUrl, openWebPreview, previewEdit, previewTitleEncoding, readCacheCount, readCacheList, readCacheNode, readCacheSearch, readCacheTree, readTagState, startBridge, subscribeBridgeState, subscribeWebPreview, tagCommand, webPreviewAction, webPreviewState } from './backend';
 
 vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn(), isTauri: vi.fn() }));
 vi.mock('@tauri-apps/api/event', () => ({ listen: vi.fn() }));
@@ -28,6 +28,11 @@ it('browser preview never invokes or subscribes to native endpoints', async () =
   await expect(tagCommand('profile-a', { kind: 'add', chromeIds: ['10'], name: '工作' })).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
   await expect(previewTitleEncoding('profile-a', 1, ['10'], false)).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
   await expect(applyTitleEncoding('profile-a', 1, ['10'], false)).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
+  await expect(webPreviewState()).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
+  await expect(openWebPreview('profile-a', '10', 'wp1', 'https://example.com/a')).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
+  await expect(webPreviewAction('back')).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
+  await expect(clearWebPreviewSession('profile-a', 'wp1')).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
+  await subscribeWebPreview(() => {});
   expect(invoke).not.toHaveBeenCalled();
   expect(listen).not.toHaveBeenCalled();
 });
@@ -50,6 +55,8 @@ it('rejects a cache page that is not the list contract', async () => {
   expect(invoke).toHaveBeenCalledWith('cache_tree', { profileId: 'profile-a', folderId: null, depth: 1 });
   vi.mocked(invoke).mockResolvedValue({ profileId: 'profile-a', writable: true });
   await expect(previewEdit('profile-a', 4, { kind: 'update', chromeId: '10', title: 'Alpha 2' })).rejects.toThrow('INVALID_EDIT_PREVIEW');
+  vi.mocked(invoke).mockResolvedValue({ phase: 'ready', token: 'secret' });
+  await expect(webPreviewState()).rejects.toThrow('INVALID_WEB_PREVIEW');
   expect(invoke).toHaveBeenCalledWith('preview_edit', { profileId: 'profile-a', expectedRevision: 4, action: { kind: 'update', chromeId: '10', title: 'Alpha 2' } });
 });
 
