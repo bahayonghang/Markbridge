@@ -1,0 +1,708 @@
+{
+  "runId": "42e65e09-b831-40ee-afd3-e616899a359c",
+  "startedAt": "2026-10-11T08:04:45.319Z",
+  "scope": "disposable Chrome + production Rust Bridge, no Tauri GUI",
+  "controls": [
+    {
+      "control": "actual_chrome_B10K_fixture",
+      "status": "PASS",
+      "bookmarks": 10000,
+      "folders": 1000,
+      "maxDepth": 20,
+      "seed": 20261010,
+      "chrome": "Chrome/155.0.8059.39",
+      "extensionId": "blbapbmincddiilocledaajcegiekbfk"
+    },
+    {
+      "control": "actual_extension_wrong_pair_token_zero_identity_writes",
+      "status": "PASS"
+    },
+    {
+      "control": "actual_chrome_pairing_and_full_tree",
+      "status": "PASS",
+      "nodes": 11003,
+      "treeDigest": "1314100098cce303257a615b3aae8300ade70f0baf1cf357ccaed59dcc004c76"
+    },
+    {
+      "control": "actual_chrome_P2_equal_chromeId_isolation",
+      "status": "PASS",
+      "profiles": 2,
+      "extensionIds": [
+        "blbapbmincddiilocledaajcegiekbfk",
+        "blbapbmincddiilocledaajcegiekbfk"
+      ],
+      "cacheCounts": [
+        11003,
+        4
+      ]
+    },
+    {
+      "control": "actual_chrome_B10K_100_changes_cache_latency",
+      "status": "PASS",
+      "count": 100,
+      "p50": 668,
+      "p95": 800,
+      "max": 871,
+      "unit": "ms",
+      "boundary": "Chrome event to Rust cache; excludes Tauri UI"
+    },
+    {
+      "control": "actual_chrome_final_tree_equivalence",
+      "status": "PASS",
+      "nodes": 11003,
+      "treeDigest": "a98973186c82242ba4e8b5e99962dfd2bdf45d86faac146ad3b882ba6c9513ac"
+    },
+    {
+      "control": "actual_chrome_explicit_reconnect",
+      "status": "PASS",
+      "elapsed": 565,
+      "unit": "ms"
+    },
+    {
+      "control": "actual_chrome_forced_worker_stop_alarm_recovery",
+      "status": "PASS"
+    },
+    {
+      "control": "actual_chrome_browser_restart_full_reconciliation",
+      "status": "PASS",
+      "nodes": 11003,
+      "treeDigest": "a98973186c82242ba4e8b5e99962dfd2bdf45d86faac146ad3b882ba6c9513ac"
+    },
+    {
+      "control": "actual_chrome_idle_5min_started",
+      "status": "NOT_RUN",
+      "debuggerAttachedToWorker": false,
+      "extensionPagesOpen": 0
+    },
+    {
+      "control": "actual_chrome_idle_5min_event_same_session",
+      "status": "PASS",
+      "elapsed": 309308,
+      "unit": "ms",
+      "debuggerAttachedToWorker": false
+    },
+    {
+      "control": "actual_chrome_revocation_zero_late_cache_writes",
+      "status": "PASS"
+    },
+    {
+      "control": "actual_chrome_import_reorder_OS_suspend_and_Tauri_GUI",
+      "status": "UNVERIFIED",
+      "reason": "No native UI automation evidence; unit fault injection is recorded separately"
+    }
+  ],
+  "metrics": [
+    {
+      "index": 0,
+      "kind": "created",
+      "unit": "ms",
+      "eventToCache": 733
+    },
+    {
+      "index": 1,
+      "kind": "created",
+      "unit": "ms",
+      "eventToCache": 803
+    },
+    {
+      "index": 2,
+      "kind": "created",
+      "unit": "ms",
+      "eventToCache": 871
+    },
+    {
+      "index": 3,
+      "kind": "created",
+      "unit": "ms",
+      "eventToCache": 800
+    },
+    {
+      "index": 4,
+      "kind": "created",
+      "unit": "ms",
+      "eventToCache": 793
+    },
+    {
+      "index": 5,
+      "kind": "created",
+      "unit": "ms",
+      "eventToCache": 778
+    },
+    {
+      "index": 6,
+      "kind": "created",
+      "unit": "ms",
+      "eventToCache": 803
+    },
+    {
+      "index": 7,
+      "kind": "created",
+      "unit": "ms",
+      "eventToCache": 813
+    },
+    {
+      "index": 8,
+      "kind": "created",
+      "unit": "ms",
+      "eventToCache": 800
+    },
+    {
+      "index": 9,
+      "kind": "created",
+      "unit": "ms",
+      "eventToCache": 760
+    },
+    {
+      "index": 10,
+      "kind": "created",
+      "unit": "ms",
+      "eventToCache": 763
+    },
+    {
+      "index": 11,
+      "kind": "created",
+      "unit": "ms",
+      "eventToCache": 768
+    },
+    {
+      "index": 12,
+      "kind": "created",
+      "unit": "ms",
+      "eventToCache": 416
+    },
+    {
+      "index": 13,
+      "kind": "created",
+      "unit": "ms",
+      "eventToCache": 753
+    },
+    {
+      "index": 14,
+      "kind": "created",
+      "unit": "ms",
+      "eventToCache": 774
+    },
+    {
+      "index": 15,
+      "kind": "created",
+      "unit": "ms",
+      "eventToCache": 683
+    },
+    {
+      "index": 16,
+      "kind": "created",
+      "unit": "ms",
+      "eventToCache": 677
+    },
+    {
+      "index": 17,
+      "kind": "created",
+      "unit": "ms",
+      "eventToCache": 656
+    },
+    {
+      "index": 18,
+      "kind": "created",
+      "unit": "ms",
+      "eventToCache": 664
+    },
+    {
+      "index": 19,
+      "kind": "created",
+      "unit": "ms",
+      "eventToCache": 344
+    },
+    {
+      "index": 20,
+      "kind": "created",
+      "unit": "ms",
+      "eventToCache": 670
+    },
+    {
+      "index": 21,
+      "kind": "created",
+      "unit": "ms",
+      "eventToCache": 667
+    },
+    {
+      "index": 22,
+      "kind": "created",
+      "unit": "ms",
+      "eventToCache": 753
+    },
+    {
+      "index": 23,
+      "kind": "created",
+      "unit": "ms",
+      "eventToCache": 798
+    },
+    {
+      "index": 24,
+      "kind": "created",
+      "unit": "ms",
+      "eventToCache": 707
+    },
+    {
+      "index": 25,
+      "kind": "changed",
+      "unit": "ms",
+      "eventToCache": 815
+    },
+    {
+      "index": 26,
+      "kind": "changed",
+      "unit": "ms",
+      "eventToCache": 723
+    },
+    {
+      "index": 27,
+      "kind": "changed",
+      "unit": "ms",
+      "eventToCache": 701
+    },
+    {
+      "index": 28,
+      "kind": "changed",
+      "unit": "ms",
+      "eventToCache": 725
+    },
+    {
+      "index": 29,
+      "kind": "changed",
+      "unit": "ms",
+      "eventToCache": 745
+    },
+    {
+      "index": 30,
+      "kind": "changed",
+      "unit": "ms",
+      "eventToCache": 710
+    },
+    {
+      "index": 31,
+      "kind": "changed",
+      "unit": "ms",
+      "eventToCache": 699
+    },
+    {
+      "index": 32,
+      "kind": "changed",
+      "unit": "ms",
+      "eventToCache": 731
+    },
+    {
+      "index": 33,
+      "kind": "changed",
+      "unit": "ms",
+      "eventToCache": 790
+    },
+    {
+      "index": 34,
+      "kind": "changed",
+      "unit": "ms",
+      "eventToCache": 688
+    },
+    {
+      "index": 35,
+      "kind": "changed",
+      "unit": "ms",
+      "eventToCache": 697
+    },
+    {
+      "index": 36,
+      "kind": "changed",
+      "unit": "ms",
+      "eventToCache": 649
+    },
+    {
+      "index": 37,
+      "kind": "changed",
+      "unit": "ms",
+      "eventToCache": 690
+    },
+    {
+      "index": 38,
+      "kind": "changed",
+      "unit": "ms",
+      "eventToCache": 692
+    },
+    {
+      "index": 39,
+      "kind": "changed",
+      "unit": "ms",
+      "eventToCache": 698
+    },
+    {
+      "index": 40,
+      "kind": "changed",
+      "unit": "ms",
+      "eventToCache": 689
+    },
+    {
+      "index": 41,
+      "kind": "changed",
+      "unit": "ms",
+      "eventToCache": 641
+    },
+    {
+      "index": 42,
+      "kind": "changed",
+      "unit": "ms",
+      "eventToCache": 688
+    },
+    {
+      "index": 43,
+      "kind": "changed",
+      "unit": "ms",
+      "eventToCache": 699
+    },
+    {
+      "index": 44,
+      "kind": "changed",
+      "unit": "ms",
+      "eventToCache": 721
+    },
+    {
+      "index": 45,
+      "kind": "changed",
+      "unit": "ms",
+      "eventToCache": 638
+    },
+    {
+      "index": 46,
+      "kind": "changed",
+      "unit": "ms",
+      "eventToCache": 657
+    },
+    {
+      "index": 47,
+      "kind": "changed",
+      "unit": "ms",
+      "eventToCache": 656
+    },
+    {
+      "index": 48,
+      "kind": "changed",
+      "unit": "ms",
+      "eventToCache": 775
+    },
+    {
+      "index": 49,
+      "kind": "changed",
+      "unit": "ms",
+      "eventToCache": 661
+    },
+    {
+      "index": 50,
+      "kind": "moved",
+      "unit": "ms",
+      "eventToCache": 640
+    },
+    {
+      "index": 51,
+      "kind": "moved",
+      "unit": "ms",
+      "eventToCache": 334
+    },
+    {
+      "index": 52,
+      "kind": "moved",
+      "unit": "ms",
+      "eventToCache": 732
+    },
+    {
+      "index": 53,
+      "kind": "moved",
+      "unit": "ms",
+      "eventToCache": 638
+    },
+    {
+      "index": 54,
+      "kind": "moved",
+      "unit": "ms",
+      "eventToCache": 760
+    },
+    {
+      "index": 55,
+      "kind": "moved",
+      "unit": "ms",
+      "eventToCache": 671
+    },
+    {
+      "index": 56,
+      "kind": "moved",
+      "unit": "ms",
+      "eventToCache": 731
+    },
+    {
+      "index": 57,
+      "kind": "moved",
+      "unit": "ms",
+      "eventToCache": 672
+    },
+    {
+      "index": 58,
+      "kind": "moved",
+      "unit": "ms",
+      "eventToCache": 641
+    },
+    {
+      "index": 59,
+      "kind": "moved",
+      "unit": "ms",
+      "eventToCache": 644
+    },
+    {
+      "index": 60,
+      "kind": "moved",
+      "unit": "ms",
+      "eventToCache": 682
+    },
+    {
+      "index": 61,
+      "kind": "moved",
+      "unit": "ms",
+      "eventToCache": 635
+    },
+    {
+      "index": 62,
+      "kind": "moved",
+      "unit": "ms",
+      "eventToCache": 635
+    },
+    {
+      "index": 63,
+      "kind": "moved",
+      "unit": "ms",
+      "eventToCache": 653
+    },
+    {
+      "index": 64,
+      "kind": "moved",
+      "unit": "ms",
+      "eventToCache": 699
+    },
+    {
+      "index": 65,
+      "kind": "moved",
+      "unit": "ms",
+      "eventToCache": 658
+    },
+    {
+      "index": 66,
+      "kind": "moved",
+      "unit": "ms",
+      "eventToCache": 610
+    },
+    {
+      "index": 67,
+      "kind": "moved",
+      "unit": "ms",
+      "eventToCache": 643
+    },
+    {
+      "index": 68,
+      "kind": "moved",
+      "unit": "ms",
+      "eventToCache": 668
+    },
+    {
+      "index": 69,
+      "kind": "moved",
+      "unit": "ms",
+      "eventToCache": 652
+    },
+    {
+      "index": 70,
+      "kind": "moved",
+      "unit": "ms",
+      "eventToCache": 685
+    },
+    {
+      "index": 71,
+      "kind": "moved",
+      "unit": "ms",
+      "eventToCache": 330
+    },
+    {
+      "index": 72,
+      "kind": "moved",
+      "unit": "ms",
+      "eventToCache": 746
+    },
+    {
+      "index": 73,
+      "kind": "moved",
+      "unit": "ms",
+      "eventToCache": 716
+    },
+    {
+      "index": 74,
+      "kind": "moved",
+      "unit": "ms",
+      "eventToCache": 690
+    },
+    {
+      "index": 75,
+      "kind": "removed",
+      "unit": "ms",
+      "eventToCache": 659
+    },
+    {
+      "index": 76,
+      "kind": "removed",
+      "unit": "ms",
+      "eventToCache": 667
+    },
+    {
+      "index": 77,
+      "kind": "removed",
+      "unit": "ms",
+      "eventToCache": 618
+    },
+    {
+      "index": 78,
+      "kind": "removed",
+      "unit": "ms",
+      "eventToCache": 631
+    },
+    {
+      "index": 79,
+      "kind": "removed",
+      "unit": "ms",
+      "eventToCache": 648
+    },
+    {
+      "index": 80,
+      "kind": "removed",
+      "unit": "ms",
+      "eventToCache": 645
+    },
+    {
+      "index": 81,
+      "kind": "removed",
+      "unit": "ms",
+      "eventToCache": 647
+    },
+    {
+      "index": 82,
+      "kind": "removed",
+      "unit": "ms",
+      "eventToCache": 614
+    },
+    {
+      "index": 83,
+      "kind": "removed",
+      "unit": "ms",
+      "eventToCache": 622
+    },
+    {
+      "index": 84,
+      "kind": "removed",
+      "unit": "ms",
+      "eventToCache": 606
+    },
+    {
+      "index": 85,
+      "kind": "removed",
+      "unit": "ms",
+      "eventToCache": 623
+    },
+    {
+      "index": 86,
+      "kind": "removed",
+      "unit": "ms",
+      "eventToCache": 646
+    },
+    {
+      "index": 87,
+      "kind": "removed",
+      "unit": "ms",
+      "eventToCache": 333
+    },
+    {
+      "index": 88,
+      "kind": "removed",
+      "unit": "ms",
+      "eventToCache": 614
+    },
+    {
+      "index": 89,
+      "kind": "removed",
+      "unit": "ms",
+      "eventToCache": 333
+    },
+    {
+      "index": 90,
+      "kind": "removed",
+      "unit": "ms",
+      "eventToCache": 624
+    },
+    {
+      "index": 91,
+      "kind": "removed",
+      "unit": "ms",
+      "eventToCache": 645
+    },
+    {
+      "index": 92,
+      "kind": "removed",
+      "unit": "ms",
+      "eventToCache": 635
+    },
+    {
+      "index": 93,
+      "kind": "removed",
+      "unit": "ms",
+      "eventToCache": 610
+    },
+    {
+      "index": 94,
+      "kind": "removed",
+      "unit": "ms",
+      "eventToCache": 615
+    },
+    {
+      "index": 95,
+      "kind": "removed",
+      "unit": "ms",
+      "eventToCache": 629
+    },
+    {
+      "index": 96,
+      "kind": "removed",
+      "unit": "ms",
+      "eventToCache": 629
+    },
+    {
+      "index": 97,
+      "kind": "removed",
+      "unit": "ms",
+      "eventToCache": 623
+    },
+    {
+      "index": 98,
+      "kind": "removed",
+      "unit": "ms",
+      "eventToCache": 609
+    },
+    {
+      "index": 99,
+      "kind": "removed",
+      "unit": "ms",
+      "eventToCache": 619
+    }
+  ],
+  "dataDirectory": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-03-app-Thj7ih",
+  "priorFailures": [
+    "4ede64a3-99c2-44d6-8756-a3c58f58c159",
+    "0dab3e15-f02c-4b13-bed6-ef8333ccc59a"
+  ],
+  "credentialNamespace": "Markbridge.Task03.42e65e09-b831-40ee-afd3-e616899a359c",
+  "profile1": "p:6cd33ed04a76654e2954d647b0aebf28a042a9518f9082b36de526cace5df270",
+  "finishedAt": "2026-10-11T08:11:30.986Z",
+  "chromeProfiles": [
+    "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-03-p1-VJs5Ow",
+    "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-03-p2-C5XSeg"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "name": "@markbridge/extension",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": { "build": "vite build", "typecheck": "tsc -p tsconfig.json" },
+  "dependencies": { "@markbridge/protocol": "workspace:*" },
+  "devDependencies": { "@types/chrome": "0.3.5", "vite": "8.3.4" }
+}

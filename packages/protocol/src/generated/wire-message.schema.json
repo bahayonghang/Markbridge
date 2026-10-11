@@ -831,7 +831,8 @@
       "enum": [
         "bookmarks-bar",
         "other",
-        "mobile"
+        "mobile",
+        "managed"
       ]
     },
     "HelloPayload": {

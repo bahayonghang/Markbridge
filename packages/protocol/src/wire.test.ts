@@ -70,6 +70,8 @@ describe('versioned wire contract', () => {
     const tree = treeValue(); tree.payload.nodes = [
       { chromeId: 'a', parentId: null, position: 0, kind: 'folder', title: 'root', folderType: 'bookmarks-bar' },
       { chromeId: 'b', parentId: null, position: 1, kind: 'folder', title: 'another root', folderType: 'bookmarks-bar', unmodifiable: 'managed' },
+      { chromeId: 'managed', parentId: 'a', position: 0, kind: 'folder', title: 'managed folder', folderType: 'managed', unmodifiable: 'managed' },
+      { chromeId: 'managed-child', parentId: 'managed', position: 0, kind: 'bookmark', title: 'managed child', url: 'https://example.invalid/managed' },
     ];
     expect(parseWireMessage(tree)).toEqual(tree);
   });

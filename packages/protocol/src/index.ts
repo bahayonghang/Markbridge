@@ -9,3 +9,4 @@ export function parseStartupState(value: unknown): StartupState {
 }
 
 export * from './wire';
+export * from './bridge';

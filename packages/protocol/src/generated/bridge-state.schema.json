@@ -1,0 +1,217 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "BridgeState",
+  "type": "object",
+  "properties": {
+    "errorCode": {
+      "$ref": "#/$defs/RequiredNullable2"
+    },
+    "pending": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/PendingPairing"
+      }
+    },
+    "port": {
+      "$ref": "#/$defs/RequiredNullable"
+    },
+    "profiles": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/BridgeProfile"
+      }
+    },
+    "protocolVersion": {
+      "$ref": "#/$defs/Version"
+    },
+    "revision": {
+      "$ref": "#/$defs/Counter"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "protocolVersion",
+    "revision",
+    "port",
+    "errorCode",
+    "profiles",
+    "pending"
+  ],
+  "$defs": {
+    "BridgeConnection": {
+      "type": "string",
+      "enum": [
+        "unpaired",
+        "connecting",
+        "reconciling",
+        "live",
+        "cached_read_only",
+        "error"
+      ]
+    },
+    "BridgeProfile": {
+      "type": "object",
+      "properties": {
+        "connection": {
+          "$ref": "#/$defs/BridgeConnection"
+        },
+        "displayName": {
+          "$ref": "#/$defs/DisplayName"
+        },
+        "errorCode": {
+          "$ref": "#/$defs/RequiredNullable2"
+        },
+        "instanceId": {
+          "$ref": "#/$defs/Id"
+        },
+        "lastSyncedAt": {
+          "$ref": "#/$defs/RequiredNullable3"
+        },
+        "nodeCount": {
+          "$ref": "#/$defs/Counter"
+        },
+        "profileId": {
+          "$ref": "#/$defs/Id"
+        },
+        "revision": {
+          "$ref": "#/$defs/Counter"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "profileId",
+        "instanceId",
+        "displayName",
+        "connection",
+        "nodeCount",
+        "revision",
+        "lastSyncedAt",
+        "errorCode"
+      ]
+    },
+    "Counter": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 9007199254740991,
+      "minimum": 0
+    },
+    "DisplayName": {
+      "type": "string",
+      "maxLength": 128,
+      "minLength": 1
+    },
+    "ErrorCode": {
+      "type": "string",
+      "enum": [
+        "INVALID_MESSAGE",
+        "UNSUPPORTED_VERSION",
+        "FRAME_TOO_LARGE",
+        "LIMIT_EXCEEDED",
+        "INVALID_TREE",
+        "UNPAIRED",
+        "READ_ONLY",
+        "WRONG_PROFILE",
+        "STALE_PROPOSAL",
+        "PROTECTED_NODE",
+        "UNCERTAIN_WRITE",
+        "FETCH_DENIED",
+        "INVALID_AI_OUTPUT",
+        "STORAGE_ERROR",
+        "STORAGE_NEWER_SCHEMA",
+        "MIGRATION_FAILED",
+        "CONFLICT",
+        "CANCELLED"
+      ]
+    },
+    "Id": {
+      "type": "string",
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*(?![\\s\\S])"
+    },
+    "PendingPairing": {
+      "type": "object",
+      "properties": {
+        "displayName": {
+          "$ref": "#/$defs/DisplayName"
+        },
+        "expiresAt": {
+          "$ref": "#/$defs/Counter"
+        },
+        "instanceId": {
+          "$ref": "#/$defs/RequiredNullable4"
+        },
+        "origin": {
+          "$ref": "#/$defs/RequiredNullable5"
+        },
+        "profileId": {
+          "$ref": "#/$defs/Id"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "profileId",
+        "displayName",
+        "instanceId",
+        "origin",
+        "expiresAt"
+      ]
+    },
+    "RequiredNullable": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "type": [
+        "integer",
+        "null"
+      ],
+      "format": "uint16",
+      "maximum": 65535,
+      "minimum": 0
+    },
+    "RequiredNullable2": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ErrorCode"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "RequiredNullable3": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Counter"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "RequiredNullable4": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Id"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "RequiredNullable5": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "Version": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 1,
+      "minimum": 1
+    }
+  }
+}

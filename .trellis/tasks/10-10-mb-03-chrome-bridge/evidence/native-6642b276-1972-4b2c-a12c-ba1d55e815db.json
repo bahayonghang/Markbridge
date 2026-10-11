@@ -1,0 +1,75 @@
+{
+  "runId": "6642b276-1972-4b2c-a12c-ba1d55e815db",
+  "startedAt": "2026-10-11T10:21:23.287Z",
+  "scope": "disposable Chrome event drop, duplicate, and reorder through a 127.0.0.1 frame proxy; harness cache RPC; no HTML import or export; no bookmark manager; no 10000 corpus; no idle wait",
+  "command": "node .trellis/tasks/10-10-mb-03-chrome-bridge/evidence/chrome-gap-harness.mjs",
+  "priorFailures": [
+    "native-4ede64a3-99c2-44d6-8756-a3c58f58c159.json",
+    "native-0dab3e15-f02c-4b13-bed6-ef8333ccc59a.json"
+  ],
+  "controls": [
+    {
+      "control": "dropped_event_tree",
+      "status": "PASS",
+      "nodes": 5,
+      "cacheNodes": 5,
+      "droppedChromeId": "5",
+      "followingChromeId": "6",
+      "droppedFrames": 1,
+      "cursor": {
+        "lastSeq": 2,
+        "revision": 2
+      }
+    },
+    {
+      "control": "duplicate_event_tree",
+      "status": "PASS",
+      "nodes": 5,
+      "cacheNodes": 5,
+      "replayedFrames": 1,
+      "cursorBefore": {
+        "lastSeq": 2,
+        "revision": 2
+      },
+      "cursorAfter": {
+        "lastSeq": 2,
+        "revision": 2
+      }
+    },
+    {
+      "control": "reordered_event_tree",
+      "status": "PASS",
+      "nodes": 7,
+      "cacheNodes": 7,
+      "heldChromeId": "7",
+      "laterChromeId": "8",
+      "cursor": {
+        "lastSeq": 4,
+        "revision": 3
+      }
+    }
+  ],
+  "treesMatch": true,
+  "eventKinds": {
+    "created": 4
+  },
+  "dataDirectory": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-03-gap-app-9Xigpd",
+  "credentialNamespace": "Markbridge.Task03.6642b276-1972-4b2c-a12c-ba1d55e815db",
+  "bridgePort": 6879,
+  "proxyPort": 6880,
+  "portsDiffer": true,
+  "chrome": "Chrome/155.0.8059.39",
+  "extensionId": "blbapbmincddiilocledaajcegiekbfk",
+  "profileId": "p:51baca897e2ba54012c2265b3e79c2be09dbb4af82832769f3b4871f42615c9f",
+  "finishedAt": "2026-10-11T10:21:26.026Z",
+  "chromeProfiles": [
+    "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-03-gap-p1-1SJ2jN"
+  ],
+  "droppedFrames": 1,
+  "replayedFrames": 1,
+  "reorderedFrames": true,
+  "forwardedEvents": 3,
+  "eventFrames": 4,
+  "clientFrames": 10,
+  "exitCode": 0
+}

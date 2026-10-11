@@ -1,0 +1,96 @@
+    Checking markbridge-protocol v0.1.0 (D:\Documents\Code\Tauri\Markbridge\crates\protocol)
+    Checking markbridge-core v0.1.0 (D:\Documents\Code\Tauri\Markbridge\crates\core)
+error: the `Err`-variant returned from this closure is very large
+  --> crates\core\src\bridge\transport.rs:70:18
+   |
+70 |               -> std::result::Result<Response, ErrorResponse> {
+   |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the `Err`-variant is at least 136 bytes
+   |
+   = help: try reducing the size of `tokio_tungstenite::tungstenite::http::Response<std::option::Option<std::string::String>>`, for example by boxing large elements or replacing it with `Box<tokio_tungstenite::tungstenite::http::Response<std::option::Option<std::string::String>>>`
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#result_large_err
+   = note: `-D clippy::result-large-err` implied by `-D warnings`
+   = help: to override `-D warnings` add `#[allow(clippy::result_large_err)]`
+
+error: this `if` statement can be collapsed
+   --> crates\core\src\bridge\transport.rs:139:13
+    |
+139 | /             if let Ok(response) = response {
+140 | |                 if !matches!(
+141 | |                     timeout_at(deadline, send(&mut ws, response)).await,
+142 | |                     Ok(Ok(()))
+...   |
+146 | |             }
+    | |_____________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#collapsible_if
+    = note: `-D clippy::collapsible-if` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::collapsible_if)]`
+help: collapse nested if block
+    |
+139 ~             if let Ok(response) = response
+140 ~                 && !matches!(
+141 |                     timeout_at(deadline, send(&mut ws, response)).await,
+...
+144 |                     break;
+145 ~                 }
+    |
+
+error: this `if` statement can be collapsed
+   --> crates\core\src\bridge\transport.rs:170:13
+    |
+170 | /             if let Ok(response) = response {
+171 | |                 if !matches!(
+172 | |                     timeout_at(deadline, send(&mut ws, response)).await,
+173 | |                     Ok(Ok(()))
+...   |
+183 | |             }
+    | |_____________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#collapsible_if
+help: collapse nested if block
+    |
+170 ~             if let Ok(response) = response
+171 ~                 && !matches!(
+172 |                     timeout_at(deadline, send(&mut ws, response)).await,
+...
+181 |                     break;
+182 ~                 }
+    |
+
+error: this block may be rewritten with the `?` operator
+   --> crates\core\src\bridge\mod.rs:379:9
+    |
+379 | /         if let Err(error) = inner.storage()?.create_profile(identity.clone()).await {
+380 | |             return Err(error);
+381 | |         }
+    | |_________^ help: replace it with: `inner.storage()?.create_profile(identity.clone()).await?;`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#question_mark
+    = note: `-D clippy::question-mark` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::question_mark)]`
+
+error: this `if` statement can be collapsed
+   --> crates\core\src\bridge\mod.rs:569:9
+    |
+569 | /         if let Some(profile) = inner.profiles.get_mut(profile_id.as_str()) {
+570 | |             if profile.session.as_ref() == Some(session_id) {
+571 | |                 profile.disconnect();
+572 | |                 profile.view.error_code.0 = error;
+...   |
+575 | |         }
+    | |_________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#collapsible_if
+help: collapse nested if block
+    |
+569 ~         if let Some(profile) = inner.profiles.get_mut(profile_id.as_str())
+570 ~             && profile.session.as_ref() == Some(session_id) {
+571 |                 profile.disconnect();
+572 |                 profile.view.error_code.0 = error;
+573 |                 self.publish(&mut inner);
+574 ~             }
+    |
+
+error: could not compile `markbridge-core` (lib) due to 5 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `markbridge-core` (lib test) due to 5 previous errors

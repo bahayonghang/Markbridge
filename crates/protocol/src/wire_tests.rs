@@ -23,6 +23,21 @@ fn both_language_fixtures_roundtrip() {
     }
 }
 #[test]
+fn managed_folder_type_is_preserved_and_protected() {
+    let mut value = rust_fixture();
+    value["payload"]["nodes"][0]["folderType"] = json!("managed");
+    let WireMessage::TreeFull { payload, .. } = parse(&value).unwrap() else {
+        unreachable!()
+    };
+    assert_eq!(payload.nodes[0].folder_type, Some(FolderType::Managed));
+    assert!(
+        payload
+            .protected_ids()
+            .unwrap()
+            .contains(payload.nodes[0].chrome_id.as_str())
+    );
+}
+#[test]
 fn unknown_versions_mutations_extra_fields_missing_nullable_fields_and_bounds_reject() {
     let mut value = rust_fixture();
     value["protocolVersion"] = json!(2);

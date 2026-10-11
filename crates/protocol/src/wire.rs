@@ -174,6 +174,7 @@ pub enum FolderType {
     BookmarksBar,
     Other,
     Mobile,
+    Managed,
 }
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]

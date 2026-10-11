@@ -3,7 +3,7 @@
   "name": "mb-03-chrome-bridge",
   "title": "Chrome 扩展配对与实时同步",
   "description": "Chrome 扩展配对与实时同步；属于 Markbridge 父规划，独立验收并记录失败与恢复边界",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": "fullstack",
   "scope": "markbridge",
   "package": null,
@@ -12,7 +12,7 @@
   "assignee": "lyh",
   "createdAt": "2026-10-10",
   "completedAt": null,
-  "branch": null,
+  "branch": "main",
   "base_branch": "main",
   "worktree_path": null,
   "commit": null,
@@ -21,13 +21,20 @@
   "children": [],
   "parent": "10-10-markbridge-workspace",
   "relatedFiles": [
-    "apps/extension service worker/options/action",
-    "apps/desktop/src-tauri/bridge",
-    "crates/core sync",
+    "apps/extension",
+    "apps/desktop/src",
+    "apps/desktop/src-tauri/src/main.rs",
+    "crates/core/src/bridge",
+    "crates/core/src/storage",
+    "crates/core/examples/bridge_harness.rs",
+    "crates/core/examples/credential_probe.rs",
+    "crates/protocol",
     "packages/protocol",
-    "连接设置 UI"
+    "scripts/protocol.mjs",
+    "scripts/check-artifacts.mjs",
+    "tests/e2e/foundation.spec.ts"
   ],
-  "notes": "Planning only. Dependency order is documented and is not enforced automatically by Trellis. No product implementation or runtime validation has started.",
+  "notes": "AC03-1 through AC03-4 have receipts. V04 host sleep stays UNVERIFIED. Archive waits for that parent gate. No publication or daily Chrome changes.",
   "meta": {
     "sequence": "03",
     "milestone": "M1",
@@ -38,8 +45,9 @@
       "R02",
       "R03"
     ],
-    "implementation_approval": "not_granted",
-    "planning_status": "ready_for_review",
-    "delivery_scope": "windows_v1"
+    "implementation_approval": "granted",
+    "planning_status": "approved",
+    "delivery_scope": "windows_v1",
+    "approval_evidence": "Parent approval_evidence; dependencies and per-child acceptance remain required"
   }
 }

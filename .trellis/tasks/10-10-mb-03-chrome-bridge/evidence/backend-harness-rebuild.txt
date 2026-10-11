@@ -1,0 +1,2 @@
+   Compiling markbridge-core v0.1.0 (D:\Documents\Code\Tauri\Markbridge\crates\core)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.33s

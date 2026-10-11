@@ -1,0 +1,47 @@
+{
+  "runId": "0dab3e15-f02c-4b13-bed6-ef8333ccc59a",
+  "startedAt": "2026-10-11T05:34:41.354Z",
+  "scope": "disposable Chrome + production Rust Bridge, no Tauri GUI",
+  "controls": [
+    {
+      "control": "actual_chrome_B100_diagnostic",
+      "status": "PASS",
+      "bookmarks": 100,
+      "folders": 10,
+      "maxDepth": 13,
+      "seed": 20261010,
+      "chrome": "Chrome/155.0.8059.39",
+      "extensionId": "blbapbmincddiilocledaajcegiekbfk"
+    },
+    {
+      "control": "actual_extension_wrong_pair_token_zero_identity_writes",
+      "status": "PASS"
+    },
+    {
+      "control": "native_driver",
+      "status": "FAIL",
+      "errorCode": "PROFILE_NOT_LIVE"
+    },
+    {
+      "control": "failure_backend_state",
+      "status": "UNVERIFIED",
+      "profiles": [],
+      "pendingCount": 1
+    },
+    {
+      "control": "failure_extension_state",
+      "status": "UNVERIFIED",
+      "state": "error",
+      "nodeCount": 0,
+      "errorCode": "STORAGE_ERROR"
+    }
+  ],
+  "metrics": [],
+  "dataDirectory": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-03-app-nIylqR",
+  "credentialNamespace": "Markbridge.Task03.0dab3e15-f02c-4b13-bed6-ef8333ccc59a",
+  "failureCode": "PROFILE_NOT_LIVE",
+  "finishedAt": "2026-10-11T05:35:14.505Z",
+  "chromeProfiles": [
+    "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-03-p1-XH0IwU"
+  ]
+}

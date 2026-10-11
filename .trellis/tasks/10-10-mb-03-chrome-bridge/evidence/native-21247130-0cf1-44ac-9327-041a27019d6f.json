@@ -1,0 +1,61 @@
+{
+  "runId": "21247130-0cf1-44ac-9327-041a27019d6f",
+  "startedAt": "2026-10-11T10:01:04.249Z",
+  "scope": "disposable Chrome sort order via chrome.bookmarks.move; harness cache RPC; no HTML import or export; no bookmark manager; no 10000 corpus; no idle wait",
+  "command": "node .trellis/tasks/10-10-mb-03-chrome-bridge/evidence/chrome-sort-harness.mjs",
+  "priorFailures": [
+    "native-4ede64a3-99c2-44d6-8756-a3c58f58c159.json",
+    "native-0dab3e15-f02c-4b13-bed6-ef8333ccc59a.json"
+  ],
+  "controls": [
+    {
+      "control": "actual_chrome_move_child_order",
+      "status": "PASS",
+      "cacheOrder": [
+        "8",
+        "6",
+        "7"
+      ],
+      "chromeOrder": [
+        "8",
+        "6",
+        "7"
+      ]
+    }
+  ],
+  "cacheOrder": [
+    "8",
+    "6",
+    "7"
+  ],
+  "chromeOrder": [
+    "8",
+    "6",
+    "7"
+  ],
+  "ordersMatch": true,
+  "dataDirectory": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-03-sort-app-j55ag7",
+  "credentialNamespace": "Markbridge.Task03.21247130-0cf1-44ac-9327-041a27019d6f",
+  "chrome": "Chrome/155.0.8059.39",
+  "extensionId": "blbapbmincddiilocledaajcegiekbfk",
+  "profileId": "p:1532e85723e98e53f7072b94ddf740df516d33582beae99b65e9e3eed5467738",
+  "folderChromeId": "5",
+  "createdOrder": [
+    "6",
+    "7",
+    "8"
+  ],
+  "cachePositions": [
+    0,
+    1,
+    2
+  ],
+  "cachePositionsUnique": true,
+  "movedChromeId": "8",
+  "moveIndex": 0,
+  "finishedAt": "2026-10-11T10:01:06.116Z",
+  "chromeProfiles": [
+    "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-03-sort-p1-h3Co3D"
+  ],
+  "exitCode": 0
+}

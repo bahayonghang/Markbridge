@@ -152,7 +152,7 @@ export type ErrorCode =
   | 'CANCELLED';
 export type SourceEpoch = number;
 export type TimeSource = 'chrome_api' | 'chrome_file';
-export type FolderType = 'bookmarks-bar' | 'other' | 'mobile';
+export type FolderType = 'bookmarks-bar' | 'other' | 'mobile' | 'managed';
 export type NodeKind = 'folder' | 'bookmark';
 export type Position = number;
 export type Title = string;

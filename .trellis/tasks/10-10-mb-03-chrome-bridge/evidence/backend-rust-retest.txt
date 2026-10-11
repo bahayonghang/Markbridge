@@ -1,0 +1,42 @@
+   Compiling markbridge-protocol v0.1.0 (D:\Documents\Code\Tauri\Markbridge\crates\protocol)
+   Compiling markbridge-core v0.1.0 (D:\Documents\Code\Tauri\Markbridge\crates\core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.28s
+     Running unittests src\lib.rs (target\debug\deps\markbridge_core-fe079f1b957b4275.exe)
+
+running 17 tests
+test tests::startup_is_unpaired ... ok
+test bridge::tests::reorder_move_and_subtree_remove_preserve_positions ... ok
+test storage::tests::empty_database_enables_wal_foreign_keys_and_numbered_schema ... ok
+test storage::tests::unversioned_existing_data_is_preserved_and_rejected ... ok
+test storage::tests::newer_schema_is_rejected_without_journal_change_backup_or_file_mutation ... ok
+test bridge::tests::pairing_requires_confirmation_and_binds_origin_instance_and_expiry ... ok
+test storage::tests::invalid_tree_wrong_profile_stale_revision_and_interrupted_commit_keep_last_cache_cursor ... ok
+test bridge::tests::events_commit_once_and_gaps_require_full_reconciliation ... ok
+test storage::tests::mirror_namespace_and_operation_snapshot_fields_survive_reopen ... ok
+test bridge::tests::equal_chrome_ids_and_wrong_auth_never_cross_profiles ... ok
+test bridge::tests::reconnect_uses_persisted_revision_and_revocation_preserves_cache ... ok
+test storage::tests::profiles_epochs_duplicates_managed_and_sidecars_remain_separate ... ok
+test storage::tests::blocking_sqlite_worker_does_not_block_current_thread_async_runtime ... ok
+test storage::tests::backup_failure_stops_before_schema_changes ... ok
+test storage::tests::upgrade_backup_includes_uncheckpointed_wal_and_preserves_old_rows ... ok
+test storage::tests::failed_migration_rolls_back_schema_and_rows_then_real_upgrade_recovers ... ok
+test bridge::tests::real_websocket_rejects_headers_identity_version_and_unauthenticated_idle ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.14s
+
+     Running unittests src\lib.rs (target\debug\deps\markbridge_protocol-69e17b1395a74772.exe)
+
+running 10 tests
+test tests::startup_fixture_roundtrips_without_extra_fields ... ok
+test wire_tests::managed_folder_type_is_preserved_and_protected ... ok
+test wire_tests::time_sources_are_normalized_without_mixing_epochs ... ok
+test wire_tests::both_language_fixtures_roundtrip ... ok
+test wire_tests::mutation_variants_reject_extra_fields_and_accept_json_integer_notation ... ok
+test wire_tests::reorder_requires_expected_folder_sequence_and_receipts_bound_observed_sequences ... ok
+test wire_tests::event_variants_keep_complete_fields_and_reject_unknown_variants ... ok
+test wire_tests::unknown_versions_mutations_extra_fields_missing_nullable_fields_and_bounds_reject ... ok
+test wire_tests::frame_limit_counts_utf8_bytes_and_preserves_exact_boundary ... ok
+test wire_tests::tree_topology_depth_and_node_limits_are_runtime_enforced ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.19s
+

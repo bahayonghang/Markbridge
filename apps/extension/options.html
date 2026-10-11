@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Markbridge · 配对设置</title>
+  </head>
+  <body>
+    <main class="options">
+      <h1>Markbridge · 配对设置</h1>
+      <p id="status" role="status">正在读取连接状态</p>
+      <p id="details"></p>
+      <section>
+        <h2>连接本机桌面</h2>
+        <p>在 Markbridge 桌面创建配对串，粘贴到下方，再回到桌面确认扩展身份。配对串有效期为 120 秒。</p>
+        <form id="pair-form">
+          <label for="pairing-code">配对串</label>
+          <textarea id="pairing-code" rows="4" maxlength="4096" autocomplete="off" spellcheck="false" required></textarea>
+          <button id="pair" type="submit">开始配对</button>
+        </form>
+      </section>
+      <section>
+        <h2>连接恢复</h2>
+        <p>断线后桌面保留只读缓存。连接恢复后重新核对完整树。</p>
+        <button id="reconnect" type="button">重新连接</button>
+        <button id="forget" type="button">清除本机配对</button>
+        <p>清除后还需在桌面吊销对应资料。书签内容保持不变。</p>
+      </section>
+      <p id="error" role="alert"></p>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

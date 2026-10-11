@@ -66,6 +66,7 @@ fn tree(revision: u64) -> TreeSnapshot {
     nodes[1].folder_type = Some(FolderType::BookmarksBar);
     nodes[2].folder_type = Some(FolderType::BookmarksBar);
     nodes[5].unmodifiable = Some(Unmodifiable::Managed);
+    nodes[5].folder_type = Some(FolderType::Managed);
     TreeSnapshot {
         source_epoch: epoch(1),
         revision: count(revision),

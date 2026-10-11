@@ -35,6 +35,8 @@ test('generated validators run with string code generation disabled, as required
     import { readFileSync } from 'node:fs';
     import startup from ${JSON.stringify(new URL('startup-state.validator.js', generated).href)};
     import wire from ${JSON.stringify(new URL('wire-message.validator.js', generated).href)};
+    import bridge from ${JSON.stringify(new URL('bridge-state.validator.js', generated).href)};
+    import pairing from ${JSON.stringify(new URL('pairing-offer.validator.js', generated).href)};
     try {
     assert.throws(() => Function('return 1'), /Code generation from strings disallowed/);
     assert.equal(startup({protocolVersion:1,state:'unpaired'}), true);
@@ -42,6 +44,10 @@ test('generated validators run with string code generation disabled, as required
     const fixture = JSON.parse(readFileSync(new URL(${JSON.stringify(new URL('../tests/fixtures/protocol/rust-to-ts.json', import.meta.url).href)}), 'utf8'));
     assert.equal(wire(fixture), true);
     assert.equal(wire({...fixture, protocolVersion:2}), false);
+    assert.equal(bridge({protocolVersion:1,revision:0,port:49153,errorCode:null,profiles:[],pending:[]}), true);
+    assert.equal(bridge({protocolVersion:1,revision:0.5,port:49153,errorCode:null,profiles:[],pending:[]}), false);
+    assert.equal(pairing({profileId:'profile-test',pairingCode:'fixture',expiresAt:1}), true);
+    assert.equal(pairing({profileId:'profile-test',pairingCode:'fixture',expiresAt:-1}), false);
     } catch (error) { console.error(error.name + ': ' + error.message); process.exit(1); }
   `;
   const result = spawnSync(process.execPath, ['--disallow-code-generation-from-strings', '--input-type=module', '--eval', source], { encoding: 'utf8' });

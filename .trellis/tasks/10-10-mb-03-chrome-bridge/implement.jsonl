@@ -7,3 +7,6 @@
 {"file":".trellis/tasks/10-10-markbridge-workspace/research/environment.md","reason":"Observed tooling and unverified native prerequisites"}
 {"file":".trellis/tasks/10-10-markbridge-workspace/design.md","reason":"Shared approved-on-review architecture and cross-task contracts"}
 {"file":".trellis/tasks/10-10-markbridge-workspace/verification.md","reason":"Formal parent acceptance matrix and evidence boundaries"}
+{"file":".trellis/tasks/10-10-mb-03-chrome-bridge/integration-contract.md","reason":"Task03 IPC, pairing handshake and layer ownership contract"}
+{"file":".trellis/spec/backend/database-guidelines.md","reason":"Atomic cache and cursor updates, revision ownership"}
+{"file":".trellis/spec/frontend/type-safety.md","reason":"Generated DTO, schema and standalone validator source of truth"}
