@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AiConnection",
+  "type": "object",
+  "properties": {
+    "failure": {
+      "$ref": "#/$defs/RequiredNullable2"
+    },
+    "failureMessage": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 80
+    },
+    "ok": {
+      "type": "boolean"
+    },
+    "schemaSupported": {
+      "$ref": "#/$defs/RequiredNullable"
+    },
+    "settings": {
+      "$ref": "#/$defs/AiSettings"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "ok",
+    "schemaSupported",
+    "failure",
+    "failureMessage",
+    "settings"
+  ],
+  "$defs": {
+    "AiFailure": {
+      "type": "string",
+      "enum": [
+        "DISABLED",
+        "ENDPOINT_DENIED",
+        "MISSING_MODEL",
+        "INVALID_OUTPUT",
+        "TIMED_OUT",
+        "RATE_LIMITED",
+        "CANCELLED",
+        "STALE_TARGET",
+        "UNREACHABLE"
+      ]
+    },
+    "AiProviderKind": {
+      "type": "string",
+      "enum": [
+        "ollama",
+        "compatible"
+      ]
+    },
+    "AiSettings": {
+      "type": "object",
+      "properties": {
+        "credentialConfigured": {
+          "type": "boolean"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "endpointLabel": {
+          "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 512
+        },
+        "model": {
+          "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 128
+        },
+        "provider": {
+          "$ref": "#/$defs/RequiredNullable3"
+        },
+        "schemaSupported": {
+          "$ref": "#/$defs/RequiredNullable"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "enabled",
+        "provider",
+        "endpointLabel",
+        "model",
+        "credentialConfigured",
+        "schemaSupported"
+      ]
+    },
+    "RequiredNullable": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "RequiredNullable2": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AiFailure"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "RequiredNullable3": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AiProviderKind"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

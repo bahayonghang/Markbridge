@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AiSettings",
+  "type": "object",
+  "properties": {
+    "credentialConfigured": {
+      "type": "boolean"
+    },
+    "enabled": {
+      "type": "boolean"
+    },
+    "endpointLabel": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 512
+    },
+    "model": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 128
+    },
+    "provider": {
+      "$ref": "#/$defs/RequiredNullable"
+    },
+    "schemaSupported": {
+      "$ref": "#/$defs/RequiredNullable2"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "enabled",
+    "provider",
+    "endpointLabel",
+    "model",
+    "credentialConfigured",
+    "schemaSupported"
+  ],
+  "$defs": {
+    "AiProviderKind": {
+      "type": "string",
+      "enum": [
+        "ollama",
+        "compatible"
+      ]
+    },
+    "RequiredNullable": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AiProviderKind"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "RequiredNullable2": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "type": [
+        "boolean",
+        "null"
+      ]
+    }
+  }
+}

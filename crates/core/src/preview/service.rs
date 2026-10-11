@@ -90,7 +90,7 @@ pub(crate) async fn load_content_preview(
             ));
         }
     };
-    let fingerprint = fingerprint(&checked.url);
+    let fingerprint = url_fingerprint(&checked.url);
     let fetched =
         fetch::fetch_public(checked.url.as_str(), ResourceKind::Document, flag, net).await;
     if flag.is_cancelled() {
@@ -405,7 +405,7 @@ fn sniff(bytes: &[u8]) -> Option<ImageMediaType> {
     }
 }
 
-fn fingerprint(url: &url::Url) -> String {
+pub(crate) fn url_fingerprint(url: &url::Url) -> String {
     let mut clean = url.clone();
     clean.set_fragment(None);
     let _ = clean.set_username("");

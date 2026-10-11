@@ -3,7 +3,7 @@
   "name": "mb-10-ai-assistance",
   "title": "AI 单条建议、端点与隐私控制",
   "description": "AI 单条建议、端点与隐私控制；属于 Markbridge 父规划，独立验收并记录失败与恢复边界",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": "fullstack",
   "scope": "markbridge",
   "package": null,
@@ -12,7 +12,7 @@
   "assignee": "lyh",
   "createdAt": "2026-10-10",
   "completedAt": null,
-  "branch": null,
+  "branch": "main",
   "base_branch": "main",
   "worktree_path": null,
   "commit": null,
@@ -21,12 +21,21 @@
   "children": [],
   "parent": "10-10-markbridge-workspace",
   "relatedFiles": [
-    "apps/desktop/src-tauri ai/provider/secret storage",
-    "crates/core ai jobs/schema",
-    "apps/desktop/src/features/ai/settings",
-    "测试 provider"
+    "crates/protocol/src/ai.rs",
+    "crates/core/src/ai/service.rs",
+    "crates/core/src/storage/ai.rs",
+    "crates/core/src/bridge/ai.rs",
+    "apps/desktop/src-tauri/src/main.rs",
+    "apps/desktop/src/features/ai/AiSettings.tsx",
+    "apps/desktop/src/features/ai/AiSuggest.tsx",
+    "packages/protocol/src/ai.ts",
+    ".trellis/spec/project-baseline.md",
+    ".trellis/spec/backend/database-guidelines.md",
+    ".trellis/spec/backend/logging-guidelines.md",
+    ".trellis/spec/backend/error-handling.md",
+    ".trellis/spec/frontend/state-management.md"
   ],
-  "notes": "Planning only. Dependency order is documented and is not enforced automatically by Trellis. No product implementation or runtime validation has started.",
+  "notes": "Implementation is in progress. AI is off by default. Model keys use Markbridge.Model. Scripted fixtures cover bad schema, overlong values, injection, cancel, and 429. AC10-4, the prepared-model clause of AC10-5, and the V12 10-page clause stay UNVERIFIED because this machine has no ollama command and no model was installed.",
   "meta": {
     "sequence": "10",
     "milestone": "M3",
@@ -39,8 +48,9 @@
       "R09",
       "R12"
     ],
-    "implementation_approval": "not_granted",
-    "planning_status": "ready_for_review",
-    "delivery_scope": "windows_v1"
+    "implementation_approval": "granted",
+    "planning_status": "approved",
+    "delivery_scope": "windows_v1",
+    "approval_evidence": "Parent approval_evidence; dependencies and per-child acceptance remain required"
   }
 }

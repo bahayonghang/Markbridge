@@ -1,0 +1,199 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AiSuggestion",
+  "type": "object",
+  "properties": {
+    "bookmarkId": {
+      "$ref": "#/$defs/Id"
+    },
+    "chromeId": {
+      "$ref": "#/$defs/Id"
+    },
+    "endpointLabel": {
+      "$ref": "#/$defs/RequiredNullable"
+    },
+    "evidence": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 200
+    },
+    "failure": {
+      "$ref": "#/$defs/RequiredNullable3"
+    },
+    "failureMessage": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 80
+    },
+    "inputFingerprint": {
+      "$ref": "#/$defs/Id"
+    },
+    "jobId": {
+      "$ref": "#/$defs/Id"
+    },
+    "model": {
+      "$ref": "#/$defs/RequiredNullable"
+    },
+    "profileId": {
+      "$ref": "#/$defs/Id"
+    },
+    "scope": {
+      "$ref": "#/$defs/AiScope"
+    },
+    "sourceTime": {
+      "$ref": "#/$defs/RequiredNullable2"
+    },
+    "state": {
+      "$ref": "#/$defs/AiJobState"
+    },
+    "suggestedFolder": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 60
+    },
+    "summary": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 1000
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 3
+    },
+    "title": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 60
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "jobId",
+    "profileId",
+    "bookmarkId",
+    "chromeId",
+    "inputFingerprint",
+    "endpointLabel",
+    "model",
+    "scope",
+    "state",
+    "title",
+    "tags",
+    "summary",
+    "suggestedFolder",
+    "evidence",
+    "sourceTime",
+    "failure",
+    "failureMessage"
+  ],
+  "$defs": {
+    "AiFailure": {
+      "type": "string",
+      "enum": [
+        "DISABLED",
+        "ENDPOINT_DENIED",
+        "MISSING_MODEL",
+        "INVALID_OUTPUT",
+        "TIMED_OUT",
+        "RATE_LIMITED",
+        "CANCELLED",
+        "STALE_TARGET",
+        "UNREACHABLE"
+      ]
+    },
+    "AiJobState": {
+      "type": "string",
+      "enum": [
+        "ready",
+        "failed",
+        "cancelled",
+        "applied"
+      ]
+    },
+    "AiScope": {
+      "type": "object",
+      "properties": {
+        "excerptChars": {
+          "type": "integer",
+          "format": "uint16",
+          "maximum": 65535,
+          "minimum": 0
+        },
+        "includesCachedText": {
+          "type": "boolean"
+        },
+        "includesTitle": {
+          "type": "boolean"
+        },
+        "includesUrl": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "includesTitle",
+        "includesUrl",
+        "includesCachedText",
+        "excerptChars"
+      ]
+    },
+    "Counter": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 9007199254740991,
+      "minimum": 0
+    },
+    "Id": {
+      "type": "string",
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*(?![\\s\\S])"
+    },
+    "RequiredNullable": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "RequiredNullable2": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Counter"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "RequiredNullable3": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AiFailure"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

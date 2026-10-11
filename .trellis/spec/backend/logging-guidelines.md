@@ -17,3 +17,5 @@ Exclude tokens, keys, headers, page text, full titles, query strings, fragments,
 Require redacted user-selected diagnostic exports. Record app, browser, protocol, and schema versions in receipts. Bound log size and retention. Do not add telemetry.
 
 Public page fetch does not log the URL, query, fragment, headers, title, page text, or image bytes.
+
+AI audit lines are JSON objects with `event`, `profileId`, `jobId`, `code`, and `elapsedMs`. They omit the endpoint, bearer, secret, headers, body, title, query, fragment, and page text. The in-memory buffer keeps 50 lines. Model transport errors are not written with `Display`.

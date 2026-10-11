@@ -18,6 +18,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Some("title-encoding") => schemars::schema_for!(markbridge_protocol::TitleEncodingPreview),
         Some("content-preview") => schemars::schema_for!(markbridge_protocol::ContentPreview),
         Some("web-preview") => schemars::schema_for!(markbridge_protocol::WebPreviewState),
+        Some("ai-settings") => schemars::schema_for!(markbridge_protocol::AiSettings),
+        Some("ai-connection") => schemars::schema_for!(markbridge_protocol::AiConnection),
+        Some("ai-suggestion") => schemars::schema_for!(markbridge_protocol::AiSuggestion),
+        Some("ai-apply") => schemars::schema_for!(markbridge_protocol::AiApplyResult),
         _ => schemars::schema_for!(markbridge_protocol::StartupState),
     };
     println!("{}", serde_json::to_string_pretty(&schema)?);

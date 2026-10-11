@@ -46,6 +46,8 @@ pub mod bridge;
 pub use bridge::*;
 pub mod preview;
 pub use preview::*;
+pub mod ai;
+pub use ai::*;
 
 #[cfg(test)]
 mod wire_tests;

@@ -1,7 +1,7 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import { invoke, isTauri } from '@tauri-apps/api/core';
 import { listen, type Event } from '@tauri-apps/api/event';
-import { applyEdit, applyTitleEncoding, beginPairing, clearWebPreviewSession, enumerateChromeUserData, exportHtml, getBridgeState, getMirrorTree, openHttpUrl, openWebPreview, previewEdit, previewTitleEncoding, readCacheCount, readCacheList, readCacheNode, readCacheSearch, readCacheTree, readTagState, startBridge, subscribeBridgeState, subscribeWebPreview, tagCommand, webPreviewAction, webPreviewState } from './backend';
+import { aiSettings, applyAi, applyEdit, applyTitleEncoding, beginPairing, cancelAi, clearAiCredential, clearWebPreviewSession, enumerateChromeUserData, exportHtml, getBridgeState, getMirrorTree, openHttpUrl, openWebPreview, previewEdit, previewTitleEncoding, readCacheCount, readCacheList, readCacheNode, readCacheSearch, readCacheTree, readTagState, saveAiConfig, setAiCredential, startBridge, subscribeBridgeState, subscribeWebPreview, suggestAi, tagCommand, testAiConnection, webPreviewAction, webPreviewState } from './backend';
 
 vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn(), isTauri: vi.fn() }));
 vi.mock('@tauri-apps/api/event', () => ({ listen: vi.fn() }));
@@ -26,6 +26,14 @@ it('browser preview never invokes or subscribes to native endpoints', async () =
   await expect(exportHtml('profile-a')).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
   await expect(readTagState('profile-a', ['10'], null)).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
   await expect(tagCommand('profile-a', { kind: 'add', chromeIds: ['10'], name: '工作' })).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
+  await expect(aiSettings()).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
+  await expect(saveAiConfig(false, '', '', '')).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
+  await expect(setAiCredential('sk-test-secret')).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
+  await expect(clearAiCredential()).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
+  await expect(testAiConnection()).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
+  await expect(suggestAi('profile-a', '10', 'ai1')).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
+  await expect(cancelAi('ai1')).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
+  await expect(applyAi({ jobId: 'ai1', profileId: 'profile-a', chromeId: '10', inputFingerprint: 'a', title: '标题', tags: [], summary: null, applyTitle: false, applyTags: false, applySummary: false })).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
   await expect(previewTitleEncoding('profile-a', 1, ['10'], false)).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
   await expect(applyTitleEncoding('profile-a', 1, ['10'], false)).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
   await expect(webPreviewState()).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');

@@ -17,3 +17,5 @@ Keep the last valid cache when a file is temporarily invalid. Show source freshn
 AI and page failures must not disable local browsing or tags. Cancellation prevents late results from applying. Avoid duplicate retry layers.
 
 Content preview failures use `failure` and `failureMessage` on `ContentPreview`. The 10 second timeout message is `抓取超过 10 秒`. `cancel_content_preview` returns no page body. A cancelled preview has null title, summary, and image.
+
+AI failures use `failure` and `failureMessage` on `AiConnection`, `AiSuggestion`, and `AiApplyResult`. Invalid JSON, overlong fields, unknown fields, timeout, HTTP 429, and cancel do not write bookmarks. A credential read failure returns `无法读取已保存的凭据。没有发送请求。` and does not call the endpoint. A profile, URL, revision, endpoint, or model mismatch returns `STALE_TARGET`. A title apply while the profile is not live returns `READ_ONLY` before the job is claimed. At most one format repair runs. Timeout, 429, and cancel do not repair.

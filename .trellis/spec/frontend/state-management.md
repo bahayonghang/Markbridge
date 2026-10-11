@@ -19,3 +19,5 @@ Documentation fixture:
 ```
 
 No state library is installed. Additional dependencies need an actual shared-state requirement. An AI response remains a proposal until a confirmed apply receipt exists.
+
+`AiSettings` may call `ai_settings` on mount. It does not call the model until the user tests the connection. The model key uses an uncontrolled password input and is cleared before the result is rendered. `AiSuggest` calls `suggest_ai` only from the generate button. A profile, bookmark, URL, or revision change drops the draft and cancels the in-flight request. Folder text is display-only. Confirmed title undo uses the existing edit undo action.

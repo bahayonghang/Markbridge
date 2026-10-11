@@ -5,6 +5,7 @@ import {
   detachFileMirror, enumerateChromeUserData, hasNativeBridge,
   reconnectProfile, rescanFileMirrors, revokePairing, startBridge,
 } from './backend';
+import { AiSettings } from './features/ai/AiSettings';
 import { LibraryWorkspace } from './features/library/LibraryWorkspace';
 import { useBridge } from './useBridge';
 
@@ -122,6 +123,7 @@ export function App() {
         ) : (
           <>
             {!native && <p className="preview-note">浏览器预览 · 仅显示界面。配对和连接操作需在桌面应用中进行。</p>}
+            <AiSettings native={native} />
             <LibraryWorkspace state={state} invalid={error === 'event'} native={native} focusMirrorId={focusMirror} />
             {(message || state?.errorCode || error === 'event') && <p className="notice" role="alert">
               {message ?? (error === 'event' ? '收到无效连接状态。请重新打开应用。' : safeError(state?.errorCode ?? null))}

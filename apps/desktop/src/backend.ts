@@ -3,8 +3,8 @@ import { listen } from '@tauri-apps/api/event';
 import {
   parseApplyResult, parseBridgeState, parseChromeProfileList, parseEditDocument, parseEditPreview,
   parseLibraryCount, parseLibraryDetail, parseLibraryNodes, parseLibraryPage, parseLibrarySearch,
-  parseContentPreview, parseMirrorTree, parseOperationList, parsePairingOffer, parseStartupState, parseTagCatalog, parseTitleEncoding, parseWebPreview,
-  type ApplyResult, type BridgeState, type ChromeProfileList, type ContentPreview, type EditDocument, type EditPreview,
+  parseAiApply, parseAiConnection, parseAiSettings, parseAiSuggestion, parseContentPreview, parseMirrorTree, parseOperationList, parsePairingOffer, parseStartupState, parseTagCatalog, parseTitleEncoding, parseWebPreview,
+  type AiApplyResult, type AiConnection, type AiSettings, type AiSuggestion, type ApplyResult, type BridgeState, type ChromeProfileList, type ContentPreview, type EditDocument, type EditPreview,
   type LibraryCount, type LibraryDetail, type LibraryNodes, type LibraryPage, type LibrarySearch,
   type MirrorTree, type OperationList, type PairingOffer, type StartupState, type TagCatalog, type TitleEncodingPreview, type WebPreviewState,
 } from '@markbridge/protocol';
@@ -192,6 +192,59 @@ export async function previewTitleEncoding(profileId: string, expectedRevision: 
 export async function readContentPreview(profileId: string, chromeId: string, requestId: string): Promise<ContentPreview> {
   if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
   return parseContentPreview(await invoke<unknown>('content_preview', { profileId, chromeId, requestId }));
+}
+
+export interface AiDraft {
+  jobId: string;
+  profileId: string;
+  chromeId: string;
+  inputFingerprint: string;
+  title: string;
+  tags: string[];
+  summary: string | null;
+  applyTitle: boolean;
+  applyTags: boolean;
+  applySummary: boolean;
+}
+
+export async function aiSettings(): Promise<AiSettings> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseAiSettings(await invoke<unknown>('ai_settings'));
+}
+
+export async function saveAiConfig(enabled: boolean, provider: string, baseUrl: string, model: string): Promise<AiSettings> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseAiSettings(await invoke<unknown>('save_ai_config', { enabled, provider, baseUrl, model }));
+}
+
+export async function setAiCredential(secret: string): Promise<AiSettings> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseAiSettings(await invoke<unknown>('set_ai_credential', { secret }));
+}
+
+export async function clearAiCredential(): Promise<AiSettings> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseAiSettings(await invoke<unknown>('clear_ai_credential'));
+}
+
+export async function testAiConnection(): Promise<AiConnection> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseAiConnection(await invoke<unknown>('test_ai_connection'));
+}
+
+export async function suggestAi(profileId: string, chromeId: string, requestId: string): Promise<AiSuggestion> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseAiSuggestion(await invoke<unknown>('suggest_ai', { profileId, chromeId, requestId }));
+}
+
+export async function cancelAi(requestId: string): Promise<void> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  await invoke('cancel_ai', { requestId });
+}
+
+export async function applyAi(draft: AiDraft): Promise<AiApplyResult> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseAiApply(await invoke<unknown>('apply_ai', { draft }));
 }
 
 export async function cancelContentPreview(requestId: string): Promise<void> {

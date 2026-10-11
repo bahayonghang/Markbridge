@@ -64,3 +64,5 @@ Migration tests must initialize an empty database, upgrade a populated v1 fixtur
 Incorrect: replace cache rows, commit, then update a cursor in another transaction. Correct: validate the snapshot, write cache and cursor in one transaction, then publish the committed revision in the later adapter.
 
 Incorrect: reuse sidecar metadata because two bookmarks have the same URL. Correct: resolve metadata only through bookmark_id under the Profile and epoch identity.
+
+Child 10 stores AI configuration in `settings` and one suggestion in `ai_jobs`. There is no new migration. `ai.credential_ref` stores the reference `ai-model-key` only. The secret stays in the OS credential service `Markbridge.Model`. `set_summary` updates `summary` and `updated_at` and preserves `note`. A job moves `running` to `ready`, `failed`, or `cancelled`. Apply claims `ready` to `applying` before any write. Cancel matches `running` or `ready` and clears `proposal`. `finish_ai_job` updates a row only while it is `running`.

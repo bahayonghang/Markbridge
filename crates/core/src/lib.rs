@@ -21,6 +21,7 @@ mod tests {
     }
 }
 
+pub mod ai;
 pub mod bridge;
 pub mod editing;
 pub mod mirror;

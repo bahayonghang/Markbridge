@@ -1,0 +1,210 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AiApplyResult",
+  "type": "object",
+  "properties": {
+    "browser": {
+      "$ref": "#/$defs/RequiredNullable"
+    },
+    "failure": {
+      "$ref": "#/$defs/RequiredNullable4"
+    },
+    "failureMessage": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 80
+    },
+    "jobId": {
+      "$ref": "#/$defs/Id"
+    },
+    "summaryApplied": {
+      "type": "boolean"
+    },
+    "tagsApplied": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "jobId",
+    "browser",
+    "tagsApplied",
+    "summaryApplied",
+    "failure",
+    "failureMessage"
+  ],
+  "$defs": {
+    "AiFailure": {
+      "type": "string",
+      "enum": [
+        "DISABLED",
+        "ENDPOINT_DENIED",
+        "MISSING_MODEL",
+        "INVALID_OUTPUT",
+        "TIMED_OUT",
+        "RATE_LIMITED",
+        "CANCELLED",
+        "STALE_TARGET",
+        "UNREACHABLE"
+      ]
+    },
+    "ApplyResult": {
+      "type": "object",
+      "properties": {
+        "conflicts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/OperationConflict"
+          },
+          "maxItems": 50
+        },
+        "errorCode": {
+          "$ref": "#/$defs/RequiredNullable2"
+        },
+        "operationId": {
+          "$ref": "#/$defs/Id"
+        },
+        "state": {
+          "$ref": "#/$defs/OperationState"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "operationId",
+        "state",
+        "errorCode",
+        "conflicts"
+      ]
+    },
+    "EditField": {
+      "type": "string",
+      "enum": [
+        "title",
+        "url",
+        "parent",
+        "position",
+        "order",
+        "existence"
+      ]
+    },
+    "ErrorCode": {
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "INVALID_MESSAGE",
+            "UNSUPPORTED_VERSION",
+            "FRAME_TOO_LARGE",
+            "LIMIT_EXCEEDED",
+            "INVALID_TREE",
+            "UNPAIRED",
+            "READ_ONLY",
+            "WRONG_PROFILE",
+            "STALE_PROPOSAL",
+            "PROTECTED_NODE",
+            "UNCERTAIN_WRITE",
+            "FETCH_DENIED",
+            "INVALID_AI_OUTPUT",
+            "STORAGE_ERROR",
+            "STORAGE_NEWER_SCHEMA",
+            "MIGRATION_FAILED",
+            "CONFLICT",
+            "CANCELLED"
+          ]
+        },
+        {
+          "description": "The selected Chrome directory is missing, unreadable, or not a User Data directory.",
+          "type": "string",
+          "const": "PATH_UNAVAILABLE"
+        }
+      ]
+    },
+    "Id": {
+      "type": "string",
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*(?![\\s\\S])"
+    },
+    "OperationConflict": {
+      "type": "object",
+      "properties": {
+        "chromeId": {
+          "$ref": "#/$defs/RequiredNullable3"
+        },
+        "field": {
+          "$ref": "#/$defs/EditField"
+        },
+        "requestId": {
+          "$ref": "#/$defs/Id"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "requestId",
+        "chromeId",
+        "field"
+      ]
+    },
+    "OperationState": {
+      "type": "string",
+      "enum": [
+        "planned",
+        "applying",
+        "applied",
+        "uncertain",
+        "partial",
+        "failed",
+        "rolling_back",
+        "rolled_back",
+        "rollback_conflict"
+      ]
+    },
+    "RequiredNullable": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ApplyResult"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "RequiredNullable2": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ErrorCode"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "RequiredNullable3": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Id"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "RequiredNullable4": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AiFailure"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

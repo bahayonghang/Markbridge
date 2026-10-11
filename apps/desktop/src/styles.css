@@ -32,8 +32,8 @@ main { width: 100%; max-width: 1440px; margin: 0 auto; }
 .library-url { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #5e6861; font-size: 12px; }
 .library-detail-title { margin: 0 0 8px; font-size: 16px; }
 .library-path { margin: 0 0 8px; padding-left: 18px; }
-.edit-desk, .tag-desk, .content-preview, .web-preview { margin-top: 16px; }
-.content-preview h4, .web-preview h4 { margin: 0 0 8px; font-size: 16px; }
+.edit-desk, .tag-desk, .content-preview, .web-preview, .ai-desk { margin-top: 16px; }
+.content-preview h4, .web-preview h4, .ai-desk h4 { margin: 0 0 8px; font-size: 16px; }
 .content-preview img { display: block; max-width: 100%; height: auto; margin-top: 8px; }
 .edit-desk label, .tag-desk label { display: block; margin-bottom: 8px; }
 .edit-desk input, .tag-desk input, .tag-desk select, .tag-desk textarea { width: min(100%, 280px); }

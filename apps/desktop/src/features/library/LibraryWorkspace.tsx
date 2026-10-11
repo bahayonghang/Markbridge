@@ -4,6 +4,7 @@ import {
   getMirrorTree, openHttpUrl, readCacheCount, readCacheList, readCacheNode, readCacheSearch, readCacheTree,
   type EditAction,
 } from '../../backend';
+import { AiSuggest } from '../ai/AiSuggest';
 import { ContentPreviewPanel } from '../preview/ContentPreview';
 import { WebPreviewPanel } from '../preview/WebPreview';
 import { EditDesk } from './EditDesk';
@@ -616,6 +617,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId }: {
             {!isHttpUrl(detailView.url) && <p className="secondary">仅打开 http 或 https 链接。</p>}
             {profile && detailView.kind === 'bookmark' && <>
               <ContentPreviewPanel profileId={profile.profileId} chromeId={detailView.chromeId} url={detailView.url ?? null} />
+              <AiSuggest profileId={profile.profileId} chromeId={detailView.chromeId} url={detailView.url ?? null} revision={profile.revision} />
               <WebPreviewPanel profileId={profile.profileId} profileName={profile.displayName} chromeId={detailView.chromeId} url={detailView.url ?? null} native={native} />
             </>}
           </>}

@@ -1,4 +1,5 @@
 //! Authenticated loopback bridge. Browser mutations are sent to the extension; this process does not call Chrome.
+mod ai;
 pub mod credentials;
 mod edit;
 mod file_mirror;
@@ -27,6 +28,10 @@ pub struct Bridge {
     inner: Arc<Mutex<Inner>>,
     state: watch::Sender<BridgeState>,
     credentials: Arc<dyn CredentialStore>,
+    model_credentials: Arc<dyn CredentialStore>,
+    model_transport: Arc<dyn crate::ai::ModelTransport>,
+    ai_gate: crate::ai::Gate,
+    ai_audit: crate::ai::Audit,
     lifecycle: Arc<Mutex<()>>,
     watches: Arc<Mutex<BTreeMap<String, file_mirror::Watch>>>,
     preview: Gate,
@@ -104,6 +109,31 @@ impl Bridge {
         path: impl AsRef<Path>,
         credentials: Arc<dyn CredentialStore>,
     ) -> Result<Self> {
+        Self::open_with_ai(
+            path,
+            credentials,
+            Arc::new(ai::EmptyCredentials),
+            Arc::new(crate::ai::IdleTransport),
+        )
+        .await
+    }
+
+    /// Production model store. The service name is `MODEL_CREDENTIAL_SERVICE`, not the pairing namespace.
+    pub async fn open_with_model_store(
+        path: impl AsRef<Path>,
+        credentials: Arc<dyn CredentialStore>,
+        models: Arc<dyn CredentialStore>,
+    ) -> Result<Self> {
+        let transport = Arc::new(crate::ai::ReqwestTransport::new()?);
+        Self::open_with_ai(path, credentials, models, transport).await
+    }
+
+    pub(crate) async fn open_with_ai(
+        path: impl AsRef<Path>,
+        credentials: Arc<dyn CredentialStore>,
+        model_credentials: Arc<dyn CredentialStore>,
+        model_transport: Arc<dyn crate::ai::ModelTransport>,
+    ) -> Result<Self> {
         let path = path.as_ref();
         let backup_dir = path
             .parent()
@@ -174,6 +204,10 @@ impl Bridge {
             inner: Arc::new(Mutex::new(inner)),
             state: state_tx,
             credentials,
+            model_credentials,
+            model_transport,
+            ai_gate: crate::ai::Gate::default(),
+            ai_audit: crate::ai::Audit::default(),
             lifecycle: Arc::new(Mutex::new(())),
             watches: Arc::new(Mutex::new(BTreeMap::new())),
             preview: Gate::default(),
@@ -361,6 +395,7 @@ impl Bridge {
     pub async fn shutdown(&self) -> Result<()> {
         let _lifecycle = self.lifecycle.lock().await;
         self.preview.cancel_all().await;
+        self.ai_gate.cancel_all().await;
         self.stop_watches().await;
         let listener = {
             let mut inner = self.inner.lock().await;

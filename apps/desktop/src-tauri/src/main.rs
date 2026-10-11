@@ -2,10 +2,10 @@
 
 use markbridge_core::bridge::{Bridge, CacheTreeNode, credentials::OsCredentialStore};
 use markbridge_protocol::{
-    ApplyResult, BookmarkNode, BridgeState, ChromeProfileList, ContentPreview, Counter, EditAction,
-    EditDocument, EditPreview, ErrorCode, Id, LibraryCount, LibraryDetail, LibraryNodes,
-    LibraryPage, LibrarySearch, MirrorTree, OperationList, PairingOffer, TagCatalog, TagCommand,
-    TitleEncodingPreview,
+    AiApplyResult, AiConnection, AiDraft, AiSettings, AiSuggestion, ApplyResult, BookmarkNode,
+    BridgeState, ChromeProfileList, ContentPreview, Counter, EditAction, EditDocument, EditPreview,
+    ErrorCode, Id, LibraryCount, LibraryDetail, LibraryNodes, LibraryPage, LibrarySearch,
+    MirrorTree, OperationList, PairingOffer, TagCatalog, TagCommand, TitleEncodingPreview,
 };
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -463,6 +463,90 @@ async fn apply_title_encoding(
 }
 
 #[tauri::command]
+async fn ai_settings(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+) -> Result<AiSettings, ErrorCode> {
+    trusted(&window)?;
+    bridge.ai_settings().await
+}
+
+#[tauri::command]
+async fn save_ai_config(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    enabled: bool,
+    provider: String,
+    base_url: String,
+    model: String,
+) -> Result<AiSettings, ErrorCode> {
+    trusted(&window)?;
+    bridge
+        .save_ai_config(enabled, provider, base_url, model)
+        .await
+}
+
+#[tauri::command]
+async fn set_ai_credential(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    secret: String,
+) -> Result<AiSettings, ErrorCode> {
+    trusted(&window)?;
+    bridge.set_ai_credential(secret).await
+}
+
+#[tauri::command]
+async fn clear_ai_credential(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+) -> Result<AiSettings, ErrorCode> {
+    trusted(&window)?;
+    bridge.clear_ai_credential().await
+}
+
+#[tauri::command]
+async fn test_ai_connection(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+) -> Result<AiConnection, ErrorCode> {
+    trusted(&window)?;
+    bridge.test_ai_connection().await
+}
+
+#[tauri::command]
+async fn suggest_ai(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    profile_id: Id,
+    chrome_id: Id,
+    request_id: Id,
+) -> Result<AiSuggestion, ErrorCode> {
+    trusted(&window)?;
+    bridge.suggest_ai(profile_id, chrome_id, request_id).await
+}
+
+#[tauri::command]
+async fn cancel_ai(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    request_id: Id,
+) -> Result<(), ErrorCode> {
+    trusted(&window)?;
+    bridge.cancel_ai(request_id).await
+}
+
+#[tauri::command]
+async fn apply_ai(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    draft: AiDraft,
+) -> Result<AiApplyResult, ErrorCode> {
+    trusted(&window)?;
+    bridge.apply_ai(draft).await
+}
+
+#[tauri::command]
 async fn content_preview(
     window: tauri::WebviewWindow,
     bridge: tauri::State<'_, Bridge>,
@@ -548,9 +632,12 @@ fn main() {
             let directory = database_directory(app)?;
             app.manage(preview::PreviewHost::new(directory.clone())?);
             let namespace = credential_namespace()?;
-            let bridge = tauri::async_runtime::block_on(Bridge::open(
+            let bridge = tauri::async_runtime::block_on(Bridge::open_with_model_store(
                 directory.join("markbridge.sqlite"),
                 Arc::new(OsCredentialStore::new(namespace)),
+                Arc::new(OsCredentialStore::new(
+                    markbridge_core::ai::MODEL_CREDENTIAL_SERVICE.to_owned(),
+                )),
             ))?;
             let mut states = bridge.subscribe();
             let handle = app.handle().clone();
@@ -594,6 +681,14 @@ fn main() {
             tag_command,
             preview_title_encoding,
             apply_title_encoding,
+            ai_settings,
+            save_ai_config,
+            set_ai_credential,
+            clear_ai_credential,
+            test_ai_connection,
+            suggest_ai,
+            cancel_ai,
+            apply_ai,
             content_preview,
             cancel_content_preview,
             open_http_url,
@@ -636,6 +731,10 @@ mod tests {
     fn acceptance_namespace_never_selects_the_daily_store() {
         let previous = std::env::var("MARKBRIDGE_CREDENTIAL_NAMESPACE").ok();
         unsafe { std::env::remove_var("MARKBRIDGE_CREDENTIAL_NAMESPACE") };
+        assert_ne!(
+            markbridge_core::ai::MODEL_CREDENTIAL_SERVICE,
+            "Markbridge.Pairing"
+        );
         assert_eq!(credential_namespace().unwrap(), "Markbridge.Pairing");
         unsafe { std::env::set_var("MARKBRIDGE_CREDENTIAL_NAMESPACE", "Markbridge.Pairing") };
         assert!(credential_namespace().is_err());

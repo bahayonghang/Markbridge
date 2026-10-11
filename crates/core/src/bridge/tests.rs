@@ -1381,6 +1381,215 @@ fn snapshot_file(path: &std::path::Path) -> (Vec<u8>, std::time::SystemTime) {
     (std::fs::read(path).unwrap(), meta.modified().unwrap())
 }
 
+#[tokio::test]
+async fn confirmed_ai_title_uses_the_edit_path_and_undo_sends_the_previous_title() {
+    let directory = tempfile::tempdir().unwrap();
+    let store = Arc::new(MemoryCredentials::default());
+    let transport = Arc::new(crate::ai::ScriptedTransport::new(vec![crate::ai::ScriptedStep::Respond {
+        status: 200,
+        body: serde_json::json!({"message":{"content":"{\"title\":\"短标题\",\"tags\":[\"资料\"],\"summary\":\"一句摘要\",\"suggestedFolder\":\"阅读\",\"evidence\":\"摘录\"}"}}).to_string(),
+        retry_after: None,
+    }]));
+    let bridge = Bridge::open_with_ai(
+        directory.path().join("cache.sqlite"),
+        store.clone(),
+        Arc::new(MemoryCredentials::default()),
+        transport.clone(),
+    )
+    .await
+    .unwrap();
+    let socket = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+    let port = socket.local_addr().unwrap().port();
+    drop(socket);
+    bridge.start(port).await.unwrap();
+    let (profile, secret) = paired(&bridge, "instance").await;
+    bridge
+        .authenticate(&origin(), &hello(&profile, "instance", "s", &secret))
+        .await
+        .unwrap();
+    accept_tree(&bridge, &profile, "s", 0, nodes()).await;
+    bridge
+        .save_ai_config(
+            true,
+            "ollama".into(),
+            "http://127.0.0.1:11434".into(),
+            "qwen2.5:7b".into(),
+        )
+        .await
+        .unwrap();
+    let (tx, mut rx) = mpsc::unbounded_channel();
+    bridge
+        .bind_outbound(&profile, &Id::new("s").unwrap(), tx)
+        .await;
+    assert_eq!(transport.calls(), 0);
+    let suggestion = bridge
+        .suggest_ai(
+            profile.clone(),
+            Id::new("42").unwrap(),
+            Id::new("ai-live").unwrap(),
+        )
+        .await
+        .unwrap();
+    assert_eq!(suggestion.state, AiJobState::Ready);
+    assert_eq!(suggestion.title.0.as_deref(), Some("短标题"));
+    assert_eq!(transport.calls(), 1);
+    assert!(
+        transport
+            .urls()
+            .await
+            .iter()
+            .all(|url| url == "http://127.0.0.1:11434/api/chat")
+    );
+    assert!(rx.try_recv().is_err());
+    assert!(
+        bridge
+            .list_operations(profile.clone())
+            .await
+            .unwrap()
+            .operations
+            .is_empty()
+    );
+    assert_eq!(
+        cached_tree(&bridge, &profile)
+            .await
+            .iter()
+            .find(|node| node.chrome_id.as_str() == "42")
+            .unwrap()
+            .title
+            .as_str(),
+        "synthetic"
+    );
+    let audit = bridge.ai_audit_lines().join("\n");
+    assert!(!audit.contains("synthetic"));
+    assert!(!audit.contains("example.com"));
+
+    {
+        let mut inner = bridge.inner.lock().await;
+        inner
+            .profiles
+            .get_mut(profile.as_str())
+            .unwrap()
+            .view
+            .connection = BridgeConnection::CachedReadOnly;
+    }
+    let draft = AiDraft {
+        job_id: suggestion.job_id.clone(),
+        profile_id: profile.clone(),
+        chrome_id: Id::new("42").unwrap(),
+        input_fingerprint: suggestion.input_fingerprint.clone(),
+        title: "改过的标题".into(),
+        tags: vec!["资料".into()],
+        summary: RequiredNullable(Some("一句摘要".into())),
+        apply_title: true,
+        apply_tags: true,
+        apply_summary: true,
+    };
+    assert_eq!(
+        bridge.apply_ai(draft.clone()).await.unwrap_err(),
+        ErrorCode::ReadOnly
+    );
+    assert!(
+        bridge
+            .list_operations(profile.clone())
+            .await
+            .unwrap()
+            .operations
+            .is_empty()
+    );
+    {
+        let mut inner = bridge.inner.lock().await;
+        inner
+            .profiles
+            .get_mut(profile.as_str())
+            .unwrap()
+            .view
+            .connection = BridgeConnection::Live;
+    }
+    let applied = bridge.apply_ai(draft).await.unwrap();
+    assert!(applied.failure.0.is_none());
+    assert!(applied.tags_applied && applied.summary_applied);
+    let browser = applied.browser.0.expect("browser operation");
+    assert_eq!(browser.state, OperationState::Applying);
+    let WireMessage::ApplyOperation { payload, .. } = rx.try_recv().unwrap() else {
+        panic!("missing apply");
+    };
+    assert!(
+        matches!(payload.steps[0].payload, Mutation::Update { title: Some(ref title), url: None } if title.as_str() == "改过的标题")
+    );
+    assert_eq!(transport.calls(), 1);
+    let before = payload.steps[0].expected_before.clone().unwrap();
+    let mut after = before.clone();
+    after.title = Title::new("改过的标题").unwrap();
+    let session = Id::new("s").unwrap();
+    let receipt = envelope(
+        "operation_receipt",
+        &profile,
+        &session,
+        Some(payload.steps[0].request_id.clone()),
+        serde_json::json!({
+            "operationId": browser.operation_id,
+            "requestId": payload.steps[0].request_id,
+            "state": "applied",
+            "before": before,
+            "after": after,
+            "beforeChildIds": null,
+            "afterChildIds": null,
+            "errorCode": null
+        }),
+    )
+    .unwrap();
+    assert!(!bridge.receive(receipt).await.unwrap());
+    let event = changed_event(&profile, 1, "改过的标题");
+    assert!(!bridge.receive(event).await.unwrap());
+    let revision = bridge
+        .state()
+        .await
+        .profiles
+        .iter()
+        .find(|item| item.profile_id == profile)
+        .unwrap()
+        .revision
+        .get();
+    let undone = bridge
+        .apply_edit(
+            profile.clone(),
+            revision,
+            EditAction::Undo {
+                operation_id: browser.operation_id.clone(),
+            },
+            false,
+        )
+        .await
+        .unwrap();
+    assert_eq!(undone.state, OperationState::RollingBack);
+    let WireMessage::ApplyOperation { payload, .. } = rx.try_recv().unwrap() else {
+        panic!("missing undo");
+    };
+    assert!(matches!(
+        payload.steps[0].payload,
+        Mutation::Update { title: Some(ref title), url: Some(ref url) }
+            if title.as_str() == "synthetic" && url.as_str() == "https://example.com/"
+    ));
+    let metadata = bridge
+        .inner
+        .lock()
+        .await
+        .storage()
+        .unwrap()
+        .metadata(suggestion.bookmark_id)
+        .await
+        .unwrap()
+        .unwrap();
+    assert_eq!(metadata.summary.as_deref(), Some("一句摘要"));
+    assert_eq!(metadata.note, "");
+    let catalog = bridge
+        .tag_catalog(profile.clone(), vec![Id::new("42").unwrap()], None)
+        .await
+        .unwrap();
+    assert!(catalog.tags.iter().any(|tag| tag.name == "资料"));
+    bridge.shutdown().await.unwrap();
+}
+
 fn assert_no_bookmarks_bak(root: &std::path::Path) {
     let mut pending = vec![root.to_path_buf()];
     while let Some(directory) = pending.pop() {

@@ -2,7 +2,7 @@
 
 ## 当前与边界
 
-当前仓库没有产品代码。以下是目标设计，路径为拟新增或修改位置，不代表已经存在。
+该子任务尚未实施。以下为目标设计，路径表示该任务的修改范围；01 已创建的基础源码以当前工作树为准。
 
 apps/desktop/src-tauri ai/provider/secret storage、crates/core ai jobs/schema、apps/desktop/src/features/ai/settings、测试 provider
 

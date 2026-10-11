@@ -9,6 +9,7 @@ use std::{
 };
 use tokio::sync::{mpsc, oneshot};
 
+pub(crate) mod ai;
 mod operations;
 pub(crate) mod preview;
 mod tags;

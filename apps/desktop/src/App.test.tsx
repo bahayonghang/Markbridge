@@ -24,6 +24,9 @@ vi.mock('./backend', () => ({
   applyEdit: vi.fn(),
   exportHtml: vi.fn(async () => ({ kind: 'html', body: '' })),
   exportSidecar: vi.fn(async () => ({ kind: 'sidecar', body: '{}' })),
+  aiSettings: vi.fn(async () => ({ enabled: false, provider: null, endpointLabel: null, model: null, credentialConfigured: false, schemaSupported: null })),
+  saveAiConfig: vi.fn(), setAiCredential: vi.fn(), clearAiCredential: vi.fn(), testAiConnection: vi.fn(),
+  suggestAi: vi.fn(), cancelAi: vi.fn(), applyAi: vi.fn(),
 }));
 const initial: BridgeState = { protocolVersion: 1, revision: 1, port: null, errorCode: null, profiles: [], pending: [], mirrors: [] };
 const profile: BridgeState['profiles'][number] = {
