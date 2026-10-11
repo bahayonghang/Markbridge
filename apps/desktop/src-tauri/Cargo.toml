@@ -7,6 +7,9 @@ rust-version.workspace = true
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 
+[features]
+custom-protocol = ["tauri/custom-protocol"]
+
 [dependencies]
 tauri = { version = "2", features = [] }
 markbridge-core.workspace = true

@@ -30,14 +30,15 @@ pub fn apply_event(nodes: &mut Vec<BookmarkNode>, event: &BookmarkEvent) -> Resu
             parent_id,
             position,
         } => {
-            let index = nodes
-                .iter()
-                .position(|n| n.chrome_id == *chrome_id)
-                .ok_or(ErrorCode::Conflict)?;
-            let mut node = nodes.remove(index);
-            if node.parent_id.as_ref() != Some(old_parent_id) || node.position != *old_position {
+            let Some(index) = nodes.iter().position(|n| n.chrome_id == *chrome_id) else {
+                return Err(ErrorCode::Conflict);
+            };
+            let cached = &nodes[index];
+            if cached.parent_id.as_ref() != Some(old_parent_id) || cached.position != *old_position
+            {
                 return Err(ErrorCode::Conflict);
             }
+            let mut node = nodes.remove(index);
             shift(nodes, Some(old_parent_id), old_position.get() + 1, -1)?;
             shift(nodes, Some(parent_id), position.get(), 1)?;
             node.parent_id = Some(parent_id.clone());
@@ -50,10 +51,9 @@ pub fn apply_event(nodes: &mut Vec<BookmarkNode>, event: &BookmarkEvent) -> Resu
             position,
             subtree,
         } => {
-            let node = nodes
-                .iter()
-                .find(|n| n.chrome_id == *chrome_id)
-                .ok_or(ErrorCode::Conflict)?;
+            let Some(node) = nodes.iter().find(|n| n.chrome_id == *chrome_id) else {
+                return Err(ErrorCode::Conflict);
+            };
             if node.parent_id.as_ref() != Some(parent_id) || node.position != *position {
                 return Err(ErrorCode::Conflict);
             }

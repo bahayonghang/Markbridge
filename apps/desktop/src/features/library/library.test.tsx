@@ -74,6 +74,7 @@ it('keeps duplicate urls, chinese text, and long titles through the cache reads'
   expect(screen.getAllByText('https://example.com/dup')).toHaveLength(2);
   expect(screen.getByText(longTitle)).toHaveClass('library-title');
   expect(screen.getByText(/下级文件夹 4 · 下级书签 9/)).toBeVisible();
+  expect(invoke).toHaveBeenCalledWith('cache_tree', { profileId: 'profile-a', folderId: null, depth: 0 });
   expect(invoke).toHaveBeenCalledWith('cache_tree', { profileId: 'profile-a', folderId: null, depth: 1 });
   expect(invoke).toHaveBeenCalledWith('cache_list', { profileId: 'profile-a', folderId: '1', offset: 0, limit: 10000 });
   expect(invoke).toHaveBeenCalledWith('cache_count', { profileId: 'profile-a', folderId: '1' });
@@ -157,16 +158,16 @@ it('names an empty library, a disconnected cache, and a revision gap', async () 
 });
 
 it('keeps search input usable and calls cache search after 200 milliseconds', async () => {
-  let release: (() => void) | undefined;
+  const pending: Array<(value: unknown) => void> = [];
   install((command, args) => {
-    if (command === 'cache_tree' && args.folderId == null) return new Promise((resolve) => { release = () => resolve(tree); });
+    if (command === 'cache_tree' && args.folderId == null) return new Promise((resolve) => { pending.push(resolve); });
     return undefined;
   });
   render(<LibraryWorkspace state={state([profile('profile-a', '资料 A')])} invalid={false} native focusMirrorId={null} />);
   const input = await screen.findByLabelText('搜索标题或网址');
   expect(input).toBeEnabled();
-  await waitFor(() => expect(release).toBeTypeOf('function'));
-  await act(async () => { release?.(); });
+  await waitFor(() => expect(pending.length).toBeGreaterThan(0));
+  await act(async () => { pending.splice(0).forEach((resolve) => resolve(tree)); });
   await screen.findByRole('treeitem', { name: /栏/ });
   vi.useFakeTimers();
   fireEvent.change(input, { target: { value: 'Alpha' } });
@@ -179,6 +180,25 @@ it('keeps search input usable and calls cache search after 200 milliseconds', as
   fireEvent.change(input, { target: { value: 'ALPHA' } });
   await act(async () => { await vi.advanceTimersByTimeAsync(200); });
   expect(screen.getByText('没有匹配的标题或网址。')).toBeVisible();
+});
+
+it('shows a synced cache bookmark outside the open folder on the input turn', async () => {
+  const hidden = node('99', '2', 0, 'bookmark', 'MB05MARK', 'https://example.com/mb05-mark');
+  install((command, args) => {
+    if (command === 'cache_search') return { items: [hidden] };
+    if (command === 'cache_tree' && args.folderId == null && args.depth === 0) return { nodes: [root, bar, other, hidden] };
+    return undefined;
+  });
+  await shown();
+  expect(screen.queryByRole('option', { name: /MB05MARK/ })).not.toBeInTheDocument();
+  expect(invoke).toHaveBeenCalledWith('cache_tree', { profileId: 'profile-a', folderId: null, depth: 0 });
+  vi.useFakeTimers();
+  fireEvent.change(screen.getByLabelText('搜索标题或网址'), { target: { value: 'MB05MARK' } });
+  expect(screen.getByRole('option', { name: /MB05MARK/ })).toBeVisible();
+  expect(vi.mocked(invoke).mock.calls.some(([command]) => command === 'cache_search')).toBe(false);
+  await act(async () => { await vi.advanceTimersByTimeAsync(200); });
+  expect(invoke).toHaveBeenCalledWith('cache_search', { profileId: 'profile-a', query: 'MB05MARK', folderId: null, limit: 201 });
+  expect(screen.getByRole('option', { name: /MB05MARK/ })).toBeVisible();
 });
 
 it('shows a loaded profile title on the input turn before cache search', async () => {

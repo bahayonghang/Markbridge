@@ -294,6 +294,29 @@ fn get_startup_state(
     Ok(markbridge_core::startup_state())
 }
 
+/// Daily pairing stays `Markbridge.Pairing`. An acceptance process may set
+/// `MARKBRIDGE_CREDENTIAL_NAMESPACE` to `Markbridge.Task05.` plus a disposable id.
+fn credential_namespace() -> Result<String, Box<dyn std::error::Error>> {
+    match std::env::var("MARKBRIDGE_CREDENTIAL_NAMESPACE") {
+        Err(std::env::VarError::NotPresent) => Ok("Markbridge.Pairing".to_owned()),
+        Err(_) => Err("invalid acceptance credential namespace".into()),
+        Ok(value) => {
+            let suffix = value
+                .strip_prefix("Markbridge.Task05.")
+                .filter(|suffix| !suffix.is_empty())
+                .ok_or("invalid acceptance credential namespace")?;
+            if suffix.len() > 80
+                || !suffix
+                    .bytes()
+                    .all(|byte| byte.is_ascii_alphanumeric() || byte == b'-')
+            {
+                return Err("invalid acceptance credential namespace".into());
+            }
+            Ok(value)
+        }
+    }
+}
+
 fn database_directory(app: &tauri::App) -> Result<std::path::PathBuf, Box<dyn std::error::Error>> {
     let directory = match std::env::var_os("MARKBRIDGE_APP_DATA") {
         Some(value) => {
@@ -313,9 +336,10 @@ fn main() {
     let app = tauri::Builder::default()
         .setup(|app| {
             let directory = database_directory(app)?;
+            let namespace = credential_namespace()?;
             let bridge = tauri::async_runtime::block_on(Bridge::open(
                 directory.join("markbridge.sqlite"),
-                Arc::new(OsCredentialStore::new("Markbridge.Pairing")),
+                Arc::new(OsCredentialStore::new(namespace)),
             ))?;
             let mut states = bridge.subscribe();
             let handle = app.handle().clone();
@@ -375,7 +399,32 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    use super::{flatten_cache, validate_http_url};
+    use super::{credential_namespace, flatten_cache, validate_http_url};
+
+    #[test]
+    fn acceptance_namespace_never_selects_the_daily_store() {
+        let previous = std::env::var("MARKBRIDGE_CREDENTIAL_NAMESPACE").ok();
+        unsafe { std::env::remove_var("MARKBRIDGE_CREDENTIAL_NAMESPACE") };
+        assert_eq!(credential_namespace().unwrap(), "Markbridge.Pairing");
+        unsafe { std::env::set_var("MARKBRIDGE_CREDENTIAL_NAMESPACE", "Markbridge.Pairing") };
+        assert!(credential_namespace().is_err());
+        unsafe {
+            std::env::set_var(
+                "MARKBRIDGE_CREDENTIAL_NAMESPACE",
+                "Markbridge.Task05.abc-123",
+            )
+        };
+        assert_eq!(credential_namespace().unwrap(), "Markbridge.Task05.abc-123");
+        unsafe { std::env::set_var("MARKBRIDGE_CREDENTIAL_NAMESPACE", "Markbridge.Task03.abc") };
+        assert!(credential_namespace().is_err());
+        match previous {
+            Some(value) => unsafe {
+                std::env::set_var("MARKBRIDGE_CREDENTIAL_NAMESPACE", value);
+            },
+            None => unsafe { std::env::remove_var("MARKBRIDGE_CREDENTIAL_NAMESPACE") },
+        }
+    }
+
     use markbridge_core::bridge::CacheTreeNode;
     use markbridge_protocol::{BookmarkNode, ErrorCode, Id, NodeKind, Position, Title};
 

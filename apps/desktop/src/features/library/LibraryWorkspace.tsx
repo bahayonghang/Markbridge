@@ -66,6 +66,15 @@ function loadedProfileNodes(index: TreeIndex, list: BookmarkNode[], detail: Libr
   return [...merged.values()];
 }
 
+function profileSearchNodes(synced: BookmarkNode[] | null, index: TreeIndex, list: BookmarkNode[], detail: LibraryDetail | null): BookmarkNode[] {
+  const loaded = loadedProfileNodes(index, list, detail);
+  if (!synced || synced.length === 0) return loaded;
+  const merged = new Map<string, BookmarkNode>();
+  for (const node of synced) merged.set(node.chromeId, node);
+  for (const node of loaded) merged.set(node.chromeId, node);
+  return [...merged.values()];
+}
+
 function neighbor(ids: string[], current: string | null, delta: number): string | null {
   if (!ids.length) return null;
   const index = current == null ? -1 : ids.indexOf(current);
@@ -103,6 +112,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId }: {
   const [phase, setPhase] = useState<'loading' | 'ready' | 'error' | 'stale'>('loading');
   const [gap, setGap] = useState(false);
   const [openFailed, setOpenFailed] = useState(false);
+  const [syncedNodes, setSyncedNodes] = useState<BookmarkNode[] | null>(null);
   const expandedRef = useRef(expanded);
   const seenRevision = useRef<number | null>(null);
   const treeGen = useRef(0);
@@ -111,6 +121,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId }: {
   const detailGen = useRef(0);
   const mirrorGen = useRef(0);
   const stampRef = useRef('');
+  const snapshotGen = useRef(0);
   expandedRef.current = expanded;
   stampRef.current = profile ? `${profile.profileId}:${profile.revision}` : '';
 
@@ -132,9 +143,11 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId }: {
     setPhase('loading');
     setGap(false);
     setOpenFailed(false);
+    setSyncedNodes(null);
     seenRevision.current = null;
     setSeenCommitted('');
     treeGen.current += 1;
+    snapshotGen.current += 1;
     listGen.current += 1;
     searchGen.current += 1;
     detailGen.current += 1;
@@ -147,6 +160,8 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId }: {
 
   useEffect(() => {
     if (!invalid) return;
+    snapshotGen.current += 1;
+    setSyncedNodes(null);
     setIndex(emptyIndex());
     setMirrorNodes([]);
     setList([]);
@@ -195,6 +210,23 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId }: {
     })();
     return () => { cancelled = true; };
   }, [profile, native, invalid]);
+
+  const snapshotProfileId = profile?.profileId ?? '';
+  useEffect(() => {
+    if (!snapshotProfileId || !native || invalid) return;
+    const generation = ++snapshotGen.current;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const root = await readCacheTree(snapshotProfileId, null, 0);
+        if (cancelled || snapshotGen.current !== generation) return;
+        setSyncedNodes(root.nodes);
+      } catch {
+        if (!cancelled && snapshotGen.current === generation) setSyncedNodes([]);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [snapshotProfileId, native, invalid]);
 
   useEffect(() => {
     if (!profile || !native || invalid || !folderId) return;
@@ -292,11 +324,12 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId }: {
   const mirrorIndex = mirror ? indexFlat(mirrorNodes) : emptyIndex();
   const activeIndex = profile ? index : mirrorIndex;
   const folders = folderRows(activeIndex, expanded);
-  // Loaded nodes filter on the input turn. The debounced cache search replaces those rows when it returns.
+  const waitingForCache = profile != null && syncedNodes == null;
+  // Synced-cache rows filter on the input turn, including nodes outside the open folder. The debounced cache search replaces those rows when it returns.
   const mirrorQuery = mirror && query.length > 0 ? query : '';
   const profileQuery = profile && query.length > 0 ? query : '';
   const searchHits = mirrorQuery ? searchSnapshot(mirrorNodes, mirrorQuery, SEARCH_LIMIT + 1) : [];
-  const loadedHits = profileQuery ? searchSnapshot(loadedProfileNodes(index, list, detail), profileQuery, SEARCH_LIMIT + 1) : [];
+  const loadedHits = profileQuery ? searchSnapshot(profileSearchNodes(syncedNodes, index, list, detail), profileQuery, SEARCH_LIMIT + 1) : [];
   const rustReady = profileQuery.length > 0 && query === committed && results != null;
   const profileHits = rustReady ? results ?? [] : loadedHits;
   const searching = mirrorQuery.length > 0 || profileQuery.length > 0;
@@ -452,7 +485,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId }: {
       {source && native && !invalid && <div className="library-panes">
         <div className="library-pane">
           <h3>文件夹</h3>
-          {phase === 'loading' && folders.length === 0 ? <p role="status">正在读取书签。</p> : folders.length === 0 ? <p>{visible.length > 0 ? '没有文件夹。' : phase === 'error' ? '没有可显示的文件夹。' : '此资料还没有书签。'}</p> : (
+          {(phase === 'loading' && folders.length === 0) || waitingForCache ? <p role="status">正在读取书签。</p> : folders.length === 0 ? <p>{visible.length > 0 ? '没有文件夹。' : phase === 'error' ? '没有可显示的文件夹。' : '此资料还没有书签。'}</p> : (
             <VirtualRows
               rows={folders}
               rowKey={(row) => rowKey('folder', row.chromeId)}
