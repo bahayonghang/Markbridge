@@ -1,0 +1,44 @@
+{
+  "id": "mb-04-readonly-mirror",
+  "name": "mb-04-readonly-mirror",
+  "title": "只读文件镜像与离线恢复",
+  "description": "只读文件镜像与离线恢复；属于 Markbridge 父规划，独立验收并记录失败与恢复边界",
+  "status": "planning",
+  "dev_type": "fullstack",
+  "scope": "markbridge",
+  "package": null,
+  "priority": "P1",
+  "creator": "lyh",
+  "assignee": "lyh",
+  "createdAt": "2026-10-10",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "10-10-markbridge-workspace",
+  "relatedFiles": [
+    "apps/desktop/src-tauri/profile discovery/watcher",
+    "crates/core mirror",
+    "连接/来源选择 UI",
+    "tests/fixtures/bookmarks files"
+  ],
+  "notes": "Planning only. Dependency order is documented and is not enforced automatically by Trellis. No product implementation or runtime validation has started.",
+  "meta": {
+    "sequence": "04",
+    "milestone": "M1",
+    "depends_on": [
+      "10-10-mb-02-identity-storage-protocol",
+      "10-10-mb-03-chrome-bridge"
+    ],
+    "requirements": [
+      "R03"
+    ],
+    "implementation_approval": "not_granted",
+    "planning_status": "ready_for_review",
+    "delivery_scope": "windows_v1"
+  }
+}

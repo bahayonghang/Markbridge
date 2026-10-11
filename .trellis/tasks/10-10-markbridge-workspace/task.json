@@ -1,0 +1,75 @@
+{
+  "id": "markbridge-workspace",
+  "name": "markbridge-workspace",
+  "title": "Markbridge 本地书签工作台完整规划",
+  "description": "Chrome 实时本地同步、编辑标签、双模式预览、AI 辅助与可恢复批量优化的父任务",
+  "status": "planning",
+  "dev_type": "docs",
+  "scope": "markbridge",
+  "package": null,
+  "priority": "P1",
+  "creator": "lyh",
+  "assignee": "lyh",
+  "createdAt": "2026-10-10",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [
+    "10-10-mb-01-foundation",
+    "10-10-mb-02-identity-storage-protocol",
+    "10-10-mb-03-chrome-bridge",
+    "10-10-mb-04-readonly-mirror",
+    "10-10-mb-05-library-workspace",
+    "10-10-mb-06-safe-editing",
+    "10-10-mb-07-local-tags",
+    "10-10-mb-08-content-preview",
+    "10-10-mb-09-webpage-preview",
+    "10-10-mb-10-ai-assistance",
+    "10-10-mb-11-batch-organization",
+    "10-10-mb-12-library-maintenance",
+    "10-10-mb-13-windows-acceptance",
+    "10-10-mb-14-cross-platform",
+    "10-10-mb-15-semantic-search"
+  ],
+  "parent": null,
+  "relatedFiles": [
+    ".trellis/spec/",
+    ".trellis/tasks/10-10-markbridge-workspace/prd.md",
+    ".trellis/tasks/10-10-markbridge-workspace/design.md",
+    ".trellis/tasks/10-10-markbridge-workspace/task-map.md",
+    ".trellis/tasks/10-10-markbridge-workspace/verification.md"
+  ],
+  "notes": "Parent owns requirements and integration; start an approved child, not this parent. Bootstrap completed separately; product code not started.",
+  "meta": {
+    "implementation_approval": "not_granted",
+    "planning_status": "ready_for_review",
+    "windows_v1_children": [
+      "10-10-mb-01-foundation",
+      "10-10-mb-02-identity-storage-protocol",
+      "10-10-mb-03-chrome-bridge",
+      "10-10-mb-04-readonly-mirror",
+      "10-10-mb-05-library-workspace",
+      "10-10-mb-06-safe-editing",
+      "10-10-mb-07-local-tags",
+      "10-10-mb-08-content-preview",
+      "10-10-mb-09-webpage-preview",
+      "10-10-mb-10-ai-assistance",
+      "10-10-mb-11-batch-organization",
+      "10-10-mb-12-library-maintenance",
+      "10-10-mb-13-windows-acceptance"
+    ],
+    "follow_up_children": [
+      "10-10-mb-14-cross-platform",
+      "10-10-mb-15-semantic-search"
+    ],
+    "user_decisions": {
+      "previews": "content_and_full_webpage",
+      "tags": "local_default_optional_title_encoding",
+      "platform": "windows_first_macos_linux_follow_up"
+    }
+  }
+}

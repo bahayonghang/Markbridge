@@ -1,0 +1,45 @@
+{
+  "id": "mb-02-identity-storage-protocol",
+  "name": "mb-02-identity-storage-protocol",
+  "title": "Profile 身份、存储与共享协议",
+  "description": "Profile 身份、存储与共享协议；属于 Markbridge 父规划，独立验收并记录失败与恢复边界",
+  "status": "planning",
+  "dev_type": "fullstack",
+  "scope": "markbridge",
+  "package": null,
+  "priority": "P1",
+  "creator": "lyh",
+  "assignee": "lyh",
+  "createdAt": "2026-10-10",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "10-10-markbridge-workspace",
+  "relatedFiles": [
+    "crates/protocol",
+    "crates/core",
+    "packages/protocol",
+    "apps/desktop/src-tauri/storage 与 migrations",
+    "tests/fixtures"
+  ],
+  "notes": "Planning only. Dependency order is documented and is not enforced automatically by Trellis. No product implementation or runtime validation has started.",
+  "meta": {
+    "sequence": "02",
+    "milestone": "M1",
+    "depends_on": [
+      "10-10-mb-01-foundation"
+    ],
+    "requirements": [
+      "R02",
+      "R03"
+    ],
+    "implementation_approval": "not_granted",
+    "planning_status": "ready_for_review",
+    "delivery_scope": "windows_v1"
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "id": "mb-13-windows-acceptance",
+  "name": "mb-13-windows-acceptance",
+  "title": "Windows 集成验收与本地安装包",
+  "description": "Windows 集成验收与本地安装包；属于 Markbridge 父规划，独立验收并记录失败与恢复边界",
+  "status": "planning",
+  "dev_type": "fullstack",
+  "scope": "markbridge",
+  "package": null,
+  "priority": "P1",
+  "creator": "lyh",
+  "assignee": "lyh",
+  "createdAt": "2026-10-10",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "10-10-markbridge-workspace",
+  "relatedFiles": [
+    "Windows 集成测试/harness",
+    "docs/用户指南",
+    "README",
+    "Tauri bundle 配置",
+    "CI",
+    "evidence/",
+    "本地构建产物清单"
+  ],
+  "notes": "Planning only. Dependency order is documented and is not enforced automatically by Trellis. No product implementation or runtime validation has started.",
+  "meta": {
+    "sequence": "13",
+    "milestone": "M4",
+    "depends_on": [
+      "10-10-mb-09-webpage-preview",
+      "10-10-mb-12-library-maintenance"
+    ],
+    "requirements": [
+      "R01",
+      "R14"
+    ],
+    "implementation_approval": "not_granted",
+    "planning_status": "ready_for_review",
+    "delivery_scope": "windows_v1"
+  }
+}

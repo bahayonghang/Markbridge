@@ -1,0 +1,9 @@
+{"file":".trellis/spec/project-baseline.md","reason":"Greenfield evidence boundary, source ownership and authorization"}
+{"file":".trellis/spec/backend/database-guidelines.md","reason":"Task 10 implementation and verification contract"}
+{"file":".trellis/spec/backend/logging-guidelines.md","reason":"Task 10 implementation and verification contract"}
+{"file":".trellis/spec/backend/error-handling.md","reason":"Task 10 implementation and verification contract"}
+{"file":".trellis/spec/frontend/state-management.md","reason":"Task 10 implementation and verification contract"}
+{"file":".trellis/tasks/10-10-markbridge-workspace/research/technical-findings.md","reason":"Verified Chrome and Tauri constraints and reference-plan corrections"}
+{"file":".trellis/tasks/10-10-markbridge-workspace/research/environment.md","reason":"Observed tooling and unverified native prerequisites"}
+{"file":".trellis/tasks/10-10-markbridge-workspace/design.md","reason":"Shared approved-on-review architecture and cross-task contracts"}
+{"file":".trellis/tasks/10-10-markbridge-workspace/verification.md","reason":"Formal parent acceptance matrix and evidence boundaries"}

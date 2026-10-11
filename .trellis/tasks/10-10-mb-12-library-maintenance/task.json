@@ -1,0 +1,44 @@
+{
+  "id": "mb-12-library-maintenance",
+  "name": "mb-12-library-maintenance",
+  "title": "死链、重复项与摘要检索",
+  "description": "死链、重复项与摘要检索；属于 Markbridge 父规划，独立验收并记录失败与恢复边界",
+  "status": "planning",
+  "dev_type": "fullstack",
+  "scope": "markbridge",
+  "package": null,
+  "priority": "P1",
+  "creator": "lyh",
+  "assignee": "lyh",
+  "createdAt": "2026-10-10",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "10-10-markbridge-workspace",
+  "relatedFiles": [
+    "crates/core maintenance",
+    "apps/desktop/src-tauri safe fetch/FTS",
+    "apps/desktop/src/features/maintenance/search"
+  ],
+  "notes": "Planning only. Dependency order is documented and is not enforced automatically by Trellis. No product implementation or runtime validation has started.",
+  "meta": {
+    "sequence": "12",
+    "milestone": "M4",
+    "depends_on": [
+      "10-10-mb-07-local-tags",
+      "10-10-mb-08-content-preview",
+      "10-10-mb-11-batch-organization"
+    ],
+    "requirements": [
+      "R13"
+    ],
+    "implementation_approval": "not_granted",
+    "planning_status": "ready_for_review",
+    "delivery_scope": "windows_v1"
+  }
+}
