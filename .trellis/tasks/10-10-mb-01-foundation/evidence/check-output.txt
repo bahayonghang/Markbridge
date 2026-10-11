@@ -1,0 +1,431 @@
+COMMAND OUTPUT: 03-lint.txt
+$ eslint . --max-warnings 0
+
+D:\Documents\Code\Tauri\Markbridge\.omp\extensions\trellis\index.ts
+  210:8   error  The value assigned to 'sessionFilePath' is not used in subsequent statements  no-useless-assignment
+  393:8   error  The value assigned to 'config' is not used in subsequent statements           no-useless-assignment
+  742:8   error  The value assigned to 'config' is not used in subsequent statements           no-useless-assignment
+  825:71  error  Empty block statement                                                         no-empty
+
+✖ 4 problems (4 errors, 0 warnings)
+
+[ELIFECYCLE] Command failed with exit code 1.
+COMMAND OUTPUT: 04-lint-retest.txt
+$ eslint apps packages scripts tests eslint.config.js playwright.config.ts vitest.config.ts --max-warnings 0
+COMMAND OUTPUT: 05-typecheck.txt
+$ pnpm -r typecheck && tsc -p tsconfig.tools.json
+packages/protocol typecheck$ tsc -p tsconfig.json
+apps/extension typecheck$ tsc -p tsconfig.json
+apps/extension typecheck: Done
+packages/protocol typecheck: Done
+apps/desktop typecheck$ tsc -p tsconfig.json
+apps/desktop typecheck: src/App.test.tsx(12,47): error TS2339: Property 'toBeVisible' does not exist on type 'Assertion<void, HTMLElement>'.
+apps/desktop typecheck: src/App.test.tsx(13,61): error TS2339: Property 'toBeVisible' does not exist on type 'Assertion<void, HTMLElement>'.
+apps/desktop typecheck: src/App.test.tsx(14,44): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<void, HTMLElement | null>'.
+apps/desktop typecheck: src/App.test.tsx(20,44): error TS2339: Property 'toHaveTextContent' does not exist on type 'Assertion<void, HTMLElement>'.
+apps/desktop typecheck: src/App.test.tsx(21,60): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<void, HTMLElement | null>'.
+apps/desktop typecheck: Failed
+[ELIFECYCLE] Command failed with exit code 2.
+Error: ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL
+
+  × "pnpm recursive run" failed in D:
+  │ \Documents\Code\Tauri\Markbridge\apps\desktop
+
+[ELIFECYCLE] Command failed with exit code 1.
+COMMAND OUTPUT: 08-typecheck-retest.txt
+$ pnpm -r typecheck && tsc -p tsconfig.tools.json
+apps/extension typecheck$ tsc -p tsconfig.json
+packages/protocol typecheck$ tsc -p tsconfig.json
+apps/extension typecheck: Done
+packages/protocol typecheck: Done
+apps/desktop typecheck$ tsc -p tsconfig.json
+apps/desktop typecheck: Done
+COMMAND OUTPUT: 09-test.txt
+$ vitest run && node --test scripts/protocol.test.mjs scripts/foundation.test.mjs
+
+ RUN  v5.0.3 D:/Documents/Code/Tauri/Markbridge
+
+ ❯ packages/protocol/src/index.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/protocol/src/index.test.ts [ packages/protocol/src/index.test.ts ]
+Error: unknown format "uint8" ignored in schema at path "#/properties/protocolVersion"
+ ❯ unknownFormat node_modules/.pnpm/ajv@8.20.0/node_modules/ajv/lib/vocabularies/format/format.ts:87:15
+ ❯ validateFormat node_modules/.pnpm/ajv@8.20.0/node_modules/ajv/lib/vocabularies/format/format.ts:75:9
+ ❯ Object.code node_modules/.pnpm/ajv@8.20.0/node_modules/ajv/lib/vocabularies/format/format.ts:40:10
+ ❯ keywordCode node_modules/.pnpm/ajv@8.20.0/node_modules/ajv/lib/compile/validate/index.ts:532:9
+ ❯ node_modules/.pnpm/ajv@8.20.0/node_modules/ajv/lib/compile/validate/index.ts:265:9
+ ❯ CodeGen.code node_modules/.pnpm/ajv@8.20.0/node_modules/ajv/lib/compile/codegen/index.ts:545:33
+ ❯ CodeGen.block node_modules/.pnpm/ajv@8.20.0/node_modules/ajv/lib/compile/codegen/index.ts:700:20
+ ❯ iterateKeywords node_modules/.pnpm/ajv@8.20.0/node_modules/ajv/lib/compile/validate/index.ts:262:7
+ ❯ groupKeywords node_modules/.pnpm/ajv@8.20.0/node_modules/ajv/lib/compile/validate/index.ts:241:7
+ ❯ node_modules/.pnpm/ajv@8.20.0/node_modules/ajv/lib/compile/validate/index.ts:233:38
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 passed (2)
+   Start at  23:24:41
+   Duration  1.40s (environment 72%, setup 17%, tests 6%, transform 2%, import 2%)
+
+[ELIFECYCLE] Test failed. See above for more details.
+COMMAND OUTPUT: 11-test-retest.txt
+$ vitest run && node --test scripts/protocol.test.mjs scripts/foundation.test.mjs
+
+ RUN  v5.0.3 D:/Documents/Code/Tauri/Markbridge
+
+
+ Test Files  2 passed (2)
+      Tests  12 passed (12)
+   Start at  23:25:10
+   Duration  1.16s (environment 61%, setup 19%, tests 7%, import 7%, transform 6%)
+
+✔ MV3 foundation requests no browser or network permissions (3.2903ms)
+✔ capability is limited to local main window (1.8967ms)
+✔ drift gate rejects changed TypeScript and schema, without touching tracked outputs (1223.1442ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1439.793
+COMMAND OUTPUT: 12-clippy-retest.txt
+    Checking webview2-com-sys v0.39.1
+    Checking tao v0.37.1
+   Compiling markbridge-desktop v0.1.0 (D:\Documents\Code\Tauri\Markbridge\apps\desktop\src-tauri)
+    Checking webview2-com v0.39.1
+    Checking wry v0.57.0
+    Checking tauri-runtime v2.12.1
+    Checking tauri-runtime-wry v2.12.1
+    Checking tauri v2.12.3
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 7.97s
+COMMAND OUTPUT: 13-cargo-test.txt
+   Compiling windows-link v0.2.1
+   Compiling memchr v2.8.3
+   Compiling cfg-if v1.0.5
+   Compiling smallvec v1.16.3
+   Compiling siphasher v1.0.4
+   Compiling writeable v0.6.4
+   Compiling litemap v0.8.3
+   Compiling utf8_iter v1.0.4
+   Compiling num-conv v0.2.2
+   Compiling stable_deref_trait v1.2.1
+   Compiling time-core v0.1.9
+   Compiling powerfmt v0.2.1
+   Compiling serde_core v1.0.229
+   Compiling icu_normalizer_data v2.3.0
+   Compiling icu_properties_data v2.3.0
+   Compiling deranged v0.5.8
+   Compiling winnow v1.0.4
+   Compiling scopeguard v1.2.0
+   Compiling log v0.4.34
+   Compiling toml_writer v1.1.3+spec-1.1.0
+   Compiling zerofrom v0.1.8
+   Compiling thiserror v2.0.21
+   Compiling typeid v1.0.3
+   Compiling fnv v1.0.7
+   Compiling windows-sys v0.61.2
+   Compiling web-time v1.1.0
+   Compiling regex-syntax v0.8.11
+   Compiling phf_shared v0.13.1
+   Compiling yoke v0.8.3
+   Compiling parking_lot_core v0.9.12
+   Compiling lock_api v0.4.14
+   Compiling hashbrown v0.17.1
+   Compiling alloc-no-stdlib v3.0.0
+   Compiling equivalent v1.0.2
+   Compiling toml_parser v1.1.5+spec-1.1.0
+   Compiling aho-corasick v1.1.5
+   Compiling bytes v1.12.1
+   Compiling phf_generator v0.13.1
+   Compiling quick-xml v0.42.0
+   Compiling base64 v0.23.1
+   Compiling dunce v1.0.5
+   Compiling getrandom v0.4.3
+   Compiling serde_json v1.0.152
+   Compiling serde_spanned v1.1.2
+   Compiling alloc-stdlib v0.3.0
+   Compiling toml_datetime v1.1.2+spec-1.1.0
+   Compiling form_urlencoded v1.2.2
+   Compiling libc v0.2.190
+   Compiling zerovec v0.11.8
+   Compiling zerotrie v0.2.5
+   Compiling phf_codegen v0.13.1
+   Compiling parking_lot v0.12.5
+   Compiling string_cache_codegen v0.6.1
+   Compiling phf_macros v0.13.1
+   Compiling brotli-decompressor v6.0.1
+   Compiling uuid v1.28.0
+   Compiling anyhow v1.0.104
+   Compiling windows-result v0.4.1
+   Compiling selectors v0.38.0
+   Compiling indexmap v2.14.2
+   Compiling http v1.5.0
+   Compiling string_cache v0.9.0
+   Compiling toml v1.1.8+spec-1.1.0
+   Compiling windows-strings v0.5.1
+   Compiling tinystr v0.8.4
+   Compiling potential_utf v0.1.6
+   Compiling web_atoms v0.2.6
+   Compiling glob v0.3.4
+   Compiling ctor v1.0.13
+   Compiling windows-core v0.62.2
+   Compiling jsonptr v0.7.1
+   Compiling icu_locale_core v2.3.0
+   Compiling icu_collections v2.3.0
+   Compiling cfb v0.14.0
+   Compiling time v0.3.55
+   Compiling erased-serde v0.4.10
+   Compiling option-ext v0.2.0
+   Compiling brotli v9.0.0
+   Compiling phf v0.13.1
+   Compiling regex-automata v0.4.18
+   Compiling json-patch v4.2.0
+   Compiling cssparser v0.37.0
+   Compiling cargo_metadata v0.19.2
+   Compiling vswhom-sys v0.1.3
+   Compiling serde_with v3.24.0
+   Compiling serde v1.0.229
+   Compiling serde-untagged v0.1.9
+   Compiling infer v0.22.0
+   Compiling windows-threading v0.2.1
+   Compiling ref-cast v1.0.27
+   Compiling icu_provider v2.3.1
+   Compiling vswhom v0.1.0
+   Compiling windows-future v0.3.2
+   Compiling windows-numerics v0.3.1
+   Compiling windows-collections v0.3.2
+   Compiling time-macros v0.2.32
+   Compiling percent-encoding v2.3.2
+   Compiling icu_normalizer v2.3.0
+   Compiling icu_properties v2.3.0
+   Compiling crc32fast v1.5.2
+   Compiling webview2-com-sys v0.39.1
+   Compiling heck v0.5.0
+   Compiling windows v0.62.2
+   Compiling raw-window-handle v0.6.2
+   Compiling flate2 v1.1.10
+   Compiling schemars v1.2.2
+   Compiling dpi v0.1.2
+   Compiling cargo_toml v1.0.1
+   Compiling markup5ever v0.39.0
+   Compiling plist v1.10.1
+   Compiling crossbeam-utils v0.8.23
+   Compiling idna_adapter v1.2.2
+   Compiling html5ever v0.39.0
+   Compiling regex v1.13.1
+   Compiling idna v1.1.0
+   Compiling bitflags v2.13.2
+   Compiling markbridge-protocol v0.1.0 (D:\Documents\Code\Tauri\Markbridge\crates\protocol)
+   Compiling windows-version v0.1.7
+   Compiling winapi-util v0.1.11
+   Compiling url v2.5.8
+   Compiling winreg v0.56.0
+   Compiling dirs-sys v0.5.0
+   Compiling pin-project-lite v0.2.17
+   Compiling png v0.17.16
+   Compiling same-file v1.0.6
+   Compiling dirs v7.0.0
+   Compiling embed-resource v3.0.12
+   Compiling walkdir v2.5.0
+   Compiling dom_query v0.28.0
+   Compiling crossbeam-channel v0.5.17
+   Compiling tauri-winres v0.3.6
+   Compiling semver v1.0.28
+   Compiling once_cell v1.21.4
+   Compiling urlpattern v0.6.0
+   Compiling schemars v0.8.22
+   Compiling tracing-core v0.1.36
+   Compiling sha2 v0.10.9
+   Compiling ico v0.5.0
+   Compiling png v0.18.1
+   Compiling unicode-segmentation v1.13.3
+   Compiling keyboard-types v0.8.3
+   Compiling serialize-to-javascript v0.1.2
+   Compiling getrandom v0.3.4
+   Compiling window-vibrancy v0.8.1
+   Compiling tokio v1.53.2
+   Compiling markbridge-core v0.1.0 (D:\Documents\Code\Tauri\Markbridge\crates\core)
+   Compiling tracing v0.1.44
+   Compiling mime v0.3.17
+   Compiling softbuffer v0.4.8
+   Compiling tauri-utils v2.10.1
+   Compiling muda v0.20.0
+   Compiling cookie v0.18.2
+   Compiling tauri-build v2.7.2
+   Compiling tauri-codegen v2.7.2
+   Compiling tauri v2.12.3
+   Compiling markbridge-desktop v0.1.0 (D:\Documents\Code\Tauri\Markbridge\apps\desktop\src-tauri)
+   Compiling tauri-macros v2.7.2
+   Compiling tao v0.37.1
+   Compiling webview2-com v0.39.1
+   Compiling wry v0.57.0
+   Compiling tauri-runtime v2.12.1
+   Compiling tauri-runtime-wry v2.12.1
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 37.19s
+     Running unittests src\lib.rs (target\debug\deps\markbridge_core-62af010dae86809e.exe)
+
+running 1 test
+test tests::startup_is_unpaired ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src\main.rs (target\debug\deps\markbridge_desktop-d7847ec6bc0773c6.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src\lib.rs (target\debug\deps\markbridge_protocol-177449836d683c02.exe)
+
+running 1 test
+test tests::startup_fixture_roundtrips_without_extra_fields ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src\bin\export-schema.rs (target\debug\deps\export_schema-4715e9577ca9059b.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests markbridge_core
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests markbridge_protocol
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+COMMAND OUTPUT: 14-frozen-reinstall.txt
+Scope: all 4 workspace projects
+✓ Lockfile passes supply-chain policies (verified 3m ago)
+Lockfile is up to date, resolution step is skipped
+Done in 52ms using pnpm v12.12.0
+COMMAND OUTPUT: 18-typecheck-final.txt
+$ pnpm -r typecheck && tsc -p tsconfig.tools.json
+packages/protocol typecheck$ tsc -p tsconfig.json
+apps/extension typecheck$ tsc -p tsconfig.json
+apps/extension typecheck: Done
+packages/protocol typecheck: Done
+apps/desktop typecheck$ tsc -p tsconfig.json
+apps/desktop typecheck: Done
+COMMAND OUTPUT: 19-e2e-retest.txt
+Scope: all 4 workspace projects
+✓ Lockfile passes supply-chain policies (verified 4m ago)
+Lockfile is up to date, resolution step is skipped
+Already up to date
+Done in 129ms using pnpm v12.12.0
+$ playwright test
+[WebServer] $ vite
+
+Running 2 tests using 1 worker
+
+  ok 1 tests\e2e\foundation.spec.ts:4:3 › desktop empty state 1100x760 (353ms)
+  ok 2 tests\e2e\foundation.spec.ts:4:3 › desktop empty state 640x480 (245ms)
+
+  2 passed (2.7s)
+COMMAND OUTPUT: 20-protocol-check.txt
+$ node scripts/protocol.mjs --check
+Protocol generation matches tracked outputs.
+COMMAND OUTPUT: 21-clean-frozen-install.txt
+Scope: all 4 workspace projects
+✓ Lockfile passes supply-chain policies (verified 5m ago)
+Lockfile is up to date, resolution step is skipped
+Packages are copied from the content-addressable store to the virtual store.
+  Content-addressable store is at: C:\Users\lyh\scoop\apps\pnpm\current\store\v11
+  Virtual store is at:             node_modules/.pnpm
+Progress: resolved 204, reused 204, downloaded 0, added 190
+Packages: +214
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 214, reused 214, downloaded 0, added 214, done
+
+devDependencies:
++ @eslint/js 10.0.1
++ @playwright/test 1.64.0
++ @testing-library/jest-dom 7.0.1
++ @testing-library/react 16.3.3
++ @types/node 26.6.5
++ eslint 10.12.0
++ globals 17.13.0
++ jsdom 30.1.2
++ json-schema-to-typescript 16.0.0
++ typescript 5.9.3
++ typescript-eslint 8.71.1
++ vitest 5.0.3
+
+Done in 2.2s using pnpm v12.12.0
+COMMAND OUTPUT: 22-build-final.txt
+$ pnpm -r build && node scripts/check-artifacts.mjs
+apps/extension build$ vite build
+packages/protocol build$ tsc -p tsconfig.json
+apps/extension build: vite v8.3.4 building client environment for production...
+apps/extension build: transforming...
+apps/extension build: ✓ 5 modules transformed.
+apps/extension build: rendering chunks...
+apps/extension build: computing gzip size...
+apps/extension build: dist/index.html                 0.53 kB │ gzip: 0.37 kB
+apps/extension build: dist/assets/index-DmwpKM2o.css  0.26 kB │ gzip: 0.21 kB
+apps/extension build: dist/assets/index-Bf2GVmJK.js   0.67 kB │ gzip: 0.38 kB
+apps/extension build: 
+apps/extension build: ✓ built in 38ms
+apps/extension build: Done
+packages/protocol build: Done
+apps/desktop build$ vite build
+apps/desktop build: vite v8.3.4 building client environment for production...
+apps/desktop build: transforming...
+apps/desktop build: ✓ 109 modules transformed.
+apps/desktop build: rendering chunks...
+apps/desktop build: computing gzip size...
+apps/desktop build: dist/index.html                   0.40 kB │ gzip:   0.29 kB
+apps/desktop build: dist/assets/index-1oADRRmP.css    1.37 kB │ gzip:   0.67 kB
+apps/desktop build: dist/assets/index-n-bt_y6T.js   352.46 kB │ gzip: 107.79 kB
+apps/desktop build: 
+apps/desktop build: ✓ built in 111ms
+apps/desktop build: Done
+Production assets: MV3 popup present; no requested permissions, source maps, known secret patterns, or absolute machine paths.
+cargo fmt --all -- --check: exit 0, no stdout/stderr (17-fmt.txt was not created because the command emitted no text).
+FIRST CLIPPY FAILURE: 07-clippy.txt (final 34 lines, preceding compile progress omitted)
+    Checking json-patch v4.2.0
+    Checking markbridge-protocol v0.1.0 (D:\Documents\Code\Tauri\Markbridge\crates\protocol)
+    Checking markbridge-core v0.1.0 (D:\Documents\Code\Tauri\Markbridge\crates\core)
+    Checking idna_adapter v1.2.2
+    Checking idna v1.1.0
+    Checking url v2.5.8
+    Checking urlpattern v0.6.0
+    Checking tauri-utils v2.10.1
+   Compiling tauri-build v2.7.2
+   Compiling tauri-codegen v2.7.2
+   Compiling tauri v2.12.3
+   Compiling tauri-macros v2.7.2
+   Compiling markbridge-desktop v0.1.0 (D:\Documents\Code\Tauri\Markbridge\apps\desktop\src-tauri)
+error: failed to run custom build command for `markbridge-desktop v0.1.0 (D:\Documents\Code\Tauri\Markbridge\apps\desktop\src-tauri)`
+
+Caused by:
+  process didn't exit successfully: `D:\Documents\Code\Tauri\Markbridge\target\debug\build\markbridge-desktop-5756cd6e4ea1ad78\build-script-build` (exit code: 1)
+  --- stdout
+  cargo:rerun-if-env-changed=TAURI_CONFIG
+  cargo:rustc-check-cfg=cfg(desktop)
+  cargo:rustc-cfg=desktop
+  cargo:rustc-check-cfg=cfg(mobile)
+  cargo:rerun-if-changed=D:\Documents\Code\Tauri\Markbridge\apps\desktop\src-tauri\tauri.conf.json
+  cargo:rustc-env=TAURI_ANDROID_PACKAGE_NAME_APP_NAME=desktop
+  cargo:rustc-env=TAURI_ANDROID_PACKAGE_NAME_PREFIX=com_markbridge
+  cargo:rustc-check-cfg=cfg(dev)
+  cargo:rustc-cfg=dev
+  cargo:PERMISSION_FILES_PATH=D:\Documents\Code\Tauri\Markbridge\target\debug\build\markbridge-desktop-495cdf083c04c981\out\app-manifest\__app__-permission-files
+  cargo:rerun-if-changed=D:\Documents\Code\Tauri\Markbridge\apps\desktop\src-tauri\capabilities
+  cargo:rerun-if-env-changed=REMOVE_UNUSED_COMMANDS
+  cargo:rustc-env=TAURI_ENV_TARGET_TRIPLE=x86_64-pc-windows-msvc
+  package.metadata does not exist
+  `D:\Documents\Code\Tauri\Markbridge\apps\desktop\src-tauri\icons/icon.ico` not found; required for generating a Windows Resource file during tauri-build
+warning: build failed, waiting for other jobs to finish...
+Frozen pnpm-lock SHA256 (source and clean-install copy): A6B149ECB758B5336442E890128FC1CE65E4144D15CF1886F1CF7D93F0A29C09

@@ -2,7 +2,7 @@
 
 ## 当前与边界
 
-当前仓库没有产品代码。以下是目标设计，路径为拟新增或修改位置，不代表已经存在。
+2026-10-10 已按批准规划建立基础源码。以下路径已存在；任务保持 in_progress，原生交互验收仍未完成。
 
 根 Cargo.toml、package.json、pnpm-workspace.yaml、lockfiles、apps/desktop、apps/extension、crates/core、crates/protocol、packages/protocol、README.md、.github/workflows
 
@@ -14,7 +14,7 @@
 
 ## 数据与兼容
 
-输入和输出使用 02 的版本化 DTO；Profile、sourceEpoch、requestId 和 revision 不在边界隐式丢弃。数据库改动必须编号 migration，保留旧库及回退证据。当前 task.json 的 relatedFiles 记录目标路径，实施时先检查真实目录再编辑。
+01 仅提供 `StartupState` 基础 IPC DTO：`protocolVersion: 1`、`state: unpaired`。Rust serde/schemars 为生成源，Ajv 在 TypeScript 边界校验；fixture 为 `tests/fixtures/protocol/startup-state.json`。02 拥有配对传输 DTO、Profile、sourceEpoch、requestId 和 revision，这些字段不得在后续边界隐式丢弃。数据库改动必须编号 migration，保留旧库及回退证据。当前 task.json 的 relatedFiles 记录目标路径，实施时先检查真实目录再编辑。
 
 ## 验证边界
 

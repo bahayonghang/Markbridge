@@ -1,0 +1,32 @@
+{
+  "name": "markbridge",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "packageManager": "pnpm@12.12.0",
+  "engines": { "node": ">=24.0.0", "pnpm": "12.12.0" },
+  "scripts": {
+    "lint": "eslint apps packages scripts tests eslint.config.js playwright.config.ts vitest.config.ts --max-warnings 0",
+    "typecheck": "pnpm -r typecheck && tsc -p tsconfig.tools.json",
+    "test": "vitest run && node --test scripts/protocol.test.mjs scripts/foundation.test.mjs scripts/native-artifact.test.mjs",
+    "build": "pnpm -r build && node scripts/check-artifacts.mjs",
+    "build:native": "node scripts/native-build.mjs",
+    "protocol:generate": "node scripts/protocol.mjs --write",
+    "protocol:check": "node scripts/protocol.mjs --check",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.64.0",
+    "@testing-library/jest-dom": "7.0.1",
+    "@testing-library/react": "16.3.3",
+    "@types/node": "26.6.5",
+    "eslint": "10.12.0",
+    "globals": "17.13.0",
+    "jsdom": "30.1.2",
+    "json-schema-to-typescript": "16.0.0",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.71.1",
+    "vitest": "5.0.3"
+  }
+}
