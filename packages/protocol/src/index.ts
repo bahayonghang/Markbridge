@@ -7,6 +7,3 @@ export function parseStartupState(value: unknown): StartupState {
   if (!validate(value)) throw new Error('INVALID_STARTUP_STATE');
   return value;
 }
-
-export * from './wire';
-export * from './bridge';

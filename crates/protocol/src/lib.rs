@@ -39,11 +39,3 @@ mod tests {
         );
     }
 }
-
-pub mod wire;
-pub use wire::*;
-pub mod bridge;
-pub use bridge::*;
-
-#[cfg(test)]
-mod wire_tests;
