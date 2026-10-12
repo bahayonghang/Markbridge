@@ -28,3 +28,11 @@ __pycache__/
 # Web build output and packages.
 /web/dist/
 /web/node_modules/
+
+# Markbridge workspace outputs.
+node_modules/
+/apps/desktop/dist/
+/apps/extension/dist/
+/apps/desktop/src-tauri/gen/
+/test-results/
+/playwright-report/
