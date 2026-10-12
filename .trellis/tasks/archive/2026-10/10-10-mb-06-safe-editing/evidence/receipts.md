@@ -62,3 +62,17 @@ managed 节点和它的一个后代，delete 与 move 都被产品拒绝，代�
 该节点和它的一个后代，delete 与 move 的产品调用都返回 `BACKEND_PROTECTED_NODE`。树摘要未变：节点数 5，摘要 `c0beed9b9e917afb`。后代仍在。
 
 `registryChangedKeys` 为空。`registryWriteApiCalled` 为 false，脚本源码没有注册表写入调用。`chrome.exe` 与 `chrome.dll` 的 SHA256 前后都是 `6b92945a2d3da600a99a0d14c0fb2ff32538037d4ca8933c839313497be4c234` 和 `81582b6200295c7de89109f71edcf8c1332e98df63dbd2a94bc647f9986ade31`。浏览器路径是 `%TEMP%\markbridge-06-filepolicy\chrome-win\chrome.exe`，没有使用 `%TEMP%\markbridge-06-chromium`，没有改二进制。日常书签长度 849515，SHA256 `DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82`。`Markbridge.Pairing` 目标数前后都是 0。任务命名空间结束时目标数 0。
+
+## V07 隔离来源收束
+
+日期：2026-10-12。没有新开 Chromium 或 Chrome 进程。上面的 PASS 行保持原记录，这一节不是一次新运行的 PASS。V07 保持 PASS。
+
+已记录命令 `node .trellis/tasks/archive/2026-10/10-10-mb-06-safe-editing/evidence/v07-policy-file.mjs`，退出码 0，run `1df7c034-1d6a-4dee-978a-030758275fa2`。报告 `evidence/v07-policy-file-report.json` 的 `status` 为 PASS。策略文件 `C:\Users\lyh\AppData\Local\Temp\markbridge-06-filepolicy\chrome-win\policies\managed\mb06.json` 的 `markerPresent` 为 false，`managedPresent` 为 false。隔离用户数据目录 `C:\Users\lyh\AppData\Local\Temp\markbridge-06-userdata-5a2ab4` 经 `Local State` 的 `local_test_policies_for_next_startup` 产生 managed 节点，`cause` 为 `user-data`，`markerPresent` 为 true。delete 与 move 返回 `BACKEND_PROTECTED_NODE`。树节点数 5，摘要 `c0beed9b9e917afb`。
+
+没有还能在不提权、不使用日常 Chrome 资料的前提下观察的未用隔离来源，所以没有新开进程。
+
+## V07 隔离来源收束核对
+
+日期：2026-10-12。对照 `evidence/v07-policy-file-report.json`。未重跑 `v07-policy-file.mjs`，未新开 Chromium 或 Chrome。
+
+`command` 为 `node .trellis/tasks/archive/2026-10/10-10-mb-06-safe-editing/evidence/v07-policy-file.mjs`，`exitCode` 为 0，`runId` 为 `1df7c034-1d6a-4dee-978a-030758275fa2`，`status` 为 PASS。`policyFile.markerPresent` 与 `policyFile.managedPresent` 都是 false。`userData.directory` 为 `C:\Users\lyh\AppData\Local\Temp\markbridge-06-userdata-5a2ab4`，`userData.mechanism` 为 `local_test_policies_for_next_startup`，`cause` 为 `user-data`，`userData.markerPresent` 为 true。四条 delete/move 控制的 `code` 都是 `BACKEND_PROTECTED_NODE`。`tree_digest.count` 为 5，`hash` 为 `c0beed9b9e917afb`，`unchanged` 为 true。上一节与这些字段一致。V07 保持 PASS。`git diff --name-only -- apps crates packages scripts tests` 为空。
