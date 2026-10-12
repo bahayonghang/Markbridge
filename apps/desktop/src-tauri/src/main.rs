@@ -838,6 +838,23 @@ fn database_directory(app: &tauri::App) -> Result<std::path::PathBuf, Box<dyn st
     Ok(directory)
 }
 
+fn on_run_event(event: &tauri::RunEvent, bridge: Option<&Bridge>) {
+    if matches!(event, tauri::RunEvent::Resumed)
+        && let Some(bridge) = bridge
+    {
+        let bridge = Bridge::clone(bridge);
+        tauri::async_runtime::spawn(async move {
+            let _ = bridge.rescan_file_mirrors().await;
+        });
+    }
+    if matches!(event, tauri::RunEvent::Exit)
+        && let Some(bridge) = bridge
+        && tauri::async_runtime::block_on(bridge.shutdown()).is_err()
+    {
+        eprintln!("SHUTDOWN_FAILED");
+    }
+}
+
 fn main() {
     let app = tauri::Builder::default()
         .setup(|app| {
@@ -937,20 +954,8 @@ fn main() {
         std::process::exit(1);
     };
     app.run(|app, event| {
-        if matches!(event, tauri::RunEvent::Resumed)
-            && let Some(bridge) = app.try_state::<Bridge>()
-        {
-            let bridge = Bridge::clone(&bridge);
-            tauri::async_runtime::spawn(async move {
-                let _ = bridge.rescan_file_mirrors().await;
-            });
-        }
-        if matches!(event, tauri::RunEvent::Exit)
-            && let Some(bridge) = app.try_state::<Bridge>()
-            && tauri::async_runtime::block_on(bridge.shutdown()).is_err()
-        {
-            eprintln!("SHUTDOWN_FAILED");
-        }
+        let bridge = app.try_state::<Bridge>();
+        on_run_event(&event, bridge.as_deref());
     });
 }
 
@@ -1214,5 +1219,134 @@ mod tests {
                 .iter()
                 .any(|node| node.title.as_str().chars().count() > 200)
         );
+    }
+
+    #[derive(Default)]
+    struct MemoryCredentials(std::sync::Mutex<std::collections::HashMap<String, String>>);
+    impl markbridge_core::bridge::credentials::CredentialStore for MemoryCredentials {
+        fn get(
+            &self,
+            reference: &str,
+        ) -> std::result::Result<String, markbridge_protocol::ErrorCode> {
+            self.0
+                .lock()
+                .unwrap()
+                .get(reference)
+                .cloned()
+                .ok_or(markbridge_protocol::ErrorCode::Unpaired)
+        }
+        fn set(
+            &self,
+            reference: &str,
+            value: &str,
+        ) -> std::result::Result<(), markbridge_protocol::ErrorCode> {
+            self.0
+                .lock()
+                .unwrap()
+                .insert(reference.to_owned(), value.to_owned());
+            Ok(())
+        }
+        fn delete(
+            &self,
+            reference: &str,
+        ) -> std::result::Result<(), markbridge_protocol::ErrorCode> {
+            self.0.lock().unwrap().remove(reference);
+            Ok(())
+        }
+    }
+
+    // A live blocking task inhibits paused-time auto-advance onto the debounce timer.
+    struct ClockHold {
+        release: Option<std::sync::mpsc::Sender<()>>,
+        task: Option<tokio::task::JoinHandle<()>>,
+    }
+    impl ClockHold {
+        fn new() -> Self {
+            let (tx, rx) = std::sync::mpsc::channel();
+            let task = tokio::task::spawn_blocking(move || {
+                let _ = rx.recv();
+            });
+            Self {
+                release: Some(tx),
+                task: Some(task),
+            }
+        }
+        async fn release(mut self) {
+            self.release.take();
+            if let Some(task) = self.task.take() {
+                task.await.unwrap();
+            }
+        }
+    }
+    impl Drop for ClockHold {
+        fn drop(&mut self) {
+            self.release.take();
+        }
+    }
+
+    async fn real_wait(duration: std::time::Duration) {
+        tokio::task::spawn_blocking(move || std::thread::sleep(duration))
+            .await
+            .unwrap();
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn resumed_run_event_rescans_a_mirror_the_watcher_has_not_applied() {
+        const LOCAL_SINGLE: &str =
+            include_str!("../../../../tests/fixtures/bookmarks/local-state-single.json");
+        const PERSONAL: &str =
+            include_str!("../../../../tests/fixtures/bookmarks/bookmarks-personal.json");
+        const UPDATED: &str =
+            include_str!("../../../../tests/fixtures/bookmarks/bookmarks-updated.json");
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path().join("User Data");
+        std::fs::create_dir_all(root.join("Default")).unwrap();
+        std::fs::write(root.join("Local State"), LOCAL_SINGLE).unwrap();
+        std::fs::write(root.join("Default").join("Bookmarks"), PERSONAL).unwrap();
+        let bridge = markbridge_core::bridge::Bridge::open(
+            dir.path().join("cache.sqlite"),
+            std::sync::Arc::new(MemoryCredentials::default()),
+        )
+        .await
+        .unwrap();
+        let attached = bridge
+            .attach_file_mirror(root.to_str().unwrap().to_owned(), "Default".into())
+            .await
+            .unwrap();
+        let mirror_id = attached.mirrors[0].mirror_source_id.clone();
+        let original = markbridge_core::mirror::parse_bookmarks(PERSONAL.as_bytes()).unwrap();
+        let updated = markbridge_core::mirror::parse_bookmarks(UPDATED.as_bytes()).unwrap();
+        assert_eq!(
+            bridge.mirror_tree(mirror_id.clone()).await.unwrap().nodes,
+            original
+        );
+        real_wait(std::time::Duration::from_millis(100)).await;
+        std::fs::write(root.join("Default").join("Bookmarks"), UPDATED).unwrap();
+        real_wait(std::time::Duration::from_millis(150)).await;
+
+        let started = tokio::time::Instant::now();
+        let hold = ClockHold::new();
+        let before = bridge.mirror_tree(mirror_id.clone()).await.unwrap();
+        assert_eq!(before.nodes, original);
+        super::on_run_event(&tauri::RunEvent::Resumed, Some(&bridge));
+        let start = std::time::Instant::now();
+        let mut settled = None;
+        while start.elapsed() < std::time::Duration::from_secs(5) {
+            let tree = bridge.mirror_tree(mirror_id.clone()).await.unwrap();
+            if tree.nodes == updated {
+                settled = Some(tree);
+                break;
+            }
+            real_wait(std::time::Duration::from_millis(20)).await;
+        }
+        let settled = settled.expect("resumed handler did not rescan the temp mirror");
+        assert_eq!(settled.nodes, updated);
+        assert_ne!(settled.nodes, original);
+        assert!(
+            started.elapsed() < std::time::Duration::from_millis(300),
+            "watcher debounce elapsed, so this was not the resume rescan"
+        );
+        hold.release().await;
+        bridge.shutdown().await.unwrap();
     }
 }

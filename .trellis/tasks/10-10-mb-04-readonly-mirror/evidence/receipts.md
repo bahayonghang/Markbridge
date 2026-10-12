@@ -60,3 +60,38 @@ fixture：
 | V05 | `cargo test --workspace --locked` | 0 | PASS | 原子替换、半写 JSON、删除、目录改名后保留最后有效树。半写为 stale。有效文件返回后为 current。attach、rescan、detach、associate 前后比较 Bookmarks 与 Local State 的字节和 mtime，并检查目录树中没有 `Bookmarks.bak`。没有 syscall 写入计数器。30 秒核对和休眠恢复不计入本行 |
 
 `pnpm test`、`pnpm test:e2e`、`tauri dev`、`build:native` 保持 NOT_RUN。V04 保持 UNVERIFIED。
+
+## 2026-10-12 去抖、30 秒核对与 Resumed
+
+主机未挂起，没有发送电源事件，没有打开桌面窗口，没有读写日常 Chrome 的 Bookmarks 或 Local State。`DEBOUNCE` 与 `METADATA_INTERVAL` 未改。测试只读写临时目录里的 fixture 副本。
+
+`cargo fmt --all -- --check` 退出码 0。
+
+`cargo test --locked --offline -p markbridge-core --lib mirror::` 退出码 0。9 passed，84 filtered out，0.80s。该命令包含原有 `invalid_reads_keep_the_last_valid_mirror`。
+
+| 项 | 命令 | 退出码 | 状态 | 依据 |
+|---|---|---:|---|---|
+| 300 ms 去抖 | `cargo test --locked --offline -p markbridge-core --lib debounce_settles_the_second_file_only_after_300ms` | 0 | PASS | 1 passed，92 filtered out，0.39s。`attach_file_mirror` 挂上临时 Personal fixture。Tokio 时间冻结期间先后原子替换为 Updated fixture 和 Work fixture。`advance(299ms)` 后树仍等于 `parse_bookmarks` 的 Personal 结果，也不等于 Updated。再 `sleep(20ms)`，冻结时钟越过 300 ms，树等于 Work 的解析结果，不等于 Updated |
+| 30 s 元数据核对 | `cargo test --locked --offline -p markbridge-core --lib metadata_interval_loads_the_file_written_while_unwatched` | 0 | PASS | 1 passed，92 filtered out，0.52s。`shutdown` 停掉 watcher 后写入 Updated fixture，再 `open`。此后没有写 Bookmarks。`advance(300ms)` 后树仍是 Personal，notify 去抖没有应用这次修改。`sleep(30s)` 后树等于 Updated 的解析结果。节点已替换，因此这次 30 s tick 的 `reload(..., true)` 没有因 stamp 相同返回 `Unchanged`，而是继续 `load_bookmarks` |
+| `RunEvent::Resumed` 重扫 | `cargo test --locked --offline -p markbridge-desktop --bin markbridge-desktop resumed_run_event_rescans_a_mirror_the_watcher_has_not_applied` | 0 | PASS | 1 passed，12 filtered out，0.32s。`app.run` 与该测试调用同一个 `on_run_event`。测试传入 `RunEvent::Resumed`。写入 Updated fixture 后、调用前，树仍是 Personal。调用后树等于 Updated 的解析结果。这段时间 Tokio 时钟增加不足 300 ms，去抖超时没有触发。测试没有直接调用 `rescan_file_mirrors`，也没有休眠主机 |
+
+V04 仍为 UNVERIFIED。本轮没有休眠、没有桌面重连、没有重启 Chrome。04 未归档。
+
+## 2026-10-12 trellis-check 去抖与重扫
+
+主机未挂起，没有发送电源事件，没有打开桌面窗口，没有读写日常 Chrome 的 Bookmarks 或 Local State。`DEBOUNCE` 仍是 300 ms。`METADATA_INTERVAL` 仍是 30 s。测试只读写临时目录里的 fixture 副本。本轮命令没有加 `--offline`。
+
+| 命令 | 退出码 | 结果 |
+|---|---:|---|
+| `cargo fmt --all -- --check` | 0 | PASS |
+| `cargo test --locked -p markbridge-core --lib debounce_settles_the_second_file_only_after_300ms` | 0 | 1 passed，92 filtered out，0.40s |
+| `cargo test --locked -p markbridge-core --lib metadata_interval_loads_the_file_written_while_unwatched` | 0 | 1 passed，92 filtered out，0.58s |
+| `cargo test --locked -p markbridge-desktop --bin markbridge-desktop resumed_run_event_rescans_a_mirror_the_watcher_has_not_applied` | 0 | 1 passed，12 filtered out，0.32s |
+
+| 项 | 状态 | 依据 |
+|---|---|---|
+| 300 ms 去抖 | PASS | `advance(299ms)` 后树仍是 Personal，不等于 Updated。冻结时钟再增加 20 ms 后，树等于 Work，不等于 Updated。落定的是第二次原子替换。`DEBOUNCE` 仍是 `Duration::from_millis(300)` |
+| 30 s 元数据核对 | PASS | 原先 `sleep(30s)` 后才读树，notify 去抖可以在这段虚拟时间里先换树。断言改为：`Bridge::open` 经 `arm_saved_watches` 拉起 watcher 后，树在整整 300 ms 和 `METADATA_INTERVAL - 50ms` 时仍是 Personal。再前进 100 ms，Tokio 时钟等于 `METADATA_INTERVAL + 50ms`，树变为 Updated。这 100 ms 完不成 300 ms 去抖。`spawn_watch` 在循环外消费一次立即 tick，该 tick 不调用 `reload`；50 ms 前树仍是旧树，所以立即 tick 没有应用这次写入。循环里的 30 s tick 调用 `reload(..., true)`。重新打开后 stamp 为 `None`，这次调用不会因 stamp 相同返回 `Unchanged`。`open` 之后没有再写 Bookmarks |
+| `RunEvent::Resumed` 重扫 | PASS | `app.run` 调用 `on_run_event`。测试把 `RunEvent::Resumed` 传入该函数，没有自己调用 `rescan_file_mirrors`。调用前树是 Personal，调用后临时镜像变为 Updated。这段时间 Tokio 时钟增加不足 300 ms，watcher 去抖没有触发。这不是操作系统休眠 |
+
+V04 仍为 UNVERIFIED。本轮没有休眠、没有桌面重连、没有重启 Chrome。04 未归档。

@@ -529,3 +529,200 @@ async fn wait_title(bridge: &Bridge, id: &markbridge_protocol::Id, title: &str) 
         tokio::time::sleep(Duration::from_millis(50)).await;
     }
 }
+
+fn replace_bookmarks(profile: &Path, body: &str) {
+    let updated_tmp = profile.join("Bookmarks.new");
+    fs::write(&updated_tmp, body).unwrap();
+    fs::rename(&updated_tmp, profile.join("Bookmarks")).unwrap();
+}
+
+async fn real_wait(duration: Duration) {
+    tokio::task::spawn_blocking(move || std::thread::sleep(duration))
+        .await
+        .unwrap();
+}
+
+// A live blocking task inhibits paused-time auto-advance onto the debounce timer.
+struct ClockHold {
+    release: Option<std::sync::mpsc::Sender<()>>,
+    task: Option<tokio::task::JoinHandle<()>>,
+}
+
+impl ClockHold {
+    fn new() -> Self {
+        let (tx, rx) = std::sync::mpsc::channel();
+        let task = tokio::task::spawn_blocking(move || {
+            let _ = rx.recv();
+        });
+        Self {
+            release: Some(tx),
+            task: Some(task),
+        }
+    }
+
+    async fn release(mut self) {
+        self.release.take();
+        if let Some(task) = self.task.take() {
+            task.await.unwrap();
+        }
+    }
+}
+
+impl Drop for ClockHold {
+    fn drop(&mut self) {
+        self.release.take();
+    }
+}
+
+async fn wait_nodes(
+    bridge: &Bridge,
+    id: &markbridge_protocol::Id,
+    expected: &[markbridge_protocol::BookmarkNode],
+) -> markbridge_protocol::MirrorTree {
+    let start = std::time::Instant::now();
+    loop {
+        let tree = bridge.mirror_tree(id.clone()).await.unwrap();
+        if tree.nodes == expected {
+            return tree;
+        }
+        if start.elapsed() > Duration::from_secs(5) {
+            panic!("timed out waiting for a file mirror update");
+        }
+        real_wait(Duration::from_millis(20)).await;
+    }
+}
+
+#[tokio::test(start_paused = true)]
+async fn debounce_settles_the_second_file_only_after_300ms() {
+    let session = Session::open().await;
+    let root = session.dir.path().join("User Data");
+    write_user_data(&root, LOCAL_SINGLE, &[("Default", PERSONAL)]);
+    let profile = root.join("Default");
+    let attached = session
+        .bridge
+        .attach_file_mirror(root.to_str().unwrap().to_owned(), "Default".into())
+        .await
+        .unwrap();
+    let mirror_id = attached.mirrors[0].mirror_source_id.clone();
+    let original = parse_bookmarks(PERSONAL.as_bytes()).unwrap();
+    let first = parse_bookmarks(UPDATED.as_bytes()).unwrap();
+    let second = parse_bookmarks(WORK.as_bytes()).unwrap();
+    assert_eq!(
+        session
+            .bridge
+            .mirror_tree(mirror_id.clone())
+            .await
+            .unwrap()
+            .nodes,
+        original
+    );
+    real_wait(Duration::from_millis(100)).await;
+
+    replace_bookmarks(&profile, UPDATED);
+    real_wait(Duration::from_millis(40)).await;
+    replace_bookmarks(&profile, WORK);
+    real_wait(Duration::from_millis(200)).await;
+
+    let hold = ClockHold::new();
+    let early = session.bridge.mirror_tree(mirror_id.clone()).await.unwrap();
+    assert_eq!(early.nodes, original);
+    tokio::time::advance(Duration::from_millis(299)).await;
+    let mid = session.bridge.mirror_tree(mirror_id.clone()).await.unwrap();
+    assert_eq!(mid.nodes, original, "tree settled before 300 ms");
+    assert_ne!(mid.nodes, first);
+    hold.release().await;
+
+    tokio::time::sleep(Duration::from_millis(20)).await;
+    let settled = wait_nodes(&session.bridge, &mirror_id, &second).await;
+    assert_eq!(settled.nodes, second);
+    assert_ne!(settled.nodes, first);
+    session.close().await;
+}
+
+#[tokio::test(start_paused = true)]
+async fn metadata_interval_loads_the_file_written_while_unwatched() {
+    let session = Session::open().await;
+    let root = session.dir.path().join("User Data");
+    write_user_data(&root, LOCAL_SINGLE, &[("Default", PERSONAL)]);
+    let profile = root.join("Default");
+    let database = session.dir.path().join("cache.sqlite");
+    let attached = session
+        .bridge
+        .attach_file_mirror(root.to_str().unwrap().to_owned(), "Default".into())
+        .await
+        .unwrap();
+    let mirror_id = attached.mirrors[0].mirror_source_id.clone();
+    session.bridge.shutdown().await.unwrap();
+
+    fs::write(profile.join("Bookmarks"), UPDATED).unwrap();
+    real_wait(Duration::from_millis(200)).await;
+
+    let bridge = Bridge::open(
+        &database,
+        Arc::new(MemoryCredentials(Mutex::new(HashMap::new()))),
+    )
+    .await
+    .unwrap();
+    let original = parse_bookmarks(PERSONAL.as_bytes()).unwrap();
+    let updated = parse_bookmarks(UPDATED.as_bytes()).unwrap();
+    assert_eq!(
+        bridge.mirror_tree(mirror_id.clone()).await.unwrap().nodes,
+        original
+    );
+    real_wait(Duration::from_millis(200)).await;
+
+    assert_eq!(super::DEBOUNCE, Duration::from_millis(300));
+    assert_eq!(super::METADATA_INTERVAL, Duration::from_secs(30));
+    let mark = tokio::time::Instant::now();
+    let hold = ClockHold::new();
+    tokio::time::advance(super::DEBOUNCE).await;
+    for _ in 0..10 {
+        tokio::task::yield_now().await;
+    }
+    real_wait(Duration::from_millis(50)).await;
+    let after_debounce = bridge.mirror_tree(mirror_id.clone()).await.unwrap();
+    assert_eq!(
+        after_debounce.nodes, original,
+        "a notify event or the immediate interval tick applied the file inside 300 ms"
+    );
+    assert_eq!(mark.elapsed(), super::DEBOUNCE);
+
+    // 100 ms from this read to the next one cannot finish a 300 ms debounce.
+    let before_tick = super::METADATA_INTERVAL - Duration::from_millis(50);
+    tokio::time::advance(before_tick - mark.elapsed()).await;
+    for _ in 0..10 {
+        tokio::task::yield_now().await;
+    }
+    real_wait(Duration::from_millis(50)).await;
+    assert_eq!(mark.elapsed(), before_tick);
+    let before_interval = bridge.mirror_tree(mirror_id.clone()).await.unwrap();
+    assert_eq!(
+        before_interval.nodes, original,
+        "tree changed before the 30 s metadata tick"
+    );
+
+    tokio::time::advance(Duration::from_millis(100)).await;
+    for _ in 0..10 {
+        tokio::task::yield_now().await;
+    }
+    let wall = std::time::Instant::now();
+    let mut settled = None;
+    while wall.elapsed() < Duration::from_secs(5) {
+        let tree = bridge.mirror_tree(mirror_id.clone()).await.unwrap();
+        if tree.nodes == updated {
+            settled = Some(tree);
+            break;
+        }
+        real_wait(Duration::from_millis(20)).await;
+    }
+    assert_eq!(
+        mark.elapsed(),
+        super::METADATA_INTERVAL + Duration::from_millis(50),
+        "elapsed moved past the 30 s tick by more than the 100 ms crossing"
+    );
+    let settled = settled.expect("30 s metadata tick did not load the unwatched write");
+    assert_eq!(settled.nodes, updated);
+    assert_ne!(settled.nodes, original);
+    hold.release().await;
+    bridge.shutdown().await.unwrap();
+}
