@@ -53,7 +53,7 @@ impl CancelFlag {
     pub(crate) fn is_cancelled(&self) -> bool {
         *self.0.borrow()
     }
-    async fn cancelled(&self) {
+    pub(crate) async fn cancelled(&self) {
         let mut watch = self.0.subscribe();
         loop {
             if *watch.borrow() {
@@ -511,4 +511,228 @@ fn inflate<R: std::io::Read>(mut decoder: R, limit: usize) -> Result<Vec<u8>, Pr
         }
         out.extend_from_slice(&buf[..n]);
     }
+}
+
+pub(crate) const PROBE_BODY_LIMIT: usize = 64 * 1024;
+
+pub(crate) struct ProbeHit {
+    pub status: u16,
+    pub login_page: bool,
+}
+
+pub(crate) enum ProbeError {
+    Cancelled,
+    Denied(PreviewFailure),
+}
+
+struct StatusRead {
+    code: u16,
+    location: Option<String>,
+    body: Vec<u8>,
+}
+
+/// HEAD, then a small GET when HEAD cannot be used or the response may be a login page.
+/// Address checks are the same as a document fetch.
+pub(crate) async fn probe_public(
+    raw: &str,
+    cancel: &CancelFlag,
+    net: &dyn Network,
+) -> Result<ProbeHit, ProbeError> {
+    if cancel.is_cancelled() {
+        return Err(ProbeError::Cancelled);
+    }
+    let work = probe_follow(raw, net);
+    tokio::pin!(work);
+    tokio::select! {
+        biased;
+        _ = cancel.cancelled() => Err(ProbeError::Cancelled),
+        _ = tokio::time::sleep(FETCH_TIMEOUT) => Err(ProbeError::Denied(PreviewFailure::TimedOut)),
+        result = &mut work => result,
+    }
+}
+
+async fn probe_follow(raw: &str, net: &dyn Network) -> Result<ProbeHit, ProbeError> {
+    let mut current = raw.to_owned();
+    let mut pinned = HashMap::new();
+    for hop in 0..=MAX_REDIRECTS {
+        let checked = guard::check_url(&current).map_err(|error| {
+            ProbeError::Denied(if hop == 0 {
+                error
+            } else {
+                redirect_error(error)
+            })
+        })?;
+        let addr = pin_addr(&checked, &mut pinned, hop, net)
+            .await
+            .map_err(ProbeError::Denied)?;
+        let mut status = match read_status(&checked, "HEAD", false, addr, net).await {
+            Ok(status) => status,
+            Err(PreviewFailure::Unreachable) | Err(PreviewFailure::InvalidResponse) => {
+                read_status(&checked, "GET", true, addr, net)
+                    .await
+                    .map_err(ProbeError::Denied)?
+            }
+            Err(error) => return Err(ProbeError::Denied(error)),
+        };
+        if matches!(status.code, 405 | 501) {
+            status = read_status(&checked, "GET", true, addr, net)
+                .await
+                .map_err(ProbeError::Denied)?;
+        }
+        if let Some(location) = status.location.clone() {
+            if hop == MAX_REDIRECTS {
+                return Err(ProbeError::Denied(PreviewFailure::RedirectDenied));
+            }
+            current = guard::redirect_target(&checked.url, &location)
+                .map_err(|error| ProbeError::Denied(redirect_error(error)))?;
+            continue;
+        }
+        if (200..300).contains(&status.code) && status.body.is_empty() {
+            if let Ok(got) = read_status(&checked, "GET", true, addr, net).await {
+                if let Some(location) = got.location {
+                    if hop == MAX_REDIRECTS {
+                        return Err(ProbeError::Denied(PreviewFailure::RedirectDenied));
+                    }
+                    current = guard::redirect_target(&checked.url, &location)
+                        .map_err(|error| ProbeError::Denied(redirect_error(error)))?;
+                    continue;
+                }
+                status = got;
+            }
+        }
+        return Ok(ProbeHit {
+            status: status.code,
+            login_page: login_page(status.code, &status.body),
+        });
+    }
+    Err(ProbeError::Denied(PreviewFailure::RedirectDenied))
+}
+
+fn login_page(status: u16, body: &[u8]) -> bool {
+    if status == 401 {
+        return true;
+    }
+    if !(200..300).contains(&status) {
+        return false;
+    }
+    let lower = String::from_utf8_lossy(body).to_ascii_lowercase();
+    lower.contains("type=\"password\"") || lower.contains("type='password'")
+}
+
+async fn read_status(
+    checked: &CheckedUrl,
+    method: &str,
+    with_body: bool,
+    addr: SocketAddr,
+    net: &dyn Network,
+) -> Result<StatusRead, PreviewFailure> {
+    let tcp = net.connect(addr).await?;
+    if checked.url.scheme() == "https" {
+        let name = rustls::pki_types::ServerName::try_from(checked.host.clone())
+            .map_err(|_| PreviewFailure::InvalidResponse)?;
+        let stream = tls_connector()
+            .connect(name, tcp)
+            .await
+            .map_err(|_| PreviewFailure::Unreachable)?;
+        read_status_http(stream, checked, method, with_body).await
+    } else {
+        read_status_http(tcp, checked, method, with_body).await
+    }
+}
+
+async fn read_status_http<S>(
+    mut stream: S,
+    checked: &CheckedUrl,
+    method: &str,
+    with_body: bool,
+) -> Result<StatusRead, PreviewFailure>
+where
+    S: AsyncRead + AsyncWrite + Unpin,
+{
+    stream
+        .write_all(&status_request(checked, method)?)
+        .await
+        .map_err(|_| PreviewFailure::Unreachable)?;
+    let header_bytes = read_until(&mut stream, b"\r\n\r\n", MAX_HEADERS).await?;
+    let (code, headers) = parse_headers(&header_bytes)?;
+    if matches!(code, 301 | 302 | 303 | 307 | 308) {
+        let location = header(&headers, "location")
+            .ok_or(PreviewFailure::InvalidResponse)?
+            .to_owned();
+        return Ok(StatusRead {
+            code,
+            location: Some(location),
+            body: Vec::new(),
+        });
+    }
+    let body = if with_body {
+        match read_prefix(&mut stream, &headers, PROBE_BODY_LIMIT).await {
+            Ok(body) => body,
+            Err(PreviewFailure::BodyTooLarge) => Vec::new(),
+            Err(error) => return Err(error),
+        }
+    } else {
+        Vec::new()
+    };
+    Ok(StatusRead {
+        code,
+        location: None,
+        body,
+    })
+}
+
+fn status_request(checked: &CheckedUrl, method: &str) -> Result<Vec<u8>, PreviewFailure> {
+    if method != "GET" && method != "HEAD" {
+        return Err(PreviewFailure::InvalidResponse);
+    }
+    let path = checked.url.path();
+    let path = if path.is_empty() { "/" } else { path };
+    let query = checked
+        .url
+        .query()
+        .map(|value| format!("?{value}"))
+        .unwrap_or_default();
+    if path.chars().any(|ch| ch.is_control()) || query.chars().any(|ch| ch.is_control()) {
+        return Err(PreviewFailure::InvalidResponse);
+    }
+    let host = match checked.url.port() {
+        Some(port) if !matches!((checked.url.scheme(), port), ("http", 80) | ("https", 443)) => {
+            format!("{}:{port}", display_host(checked))
+        }
+        _ => display_host(checked),
+    };
+    Ok(format!("{method} {path}{query} HTTP/1.1\r\nHost: {host}\r\nUser-Agent: MarkbridgePreview/0.1\r\nAccept: text/html\r\nConnection: close\r\n\r\n").into_bytes())
+}
+
+async fn read_prefix<S: AsyncRead + Unpin>(
+    stream: &mut S,
+    headers: &[(String, String)],
+    limit: usize,
+) -> Result<Vec<u8>, PreviewFailure> {
+    if header(headers, "transfer-encoding")
+        .is_some_and(|value| value.eq_ignore_ascii_case("chunked"))
+    {
+        return read_chunked(stream, limit).await;
+    }
+    let wanted = header(headers, "content-length")
+        .and_then(|value| value.parse::<usize>().ok())
+        .unwrap_or(limit)
+        .min(limit);
+    if wanted == 0 {
+        return Ok(Vec::new());
+    }
+    let mut body = vec![0_u8; wanted];
+    let mut filled = 0;
+    while filled < wanted {
+        let n = stream
+            .read(&mut body[filled..])
+            .await
+            .map_err(|_| PreviewFailure::Unreachable)?;
+        if n == 0 {
+            break;
+        }
+        filled += n;
+    }
+    body.truncate(filled);
+    Ok(body)
 }

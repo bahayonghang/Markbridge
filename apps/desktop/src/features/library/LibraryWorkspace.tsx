@@ -5,6 +5,7 @@ import {
   type EditAction,
 } from '../../backend';
 import { AiSuggest } from '../ai/AiSuggest';
+import { MaintenanceDesk } from '../maintenance/MaintenanceDesk';
 import { OrganizationDesk } from '../organization/OrganizationDesk';
 import { ContentPreviewPanel } from '../preview/ContentPreview';
 import { WebPreviewPanel } from '../preview/WebPreview';
@@ -624,6 +625,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId }: {
             </>}
           </>}
           {profile?.connection === 'live' && pickedBookmarks.length > 0 && <OrganizationDesk profileId={profile.profileId} revision={profile.revision} live chromeIds={pickedBookmarks} />}
+          {profile && <MaintenanceDesk profileId={profile.profileId} revision={profile.revision} live={profile.connection === 'live'} chromeIds={pickedBookmarks} />}
           {profile?.connection === 'live' && <EditDesk
             profileId={profile.profileId}
             revision={profile.revision}

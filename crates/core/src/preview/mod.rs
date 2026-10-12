@@ -4,7 +4,7 @@ mod fetch;
 mod guard;
 mod service;
 
-pub(crate) use fetch::SystemNetwork;
+pub(crate) use fetch::{CancelFlag, Network, ProbeError, ProbeHit, SystemNetwork, probe_public};
 pub use service::Gate;
 pub(crate) use service::load_content_preview;
 pub(crate) use service::url_fingerprint;

@@ -754,6 +754,74 @@ pub fn plan_reclassify(
     })
 }
 
+/// Deletes the selected bookmarks. Higher positions in a parent go first so later expected positions stay valid.
+pub fn plan_bookmark_cleanup(nodes: &[BookmarkNode], chrome_ids: &[Id]) -> Result<Plan, ErrorCode> {
+    if chrome_ids.is_empty() {
+        return Err(ErrorCode::InvalidMessage);
+    }
+    let index = index(nodes)?;
+    let mut seen = HashSet::new();
+    let mut selected = Vec::new();
+    for id in chrome_ids {
+        if !seen.insert(id.as_str().to_owned()) {
+            return Err(ErrorCode::InvalidMessage);
+        }
+        let node = index
+            .by_id
+            .get(id.as_str())
+            .copied()
+            .ok_or(ErrorCode::InvalidTree)?;
+        if node.kind != NodeKind::Bookmark {
+            return Err(ErrorCode::InvalidMessage);
+        }
+        if !can_remove_or_move(&index, node) {
+            return Err(ErrorCode::ProtectedNode);
+        }
+        selected.push(node);
+    }
+    selected.sort_by(|left, right| {
+        let parent = parent_key(left).cmp(parent_key(right));
+        parent
+            .then(right.position.get().cmp(&left.position.get()))
+            .then(right.chrome_id.as_str().cmp(left.chrome_id.as_str()))
+    });
+    let mut steps = Vec::new();
+    let mut changes = Vec::new();
+    let mut orders = Vec::new();
+    let mut parents = HashSet::new();
+    for node in selected {
+        let parent = node.parent_id.clone().ok_or(ErrorCode::ProtectedNode)?;
+        if parents.insert(parent.as_str().to_owned()) {
+            orders.push(ChildOrder {
+                parent_id: parent.clone(),
+                child_ids: child_ids_of(&index, parent.as_str()),
+            });
+        }
+        changes.push(change(EditField::Existence, Some(node.title.as_str()), None)?);
+        steps.push(step(
+            Some(node.chrome_id.clone()),
+            Some(node.clone()),
+            None,
+            Mutation::Delete {},
+        )?);
+    }
+    let affected = steps.len() as u64;
+    Ok(Plan {
+        steps,
+        affected,
+        requires_second_confirm: affected > LARGE_DELETE,
+        changes,
+        orders,
+        restores: vec![],
+        undo_of: None,
+        conflicts: vec![],
+    })
+}
+
+fn parent_key(node: &BookmarkNode) -> &str {
+    node.parent_id.as_ref().map(Id::as_str).unwrap_or("")
+}
+
 pub fn plan_empty_cleanup(
     nodes: &[BookmarkNode],
     folder_ids: &[Id],
@@ -867,13 +935,30 @@ fn plan_undo(
     let mut changes = Vec::new();
     let mut restores = Vec::new();
     let mut conflicts = Vec::new();
+    let removed: HashSet<String> = stored
+        .steps
+        .iter()
+        .filter(|step| matches!(step.payload, Mutation::Delete {}))
+        .filter_map(|step| {
+            step.before
+                .as_ref()
+                .map(|node| node.chrome_id.as_str().to_owned())
+        })
+        .collect();
     for original in stored.steps.iter().rev() {
         if !original.applied {
             continue;
         }
         let index = index(&working)?;
         let outcome = if matches!(original.payload, Mutation::Delete {}) {
-            restore_deleted(&index, original, &stored.orders, locals, &stored.snapshot)
+            restore_deleted(
+                &index,
+                original,
+                &stored.orders,
+                locals,
+                &stored.snapshot,
+                &removed,
+            )
         } else {
             inverse(&index, original).map_err(UndoFailure::Conflict)
         };
@@ -1100,6 +1185,7 @@ fn restore_deleted(
     orders: &[ChildOrder],
     locals: &[LocalRef],
     snapshot: &[BookmarkNode],
+    removed: &HashSet<String>,
 ) -> Result<Inverse, UndoFailure> {
     let conflict = |chrome: Option<&Id>, field| {
         UndoFailure::Conflict(OperationConflict {
@@ -1148,7 +1234,10 @@ fn restore_deleted(
             order
                 .child_ids
                 .iter()
-                .filter(|id| *id != &before.chrome_id)
+                .filter(|id| {
+                    let key = id.as_str();
+                    index.by_id.contains_key(key) || !removed.contains(key)
+                })
                 .cloned()
                 .collect()
         })

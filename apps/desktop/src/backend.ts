@@ -3,10 +3,10 @@ import { listen } from '@tauri-apps/api/event';
 import {
   parseApplyResult, parseBridgeState, parseChromeProfileList, parseEditDocument, parseEditPreview,
   parseLibraryCount, parseLibraryDetail, parseLibraryNodes, parseLibraryPage, parseLibrarySearch,
-  parseAiApply, parseAiConnection, parseAiSettings, parseAiSuggestion, parseContentPreview, parseMirrorTree, parseOperationList, parseOrganizationPlan, parsePairingOffer, parseStartupState, parseTagCatalog, parseTitleEncoding, parseWebPreview,
+  parseAiApply, parseAiConnection, parseAiSettings, parseAiSuggestion, parseContentPreview, parseMaintenanceReport, parseMirrorTree, parseOperationList, parseOrganizationPlan, parsePairingOffer, parseStartupState, parseTagCatalog, parseTextSearch, parseTitleEncoding, parseWebPreview,
   type AiApplyResult, type AiConnection, type AiSettings, type AiSuggestion, type ApplyResult, type BridgeState, type ChromeProfileList, type ContentPreview, type EditDocument, type EditPreview,
   type LibraryCount, type LibraryDetail, type LibraryNodes, type LibraryPage, type LibrarySearch,
-  type MirrorTree, type OperationList, type OrganizationFolder, type OrganizationPlan, type PairingOffer, type StartupState, type TagCatalog, type TitleEncodingPreview, type WebPreviewState,
+  type MaintenanceReport, type MirrorTree, type OperationList, type OrganizationFolder, type OrganizationPlan, type PairingOffer, type StartupState, type TagCatalog, type TextSearchPage, type TitleEncodingPreview, type WebPreviewState,
 } from '@markbridge/protocol';
 
 export type EditAction =
@@ -280,6 +280,36 @@ export async function cancelOrganization(jobId: string): Promise<OrganizationPla
 export async function cleanupOrganization(jobId: string, confirm: boolean, secondConfirm: boolean): Promise<OrganizationPlan> {
   if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
   return parseOrganizationPlan(await invoke<unknown>('cleanup_organization', { jobId, confirm, secondConfirm }));
+}
+
+export async function inspectLibrary(profileId: string, chromeIds: string[]): Promise<MaintenanceReport> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseMaintenanceReport(await invoke<unknown>('inspect_library', { profileId, chromeIds }));
+}
+
+export async function checkLinks(profileId: string, chromeIds: string[], requestId: string): Promise<MaintenanceReport> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseMaintenanceReport(await invoke<unknown>('check_links', { profileId, chromeIds, requestId }));
+}
+
+export async function cancelLinkCheck(requestId: string): Promise<void> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  await invoke('cancel_link_check', { requestId });
+}
+
+export async function previewCleanup(profileId: string, expectedRevision: number, chromeIds: string[], keeperChromeId: string): Promise<MaintenanceReport> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseMaintenanceReport(await invoke<unknown>('preview_cleanup', { profileId, expectedRevision, chromeIds, keeperChromeId }));
+}
+
+export async function confirmCleanup(profileId: string, expectedRevision: number, chromeIds: string[], keeperChromeId: string, confirm: boolean, secondConfirm: boolean): Promise<MaintenanceReport> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseMaintenanceReport(await invoke<unknown>('confirm_cleanup', { profileId, expectedRevision, chromeIds, keeperChromeId, confirm, secondConfirm }));
+}
+
+export async function searchLibraryText(profileId: string, query: string): Promise<TextSearchPage> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseTextSearch(await invoke<unknown>('search_library_text', { profileId, query }));
 }
 
 export async function organizationPlan(jobId: string): Promise<OrganizationPlan> {

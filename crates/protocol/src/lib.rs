@@ -50,6 +50,8 @@ pub mod ai;
 pub use ai::*;
 pub mod organization;
 pub use organization::*;
+pub mod maintenance;
+pub use maintenance::*;
 
 #[cfg(test)]
 mod wire_tests;

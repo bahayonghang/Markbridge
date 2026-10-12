@@ -10,6 +10,7 @@ use std::{
 use tokio::sync::{mpsc, oneshot};
 
 pub(crate) mod ai;
+pub(crate) mod maintenance;
 mod operations;
 pub(crate) mod preview;
 mod tags;
@@ -25,6 +26,7 @@ const MIGRATIONS: &[&str] = &[
     include_str!("migrations/004_tags.sql"),
     include_str!("migrations/005_preview.sql"),
     include_str!("migrations/006_organization.sql"),
+    include_str!("migrations/007_maintenance.sql"),
 ];
 pub const SCHEMA_VERSION: u32 = MIGRATIONS.len() as u32;
 type Result<T> = std::result::Result<T, ErrorCode>;
@@ -261,6 +263,7 @@ impl Storage {
         self.call(move |conn| {
             conn.execute("INSERT INTO bookmark_metadata(bookmark_id,display_title,summary,note,updated_at) VALUES(?1,?2,?3,?4,?5) ON CONFLICT(bookmark_id) DO UPDATE SET display_title=excluded.display_title,summary=excluded.summary,note=excluded.note,updated_at=excluded.updated_at",
                 params![bookmark_id.as_str(), metadata.display_title, metadata.summary, metadata.note, metadata.updated_at.get() as i64]).map_err(storage_error)?;
+            maintenance::sync_metadata_fts(conn, bookmark_id.as_str())?;
             Ok(())
         }).await
     }

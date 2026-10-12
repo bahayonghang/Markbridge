@@ -15,3 +15,5 @@ Provide keyboard navigation, visible focus, accessible labels, and a keyboard al
 Preserve user drafts when external edits cause conflict. UI tasks must add native screenshot and interaction evidence.
 
 `apps/desktop/src/features/preview/WebPreview.tsx` opens one in-app page for the selected bookmark from the trusted main window. The panel names the current profile and the selected URL, and it shows the preview-window URL separately. Closing the window keeps that profile session until the user confirms clear. A failed or blocked load tells the user to continue in Chrome and does not promise site or Chrome login compatibility. The desktop control does not grant the extension `activeTab`.
+
+`apps/desktop/src/features/maintenance/MaintenanceDesk.tsx` is mounted when a profile is open. It does not call the backend on mount. Preview cleanup does not confirm a delete. Confirm stays disabled unless the profile is live and a preview is visible. A running link check does not disable the tree or the ordinary edit desk. Undo calls `applyEdit` with `undo`. A revision change drops an unconfirmed preview and keeps a completed operation id.

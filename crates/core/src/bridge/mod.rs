@@ -3,6 +3,7 @@ mod ai;
 pub mod credentials;
 mod edit;
 mod file_mirror;
+mod maintenance;
 mod organization;
 mod sync;
 mod tags;
@@ -36,6 +37,8 @@ pub struct Bridge {
     lifecycle: Arc<Mutex<()>>,
     watches: Arc<Mutex<BTreeMap<String, file_mirror::Watch>>>,
     preview: Gate,
+    links: Gate,
+    link_net: Arc<std::sync::Mutex<Arc<dyn crate::preview::Network>>>,
 }
 struct Pending {
     view: PendingPairing,
@@ -214,6 +217,8 @@ impl Bridge {
             lifecycle: Arc::new(Mutex::new(())),
             watches: Arc::new(Mutex::new(BTreeMap::new())),
             preview: Gate::default(),
+            links: Gate::default(),
+            link_net: Arc::new(std::sync::Mutex::new(Arc::new(crate::preview::SystemNetwork))),
         };
         bridge.arm_saved_watches().await;
         Ok(bridge)
@@ -398,6 +403,7 @@ impl Bridge {
     pub async fn shutdown(&self) -> Result<()> {
         let _lifecycle = self.lifecycle.lock().await;
         self.preview.cancel_all().await;
+        self.links.cancel_all().await;
         self.ai_gate.cancel_all().await;
         self.stop_watches().await;
         let listener = {

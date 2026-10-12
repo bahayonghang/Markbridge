@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TextSearchPage",
+  "type": "object",
+  "properties": {
+    "hits": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/TextHit"
+      },
+      "maxItems": 50
+    },
+    "profileId": {
+      "$ref": "#/$defs/Id"
+    },
+    "query": {
+      "type": "string",
+      "maxLength": 200
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "profileId",
+    "query",
+    "hits"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string",
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*(?![\\s\\S])"
+    },
+    "TextHit": {
+      "type": "object",
+      "properties": {
+        "bookmarkId": {
+          "$ref": "#/$defs/Id"
+        },
+        "chromeId": {
+          "$ref": "#/$defs/Id"
+        },
+        "note": {
+          "type": "string",
+          "maxLength": 4096
+        },
+        "summary": {
+          "type": "string",
+          "maxLength": 4096
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 4096
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "bookmarkId",
+        "chromeId",
+        "title",
+        "summary",
+        "note"
+      ]
+    }
+  }
+}

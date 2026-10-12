@@ -246,6 +246,7 @@ impl Storage {
                 "INSERT INTO bookmark_metadata(bookmark_id,display_title,summary,note,updated_at) VALUES(?1,NULL,?2,'',?3) ON CONFLICT(bookmark_id) DO UPDATE SET summary=excluded.summary, updated_at=excluded.updated_at",
                 params![bookmark_id.as_str(), summary, now],
             ).map_err(storage_error)?;
+            super::maintenance::sync_metadata_fts(conn, bookmark_id.as_str())?;
             Ok(())
         }).await
     }

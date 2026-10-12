@@ -148,6 +148,7 @@ fn set_note(
             params![bookmark, note, now],
         )
         .map_err(storage_error)?;
+        super::maintenance::sync_metadata_fts(conn, bookmark)?;
     }
     write_journal(conn, profile_id, &snap)?;
     Ok(affected(changed.len() as u64))
@@ -423,6 +424,7 @@ fn restore(conn: &rusqlite::Connection, _epoch: i64, snap: &Snap) -> Result<()> 
             params![note.bookmark_id, note.note, now],
         )
         .map_err(storage_error)?;
+        super::maintenance::sync_metadata_fts(conn, &note.bookmark_id)?;
     }
     Ok(())
 }

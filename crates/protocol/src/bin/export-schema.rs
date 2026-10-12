@@ -23,6 +23,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Some("ai-suggestion") => schemars::schema_for!(markbridge_protocol::AiSuggestion),
         Some("ai-apply") => schemars::schema_for!(markbridge_protocol::AiApplyResult),
         Some("organization-plan") => schemars::schema_for!(markbridge_protocol::OrganizationPlan),
+        Some("maintenance-report") => schemars::schema_for!(markbridge_protocol::MaintenanceReport),
+        Some("text-search") => schemars::schema_for!(markbridge_protocol::TextSearchPage),
         _ => schemars::schema_for!(markbridge_protocol::StartupState),
     };
     println!("{}", serde_json::to_string_pretty(&schema)?);

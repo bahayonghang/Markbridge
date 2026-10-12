@@ -281,6 +281,7 @@ impl Storage {
                         "INSERT INTO bookmark_tags(bookmark_id,tag_id) SELECT ?2,tag_id FROM bookmark_tags WHERE bookmark_id=?1 ON CONFLICT(bookmark_id,tag_id) DO NOTHING",
                         params![map.old_bookmark_id.as_str(), new_id],
                     ).map_err(storage_error)?;
+                    super::maintenance::sync_metadata_fts(conn, &new_id)?;
                 }
                 body.maps = remaining;
                 let json = serde_json::to_string(&body).map_err(|_| ErrorCode::StorageError)?;

@@ -5,8 +5,8 @@ use markbridge_protocol::{
     AiApplyResult, AiConnection, AiDraft, AiSettings, AiSuggestion, ApplyResult, BookmarkNode,
     BridgeState, ChromeProfileList, ContentPreview, Counter, EditAction, EditDocument, EditPreview,
     ErrorCode, Id, LibraryCount, LibraryDetail, LibraryNodes, LibraryPage, LibrarySearch,
-    MirrorTree, OperationList, OrganizationFolder, OrganizationPlan, PairingOffer, TagCatalog,
-    TagCommand, TitleEncodingPreview,
+    MaintenanceReport, MirrorTree, OperationList, OrganizationFolder, OrganizationPlan, PairingOffer,
+    TagCatalog, TagCommand, TextSearchPage, TitleEncodingPreview,
 };
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -674,6 +674,89 @@ async fn cancel_content_preview(
 }
 
 #[tauri::command]
+async fn inspect_library(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    profile_id: Id,
+    chrome_ids: Vec<Id>,
+) -> Result<MaintenanceReport, ErrorCode> {
+    trusted(&window)?;
+    bridge.inspect_library(profile_id, chrome_ids).await
+}
+
+#[tauri::command]
+async fn check_links(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    profile_id: Id,
+    chrome_ids: Vec<Id>,
+    request_id: Id,
+) -> Result<MaintenanceReport, ErrorCode> {
+    trusted(&window)?;
+    bridge.check_links(profile_id, chrome_ids, request_id).await
+}
+
+#[tauri::command]
+async fn cancel_link_check(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    request_id: Id,
+) -> Result<(), ErrorCode> {
+    trusted(&window)?;
+    bridge.cancel_link_check(request_id).await
+}
+
+#[tauri::command]
+async fn preview_cleanup(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    profile_id: Id,
+    expected_revision: u64,
+    chrome_ids: Vec<Id>,
+    keeper_chrome_id: Id,
+) -> Result<MaintenanceReport, ErrorCode> {
+    trusted(&window)?;
+    bridge
+        .preview_cleanup(profile_id, expected_revision, chrome_ids, keeper_chrome_id)
+        .await
+}
+
+#[tauri::command]
+async fn confirm_cleanup(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    profile_id: Id,
+    expected_revision: u64,
+    chrome_ids: Vec<Id>,
+    keeper_chrome_id: Id,
+    confirm: bool,
+    second_confirm: bool,
+) -> Result<MaintenanceReport, ErrorCode> {
+    trusted(&window)?;
+    bridge
+        .confirm_cleanup(
+            profile_id,
+            expected_revision,
+            chrome_ids,
+            keeper_chrome_id,
+            confirm,
+            second_confirm,
+        )
+        .await
+}
+
+#[tauri::command]
+async fn search_library_text(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    profile_id: Id,
+    query: String,
+) -> Result<TextSearchPage, ErrorCode> {
+    trusted(&window)?;
+    bridge.search_text(profile_id, query).await
+}
+
+#[tauri::command]
 fn open_http_url(window: tauri::WebviewWindow, url: String) -> Result<(), ErrorCode> {
     trusted(&window)?;
     open_http(&url)
@@ -822,6 +905,12 @@ fn main() {
             organization_plan,
             content_preview,
             cancel_content_preview,
+            inspect_library,
+            check_links,
+            cancel_link_check,
+            preview_cleanup,
+            confirm_cleanup,
+            search_library_text,
             open_http_url,
             open_web_preview,
             web_preview_action,
