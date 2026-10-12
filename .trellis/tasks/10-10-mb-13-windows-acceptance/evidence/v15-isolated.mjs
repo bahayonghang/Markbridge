@@ -727,9 +727,12 @@ async function driveRecovery() {
       const rows = await operations();
       const chromeRows = await chromeBookmarks(unackedTitle);
       if (!Array.isArray(rows) || !again) return null;
+      const creates = rows.filter((row) => row[2] === 'create');
       const sameCount = chromeRows.length === before.ids.length && chromeRows.every((row) => before.ids.includes(row.id));
-      const noExtraCreate = rows.filter((row) => row[2] === 'create').length === before.rows.filter((row) => row[2] === 'create').length;
-      if (sameCount && noExtraCreate) return { rows, ids: chromeRows.map((row) => row.id) };
+      const noExtraCreate = creates.length === before.rows.filter((row) => row[2] === 'create').length;
+      const createSettled = creates.length > 0 && creates.every((row) => row[1] === 'uncertain' || (row[1] === 'applied' && row[3] >= 1));
+      if (sameCount && noExtraCreate && createSettled) return { rows, ids: chromeRows.map((row) => row.id) };
+      if (sameCount && noExtraCreate) return null;
       return { failed: true, rows, ids: chromeRows.map((row) => row.id) };
     }, 20000, 500);
     obs.recovery = after && !after.failed ? 'PASS' : 'FAIL';

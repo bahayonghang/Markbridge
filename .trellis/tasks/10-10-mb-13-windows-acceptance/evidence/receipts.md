@@ -601,3 +601,23 @@ AC13-2 为 FAIL。V15 为 FAIL。编辑回执通过。重启后不重放未回�
 
 日常书签前后都是 849515 字节，SHA256 `DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82`。结果只记 `pairing code chars=221` 和 `cmdkey pairing=0 model=0`。没有配对串或凭据值。`.trellis/spec/frontend/component-guidelines.md` 仍未暂存。
 
+## 2026-10-12 打开时冻结未回执创建
+
+01:45（-04:00）。命令 `cargo test -p markbridge-core --locked open_leaves_an_unacked_edit_create_uncertain_and_does_not_replay -- --test-threads=1`，退出码 0，1 passed。没有设置 `CARGO_HOME`、`RUSTUP_HOME` 或 `HOME`。没有改非测试产品代码。没有运行 `pnpm build:package`，没有重装，没有运行 `evidence/v15-isolated.mjs`。已安装二进制仍是旧包。
+
+测试走已交付的 `Bridge::apply_edit`，动作为 `EditAction::Create`。`ApplyOperation` 已发出，没有交付 `operation_receipt`。`Bridge::shutdown` 之后对同一 sqlite 调用 `Bridge::open`。`list_operations` 的状态是 `uncertain`。新会话绑定后，出站通道没有 `ApplyOperation`。同一条操作仍是 `uncertain`。
+
+`evidence/v15-recv-result.json` 的最终 `applied` / `create`、回执列 1、Chrome id 6、没有第二条创建，对应 06 设计里扩展已保存回执、之后用 `get_operation_status` 报回的路径。那次运行在 `taskkill` 前恢复了 `WebSocket.prototype.send`。再次打开和状态查询之间没有读 SQLite。它不能证明 `freeze_inflight`。上面的测试是打开时把 `applying` 记为 `uncertain` 且不重放的证据。该 JSON 和原来的 FAIL 行保留。
+
+`v15-isolated.mjs` 只改了恢复判断。以后相同 Chrome id 且没有多出的创建行，还不够记 PASS。创建操作必须是 `uncertain`，或者 `applied` 且回执列至少为 1。没有重跑该脚本，`v15-recv-result.json` 没有改。
+
+V15 仍是 FAIL。AC13-2 仍是 FAIL。AI、AC13-3、AC13-4 仍是 NOT_RUN。V16 仍是 UNVERIFIED。没有勾 PRD。
+
+## 2026-10-12 trellis-check 打开冻结
+
+命令 `cargo test -p markbridge-core --locked open_leaves_an_unacked_edit_create_uncertain_and_does_not_replay -- --test-threads=1`，退出码 0，1 passed。没有设置 `CARGO_HOME`、`RUSTUP_HOME` 或 `HOME`。
+
+测试调用已交付的 `Bridge::apply_edit`，动作是 `EditAction::Create`。关闭前没有交付 `operation_receipt`。同一 sqlite 上 `Bridge::shutdown` 之后 `Bridge::open`。`open` 调用 `freeze_inflight`。打开后状态是 `uncertain`。新出站通道没有 `ApplyOperation`。
+
+`git diff --name-only -- apps crates packages scripts` 只有 `crates/core/src/bridge/tests.rs`。`重启后不重放未回执写入` 的 FAIL 行没有改。V15 仍是 FAIL。AC13-2 仍是 FAIL。AI、AC13-3、AC13-4 仍是 NOT_RUN。V16 仍是 UNVERIFIED。没有勾 PRD。没有运行安装程序，没有改 `v15-recv-result.json`。
+

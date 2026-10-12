@@ -2507,6 +2507,75 @@ async fn restart_leaves_a_dispatched_step_uncertain_and_does_not_replay() {
     bridge.shutdown().await.unwrap();
 }
 
+#[tokio::test]
+async fn open_leaves_an_unacked_edit_create_uncertain_and_does_not_replay() {
+    let (bridge, directory, credentials) = fixture().await;
+    let (profile, secret) = paired(&bridge, "instance").await;
+    bridge
+        .authenticate(&origin(), &hello(&profile, "instance", "s", &secret))
+        .await
+        .unwrap();
+    accept_tree(&bridge, &profile, "s", 0, nodes()).await;
+    let revision = bridge
+        .state()
+        .await
+        .profiles
+        .iter()
+        .find(|item| item.profile_id == profile)
+        .unwrap()
+        .revision
+        .get();
+    let mut outbound = bind_session(&bridge, &profile, "s").await;
+    let created = bridge
+        .apply_edit(
+            profile.clone(),
+            revision,
+            EditAction::Create {
+                parent_id: Id::new("0").unwrap(),
+                position: Position::new(1).unwrap(),
+                title: Title::new("added").unwrap(),
+                url: Some(Url::new("https://example.com/added").unwrap()),
+            },
+            false,
+        )
+        .await
+        .unwrap();
+    assert_eq!(created.state, OperationState::Applying);
+    let WireMessage::ApplyOperation { payload, .. } = outbound.try_recv().unwrap() else {
+        panic!("missing create");
+    };
+    assert!(matches!(payload.steps[0].payload, Mutation::Create { .. }));
+    assert!(outbound.try_recv().is_err());
+    let operation_id = created.operation_id;
+    let path = directory.path().join("cache.sqlite");
+    bridge.shutdown().await.unwrap();
+    let bridge = Bridge::open(&path, credentials).await.unwrap();
+    let stored = bridge.list_operations(profile.clone()).await.unwrap();
+    assert_eq!(stored.operations.len(), 1);
+    assert_eq!(stored.operations[0].operation_id, operation_id);
+    assert_eq!(stored.operations[0].state, OperationState::Uncertain);
+    bridge
+        .authenticate(&origin(), &hello(&profile, "instance", "s2", &secret))
+        .await
+        .unwrap();
+    let mut restarted = bind_session(&bridge, &profile, "s2").await;
+    accept_tree(&bridge, &profile, "s2", 0, nodes()).await;
+    let mut queried = false;
+    while let Ok(message) = restarted.try_recv() {
+        assert!(
+            !matches!(message, WireMessage::ApplyOperation { .. }),
+            "restart replayed a browser write"
+        );
+        if matches!(message, WireMessage::GetOperationStatus { .. }) {
+            queried = true;
+        }
+    }
+    assert!(queried);
+    let again = bridge.list_operations(profile).await.unwrap();
+    assert_eq!(again.operations[0].state, OperationState::Uncertain);
+    bridge.shutdown().await.unwrap();
+}
+
 #[path = "b100.rs"]
 mod b100;
 
