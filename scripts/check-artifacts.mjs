@@ -17,11 +17,11 @@ for (const root of roots) await inspect(fileURLToPath(new URL(`../${root}`, impo
 const extension = new URL('../apps/extension/dist/', import.meta.url);
 const manifest = JSON.parse(await readFile(new URL('manifest.json', extension), 'utf8'));
 assert.equal(manifest.manifest_version, 3);
-assert.deepEqual(manifest.permissions, ['bookmarks', 'storage', 'alarms']);
+assert.deepEqual(manifest.permissions, ['bookmarks', 'storage', 'alarms', 'scripting', 'activeTab']);
 assert.equal(manifest.host_permissions, undefined);
 assert.deepEqual(manifest.background, { service_worker: 'worker.js', type: 'module' });
 await readFile(new URL(manifest.action.default_popup, extension));
 await readFile(new URL(manifest.options_ui.page, extension));
 const worker = await readFile(new URL(manifest.background.service_worker, extension), 'utf8');
 assert.doesNotMatch(worker, /\beval\s*\(|\bFunction\s*\(/);
-console.log('Production assets: MV3 popup/options/worker present; bookmarks/storage/alarms only; no source maps, dynamic code, known secret patterns, or absolute machine paths.');
+console.log('Production assets: MV3 popup/options/worker present; permissions are bookmarks, storage, alarms, scripting, and activeTab; no source maps, dynamic code, known secret patterns, or absolute machine paths.');

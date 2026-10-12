@@ -159,3 +159,28 @@ V01 仍是 FAIL。没有把 AC13-2 或 V15 标成 PASS。
 Rust 源码没有 `#[allow(clippy::too_many_arguments)]`。`evidence/09-clippy.stderr.log` 仍有旧的 clippy 帮助文字，那不是源码属性。fmt 与 clippy 两行记为 PASS。
 
 V01 仍是 FAIL。AC13-2 仍是 FAIL。V15 仍是 FAIL。V16 仍是 UNVERIFIED。没有改产品源码。
+
+## 2026-10-11 权限断言与 e2e mock
+
+23:55–23:56（-04:00）。只改了权限断言和 e2e mock。没有改旧表里的 FAIL 行，没有勾 PRD。
+
+| 命令 | 退出码 | 结果 |
+|---|---|---|
+| `pnpm test` | 0 | Vitest 99 通过。Node 测试 5 通过、0 失败 |
+| `pnpm build` | 0 | 构建完成后 `check-artifacts` 通过。权限为 `bookmarks`、`storage`、`alarms`、`scripting`、`activeTab` |
+| `pnpm test:e2e` | 0 | 6 通过、0 失败 |
+
+V01 仍是 FAIL。上表里 `pnpm test`、`pnpm test:e2e`、`pnpm build` 的退出码 1 保留。本次不把 V01 改成 PASS。AC13-2 仍是 FAIL。V15 仍是 FAIL。AC13-3 仍是 NOT_RUN。AC13-4 仍是 NOT_RUN。V16 仍是 UNVERIFIED。
+
+## 2026-10-11 trellis-check 重跑
+
+23:58–23:59（-04:00）。从仓库根重跑四条命令。没有改产品源码，没有勾 PRD。
+
+| 命令 | 退出码 | 结果 |
+|---|---|---|
+| `pnpm lint` | 0 | PASS |
+| `pnpm test` | 0 | PASS。Vitest 99 通过。Node 测试 5 通过、0 失败 |
+| `pnpm build` | 0 | PASS。`check-artifacts` 通过 |
+| `pnpm test:e2e` | 0 | PASS。6 通过、0 失败 |
+
+这四条是 PASS。历史 V01 FAIL 行保留。这次重跑的四条退出码都是 0，不把历史 V01 改成 PASS。AC13-2 仍是 FAIL。V15 仍是 FAIL。AC13-3 仍是 NOT_RUN。AC13-4 仍是 NOT_RUN。V16 仍是 UNVERIFIED。

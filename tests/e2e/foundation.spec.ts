@@ -17,7 +17,7 @@ async function mockBridge(page: Page, scenario: 'connected' | 'startup-error' | 
       export async function getStartupState() { ${scenario === 'startup-error' ? "throw new Error('sensitive-raw-error');" : "return { protocolVersion: 1, state: 'unpaired' };"} }
       export async function getBridgeState() {
         ${scenario === 'connected' ? "state = { ...initial, revision: 3, port: 49153, profiles: [profile] }; receive?.(state);" : ''}
-        return initial;
+        return state;
       }
       export async function startBridge(port) {
         starts += 1;
@@ -49,6 +49,47 @@ async function mockBridge(page: Page, scenario: 'connected' | 'startup-error' | 
       export async function readCacheNode() { throw new Error('missing'); }
       export async function readCacheCount() { return { folders: 0, bookmarks: 0 }; }
       export async function openHttpUrl() {}
+      export async function aiSettings() { return { enabled: false, provider: null, endpointLabel: null, model: null, credentialConfigured: false, schemaSupported: null }; }
+      export async function saveAiConfig() { return aiSettings(); }
+      export async function setAiCredential() { return aiSettings(); }
+      export async function clearAiCredential() { return aiSettings(); }
+      export async function testAiConnection() { return { ok: false, failureMessage: null, settings: await aiSettings() }; }
+      export async function listOperations() { return { operations: [] }; }
+      export async function refreshOperations() { return { operations: [] }; }
+      export async function reviewOperation() { return { operations: [] }; }
+      export async function previewEdit() { throw new Error('mock'); }
+      export async function applyEdit() { throw new Error('mock'); }
+      export async function exportHtml() { throw new Error('mock'); }
+      export async function exportSidecar() { throw new Error('mock'); }
+      export async function readTagState() { return { affected: 0, encodingEnabled: false, entries: [], filterTagId: null, journalId: null, matches: [], mergeRequired: false, profileId: 'profile-test', sourceTagId: null, tags: [], targetTagId: null }; }
+      export async function tagCommand() { throw new Error('mock'); }
+      export async function previewTitleEncoding() { throw new Error('mock'); }
+      export async function applyTitleEncoding() { throw new Error('mock'); }
+      export async function applyAi() { throw new Error('mock'); }
+      export async function cancelAi() {}
+      export async function suggestAi() { throw new Error('mock'); }
+      export async function inspectLibrary() { throw new Error('mock'); }
+      export async function checkLinks() { throw new Error('mock'); }
+      export async function cancelLinkCheck() {}
+      export async function previewCleanup() { throw new Error('mock'); }
+      export async function confirmCleanup() { throw new Error('mock'); }
+      export async function searchLibraryText() { return { hits: [] }; }
+      export async function proposeOrganization() { throw new Error('mock'); }
+      export async function reviewOrganization() { throw new Error('mock'); }
+      export async function assignOrganization() { throw new Error('mock'); }
+      export async function editOrganization() { throw new Error('mock'); }
+      export async function applyOrganization() { throw new Error('mock'); }
+      export async function pauseOrganization() { throw new Error('mock'); }
+      export async function cancelOrganization() { throw new Error('mock'); }
+      export async function cleanupOrganization() { throw new Error('mock'); }
+      export async function organizationPlan() { throw new Error('mock'); }
+      export async function readContentPreview() { throw new Error('mock'); }
+      export async function cancelContentPreview() {}
+      export async function webPreviewState() { return { requestId: null, profileId: null, chromeId: null, url: null, currentUrl: null, phase: 'closed', canGoBack: false, canGoForward: false, notice: null, noticeMessage: null }; }
+      export async function openWebPreview() { throw new Error('mock'); }
+      export async function webPreviewAction() { throw new Error('mock'); }
+      export async function clearWebPreviewSession() { throw new Error('mock'); }
+      export async function subscribeWebPreview() { return () => {}; }
     `,
   }));
 }
