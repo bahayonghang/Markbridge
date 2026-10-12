@@ -809,3 +809,31 @@ AC13-1 与 V04 仍是 UNVERIFIED。V04 不是 PASS，也不是明确 FAIL，所�
 
 引用与更早正文一致。没有把 V04、AC13-1 或 V16 改成 PASS。没有归档。
 
+## 2026-10-12 V06 V15 V16
+
+本节只引用本文件已经写下的命令、退出码和数字。没有新跑命令。上面的旧行不改。
+
+V06。`## 2026-10-12 B10K 冷启动与搜索` 的命令 `node .trellis/tasks/10-10-mb-13-windows-acceptance/evidence/b10k-measure.mjs` 退出码 0。该节记录搜索 30 次、冷启动 3 次。冷启动 1153、646、619 ms，三次都小于等于 3000。暖态搜索 p95 6.699999995529652 ms，小于等于 200。这次 13 自有测量的判定是 PASS。`## V01–V16` 里引用 05 的 V06 行不改。
+
+V15。`## 2026-10-12 隔离闭环` 的命令 `node .trellis/tasks/10-10-mb-13-windows-acceptance/evidence/v15-isolated.mjs` 退出码 0。安装、启动、重启、卸载进程退出码都是 0。最新判定仍是 PASS。更早的 FAIL 行保留。
+
+V16。没有 Floccus 命令，没有退出码。判定仍是 UNVERIFIED。
+
+AC13-1 仍是 UNVERIFIED。V04 不是 PASS，也不是明确 FAIL。这一条挡住归档。
+
+`## 2026-10-12 当前追溯` 里 AC13-2、AC13-3、AC13-4 的最新具名判定都是 PASS。PRD 只勾这三项。AC13-1 与 AC13-5 不勾。
+
+## 2026-10-12 trellis-check V06 V15 V16
+
+对照 `## 2026-10-12 V06 V15 V16` 与它点名的更早各节。引用的命令、退出码和数字与那些节一致。没有改旧行。没有重跑 `b10k-measure.mjs`、`v15-isolated.mjs`、playwright、安装程序或 Chrome。没有改产品文件，没有改 `task.json`，没有归档。
+
+V06。`## 2026-10-12 B10K 冷启动与搜索` 的 `b10k-measure.mjs` 退出码 0。搜索 30 次。冷启动 1153、646、619 ms，三次都小于等于 3000。暖态搜索 p95 6.699999995529652 ms，小于等于 200。这次 13 自有测量的判定是 PASS。`## V01–V16` 里引用 05 的 V06 行不改。
+
+V15。`## 2026-10-12 隔离闭环` 的 `v15-isolated.mjs` 退出码 0。安装、启动、重启、卸载进程退出码都是 0。最新判定仍是 PASS。更早的 FAIL 行保留。
+
+V16。没有 Floccus 命令，没有退出码。判定仍是 UNVERIFIED。
+
+AC13-1 仍是 UNVERIFIED。V04 不是 PASS，也不是明确 FAIL。这一条挡住归档。
+
+`git diff --name-only -- apps crates packages scripts tests` 没有输出。`task.json` 的 `status` 仍是 `in_progress`。PRD 的 AC13-2、AC13-3、AC13-4 仍勾选。这三项在 `## 2026-10-12 当前追溯` 的最新具名判定都是 PASS。AC13-2 里的 AI 仍是 NOT_RUN，对应 `where.exe ollama` 退出码 1。AC13-1 与 AC13-5 不勾。
+
