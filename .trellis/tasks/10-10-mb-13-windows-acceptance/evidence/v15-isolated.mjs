@@ -11,16 +11,16 @@ const installer = path.join(repo, 'target/release/bundle/nsis/Markbridge_0.1.0_x
 const extensionDir = path.join(repo, 'apps/extension/dist');
 const chromeExe = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const tempRoot = path.resolve(process.env.TEMP || '');
-const installDir = path.join(tempRoot, 'mb13-v15-recv-install');
-const appData = path.join(tempRoot, 'mb13-v15-recv-data');
-const chromeDir = path.join(tempRoot, 'mb13-v15-chrome-recv');
-const queryDir = path.join(tempRoot, 'mb13-v15-recv-query');
+const installDir = path.join(tempRoot, 'mb13-v15-close-install');
+const appData = path.join(tempRoot, 'mb13-v15-close-data');
+const chromeDir = path.join(tempRoot, 'mb13-v15-close-chrome');
+const queryDir = path.join(tempRoot, 'mb13-v15-close-query');
 const webviewDir = path.join(installDir, 'webview2');
-const helperPath = path.join(tempRoot, 'mb13-v15-recv-win.ps1');
-const pyPath = path.join(tempRoot, 'mb13-v15-recv-ops.py');
-const logPath = path.join(evidenceDir, 'v15-recv-run.log');
-const resultPath = path.join(evidenceDir, 'v15-recv-result.json');
-const namespace = 'Markbridge.Task05.mb13-v15-recv-20261012';
+const helperPath = path.join(tempRoot, 'mb13-v15-close-win.ps1');
+const pyPath = path.join(tempRoot, 'mb13-v15-close-ops.py');
+const logPath = path.join(evidenceDir, 'v15-close-run.log');
+const resultPath = path.join(evidenceDir, 'v15-close-result.json');
+const namespace = 'Markbridge.Task05.mb13-v15-close-20261012';
 const bridgePort = 49153;
 const expectedBookmarks = 'len=849515 sha256=DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82';
 const dailyBookmarks = path.join(process.env.LOCALAPPDATA || '', 'Google/Chrome/User Data/Default/Bookmarks');
@@ -234,7 +234,7 @@ switch ($Action) {
     Write-Output 'DELETED'
   }
   'killmarker' {
-    $rows = @(Get-CimInstance Win32_Process -Filter "Name = 'chrome.exe'" | Where-Object { $_.CommandLine -and $_.CommandLine -like '*mb13-v15-chrome*' })
+    $rows = @(Get-CimInstance Win32_Process -Filter "Name = 'chrome.exe'" | Where-Object { $_.CommandLine -and $_.CommandLine -like '*mb13-v15-close-chrome*' })
     foreach ($row in $rows) { Stop-Process -Id $row.ProcessId -Force -ErrorAction SilentlyContinue }
     Write-Output "killed=$($rows.Count)"
   }
@@ -557,7 +557,7 @@ async function install() {
 async function launchChrome() {
   await gate('before-chrome');
   assertTemp(chromeDir);
-  if (!chromeDir.includes('mb13-v15-chrome') || chromeDir.toLowerCase().includes('google\\chrome\\user data')) {
+  if (path.basename(chromeDir) !== 'mb13-v15-close-chrome' || chromeDir.toLowerCase().includes('google\\chrome\\user data')) {
     throw new Error('chrome profile path refused');
   }
   await removeDir(chromeDir);

@@ -668,3 +668,85 @@ V15 仍是 FAIL。AC13-2 仍是 FAIL。AI、AC13-3、AC13-4 仍是 NOT_RUN。V16
 
 AC13-3 仍是 PASS。
 
+## 2026-10-12 隔离闭环
+
+06:07:53–06:09:01（UTC）。命令 `node .trellis/tasks/10-10-mb-13-windows-acceptance/evidence/v15-isolated.mjs`，退出码 0。没有运行 `pnpm build:package`。安装包仍是 `target/release/bundle/nsis/Markbridge_0.1.0_x64-setup.exe`，5604777 字节，SHA256 `edc562b4d105d1c8f32cdcc83860377b725fe1f8726bfa1a52282ddf203f77d8`。该包未签名，Authenticode 状态是 `NotSigned`。没有发布。它不是已发布版本。
+
+日志在 `evidence/v15-close-run.log`，判断在 `evidence/v15-close-result.json`。没有改 `evidence/v15-recv-result.json` 或 `evidence/v15-recv-run.log`。安装目录 `C:\Users\lyh\AppData\Local\Temp\mb13-v15-close-install`。`MARKBRIDGE_APP_DATA` 为 `C:\Users\lyh\AppData\Local\Temp\mb13-v15-close-data`，数据库文件名是 `markbridge.sqlite`。`WEBVIEW2_USER_DATA_FOLDER` 为该安装目录下的 `webview2`。`MARKBRIDGE_CREDENTIAL_NAMESPACE` 为 `Markbridge.Task05.mb13-v15-close-20261012`。没有设置 `Markbridge.Pairing`。配对串只记长度 221。Chrome 用户数据目录为 `C:\Users\lyh\AppData\Local\Temp\mb13-v15-close-chrome`。扩展从 `apps/extension/dist` 经 CDP `Extensions.loadUnpacked` 加载，扩展身份长度为 32。没有加载已安装扩展。没有使用日常 Chrome 资料，没有写日常 `Bookmarks`，没有写 `HKLM` 或 `C:\Program Files\Google\Chrome`。没有删除 `%LOCALAPPDATA%\com.markbridge.desktop\EBWebView`。
+
+`where.exe 7z` 退出码 0。清单和解压调用 PATH 上的 `7z`，命令是 `7z l` 和 `7z e`，没有把 7-Zip 路径写进命令。`7z l` 退出码 0。`7z e` 退出码 0。临时解压目录已删除。
+
+`7z l` 输出：
+
+```
+7-Zip 26.04 (x64) : Copyright (c) 1999-2026 Igor Pavlov : 2026-10-05
+
+Scanning the drive for archives:
+1 file, 5604777 bytes (5474 KiB)
+
+Listing archive: D:\Documents\Code\Tauri\Markbridge\target\release\bundle\nsis\Markbridge_0.1.0_x64-setup.exe
+
+--
+Path = D:\Documents\Code\Tauri\Markbridge\target\release\bundle\nsis\Markbridge_0.1.0_x64-setup.exe
+Type = Nsis
+Physical Size = 5604777
+Method = LZMA:23
+Solid = +
+Headers Size = 73350
+Embedded Stub Size = 52736
+SubType = NSIS-3 Unicode
+
+   Date      Time    Attr         Size   Compressed  Name
+------------------- ----- ------------ ------------  ------------------------
+                    .....        12288      5552037  $PLUGINSDIR\System.dll
+2025-12-01 10:27:58 .....        26494               $PLUGINSDIR\modern-wizard.bmp
+                    .....         9728               $PLUGINSDIR\nsDialogs.dll
+                    .....        34304               $PLUGINSDIR\nsis_tauri_utils.dll
+                    .....        13316               $PLUGINSDIR\StartMenu.dll
+                    .....        15360               $PLUGINSDIR\NSISdl.dll
+2026-10-12 01:20:28 .....     23035904               markbridge-desktop.exe
+                    .....                            uninstall.exe
+------------------- ----- ------------ ------------  ------------------------
+2026-10-12 01:20:28           23147394      5552037  8 files
+```
+
+抽出的 `markbridge-desktop.exe` 为 23035904 字节，SHA256 `79c0f5879eb45e56bbc8778fe8407040db0332034be9f8aff4d4fc8b79da44b9`。`target/release/markbridge-desktop.exe` 长度与 SHA256 相同。`FileVersion` 与 `ProductVersion` 都是 `0.1.0`。
+
+`where.exe ollama` 退出码 1。AI 为 NOT_RUN。
+
+安装进程退出码 0。配对、同步、文本预览、应用内网页预览、编辑回执都是 PASS。编辑回执的操作是 `applied` / `update`，回执列是 1，Chrome 行数是 1。启动退出码 0。恢复前 Chrome id 是 `6`，创建行是 `applying`，回执列是 0。恢复后 Chrome id 仍是 `6`，创建行数没有增加，该行是 `applied`，回执列是 1。恢复是 PASS。重启退出码 0。卸载进程退出码 0。崩溃用的 `taskkill` 退出码是 1，不计入重启退出码。
+
+卸载返回后，`SQLITE exists=true`，文件名 `markbridge.sqlite`，204800 字节。该文件在 `MARKBRIDGE_APP_DATA`，不在安装目录内。安装目录当时仍在，其中的 `webview2` 也在。README 增加的一句是：卸载仅限已授权测试目录且先验证路径，保留测试证据；这次卸载没有删除安装目录外的该库；schema 升级仍按原有备份句。`markbridge-desktop` 进程数是 0。卸载后 `Markbridge.Pairing` 与 `Markbridge.Model` 都是 0，复查仍是 0。日常书签前后都是 849515 字节，SHA256 `DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82`。`%LOCALAPPDATA%\com.markbridge.desktop\EBWebView` 前后都是 461 个文件，新文件数是 0。没有勾 PRD。更早的 FAIL 和 NOT_RUN 行没有改。
+
+| 观察 | 判定 | 记录 |
+|---|---|---|
+| AC13-2 | PASS | 安装、配对、同步、文本预览、预览窗口、编辑回执、恢复、启动退出、重启退出、卸载都是 PASS。AI 为 NOT_RUN |
+| AC13-4 | PASS | 同一安装包的长度、SHA256、`7z l` 清单、包内 exe 与 release exe 一致，`FileVersion` / `ProductVersion` 为 `0.1.0`。包未签名、未发布。卸载后安装目录外的 sqlite 仍在，README 写明该卸载不删除它 |
+| V15 | PASS | 清单存在，隔离安装已启动，配对完成，退出、重启、卸载进程退出码都是 0，README 与 sqlite 观察一致，桌面进程数是 0，`Markbridge.Pairing` 与 `Markbridge.Model` 都是 0 |
+
+## 2026-10-12 trellis-check 隔离闭环
+
+这次复查没有重装，没有运行安装程序，没有启动应用或 Chrome，没有写日常 `Bookmarks`。没有改 README，没有改产品源码。
+
+`v15-close-result.json` 里安装、`pairingLive`、同步、文本预览、预览窗口、编辑回执、恢复、`startExit`、`restartExit`、卸载都是 PASS。恢复前 Chrome id 是 `6`，创建行是 `applying`，回执列是 0。恢复后 id 仍是 `6`，创建行仍是一条，该行是 `applied`，回执列是 1。没有多出的创建。结果文件只记 `pairing code chars=221` 和 `cmdkey pairing=0 model=0`。没有配对串，没有凭据值。
+
+`git diff -- .trellis/tasks/10-10-mb-13-windows-acceptance/evidence/v15-recv-result.json` 没有输出。该文件已跟踪，没有未暂存差异。
+
+重算安装包 `target/release/bundle/nsis/Markbridge_0.1.0_x64-setup.exe`：5604777 字节，SHA256 `EDC562B4D105D1C8F32CDCC83860377B725FE1F8726BFA1A52282DDF203F77D8`。与上一节收据相同。`7z l` 再次列出同一 8 个文件，物理大小 5604777。Authenticode 状态是 `NotSigned`。`target/release/markbridge-desktop.exe` 是 23035904 字节，SHA256 `79C0F5879EB45E56BBC8778FE8407040DB0332034BE9F8AFF4D4FC8B79DA44B9`，`FileVersion` 与 `ProductVersion` 都是 `0.1.0`。
+
+重算日常书签：849515 字节，SHA256 `DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82`。与结果文件前后指纹相同。没有写这个文件。
+
+README 新增段复述任务 `design.md` 第 27 行的卸载句，并复述原有 schema 备份句，加上这次卸载后安装目录外的 `markbridge.sqlite` 仍在。没有另写一套保留策略。
+
+结果文件里的 `obs.ac13_4` 仍是 `NOT_RUN`，脚本没有给安装包清单打分。AC13-4 的 PASS 来自长度、SHA256、`7z l`、版本、未签名和 README 观察。更早的 FAIL 与 NOT_RUN 行还在。PRD 五项仍是未勾选。V16 仍是 UNVERIFIED。AI 仍是 NOT_RUN。
+
+| 观察 | 判定 | 记录 |
+|---|---|---|
+| AC13-2 | PASS | 结果文件中安装、配对、同步、双预览、编辑回执、恢复、启动退出、重启退出、卸载都是 PASS。AI 为 NOT_RUN |
+| AC13-4 | PASS | 重算长度与 SHA256 与收据相同。清单、版本、`NotSigned` 与 README 观察成立。没有新的保留策略 |
+| V15 | PASS | 同上。`v15-recv-result.json` 没有未暂存差异 |
+| V16 | UNVERIFIED | 没有 Floccus |
+| AI | NOT_RUN | 结果文件 `obs.ai` 是 NOT_RUN |
+
+AC13-2、AC13-4、V15 仍是 PASS。
+
