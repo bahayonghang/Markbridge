@@ -507,3 +507,46 @@ AC13-2 为 FAIL。V15 为 FAIL。编辑回执的页面文字和重启不重放�
 
 已保存运行里的日常书签 SHA256 仍是 `DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82`。这次没有重新计算。
 
+## 2026-10-12 新安装包的编辑回执
+
+`pnpm build:package` 退出码 0。没有执行裸 `tauri build`，没有签名，没有发布。构建日志有 `Skipping binary patching`，并写明 `unsigned; unpublished`。新的 `target/release/bundle/nsis/Markbridge_0.1.0_x64-setup.exe` 为 5604777 字节，SHA256 `edc562b4d105d1c8f32cdcc83860377b725fe1f8726bfa1a52282ddf203f77d8`。包内 `markbridge-desktop.exe` 为 23035904 字节，SHA256 `79c0f5879eb45e56bbc8778fe8407040db0332034be9f8aff4d4fc8b79da44b9`，与当次 release exe 一致。
+
+05:21:01–05:21:59（UTC）。命令 `node .trellis/tasks/10-10-mb-13-windows-acceptance/evidence/v15-isolated.mjs`，退出码 0。安装目录 `C:\Users\lyh\AppData\Local\Temp\mb13-v15-pkg-install`。没有安装到 `%LOCALAPPDATA%\Markbridge` 或 `%APPDATA%\com.markbridge.desktop`。`MARKBRIDGE_APP_DATA` 为 `C:\Users\lyh\AppData\Local\Temp\mb13-v15-pkg-data`，数据库文件名是 `markbridge.sqlite`，路径不含 `com.markbridge.desktop`。`WEBVIEW2_USER_DATA_FOLDER` 为该安装目录下的 `webview2`。`MARKBRIDGE_CREDENTIAL_NAMESPACE` 为 `Markbridge.Task05.mb13-v15-pkg-20261012`。没有设置 `Markbridge.Pairing`。没有打印或删除凭据。配对串只记长度 221。Chrome 用户数据目录为 `C:\Users\lyh\AppData\Local\Temp\mb13-v15-chrome-pkg`。扩展从 `apps/extension/dist` 经 CDP `Extensions.loadUnpacked` 加载。没有使用日常 Chrome 资料，没有写 `HKLM` 或 `HKCU\Software\Policies`，没有改 Chrome。日志在 `evidence/v15-pkg-run.log`，判断在 `evidence/v15-pkg-result.json`。
+
+05:21:08 点击「启动连接」。页面显示 `127.0.0.1:49153`，「生成配对串」可点。启动门没有使用「实时同步」。
+
+05:21:23 预览对话框存在，「确认变更」可点，随后点击。05:21:25 `role="status"` 含「回执已确认。」。同一轮读到的操作是 `applied` / `update`，回执列 1，状态已经离开 `applying`。Chrome 有 1 条改后标题，网址仍是 `https://example.com/`。
+
+恢复在观察到未回执创建之后中断。当时 Chrome 书签 id 为 6，SQLite 第二行是 `applying` / `create`，回执列 0，扩展丢弃的 `operation_receipt` 计数为 1。`killApp` 的参数名 `run` 盖住了同名函数，`taskkill` 没有执行，错误是 `run is not a function`。`finally` 随后对仍在运行的进程发送 `WM_CLOSE`，退出码 0。没有崩溃后的再次启动，没有观察未回执写入是否重放。
+
+| 观察 | 判定 | 记录 |
+|---|---|---|
+| 安装 | PASS | 进程退出码 0。目录是 `C:\Users\lyh\AppData\Local\Temp\mb13-v15-pkg-install` |
+| 启动并退出 | PASS | `WM_CLOSE` 已发送，进程退出码 0 |
+| 重启 | PASS | 脚本把第二次进程的 `WM_CLOSE` 退出码 0 记成重启退出。这次关闭发生在 `killApp` 抛错之后，不是崩溃后的再次启动 |
+| 卸载 | PASS | 进程退出码 0。临时安装目录的注册表值已删除 |
+| 配对到 live | PASS | 点击了「启动连接」和「生成配对串」。配对串长度 221。确认扩展后状态含「实时同步」 |
+| 一次同步 | PASS | 选中 `mb13-v15-example`。指标含「缓存节点」4、「来源版本」1，最近同步不是「尚未同步」 |
+| 文本预览 | PASS | 内容预览含 `Example Domain` |
+| 独立预览窗口 | PASS | 点击「打开应用内网页」。窗口标题含「网页预览」 |
+| 一次确认编辑和回执 | PASS | 对话框和「确认变更」都在点击前存在。状态离开 `applying` 后，`role="status"` 含「回执已确认。」。Chrome 1 条，网址仍是 `https://example.com/`。SQLite `applied` / `update`，回执列 1 |
+| 重启后不重放未回执写入 | NOT_RUN | 未回执创建已出现：`applying` / `create`，回执列 0，Chrome id 6，丢弃计数 1。`killApp` 抛出 `run is not a function`。没有崩溃后的再次启动，没有重放观察 |
+| `cmdkey` | PASS | `Markbridge.Pairing` 与 `Markbridge.Model` 前后都是 0 |
+| 日常 EBWebView | PASS | 运行开始 `2026-10-12T05:21:01.459Z`。结束后 461 个文件，比运行开始新的文件数是 0。最新仍是 `2026-10-12T03:17:48.5775353Z`。这些文件没有删除 |
+| AI | NOT_RUN | `where.exe ollama` 退出码 1 |
+| AC13-3 | NOT_RUN | 没有生成 B10K |
+| AC13-4 | NOT_RUN | 没有把本次安装写成安装包清单或卸载策略 |
+| V16 | UNVERIFIED | 没有 Floccus 环境 |
+
+日常书签运行前和运行后都是 849515 字节，SHA256 `DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82`。
+
+AC13-2 为 FAIL。V15 为 FAIL。编辑回执通过。重启后不重放未回执写入是 NOT_RUN。AI、AC13-3、AC13-4 为 NOT_RUN。V16 为 UNVERIFIED。没有勾 PRD。`.trellis/spec/frontend/component-guidelines.md` 仍未暂存。
+
+## 2026-10-12 trellis-check 新包结果
+
+这次复查没有重装，没有运行安装程序或 Chrome。V15 仍是 FAIL。
+
+`v15-result.json` 没有安装包 SHA256，也没有字节长度，只有 `installer=true`。该文件编辑回执是 FAIL，没有「回执已确认。」。恢复是 NOT_RUN。日常书签前后都是 849515 字节，SHA256 `DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82`。配对只记 `pairing code chars=221`。
+
+脚本把这次结果写到 `v15-pkg-result.json`。该文件同样没有安装包 SHA256 和长度。上一节记录的安装包是 5604777 字节，SHA256 `edc562b4d105d1c8f32cdcc83860377b725fe1f8726bfa1a52282ddf203f77d8`。`v15-pkg-result.json` 的 `EDIT_SURFACE` 含「回执已确认。」，`EDIT_RECEIPT` 的操作是 `applied` / `update`。脚本在操作离开 `applying` 且页面含这句之后才写这两行。`killApp` 的参数 `run` 和 `closeApp` 的回退行都调用 `run('taskkill', ...)`，盖住了同名函数。没有改脚本。恢复是 NOT_RUN，所以 V15 仍是 FAIL。
+
