@@ -11,16 +11,16 @@ const installer = path.join(repo, 'target/release/bundle/nsis/Markbridge_0.1.0_x
 const extensionDir = path.join(repo, 'apps/extension/dist');
 const chromeExe = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const tempRoot = path.resolve(process.env.TEMP || '');
-const installDir = path.join(tempRoot, 'mb13-v15-cont-install');
-const appData = path.join(tempRoot, 'mb13-v15-cont-data');
-const chromeDir = path.join(tempRoot, 'mb13-v15-chrome-cont');
-const queryDir = path.join(tempRoot, 'mb13-v15-cont-query');
+const installDir = path.join(tempRoot, 'mb13-v15-notice-install');
+const appData = path.join(tempRoot, 'mb13-v15-notice-data');
+const chromeDir = path.join(tempRoot, 'mb13-v15-chrome-notice');
+const queryDir = path.join(tempRoot, 'mb13-v15-notice-query');
 const webviewDir = path.join(installDir, 'webview2');
 const helperPath = path.join(tempRoot, 'mb13-v15-win.ps1');
 const pyPath = path.join(tempRoot, 'mb13-v15-ops.py');
-const logPath = path.join(evidenceDir, 'v15-run.log');
-const resultPath = path.join(evidenceDir, 'v15-result.json');
-const namespace = 'Markbridge.Task05.mb13-v15-cont-20261012';
+const logPath = path.join(evidenceDir, 'v15-notice-run.log');
+const resultPath = path.join(evidenceDir, 'v15-notice-result.json');
+const namespace = 'Markbridge.Task05.mb13-v15-notice-20261012';
 const bridgePort = 49153;
 const expectedBookmarks = 'len=849515 sha256=DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82';
 const dailyBookmarks = path.join(process.env.LOCALAPPDATA || '', 'Google/Chrome/User Data/Default/Bookmarks');
@@ -586,6 +586,20 @@ async function launchChrome() {
   extensionReady = true;
   await gate('after-chrome');
 }
+async function editSurface() {
+  return withPage(async (client) => {
+    await client.call('Runtime.enable');
+    const value = await client.eval(`(() => {
+      const text = (node) => (node.innerText || '').replace(/\\s+/g, ' ').trim().slice(0, 180);
+      const status = [...document.querySelectorAll('[role="status"]')].map(text).filter(Boolean).slice(0, 12);
+      const alert = [...document.querySelectorAll('[role="alert"]')].map(text).filter(Boolean).slice(0, 8);
+      const dialog = !!document.querySelector('[role="dialog"][aria-label="确认变更"]');
+      const button = [...document.querySelectorAll('button')].some((item) => item.textContent.trim() === '确认变更' && !item.disabled);
+      return { status, alert, dialog, button, confirmed: document.body ? document.body.innerText.includes('回执已确认') : false };
+    })()`);
+    return value && Array.isArray(value.status) && Array.isArray(value.alert) ? value : null;
+  });
+}
 async function driveHappy(run) {
   const page = await poll(async () => withPage(async () => ({ ok: true })), 45000, 500);
   if (!page) throw new Error('desktop debug page missing');
@@ -648,9 +662,19 @@ async function driveHappy(run) {
   await clickButton('关闭预览', 5000);
   const titled = await setField('edit-title', editedTitle);
   const previewed = titled && await clickButton('预览修改');
-  const confirmedEdit = previewed && await clickButton('确认变更');
-  note(`EDIT preview=${previewed} confirm=${confirmedEdit}`);
-  const receipt = await poll(async () => (await bodyHas('回执已确认')) || null, 20000, 400);
+  const dialogReady = previewed && await poll(async () => {
+    const surface = await editSurface();
+    return surface && surface.dialog && surface.button ? surface : null;
+  }, 20000, 200);
+  const confirmedEdit = !!dialogReady && await clickButton('确认变更', 5000);
+  note(`EDIT preview=${previewed} dialog=${!!dialogReady} confirm=${confirmedEdit}`);
+  let lastSurface = null;
+  const receipt = await poll(async () => {
+    const surface = await editSurface();
+    if (surface) lastSurface = surface;
+    return surface && surface.confirmed ? surface : null;
+  }, 20000, 400);
+  note(`EDIT_SURFACE status=${JSON.stringify((lastSurface && lastSurface.status) || [])} alert=${JSON.stringify((lastSurface && lastSurface.alert) || [])}`);
   const rows = await poll(async () => {
     const list = await operations();
     return list.some((row) => row[1] === 'applied' && row[2] === 'update') ? list : null;

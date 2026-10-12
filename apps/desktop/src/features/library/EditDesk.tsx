@@ -46,6 +46,7 @@ export function EditDesk({ profileId, revision, node, siblingIds, folderId, inse
   const [preview, setPreview] = useState<EditPreview | null>(null);
   const [action, setAction] = useState<EditAction | null>(null);
   const [notice, setNotice] = useState('');
+  const [watchId, setWatchId] = useState<string | null>(null);
   const [history, setHistory] = useState<OperationList['operations']>([]);
   const [historyError, setHistoryError] = useState(false);
   if ((node?.chromeId ?? '') !== seen) {
@@ -69,8 +70,29 @@ export function EditDesk({ profileId, revision, node, siblingIds, folderId, inse
   }, [profileId, revision, notice]);
 
   useEffect(() => {
+    if (!watchId) return undefined;
+    let cancelled = false;
+    const pull = () => {
+      void listOperations(profileId).then((list) => {
+        if (cancelled) return;
+        const item = list.operations.find((row) => row.operationId === watchId);
+        if (!item || item.state === 'applying' || item.state === 'rolling_back' || item.state === 'planned') return;
+        setWatchId(null);
+        setNotice(noticeFor(item.state, item.errorCode));
+      }, () => undefined);
+    };
+    pull();
+    const timer = window.setInterval(pull, 400);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [watchId, profileId]);
+
+  useEffect(() => {
     if (!request) return;
     let cancelled = false;
+    setWatchId(null);
     void previewEdit(profileId, revision, request.action).then(
       (next) => {
         if (cancelled) return;
@@ -85,6 +107,7 @@ export function EditDesk({ profileId, revision, node, siblingIds, folderId, inse
   }, [request, profileId, revision]);
 
   async function requestPreview(next: EditAction) {
+    setWatchId(null);
     setNotice('');
     try {
       const value = await previewEdit(profileId, revision, next);
@@ -103,6 +126,7 @@ export function EditDesk({ profileId, revision, node, siblingIds, folderId, inse
       setPreview(null);
       setAction(null);
       setNotice(noticeFor(result.state, result.errorCode));
+      setWatchId(result.state === 'applying' || result.state === 'rolling_back' ? result.operationId : null);
     } catch { setPhase('error'); }
   }
 

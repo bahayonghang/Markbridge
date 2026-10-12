@@ -1,8 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import type { TagCatalog, TitleEncodingPreview } from '@markbridge/protocol';
 import {
-  applyTitleEncoding, previewTitleEncoding, readTagState, tagCommand, type TagCommand,
+  applyTitleEncoding, listOperations, previewTitleEncoding, readTagState, tagCommand, type TagCommand,
 } from '../../backend';
+
+function noticeFor(state: string, errorCode: string | null): string {
+  if (errorCode === 'CONFLICT' || state === 'rollback_conflict') return '存在冲突，外部值保持不变。';
+  if (state === 'uncertain') return '结果不确定，需要核对后才能继续修改。';
+  if (state === 'applied' || state === 'rolled_back') return '回执已确认。';
+  return '已发送，等待回执。发送成功还不是 Chrome 中的结果。';
+}
 
 function selectionNote(catalog: TagCatalog | null): { note: string; mixed: boolean } {
   const entries = catalog?.entries ?? [];
@@ -25,6 +32,7 @@ export function TagDesk({ profileId, revision, live, chromeIds, filterTagId, onF
   const [catalog, setCatalog] = useState<TagCatalog | null>(null);
   const [failed, setFailed] = useState(false);
   const [notice, setNotice] = useState('');
+  const [watchId, setWatchId] = useState<string | null>(null);
   const [note, setNote] = useState('');
   const [mixedNote, setMixedNote] = useState(false);
   const [seenNotes, setSeenNotes] = useState('');
@@ -71,6 +79,26 @@ export function TagDesk({ profileId, revision, live, chromeIds, filterTagId, onF
     return () => { cancelled = true; };
   }, [profileId, revision, selectionKey, filterTagId]);
 
+  useEffect(() => {
+    if (!watchId) return undefined;
+    let cancelled = false;
+    const pull = () => {
+      void listOperations(profileId).then((list) => {
+        if (cancelled) return;
+        const item = list.operations.find((row) => row.operationId === watchId);
+        if (!item || item.state === 'applying' || item.state === 'rolling_back' || item.state === 'planned') return;
+        setWatchId(null);
+        setNotice(noticeFor(item.state, item.errorCode));
+      }, () => undefined);
+    };
+    pull();
+    const timer = window.setInterval(pull, 400);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [watchId, profileId]);
+
   async function publish(next: TagCatalog) {
     if (!filterTagId) {
       setCatalog(next);
@@ -86,6 +114,7 @@ export function TagDesk({ profileId, revision, live, chromeIds, filterTagId, onF
   async function run(command: TagCommand) {
     previewGen.current += 1;
     setPreview(null);
+    setWatchId(null);
     setFailed(false);
     try {
       const next = await tagCommand(profileId, command);
@@ -104,6 +133,7 @@ export function TagDesk({ profileId, revision, live, chromeIds, filterTagId, onF
 
   async function requestPreview(restore: boolean) {
     const generation = ++previewGen.current;
+    setWatchId(null);
     setFailed(false);
     setPreview(null);
     try {
@@ -128,7 +158,8 @@ export function TagDesk({ profileId, revision, live, chromeIds, filterTagId, onF
     setFailed(false);
     try {
       const result = await applyTitleEncoding(profileId, expectedRevision, ids, restore);
-      setNotice(result.state === 'applied' || result.state === 'rolled_back' ? '回执已确认。' : '已发送，等待回执。发送成功还不是 Chrome 中的结果。');
+      setNotice(noticeFor(result.state, result.errorCode));
+      setWatchId(result.state === 'applying' || result.state === 'rolling_back' ? result.operationId : null);
       const next = await readTagState(profileId, chromeIdsRef.current, filterTagId);
       setCatalog(next);
       onCatalogRef.current(next);

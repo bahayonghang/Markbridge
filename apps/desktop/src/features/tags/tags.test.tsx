@@ -153,6 +153,39 @@ it('writes an encoded title only after the full diff is shown, and a second pass
   expect(vi.mocked(invoke).mock.calls.filter(([command]) => command === 'apply_title_encoding')).toHaveLength(1);
 });
 
+it('shows a confirmed receipt after the title confirm when the operation list reaches applied', async () => {
+  let enabled = false;
+  let listed: 'before' | 'after' = 'before';
+  vi.mocked(invoke).mockImplementation(async (command: string, raw?: unknown) => {
+    const args: Args = raw && typeof raw === 'object' ? raw as Args : {};
+    if (command === 'tag_state') return catalog({ encodingEnabled: enabled });
+    if (command === 'tag_command') {
+      enabled = (args.command as { enabled?: boolean }).enabled === true;
+      return catalog({ encodingEnabled: enabled });
+    }
+    if (command === 'preview_title_encoding') return encodingPreview([{ before: 'Alpha', after: 'Alpha | Work' }]);
+    if (command === 'apply_title_encoding') return { operationId: 'op-title', state: 'applying', errorCode: null, conflicts: [] };
+    if (command === 'list_operations') {
+      return {
+        operations: listed === 'after'
+          ? [{ operationId: 'op-title', state: 'applied', affected: 1, errorCode: null, conflicts: [] }]
+          : [],
+      };
+    }
+    return {};
+  });
+  render(<TagDesk profileId="profile-a" revision={4} live chromeIds={['10']} filterTagId={null} onFilter={() => {}} onCatalog={() => {}} />);
+  fireEvent.click(await screen.findByLabelText('启用标题编码'));
+  await waitFor(() => expect(screen.getByRole('button', { name: '预览标题差异' })).toBeEnabled());
+  fireEvent.click(screen.getByRole('button', { name: '预览标题差异' }));
+  fireEvent.click(await screen.findByRole('button', { name: '确认写入标题' }));
+  expect(await screen.findByText(/等待回执/)).toBeVisible();
+  expect(screen.queryByText('回执已确认。')).not.toBeInTheDocument();
+  listed = 'after';
+  await waitFor(() => expect(screen.getByText('回执已确认。')).toBeVisible(), { timeout: 2500 });
+  expect(screen.queryByRole('button', { name: '确认写入标题' })).not.toBeInTheDocument();
+});
+
 it('drops a title diff when local tags change, including a late preview', async () => {
   let releasePreview: (value: ReturnType<typeof encodingPreview>) => void = () => {};
   vi.mocked(invoke).mockImplementation(async (command: string, raw?: unknown) => {

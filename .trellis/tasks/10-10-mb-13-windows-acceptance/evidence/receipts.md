@@ -458,3 +458,52 @@ AC13-2 为 FAIL。V15 为 FAIL。编辑回执的页面文字和重启不重放�
 
 `v15-result.json`、`v15-gate-result.json`、`v15-bridge-result.json` 和本收据没有配对串、凭据、令牌或带秘密的书签网址。配对串只记了字符数 221。
 
+## 2026-10-12 确认变更后的状态文字
+
+没有重新构建。安装包仍是 `target/release/bundle/nsis/Markbridge_0.1.0_x64-setup.exe`。这次安装包里的界面没有包含源码里新加的回执跟踪。
+
+`apply_edit` 在发送后立刻返回 `applying`。已安装的 `EditDesk` 只用这个返回值设置状态句，所以页面显示「已发送，等待回执。发送成功还不是 Chrome 中的结果。」回执随后写入 SQLite，不会把这句改成「回执已确认。」脚本在点击前等到了对话框和可用的「确认变更」按钮，没有提前点击。
+
+05:07–05:08（UTC）。命令 `node .trellis/tasks/10-10-mb-13-windows-acceptance/evidence/v15-isolated.mjs`，退出码 0。安装目录 `C:\Users\lyh\AppData\Local\Temp\mb13-v15-notice-install`。`MARKBRIDGE_APP_DATA` 为 `C:\Users\lyh\AppData\Local\Temp\mb13-v15-notice-data`，数据库文件名是 `markbridge.sqlite`。`WEBVIEW2_USER_DATA_FOLDER` 为该安装目录下的 `webview2`。`MARKBRIDGE_CREDENTIAL_NAMESPACE` 为 `Markbridge.Task05.mb13-v15-notice-20261012`。Chrome 用户数据目录为 `C:\Users\lyh\AppData\Local\Temp\mb13-v15-chrome-notice`。扩展从 `apps/extension/dist` 经 CDP `Extensions.loadUnpacked` 加载。日志在 `evidence/v15-notice-run.log`，判断在 `evidence/v15-notice-result.json`。没有设置 `Markbridge.Pairing`。没有打印或删除凭据。没有使用日常 Chrome 资料，没有写 `HKLM` 或 `HKCU\Software\Policies`。
+
+05:08:00 点击「启动连接」。页面显示 `127.0.0.1:49153`，「生成配对串」可点。配对串长度为 221。
+
+05:08:14 预览对话框存在，按钮「确认变更」可点，随后点击。20 秒后 `role="status"` 的文字是「已连接 Chrome」「尚未打开应用内网页。」「已发送，等待回执。发送成功还不是 Chrome 中的结果。」`role="alert"` 为空。页面没有「回执已确认」。Chrome 有 1 条改后标题。SQLite 一行 `applied` / `update`，回执列为 1。
+
+| 观察 | 判定 | 记录 |
+|---|---|---|
+| 安装 | PASS | 进程退出码 0 |
+| 启动并退出 | PASS | `WM_CLOSE` 已发送，进程退出码 0 |
+| 重启 | NOT_RUN | 编辑回执未通过，脚本没有进入第二次启动 |
+| 卸载 | PASS | 进程退出码 0 |
+| 配对到 live | PASS | 点击了真实的「启动连接」和「生成配对串」，确认扩展后状态含「实时同步」 |
+| 一次同步 | PASS | 选中 `mb13-v15-example`。指标含「缓存节点」4、「来源版本」1，最近同步不是「尚未同步」 |
+| 文本预览 | PASS | 内容预览含 `Example Domain` |
+| 独立预览窗口 | PASS | 点击「打开应用内网页」。窗口标题含「网页预览」 |
+| 一次确认编辑和回执 | FAIL | 对话框和「确认变更」都在点击前存在。状态句停在「已发送，等待回执。发送成功还不是 Chrome 中的结果。」Chrome 1 条，SQLite `applied` / `update`，回执列 1。20 秒内没有「回执已确认」 |
+| 重启后不重放未回执写入 | NOT_RUN | 没有制造未回执写入 |
+| `cmdkey` | PASS | `Markbridge.Pairing` 与 `Markbridge.Model` 前后都是 0 |
+| 日常 EBWebView | PASS | 运行开始 `2026-10-12T05:07:53.087Z`。结束后 461 个文件，比运行开始新的文件数是 0。最新仍是 `2026-10-12T03:17:48.5775353Z`。这些文件没有删除 |
+| AI | NOT_RUN | `where.exe ollama` 退出码 1 |
+| AC13-3 | NOT_RUN | 没有生成 B10K |
+| AC13-4 | NOT_RUN | 没有把本次安装写成安装包清单或卸载策略 |
+| V16 | UNVERIFIED | 没有 Floccus 环境 |
+
+日常书签运行前和运行后都是 849515 字节，SHA256 `DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82`。
+
+源码里的 `EditDesk` 在 `apply_edit` 返回 `applying` 或 `rolling_back` 后继续读 `list_operations`。操作状态离开 `planned`、`applying`、`rolling_back` 时，状态句改为 `noticeFor` 的结果。`applied` 和 `rolled_back` 仍是「回执已确认。」`library.test.tsx` 通过「确认变更」按钮覆盖这条路径，16 项通过。`eslint` 对这两个文件没有警告。`pnpm --filter @markbridge/desktop typecheck` 退出码 0。这些检查不覆盖本次安装包。
+
+AC13-2 为 FAIL。V15 为 FAIL。编辑回执的页面文字和重启不重放没有通过。
+
+## 2026-10-12 trellis-check 回执跟踪
+
+没有重装，没有构建 NSIS，没有运行安装程序，没有启动应用或 Chrome，没有改日常书签。隔离运行用的仍是旧安装包 `target/release/bundle/nsis/Markbridge_0.1.0_x64-setup.exe`。已记录的编辑回执保持 FAIL。AC13-2 为 FAIL。V15 为 FAIL。
+
+`apply_title_encoding` 调用 `commit_planned`。发送成功后立刻返回 `applying`，回执这时还不存在。`TagDesk.confirmPreview` 已改为和 `EditDesk` 一样：返回 `applying` 或 `rolling_back` 后读 `list_operations`。操作状态仍是 `planned`、`applying` 或 `rolling_back` 时不改状态句。`applied` 和 `rolled_back` 才显示「回执已确认。」`tags.test.tsx` 点击「确认写入标题」，不直接写入这句状态文字。`EditDesk` 在外部 `request` 开始新预览时也会停掉这次跟踪。按钮路径仍要点「确认变更」。
+
+`pnpm exec vitest run apps/desktop/src/features/tags/tags.test.tsx apps/desktop/src/features/library/library.test.tsx` 退出码 0。随后单独执行 `pnpm exec vitest run apps/desktop/src/features/library/library.test.tsx`，退出码 0，JSON 报告 16 项通过、0 项失败。`pnpm --filter @markbridge/desktop typecheck` 退出码 0。`eslint` 检查 `EditDesk.tsx`、`library.test.tsx`、`TagDesk.tsx`、`tags.test.tsx`，退出码 0。这些检查不覆盖已安装的旧包。
+
+`.trellis/spec/frontend/component-guidelines.md` 不在本任务 jsonl 里。这次没有扩写。未提交内容仍是实现时加入的那段 `EditDesk` 说明。
+
+已保存运行里的日常书签 SHA256 仍是 `DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82`。这次没有重新计算。
+

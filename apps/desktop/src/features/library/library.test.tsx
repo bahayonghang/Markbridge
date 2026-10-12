@@ -373,6 +373,48 @@ it('requires confirmation before a browser write and a second confirmation for a
   expect(vi.mocked(invoke).mock.calls.filter(([command]) => command === 'apply_edit')).toHaveLength(2);
 });
 
+function operation(state: 'applying' | 'applied') {
+  return { operationId: 'op-applied', state, affected: 1, errorCode: null, conflicts: [] };
+}
+
+it('shows a confirmed receipt after confirm when the operation list reaches applied', async () => {
+  let listed: 'before' | 'after' = 'before';
+  install((command) => {
+    if (command === 'preview_edit') return editPreview();
+    if (command === 'apply_edit') return { operationId: 'op-applied', state: 'applying', errorCode: null, conflicts: [] };
+    if (command === 'list_operations') return { operations: listed === 'after' ? [operation('applied')] : [] };
+    return undefined;
+  });
+  const view = render(<LibraryWorkspace state={state([profile('profile-a', '资料 A')])} invalid={false} native focusMirrorId={null} />);
+  const title = await screen.findByLabelText('新标题');
+  fireEvent.change(title, { target: { value: '根 2' } });
+  fireEvent.click(screen.getByRole('button', { name: '预览修改' }));
+  fireEvent.click(await screen.findByRole('button', { name: '确认变更' }));
+  expect(await screen.findByText(/等待回执/)).toBeVisible();
+  listed = 'after';
+  await waitFor(() => expect(screen.getByText('回执已确认。')).toBeVisible(), { timeout: 2500 });
+  view.rerender(<LibraryWorkspace state={state([profile('profile-a', '资料 A', 5)])} invalid={false} native focusMirrorId={null} />);
+  expect(screen.getByText('回执已确认。')).toBeVisible();
+  expect(screen.queryByRole('dialog', { name: '确认变更' })).not.toBeInTheDocument();
+});
+
+it('keeps a confirmed receipt when apply returns applied and the revision changes', async () => {
+  install((command) => {
+    if (command === 'preview_edit') return editPreview();
+    if (command === 'apply_edit') return { operationId: 'op-applied', state: 'applied', errorCode: null, conflicts: [] };
+    if (command === 'list_operations') return { operations: [operation('applied')] };
+    return undefined;
+  });
+  const view = render(<LibraryWorkspace state={state([profile('profile-a', '资料 A')])} invalid={false} native focusMirrorId={null} />);
+  const title = await screen.findByLabelText('新标题');
+  fireEvent.change(title, { target: { value: '根 2' } });
+  fireEvent.click(screen.getByRole('button', { name: '预览修改' }));
+  fireEvent.click(await screen.findByRole('button', { name: '确认变更' }));
+  expect(await screen.findByText('回执已确认。')).toBeVisible();
+  view.rerender(<LibraryWorkspace state={state([profile('profile-a', '资料 A', 5)])} invalid={false} native focusMirrorId={null} />);
+  expect(screen.getByText('回执已确认。')).toBeVisible();
+});
+
 it('does not offer browser edits for a read-only file mirror', async () => {
   const mirror = {
     mirrorSourceId: 'mirror-a', displayName: 'Personal', association: 'independent' as const, pairedProfileId: null,
