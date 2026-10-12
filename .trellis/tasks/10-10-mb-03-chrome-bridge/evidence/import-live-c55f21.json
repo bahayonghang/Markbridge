@@ -1,0 +1,114 @@
+{
+  "suffix": "c55f21",
+  "namespace": "Markbridge.Task03.c55f21",
+  "source": "preseeded-bookmarks-one-process",
+  "startedAt": "2026-10-12T08:37:08.335Z",
+  "command": "node .trellis/tasks/10-10-mb-03-chrome-bridge/evidence/chrome-import-live-harness.mjs",
+  "wire": [
+    "c:pair",
+    "s:pair_result",
+    "c:pair",
+    "s:pair_result",
+    "c:hello",
+    "s:hello_result",
+    "s:get_tree",
+    "c:tree_full",
+    "c:ping",
+    "s:ping",
+    "s:pong",
+    "c:pong"
+  ],
+  "states": [
+    null,
+    "live"
+  ],
+  "extensionStatuses": [
+    "connected"
+  ],
+  "cdpOrder": [
+    "Target.setAutoAttach",
+    "Extensions.loadUnpacked",
+    "Runtime.runIfWaitingForDebugger",
+    "Browser.getHistograms",
+    "Runtime.runIfWaitingForDebugger",
+    "Runtime.enable",
+    "Runtime.evaluate",
+    "Runtime.evaluate",
+    "Runtime.evaluate",
+    "Browser.getHistograms",
+    "Runtime.evaluate",
+    "Browser.getVersion"
+  ],
+  "importBegan": false,
+  "importEnded": false,
+  "resyncAfterImport": false,
+  "treeAfterResync": false,
+  "reconcilingAfterImport": false,
+  "treesMatch": true,
+  "probePresent": true,
+  "chromeEmittedImportEnded": false,
+  "droppedByBridge": false,
+  "copiedExecutable": false,
+  "launchedFromTempCopy": false,
+  "chromeLaunchCount": 1,
+  "loadUnpackedCalls": 1,
+  "dailyProfileTouched": false,
+  "productEdited": false,
+  "initialPreferences": false,
+  "oplock": false,
+  "handshakes": 2,
+  "workerPaused": true,
+  "shippedListenerAttached": true,
+  "listenerAttachedBeforeModelFinished": false,
+  "histogramBeforeResume": 1,
+  "histogramAfterListeners": 1,
+  "probeInstalled": true,
+  "probeBegan": 0,
+  "probeEnded": 0,
+  "pass": false,
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-03-import-live-wqRkjq",
+  "output": "evidence/import-live-c55f21.json",
+  "credentialBefore": {
+    "pairing": 0,
+    "namespace": 0
+  },
+  "expectedDaily": {
+    "length": 849515,
+    "sha256": "DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82"
+  },
+  "dailyBefore": {
+    "length": 850304,
+    "sha256": "09F2A5C24BA0EE3E3AFF521B90B8509411C2BCDABFE743746A670B07515C1B9D"
+  },
+  "dailyMatchesExpected": false,
+  "seedNodeCount": 4,
+  "seedBytes": 903,
+  "seedWrittenBeforeLaunch": true,
+  "portsDiffer": true,
+  "extensionId": "blbapbmincddiilocledaajcegiekbfk",
+  "workerSession": "691778D7049B96726CF5939DC7E4946C",
+  "bookmarkLoadHistograms": [
+    {
+      "name": "Bookmarks.Storage.TimeToLoadAtStartup2",
+      "count": 1
+    }
+  ],
+  "getTreeWaitMs": 0,
+  "probeVisibleAtListener": true,
+  "chrome": "Chrome/155.0.8059.39",
+  "pairingCodeLength": 220,
+  "profileId": "p:39fdda582dd216a152082422e11942e5ae2e74593398414bd4abbb91b70779de",
+  "nodeCount": 4,
+  "reconcilingReached": false,
+  "credentialAfter": {
+    "pairing": 0,
+    "namespace": 0
+  },
+  "dailyAfter": {
+    "length": 850304,
+    "sha256": "09F2A5C24BA0EE3E3AFF521B90B8509411C2BCDABFE743746A670B07515C1B9D"
+  },
+  "dailyStable": true,
+  "exitCode": 1,
+  "finishedAt": "2026-10-12T08:37:32.492Z"
+}

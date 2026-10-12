@@ -1,0 +1,60 @@
+{
+  "suffix": "e1e088",
+  "namespace": "Markbridge.Task03.e1e088",
+  "source": "preseeded-bookmarks-one-process",
+  "startedAt": "2026-10-12T08:35:59.669Z",
+  "command": "node .trellis/tasks/10-10-mb-03-chrome-bridge/evidence/chrome-import-live-harness.mjs",
+  "wire": [],
+  "states": [],
+  "extensionStatuses": [],
+  "cdpOrder": [],
+  "importBegan": false,
+  "importEnded": false,
+  "resyncAfterImport": false,
+  "treeAfterResync": false,
+  "reconcilingAfterImport": false,
+  "treesMatch": false,
+  "probePresent": false,
+  "chromeEmittedImportEnded": null,
+  "droppedByBridge": false,
+  "copiedExecutable": false,
+  "launchedFromTempCopy": false,
+  "chromeLaunchCount": 0,
+  "loadUnpackedCalls": 0,
+  "dailyProfileTouched": true,
+  "productEdited": false,
+  "initialPreferences": false,
+  "oplock": false,
+  "handshakes": 0,
+  "workerPaused": false,
+  "shippedListenerAttached": false,
+  "listenerAttachedBeforeModelFinished": null,
+  "histogramBeforeResume": null,
+  "histogramAfterListeners": null,
+  "probeInstalled": false,
+  "probeBegan": 0,
+  "probeEnded": 0,
+  "pass": false,
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-03-import-live-Glg2Hc",
+  "output": "evidence/import-live-e1e088.json",
+  "credentialBefore": {
+    "pairing": 0,
+    "namespace": 0
+  },
+  "dailyBefore": {
+    "length": 850304,
+    "sha256": "09F2A5C24BA0EE3E3AFF521B90B8509411C2BCDABFE743746A670B07515C1B9D"
+  },
+  "failureCode": "DAILY_GUARD",
+  "driverMessage": "DAILY_GUARD",
+  "credentialAfter": {
+    "pairing": 0,
+    "namespace": 0
+  },
+  "dailyAfter": {
+    "length": 850304,
+    "sha256": "09F2A5C24BA0EE3E3AFF521B90B8509411C2BCDABFE743746A670B07515C1B9D"
+  },
+  "exitCode": 1,
+  "finishedAt": "2026-10-12T08:35:59.833Z"
+}

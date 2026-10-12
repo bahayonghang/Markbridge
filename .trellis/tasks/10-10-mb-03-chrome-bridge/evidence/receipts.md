@@ -266,3 +266,45 @@ V02、V03、V04 与 AC03 各行未改。
 | `node .trellis/tasks/10-10-mb-03-chrome-bridge/evidence/chrome-import-file-harness.mjs` | 1 |
 
 导入保持 UNVERIFIED。V04 总行保持 UNVERIFIED。OS 休眠仍未跑。03 未归档。
+
+## 预置 Bookmarks 单进程
+
+日期：2026-10-12。工作目录为仓库根。第三个来源：启动前把一份普通 Chrome Bookmarks JSON 写进临时资料的 `Default\Bookmarks`，只启动一次 Chrome。第一条 CDP 命令是 `Target.setAutoAttach`，`waitForDebuggerOnStart` 为 true，第二条是 `Extensions.loadUnpacked`，加载 `apps/extension/dist`。没有 `initial_preferences`，没有 oplock，没有第二次启动，没有 Netscape HTML，没有书签管理器，没有 `chrome://bookmarks`，没有挂起主机。没有改产品源码。没有设置 `Markbridge.Pairing`。
+
+`evidence/import-live-e1e088.json` 在启动 Chrome 之前退出。`chromeLaunchCount` 是 0。`loadUnpackedCalls` 是 0。退出码是 1。当时读到的日常 Bookmarks 已经不是提示中的长度，命令没有继续。
+
+观察文件是 `evidence/import-live-c55f21.json`。临时目录前缀是 `markbridge-03-import-live-`。命名空间是 `Markbridge.Task03.c55f21`。配对码只记录长度 220。`Markbridge.Pairing` 前后都是 0。该命名空间结束后是 0。
+
+| 命令 | 退出码 |
+|---|---:|
+| `node .trellis/tasks/10-10-mb-03-chrome-bridge/evidence/chrome-import-live-harness.mjs` | 1 |
+
+开始 2026-10-12T08:37:08.335Z，结束 2026-10-12T08:37:32.492Z。Chrome 为 `Chrome/155.0.8059.39`。扩展 id 是 `blbapbmincddiilocledaajcegiekbfk`。`chromeLaunchCount` 是 1。`loadUnpackedCalls` 是 1。`cdpOrder` 的前两项是 `Target.setAutoAttach`、`Extensions.loadUnpacked`。播种文件 903 字节，4 个节点，含探针 `https://example.invalid/mb03-live-probe`。
+
+服务工作线程在脚本运行前暂停。恢复前 `Bookmarks.Storage.TimeToLoadAtStartup2` 的 count 是 1。恢复后 `chrome.bookmarks.getTree()` 等待 0 ms，探针已经在树里。出厂扩展的 `onImportEnded` 监听当时已经装上。监听没有发生在模型加载完成之前。
+
+线上是 `pair`、`hello`、`get_tree`、`tree_full` 和 ping/pong，没有 `import_ended`。扩展状态只有 `connected`，没有 `reconciling`。监听装上之后的计数是 began 0、ended 0。这个计数不覆盖模型加载那一段。没有观察到 Chrome 发出 `import_ended` 之后被 `bridge.ts` 丢掉。完整树与 `chrome.bookmarks.getTree()` 一致，4 个节点，探针在两边都在。`pass` 是 false。
+
+这个来源保持 UNVERIFIED。V04 总行不改为 PASS。OS 休眠仍未跑。缺少该事件不是产品缺陷。
+
+`%LOCALAPPDATA%\Google\Chrome\User Data\Default\Bookmarks` 在这次启动前和结束后都是长度 850304，SHA256 `09F2A5C24BA0EE3E3AFF521B90B8509411C2BCDABFE743746A670B07515C1B9D`。`dailyProfileTouched` 是 false。这与提示中的长度 849515、SHA256 `DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82` 不一致。本次命令没有写该文件。
+
+## 2026-10-12 trellis-check 预置 Bookmarks 单进程
+
+复核没有再启动 Chrome，没有重跑 `chrome-import-live-harness.mjs`、`chrome-import-file-harness.mjs` 或 `chrome-import-harness.mjs`，没有写或恢复日常 `Bookmarks`。上文「预置 Bookmarks 单进程」未改。没有改 JSON。没有跑 `task.py`。
+
+两份 JSON 的 `command` 都是 `node .trellis/tasks/10-10-mb-03-chrome-bridge/evidence/chrome-import-live-harness.mjs`。`source` 都是 `preseeded-bookmarks-one-process`。
+
+`evidence/import-live-c55f21.json` 的 `exitCode` 是 1。`importEnded` 是 false。`chromeEmittedImportEnded` 是 false。`probeBegan` 是 0。`probeEnded` 是 0。`listenerAttachedBeforeModelFinished` 是 false。`extensionStatuses` 只有 `connected`，没有 `reconciling`。`pass` 是 false。`chromeLaunchCount` 是 1。`loadUnpackedCalls` 是 1。`wire` 没有 `import_ended`。`dailyBefore` 和 `dailyAfter` 都是长度 850304、SHA256 `09F2A5C24BA0EE3E3AFF521B90B8509411C2BCDABFE743746A670B07515C1B9D`。`expectedDaily` 是长度 849515、SHA256 `DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82`。
+
+`evidence/import-live-e1e088.json` 开始于 2026-10-12T08:35:59.669Z，早于 `c55f21` 的 2026-10-12T08:37:08.335Z。`exitCode` 是 1。`chromeLaunchCount` 是 0。`failureCode` 是 `DAILY_GUARD`。它是同一条命令在启动 Chrome 之前的退出，不是第二个来源。当前 `chrome-import-live-harness.mjs` 里没有 `DAILY_GUARD` 这个字符串；`DAILY_GUARD` 只留在这份 JSON 里。
+
+`%LOCALAPPDATA%\Google\Chrome\User Data\Default\Bookmarks` 只读重算：长度 850304，SHA256 `09F2A5C24BA0EE3E3AFF521B90B8509411C2BCDABFE743746A670B07515C1B9D`。与 `c55f21` 的前后摘要相同，与更早的 849515 / `DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82` 不同。文件里没有文本 `mb03-live-probe`。当前 harness 的播种内容不在这个文件里。打开方式是 `FileAccess.Read`。没有写该文件。该命令退出码是 0。
+
+`git diff --name-only -- apps crates packages scripts tests` 无输出，退出码 0。`git status --short` 对这组路径和 `task.json` 也无输出，退出码 0。`task.json` 的 status 仍是 `in_progress`。
+
+`chrome-import-live-harness.mjs` 不读取、不写入 Netscape HTML。它不打开 `chrome://bookmarks`。它不使用 `initial_preferences`，只在临时资料里确认该文件不存在。它不做 oplock。`--user-data-dir` 来自 `os.tmpdir()` 下的 `markbridge-03-import-live-*`。`c55f21` 的 `root` 是 `C:\Users\lyh\AppData\Local\Temp\markbridge-03-import-live-wqRkjq`。
+
+出厂监听没有在书签模型加载完成之前装上。`listenerAttachedBeforeModelFinished` 是 false。恢复前加载直方图的 count 已经是 1，`getTree` 当时 0 ms 返回，探针已经在树里。线上没有 `import_ended`，探针计数也是 0。这些观察都在模型加载完成之后。这次运行不能证明加载当时没有该事件。
+
+导入保持 UNVERIFIED。V04 总行保持 UNVERIFIED。OS 休眠仍未跑。03 未归档。
