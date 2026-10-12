@@ -32,7 +32,7 @@ pnpm build
 pnpm --filter @markbridge/desktop tauri dev
 ```
 
-开发服务器仅绑定 `127.0.0.1:1420`。开发服务器提供前端资源，未实现扩展桥接服务。浏览器预览入口为 `pnpm --filter @markbridge/desktop dev`，预览采用未配对状态，不代表原生 IPC 已验收。
+开发服务器只绑定 `127.0.0.1`。优先使用端口 1420；若该端口不可绑定，Vite 改用下一个候选端口。`just dev` 会把 Tauri 的 `devUrl` 设成同一个端口。浏览器预览入口为 `pnpm --filter @markbridge/desktop dev`，预览采用未配对状态，不代表原生 IPC 已验收。设置 `MARKBRIDGE_DEV_PORT` 时只尝试该端口。
 
 扩展构建位于 `apps/extension/dist`，只包含 MV3 弹窗，不申请浏览器或网络权限，不包含 service worker。基础检查只核对构建产物和 manifest。后续 Chrome 实验使用单独的临时 Profile，不加载到日常 Profile。
 
