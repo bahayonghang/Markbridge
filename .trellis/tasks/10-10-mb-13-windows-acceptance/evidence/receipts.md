@@ -621,3 +621,50 @@ V15 仍是 FAIL。AC13-2 仍是 FAIL。AI、AC13-3、AC13-4 仍是 NOT_RUN。V16
 
 `git diff --name-only -- apps crates packages scripts` 只有 `crates/core/src/bridge/tests.rs`。`重启后不重放未回执写入` 的 FAIL 行没有改。V15 仍是 FAIL。AC13-2 仍是 FAIL。AI、AC13-3、AC13-4 仍是 NOT_RUN。V16 仍是 UNVERIFIED。没有勾 PRD。没有运行安装程序，没有改 `v15-recv-result.json`。
 
+## 2026-10-12 B10K 冷启动与搜索
+
+05:58:40–05:58:57（UTC）。命令 `node .trellis/tasks/10-10-mb-13-windows-acceptance/evidence/b10k-measure.mjs`，退出码 0。stdout 的一行 JSON 与 `evidence/b10k-result.json` 是同一次运行。没有引用 05 的 `profile-search.json`、`native-summary.json` 或旧收据数字。没有运行 `pnpm build:package`，没有安装 NSIS。已有 `target/release/markbridge-desktop.exe` 23035904 字节，mtime `2026-10-12T05:20:38.466Z`。没有设置 `CARGO_HOME`、`RUSTUP_HOME` 或 `HOME`。
+
+种子 `20261010`。`buildB10k()` 为 10000 条书签、1000 个文件夹、深度 20。临时 sqlite 的 `bookmarks_cache` 未删除行是 11004。应用数据在临时目录，路径不含 `com.markbridge.desktop`。没有打开日常 Chrome 资料，没有写日常 `Bookmarks`，没有加载已安装扩展，也没有做 Chrome 在线变更。`MARKBRIDGE_CREDENTIAL_NAMESPACE` 为 `Markbridge.Task05.mb13-b10k-20261012`。调试端口 9357。
+
+同步样本是进程启动到资料「缓存节点」为 11004，单位毫秒：1091、587、564。p50 587，p95 1091，max 1091。这不是 V03 的 100 次 Chrome 事件。
+
+冷启动是进程启动到可操作缓存树：页面含 `MB05BAR` 和「显示本机缓存」，来源以 `profile:` 开头，搜索框可输入。三次毫秒：1153、646、619。p50 646，p95 1153，max 1153。三次都小于等于 3000。
+
+搜索 30 次，查询是夹具标记 `MB05MARK`。计时从页面 `performance.now()` 开始，位于写入输入之前，直到 `[role=option]` 含该标记。原始毫秒：11.299999997019768、4.5、4.600000001490116、4.600000001490116、4.0999999940395355、4.299999997019768、4.199999995529652、4.299999997019768、4.600000001490116、4.399999998509884、4.600000001490116、4.800000004470348、4.200000002980232、4.200000002980232、4.200000002980232、4.600000001490116、3.899999998509884、4.5、4.199999995529652、3.8000000044703484、4.300000004470348、4.300000004470348、6.399999998509884、6.4000000059604645、6.699999995529652、5.5、4.299999997019768、4.0999999940395355、6.700000002980232、4。第一次 11.299999997019768。后 29 次暖态 p50 4.300000004470348，p95 6.699999995529652，max 6.700000002980232。分位取排序后 `ceil(n*ratio)-1`。暖态 p95 小于等于 200。
+
+| 观察 | 判定 | 记录 |
+|---|---|---|
+| AC13-3 | PASS | 同步 3 条、搜索 30 条、冷启动 3 条。冷启动各小于等于 3000 ms。暖态搜索 p95 6.699999995529652 ms |
+| V15 | FAIL | 本段没有重跑 |
+| AC13-2 | FAIL | 本段没有重跑 |
+| AC13-4 | NOT_RUN | 没有安装包清单 |
+| AI | NOT_RUN | 没有跑模型 |
+| V16 | UNVERIFIED | 没有 Floccus |
+
+机器参数来自同一次 stdout：版本 `10.0.26300`，构建 `26300`，CPU `Intel(R) Core(TM) Ultra 9 275HX`，24 核，`memoryBytes` 68143853568，`AppliedDPI` 120，`devicePixelRatio` 1.25。stdout 里的 `machine.caption` 不是有效 UTF-8。另一次 CIM 读取的标题是 `Microsoft Windows 11 专业版`，不属于计时样本。
+
+日常书签运行前、运行后，以及收据写入前再算的一次，都是 849515 字节，SHA256 `DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82`。`Markbridge.Pairing` 与 `Markbridge.Model` 前后都是 0。任务命名空间命中也是 0。没有打印或删除凭据。`%LOCALAPPDATA%\com.markbridge.desktop\EBWebView` 前后都是 461 个文件，最新仍是 `2026-10-12T03:17:48.5775353Z`。这些文件没有删除。没有勾 PRD。
+
+## 2026-10-12 trellis-check B10K
+
+复查只读 `b10k-measure.mjs` 和 `b10k-result.json`。没有重跑 `b10k-measure.mjs`。结果文件里的分位与脚本 `sorted[Math.ceil(n * ratio) - 1]` 一致。
+
+`coldMs` 由启动 `target/release/markbridge-desktop.exe` 后的页面探针写入。`searchMs` 由页面 `performance.now()` 写入。种子经 `buildB10k()`，值是 `20261010`。应用数据在临时目录。脚本读取日常 `Bookmarks` 做指纹，不打开日常 Chrome 资料，也不写该文件。
+
+重算：同步 n=3，p50 587，p95 1091，max 1091。冷启动 n=3，p50 646，p95 1153，max 1153。搜索 n=30，p50 4.300000004470348，p95 6.700000002980232，max 11.299999997019768。暖态丢掉第一条，n=29，p50 4.300000004470348，p95 6.699999995529652，max 6.700000002980232。与上一节收据相同。冷启动三次都小于等于 3000。暖态 p95 小于等于 200。
+
+现在的日常书签是 849515 字节，SHA256 `DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82`。与结果文件前后指纹相同。没有写这个文件，没有删 EBWebView。
+
+`git diff --name-only -- apps crates packages scripts` 没有输出。更早的 AC13-3 NOT_RUN 行还在。V15 仍是 FAIL。AC13-2 仍是 FAIL。AC13-4 仍是 NOT_RUN。V16 仍是 UNVERIFIED。没有勾 PRD。
+
+| 观察 | 判定 | 记录 |
+|---|---|---|
+| AC13-3 | PASS | 重算暖态 p95 6.699999995529652，冷启动 max 1153 |
+| V15 | FAIL | 本段没有重跑 |
+| AC13-2 | FAIL | 本段没有重跑 |
+| AC13-4 | NOT_RUN | 本段没有重跑 |
+| V16 | UNVERIFIED | 没有 Floccus |
+
+AC13-3 仍是 PASS。
+

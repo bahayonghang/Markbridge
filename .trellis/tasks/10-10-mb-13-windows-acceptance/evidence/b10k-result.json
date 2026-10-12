@@ -1,0 +1,112 @@
+{
+  "seed": 20261010,
+  "path": "loaded-profile-cache",
+  "liveChrome": false,
+  "syncDefinition": "process start until the B10K profile metric cache node count is 11004",
+  "coldDefinition": "process start until the cache tree is operable: MB05BAR visible, cached-read-only note, profile source, search enabled",
+  "searchDefinition": "page performance.now from before the MB05MARK input evaluate until a role=option contains MB05MARK; warm drops the first sample",
+  "percentile": "sorted[ceil(n*ratio)-1]",
+  "bookmarks": 10000,
+  "folders": 1000,
+  "maxDepth": 20,
+  "cacheNodes": 11004,
+  "syncMs": [
+    1091,
+    587,
+    564
+  ],
+  "coldMs": [
+    1153,
+    646,
+    619
+  ],
+  "searchMs": [
+    11.299999997019768,
+    4.5,
+    4.600000001490116,
+    4.600000001490116,
+    4.0999999940395355,
+    4.299999997019768,
+    4.199999995529652,
+    4.299999997019768,
+    4.600000001490116,
+    4.399999998509884,
+    4.600000001490116,
+    4.800000004470348,
+    4.200000002980232,
+    4.200000002980232,
+    4.200000002980232,
+    4.600000001490116,
+    3.899999998509884,
+    4.5,
+    4.199999995529652,
+    3.8000000044703484,
+    4.300000004470348,
+    4.300000004470348,
+    6.399999998509884,
+    6.4000000059604645,
+    6.699999995529652,
+    5.5,
+    4.299999997019768,
+    4.0999999940395355,
+    6.700000002980232,
+    4
+  ],
+  "bookmarksBefore": {
+    "length": 849515,
+    "sha256": "DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82"
+  },
+  "bookmarksAfter": {
+    "length": 849515,
+    "sha256": "DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82"
+  },
+  "credentialsBefore": {
+    "pairing": 0,
+    "model": 0
+  },
+  "credentialsAfter": {
+    "pairing": 0,
+    "model": 0
+  },
+  "ebBefore": {
+    "count": 461,
+    "newest": "2026-10-12T03:17:48.577Z"
+  },
+  "ebAfter": {
+    "count": 461,
+    "newest": "2026-10-12T03:17:48.577Z"
+  },
+  "machine": {
+    "caption": "Microsoft Windows 11 רҵ��",
+    "version": "10.0.26300",
+    "build": "26300",
+    "cpu": "Intel(R) Core(TM) Ultra 9 275HX",
+    "cores": 24,
+    "memoryBytes": 68143853568,
+    "appliedDpi": 120
+  },
+  "exe": {
+    "bytes": 23035904,
+    "mtime": "2026-10-12T05:20:38.466Z"
+  },
+  "devicePixelRatio": 1.25,
+  "ac13_3": "PASS",
+  "error": null,
+  "startedAt": "2026-10-12T05:58:40.096Z",
+  "finishedAt": "2026-10-12T05:58:57.804Z",
+  "syncP50": 587,
+  "syncP95": 1091,
+  "syncMax": 1091,
+  "coldP50": 646,
+  "coldP95": 1153,
+  "coldMax": 1153,
+  "searchCount": 30,
+  "searchP50": 4.300000004470348,
+  "searchP95": 6.700000002980232,
+  "searchMax": 11.299999997019768,
+  "searchCold": 11.299999997019768,
+  "searchWarmCount": 29,
+  "searchWarmP50": 4.300000004470348,
+  "searchWarmP95": 6.699999995529652,
+  "searchWarmMax": 6.700000002980232
+}
