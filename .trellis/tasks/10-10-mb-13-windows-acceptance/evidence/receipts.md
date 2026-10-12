@@ -750,3 +750,23 @@ README 新增段复述任务 `design.md` 第 27 行的卸载句，并复述原�
 
 AC13-2、AC13-4、V15 仍是 PASS。
 
+## 2026-10-12 权限断言仍与 manifest 一致
+
+`node --test scripts/foundation.test.mjs` 退出码 0。2 通过，0 失败。
+
+`apps/extension/public/manifest.json` 的 `permissions` 仍是 `bookmarks`、`storage`、`alarms`、`scripting`、`activeTab`。`scripts/foundation.test.mjs` 与 `scripts/check-artifacts.mjs` 断言同一五项。`tests/e2e/foundation.spec.ts` 仍期望「已连接 Chrome」和「无法读取启动状态」。没有改这三处，也没有改 manifest。manifest 没有 `host_permissions`、`content_scripts`、`externally_connectable`。
+
+没有重跑 `pnpm test:e2e`。该 spec 会把 PNG 写到 `.trellis/tasks/10-10-mb-03-chrome-bridge/evidence`，那些截图保持不动。
+
+`## 2026-10-11 trellis-check 重跑` 已记录 `pnpm test`、`pnpm build`、`pnpm test:e2e`，退出码都是 0。
+
+历史 V01 行仍是 FAIL，没有改成 PASS。V04 仍是 UNVERIFIED。没有勾 PRD。13 没有归档。
+
+## 2026-10-12 trellis-check 权限断言
+
+`node --test scripts/foundation.test.mjs` 退出码 0。2 通过，0 失败。
+
+`git diff --name-only -- apps crates packages scripts tests` 没有输出。`apps/extension/public/manifest.json` 的 `permissions` 是 `bookmarks`、`storage`、`alarms`、`scripting`、`activeTab`。`scripts/foundation.test.mjs` 与 `scripts/check-artifacts.mjs` 断言同一五项。`tests/e2e/foundation.spec.ts` 期望「已连接 Chrome」和「无法读取启动状态」。
+
+没有重跑 `pnpm test:e2e`。`## 2026-10-11 trellis-check 重跑` 仍记录 `pnpm test`、`pnpm build`、`pnpm test:e2e` 退出码都是 0。V04 仍是 UNVERIFIED。历史 V01 行仍是 FAIL。没有勾 PRD。13 没有归档。
+
