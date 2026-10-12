@@ -1,0 +1,144 @@
+{
+  "suffix": "b3ca4e",
+  "namespace": "Markbridge.Task03.b3ca4e",
+  "source": "UNVERIFIED",
+  "v04": "UNVERIFIED",
+  "osSleep": "UNVERIFIED",
+  "importStatus": "UNVERIFIED",
+  "startedAt": "2026-10-12T09:45:35.927Z",
+  "command": "node .trellis/tasks/10-10-mb-03-chrome-bridge/evidence/chrome-import-reconcile-harness.mjs",
+  "output": "evidence/import-reconcile-b3ca4e.json",
+  "notedDaily": {
+    "length": 850304,
+    "sha256": "09F2A5C24BA0EE3E3AFF521B90B8509411C2BCDABFE743746A670B07515C1B9D"
+  },
+  "wire": [
+    "c:pair",
+    "s:pair_result",
+    "c:pair",
+    "s:pair_result",
+    "c:hello",
+    "s:hello_result",
+    "s:get_tree",
+    "c:tree_full"
+  ],
+  "states": [
+    null,
+    "live"
+  ],
+  "extensionStatuses": [
+    "unpaired",
+    "pending",
+    "connecting",
+    "connected"
+  ],
+  "sources": [
+    {
+      "name": "Microsoft Internet Explorer",
+      "path": null,
+      "html": false,
+      "fileInput": false,
+      "insideTemp": false,
+      "exists": false
+    },
+    {
+      "name": "Bookmarks HTML File",
+      "path": null,
+      "html": true,
+      "fileInput": false,
+      "insideTemp": false,
+      "exists": false
+    }
+  ],
+  "pathFields": [],
+  "controlIds": [
+    "insert-drive-file",
+    "file-save",
+    "file-download-off",
+    "file-save-off",
+    "open-in-browser",
+    "defaultBrowser",
+    "profile-row",
+    "profile-icon",
+    "profile-name",
+    "edit-profile",
+    "importDataDialogTrigger",
+    "browserSelect",
+    "importDialogHistory",
+    "importDialogBookmarks",
+    "importDialogSavedPasswords",
+    "importDialogSearchEngine",
+    "importDialogAutofillFormData",
+    "import",
+    "bookmarksCheckboxLabel",
+    "manageProfile",
+    "profileAvatarSelector"
+  ],
+  "modelLoaded": true,
+  "treeFullBeforeTrigger": true,
+  "readyBeforeTrigger": {
+    "treeFull": true,
+    "connection": "live",
+    "extensionStatus": "connected",
+    "modelLoaded": true
+  },
+  "dialogFound": true,
+  "importPageOpened": true,
+  "importClicked": false,
+  "importEnded": false,
+  "reconcilingAfterImport": false,
+  "treeAfterResync": false,
+  "treesMatch": false,
+  "importedNodeCount": 0,
+  "importedNodesInBoth": false,
+  "chromeLaunchCount": 1,
+  "loadUnpackedCalls": 1,
+  "bookmarksSeed": false,
+  "initialPreferences": false,
+  "oplock": false,
+  "htmlFileWritten": false,
+  "bookmarksManagerOpened": false,
+  "dailyProfileTouched": false,
+  "productEdited": false,
+  "pass": false,
+  "userData": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-03-import-reconcile-3TmK4t",
+  "appData": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-03-import-reconcile-app-eP85vP",
+  "productDiffBefore": [],
+  "credentialBefore": {
+    "pairing": 0,
+    "namespace": 0
+  },
+  "dailyBefore": {
+    "length": 850304,
+    "sha256": "09F2A5C24BA0EE3E3AFF521B90B8509411C2BCDABFE743746A670B07515C1B9D"
+  },
+  "dailyMatchesNoted": true,
+  "portsDiffer": true,
+  "chrome": "Chrome/155.0.8059.39",
+  "extensionId": "blbapbmincddiilocledaajcegiekbfk",
+  "pairingCodeLength": 221,
+  "profileId": "p:9ec1bc9689d1cab31a583202876e2c385672f1a9583af27a7e2c0f254c68451d",
+  "handshakes": 2,
+  "connectionBeforeTrigger": "live",
+  "extensionStatusBeforeTrigger": "connected",
+  "bridgeReady": true,
+  "nodeCountBefore": 3,
+  "importPageHref": "chrome://settings/importData",
+  "importPageTitle": "Settings - You and Google",
+  "scrapeError": null,
+  "eligibleCount": 0,
+  "failureCode": "NO_IN_TEMP_NON_HTML_SOURCE",
+  "triggerName": null,
+  "credentialAfter": {
+    "pairing": 0,
+    "namespace": 0
+  },
+  "dailyAfter": {
+    "length": 850304,
+    "sha256": "09F2A5C24BA0EE3E3AFF521B90B8509411C2BCDABFE743746A670B07515C1B9D"
+  },
+  "dailyChangedDuringRun": false,
+  "productDiff": [],
+  "exitCode": 1,
+  "finishedAt": "2026-10-12T09:45:39.990Z"
+}

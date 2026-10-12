@@ -395,3 +395,38 @@ JSON 里 `pass` 是 false，`hostSuspendedByThisRun` 是 false，`realOsResumeWh
 `git diff --name-only -- apps crates packages scripts tests` 无输出，退出码 0。`git status --short --branch -- .trellis/tasks/10-10-mb-03-chrome-bridge/task.json apps crates packages scripts tests` 只有 `## main`，退出码 0。`task.json` 的 status 仍是 `in_progress`，`completedAt` 仍是 null。
 
 导入保持 UNVERIFIED。OS 休眠保持 UNVERIFIED。V04 总行不改为 PASS。03 未归档。
+
+
+## chrome://settings/importData
+
+日期：2026-10-12。工作目录为仓库根。一个临时 Chrome 进程。`--user-data-dir` 在 `os.tmpdir()` 下，前缀 `markbridge-03-import-reconcile-`。扩展用 `Extensions.loadUnpacked` 加载 `apps/extension/dist`。命名空间 `Markbridge.Task03.b3ca4e`。`bridge_harness` 的第二个参数是该命名空间。配对码只记录长度 221。没有设置 `Markbridge.Pairing`。没有播种启动 Bookmarks，没有读保持，没有 `initial_preferences`，没有 oplock。没有写 Netscape HTML，没有打开 `chrome://bookmarks`。没有从日常 Chrome、Edge、Firefox 或 IE 导入。没有改产品文件。
+
+| 命令 | 退出码 |
+|---|---:|
+| `node .trellis/tasks/10-10-mb-03-chrome-bridge/evidence/chrome-import-reconcile-harness.mjs` | 1 |
+
+观察文件是 `evidence/import-reconcile-b3ca4e.json`。`pass` 是 false。`source` 是 UNVERIFIED。`failureCode` 是 NO_IN_TEMP_NON_HTML_SOURCE。`chromeLaunchCount` 是 1。`loadUnpackedCalls` 是 1。
+
+触发前 `modelLoaded` 是 true。`treeFullBeforeTrigger` 是 true。后端连接是 `live`。扩展状态是 `connected`。节点数 3。
+
+`importPageOpened` 是 true。`dialogFound` 是 true。来源：Microsoft Internet Explorer（路径 无，html=false，insideTemp=false）；Bookmarks HTML File（路径 无，html=true，insideTemp=false）。路径字段：无。`trigger` 是 none。`importClicked` 是 false。
+
+`importEnded` 是 false。`reconcilingAfterImport` 是 false。`treeAfterResync` 是 false。`treesMatch` 是 false。`importedNodeCount` 是 0。`importedNodesInBoth` 是 false。
+
+`%LOCALAPPDATA%\Google\Chrome\User Data\Default\Bookmarks` 启动前长度 850304，SHA256 `09F2A5C24BA0EE3E3AFF521B90B8509411C2BCDABFE743746A670B07515C1B9D`。结束后长度 850304，SHA256 `09F2A5C24BA0EE3E3AFF521B90B8509411C2BCDABFE743746A670B07515C1B9D`。运行中哈希没有变化。没有写该文件。先前观察到的长度 850304、SHA256 `09F2A5C24BA0EE3E3AFF521B90B8509411C2BCDABFE743746A670B07515C1B9D` 只作对照，不是这次的通过条件。`dailyMatchesNoted` 是 true。
+
+这个来源是 UNVERIFIED。缺少 import_ended 或其他通过条件时，不把它记成产品缺陷。导入保持 UNVERIFIED。OS 休眠保持 UNVERIFIED。V04 总行不改为 PASS。03 未归档。
+
+## importData 复核
+
+日期：2026-10-12。检查只追加本节。没有重跑 `chrome-import-reconcile-harness.mjs`。没有再启动 Chrome。`evidence/import-reconcile-b3ca4e.json` 未改。更早的收据行未改。
+
+命令 `node .trellis/tasks/10-10-mb-03-chrome-bridge/evidence/chrome-import-reconcile-harness.mjs` 的记录退出码是 1。`pass` 是 false。触发前 `readyBeforeTrigger` 为 treeFull true、connection `live`、extensionStatus `connected`、modelLoaded true。`importClicked` 是 false。`triggerName` 是 null。`htmlFileWritten` 是 false。`importEnded` 是 false。`wire` 没有 `import_ended`。来源是 Microsoft Internet Explorer 与 Bookmarks HTML File，两条 `path` 都是 null，`insideTemp` 都是 false。`source`、`importStatus`、`osSleep`、`v04` 都是 UNVERIFIED。
+
+`userData` 是 `C:\Users\lyh\AppData\Local\Temp\markbridge-03-import-reconcile-3TmK4t`。`os.tmpdir()` 的 realpath 是 `C:\Users\lyh\AppData\Local\Temp`。该路径在临时目录下，目录名前缀是 `markbridge-03-import-reconcile-`，不在 `C:\Users\lyh\AppData\Local\Google\Chrome\User Data` 下。JSON 有 `pairingCodeLength` 221 和 `profileId`。没有配对码正文、token 或凭据值。`credentialBefore` 与 `credentialAfter` 只是计数，pairing 与 namespace 都是 0。
+
+日常 `Bookmarks` 只读重算使用 `FileAccess.Read` 与 `FileShare.ReadWrite`。长度 850304。SHA256 `09F2A5C24BA0EE3E3AFF521B90B8509411C2BCDABFE743746A670B07515C1B9D`。最后写入时间仍是 2026-10-12T08:34:32.0604316Z。与 JSON 的 `dailyBefore` 和 `dailyAfter` 相同。该读取退出码 0。没有写该文件。没有输出标题、URL 或树。
+
+`git diff --name-only -- apps crates packages scripts tests` 无输出，退出码 0。`task.json` 的 status 仍是 `in_progress`，`completedAt` 仍是 null。
+
+这个来源保持 UNVERIFIED。导入保持 UNVERIFIED。OS 休眠保持 UNVERIFIED。V04 总行不改为 PASS。`pass` 保持 false。03 未归档。
