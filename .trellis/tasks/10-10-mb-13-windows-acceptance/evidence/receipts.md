@@ -770,3 +770,42 @@ AC13-2、AC13-4、V15 仍是 PASS。
 
 没有重跑 `pnpm test:e2e`。`## 2026-10-11 trellis-check 重跑` 仍记录 `pnpm test`、`pnpm build`、`pnpm test:e2e` 退出码都是 0。V04 仍是 UNVERIFIED。历史 V01 行仍是 FAIL。没有勾 PRD。13 没有归档。
 
+## 2026-10-12 当前追溯
+
+本节只引用本文件已经写下的判定、命令和退出码。没有新跑命令。上面的旧行不改。某一节在更早的 FAIL 之后写下退出码 0 时，两件事实都留在本表：历史判定留在「较早记录」，该节之后本文件最后一次写出的判定留在「最新判定」。本文件对某一项没有命令、也没有退出码，且也没有把它写成 UNVERIFIED 时，最新判定写 NOT_RUN。V04、AC13-1、V16、AC13-5 在本文件里已经是 UNVERIFIED，命令栏是「无」或没有该项命令，这里不改成 PASS，也不改成 NOT_RUN。AI 不是 V 行，收据把它和这些行记在一起，所以单独列出。没有勾 PRD。13 没有归档。
+
+| 项 | 最新判定 | 命令与退出码 | 较早记录 |
+|---|---|---|---|
+| AC13-1 | UNVERIFIED | 无单项命令，无退出码。`## V01–V16` 写没有导入命令，也没有休眠命令。`## 2026-10-12 trellis-check 权限断言` 仍写 V04 是 UNVERIFIED | `## AC13` 与 `## 2026-10-11 trellis-check` 都是 UNVERIFIED。V04 不是 PASS，也不是明确 FAIL，所以这一条不是 PASS。V01 的最新具名判定是 FAIL，那是明确 FAIL，不把 AC13-1 写成 PASS |
+| AC13-2 | PASS | `## 2026-10-12 隔离闭环`：`node .trellis/tasks/10-10-mb-13-windows-acceptance/evidence/v15-isolated.mjs` 退出码 0。`## 2026-10-12 trellis-check 隔离闭环` 复述 PASS，该节没有重跑 | `## AC13` 起直到 `## 2026-10-12 trellis-check 打开冻结` 的 AC13-2 都是 FAIL，那些行保留。同一次 PASS 里 AI 仍是 NOT_RUN |
+| AC13-3 | PASS | `## 2026-10-12 B10K 冷启动与搜索`：`node .trellis/tasks/10-10-mb-13-windows-acceptance/evidence/b10k-measure.mjs` 退出码 0。`## 2026-10-12 trellis-check B10K` 写 AC13-3 仍是 PASS，该节没有重跑 | `## AC13` 以及其后各节直到 `## 2026-10-12 重启不重放` 的 AC13-3 都是 NOT_RUN，那些行保留 |
+| AC13-4 | PASS | `## 2026-10-12 隔离闭环`：`where.exe 7z` 退出码 0，`7z l` 退出码 0，`7z e` 退出码 0；同节 `v15-isolated.mjs` 退出码 0。`## 2026-10-12 trellis-check 隔离闭环` 复述 PASS，没有新的退出码 | `## AC13`、两节安装包清单，以及 B10K 节都把 AC13-4 写成 NOT_RUN，那些行保留。`## 2026-10-12 安装包文件清单` 里 `7z l` 与 `7z e` 已经是退出码 0，该节仍写 NOT_RUN |
+| AC13-5 | UNVERIFIED | 无。`## V01–V16` 的 V16 命令栏是「无」，没有退出码。没有 Floccus 环境 | `## AC13` 与 `## 2026-10-11 trellis-check` 都是 UNVERIFIED。之后各节只复述 V16，没有把 AC13-5 写成 PASS |
+| V01 | FAIL | 历史非 0：`## 本任务命令` 的 `pnpm test` 1、`pnpm test:e2e` 1、`pnpm build` 1。`## 2026-10-11 trellis-check`：`cargo fmt --all -- --check` 1；clippy 日志退出码 101。其后退出码 0：`## 2026-10-12 trellis-check fmt` 的 `cargo fmt --all -- --check` 与 `cargo clippy --workspace --all-targets -- -D warnings` 都是 0；`## 2026-10-11 trellis-check 重跑` 的 `pnpm lint`、`pnpm test`、`pnpm build`、`pnpm test:e2e` 都是 0。`pnpm --filter @markbridge/desktop tauri build` 的退出码栏是「无」，该命令行仍是 NOT_RUN | `## V01–V16` 判定 FAIL。`## 2026-10-11 trellis-check 重跑` 写明不把历史 V01 改成 PASS。`## 2026-10-12 trellis-check 权限断言` 仍写历史 V01 行是 FAIL。最新具名判定是 FAIL |
+| V02 | PASS | `## V01–V16`：03 收据中的 `cargo test --workspace --locked` 与 `pnpm test` 退出码 0。原生 JSON `42e65e09` 的进程退出码由 03 按脚本推断为 0 | 本文件之后没有改写 V02。该行写明本任务未重跑该 harness |
+| V03 | PASS | `## V01–V16`：05 `node .trellis/tasks/10-10-mb-05-library-workspace/evidence/profile-live.mjs` 退出码 0。`## 2026-10-11 trellis-check` 复述 PASS，没有重跑 | 同段写 03 的 V03 仍是 NOT_RUN。上表 V03 采用 05 的退出码 0。本任务未重跑 |
+| V04 | UNVERIFIED | 无导入命令，无休眠命令，无退出码。`## V01–V16` 与 `## 2026-10-12 trellis-check 权限断言` | 该行写明不把 worker 重启或文件镜像测试写成整行 PASS。不是 PASS，也不是明确 FAIL |
+| V05 | PASS | `## V01–V16`：04 `cargo test --workspace --locked` 退出码 0 | 本文件之后没有改写 V05 |
+| V06 | PASS | `## V01–V16`：05 `measure.mjs` 与 `profile-search.mjs` 退出码都是 0 | 该行写 150% DPI 在 05 收据中仍是 UNVERIFIED，整行判定仍是 PASS。本任务未重跑这两条。`b10k-measure.mjs` 退出码 0 记在 AC13-3，没有改写 V06 |
+| V07 | PASS | `## V01–V16`：06 `node .trellis/tasks/10-10-mb-06-safe-editing/evidence/chrome-edit-harness.mjs` 退出码 0 | 本文件之后没有改写 V07 |
+| V08 | PASS | `## V01–V16`：同上 06 harness，退出码 0 | 本文件之后没有改写 V08。`## 2026-10-12 打开时冻结未回执创建` 另有 `cargo test -p markbridge-core --locked open_leaves_an_unacked_edit_create_uncertain_and_does_not_replay -- --test-threads=1` 退出码 0。该节写 V15 仍是 FAIL，没有改 V08 |
+| V09 | PASS | `## V01–V16`：07 `node .trellis/tasks/10-10-mb-07-local-tags/evidence/chrome-tag-harness.mjs` 退出码 0 | 本文件之后没有改写 V09 |
+| V10 | PASS | `## V01–V16`：08 `cargo test --workspace --locked` 退出码 0 | 本文件之后没有改写 V10 |
+| V11 | PASS | `## V01–V16`：09 `node .trellis/tasks/10-10-mb-09-webpage-preview/evidence/native-preview.mjs` 退出码 0 | 本文件之后没有改写 V11 |
+| V12 | PASS | `## V01–V16`：10 `cargo test -p markbridge-core --lib reqwest_ten_public_pages --locked --offline -- --ignored --nocapture --test-threads=1` 退出码 0 | 本文件之后没有改写 V12。`where.exe ollama` 退出码 1 不改写这一行 |
+| V13 | PASS | `## V01–V16`：11 `cargo test -p markbridge-core --lib --locked disposable_chrome_b100 -- --ignored --nocapture --test-threads=1` 退出码 0 | 本文件之后没有改写 V13 |
+| V14 | PASS | `## V01–V16`：`cargo test --workspace --locked` 退出码 0；检查过滤重跑退出码 0 | 同节写 12 的 `pnpm test` 退出码 1，本任务当时的 `pnpm test` 也是 1。`## 2026-10-11 trellis-check 重跑` 的 `pnpm test` 退出码 0。V14 行没有改写，最新具名判定仍是 PASS |
+| V15 | PASS | `## 2026-10-12 隔离闭环`：`node .trellis/tasks/10-10-mb-13-windows-acceptance/evidence/v15-isolated.mjs` 退出码 0。同节 `7z l` 与 `7z e` 退出码 0。安装、启动、重启、卸载进程退出码都是 0。`taskkill` 退出码 1，该节写明不计入重启退出码。`## 2026-10-12 trellis-check 隔离闭环` 复述 PASS，没有重跑 | `## V01–V16` 写 `isolated-run.ps1` 退出码 0、判定 FAIL。`## 2026-10-11 trellis-check` 写该退出码不保留，且没有重跑该脚本，判定仍是 FAIL。其后多次 `v15-isolated.mjs` 退出码 0 且判定 FAIL，直到 `## 2026-10-12 trellis-check 打开冻结`。那些 FAIL 行保留 |
+| V16 | UNVERIFIED | 无。没有退出码。没有 Floccus 环境 | `## V01–V16` 起各节都是 UNVERIFIED。`## 2026-10-12 trellis-check 隔离闭环` 仍是 UNVERIFIED。不是 PASS |
+| AI | NOT_RUN | `where.exe ollama` 退出码 1。`## 2026-10-12 V15 隔离运行` 与 `## 2026-10-12 隔离闭环` 都写下这一退出码。`## 2026-10-12 trellis-check 隔离闭环` 写 `obs.ai` 是 NOT_RUN | 各节都是 NOT_RUN。不是 PASS。AC13-2 的 PASS 不改写这一行 |
+
+## 2026-10-12 trellis-check 当前追溯
+
+对照 `## 2026-10-12 当前追溯` 与本文件更早各节。没有新跑命令。没有改旧行，没有改判定。
+
+`git diff -- .trellis/tasks/10-10-mb-13-windows-acceptance/evidence/receipts.md` 在本次追加前是 29 行插入、0 行删除。`git diff --name-only -- apps crates packages scripts tests` 没有输出。`task.json` 的 `status` 仍是 `in_progress`。
+
+AC13-1 与 V04 仍是 UNVERIFIED。V04 不是 PASS，也不是明确 FAIL，所以 AC13-1 不是 PASS。V16 与 AC13-5 仍是 UNVERIFIED。没有 Floccus 命令。AI 仍是 NOT_RUN，对应 `where.exe ollama` 退出码 1。V15 的最新具名判定是 PASS，依据是 `## 2026-10-12 隔离闭环` 里 `v15-isolated.mjs` 退出码 0，以及同节安装、启动、重启、卸载进程退出码 0。更早的 V15 FAIL 行还在。
+
+引用与更早正文一致。没有把 V04、AC13-1 或 V16 改成 PASS。没有归档。
+
