@@ -506,3 +506,24 @@ OS 休眠保持 UNVERIFIED。V04 总行保持 UNVERIFIED。导入不标 PASS，�
 日期：2026-10-12。上一节与这次当场核对一致，句子未改。当前进程不是管理员。`HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Sudo` 的 Enabled=1。`C:\Users\lyh\AppData\Local\Temp\grok-goal-48052dce33c9\implementer\sleepstudy.html` 不存在。这次没有执行 `sudo`，没有提权，没有挂起主机，没有查询 `Microsoft-Windows-Kernel-Power`。没有改 `apps`、`crates`、`packages`、`scripts`、`tests` 或 `task.json`。没有归档。`git diff --name-only -- apps crates packages scripts tests` 无输出。`task.json` 的 status 仍是 `in_progress`。
 
 OS 休眠保持 UNVERIFIED。V04 总行保持 UNVERIFIED。导入保持 UNVERIFIED。03 未归档。
+
+
+## chrome://settings/importData
+
+日期：2026-10-12。工作目录为仓库根。一个临时 Chrome 进程。`--user-data-dir` 在 `os.tmpdir()` 下，前缀 `markbridge-03-import-reconcile-`。扩展用 `Extensions.loadUnpacked` 加载 `apps/extension/dist`。命名空间 `Markbridge.Task03.f5bee5`。`bridge_harness` 的第二个参数是该命名空间。配对码只记录长度 220。没有设置 `Markbridge.Pairing`。没有播种启动 Bookmarks，没有读保持，没有 `initial_preferences`，没有 oplock。没有写 Netscape HTML，没有打开 `chrome://bookmarks`。一次性 Spartan 库写在临时 user-data-dir 内，再接到旧版 Edge 的检测目录。`edgePlanted` 是 true。`edgeResolvedInsideTemp` 是 true。`edgeLinkExisted` 是 false。`edgePackageExisted` 是 false。`edgeJunctionRemoved` 是 true。`edgePackageRemoved` 是 true。没有写日常 Chrome、Chromium Edge 用户数据、Firefox、IE 收藏夹或 Markbridge 应用数据。没有改产品文件。
+
+| 命令 | 退出码 |
+|---|---:|
+| `node .trellis/tasks/10-10-mb-03-chrome-bridge/evidence/chrome-import-reconcile-harness.mjs` | 1 |
+
+观察文件是 `evidence/import-reconcile-f5bee5.json`。`pass` 是 false。`source` 是 UNVERIFIED。`failureCode` 是 RECONCILING_NOT_SEEN。`chromeLaunchCount` 是 1。`loadUnpackedCalls` 是 1。
+
+触发前 `modelLoaded` 是 true。`treeFullBeforeTrigger` 是 true。后端连接是 `live`。扩展状态是 `connected`。节点数 3。
+
+`importPageOpened` 是 true。`dialogFound` 是 true。来源：Microsoft Edge（路径 C:\Users\lyh\AppData\Local\Temp\markbridge-03-import-reconcile-sEESuQ\edge-source，html=false，insideTemp=true）；Microsoft Internet Explorer（路径 无，html=false，insideTemp=false）；Bookmarks HTML File（路径 无，html=true，insideTemp=false）。路径字段：无。`trigger` 是 Microsoft Edge。`importClicked` 是 true。
+
+`importEnded` 是 true。`reconcilingAfterImport` 是 false。`treeAfterResync` 是 true。`treesMatch` 是 true。`importedNodeCount` 是 1。`importedNodesInBoth` 是 true。
+
+`%LOCALAPPDATA%\Google\Chrome\User Data\Default\Bookmarks` 启动前长度 850304，SHA256 `09F2A5C24BA0EE3E3AFF521B90B8509411C2BCDABFE743746A670B07515C1B9D`。结束后长度 850304，SHA256 `09F2A5C24BA0EE3E3AFF521B90B8509411C2BCDABFE743746A670B07515C1B9D`。运行中哈希没有变化。没有写该文件。先前观察到的长度 850304、SHA256 `09F2A5C24BA0EE3E3AFF521B90B8509411C2BCDABFE743746A670B07515C1B9D` 只作对照，不是这次的通过条件。`dailyMatchesNoted` 是 true。
+
+这个来源是 UNVERIFIED。缺少 import_ended 或其他通过条件时，不把它记成产品缺陷。导入保持 UNVERIFIED。OS 休眠保持 UNVERIFIED。V04 总行不改为 PASS。03 未归档。

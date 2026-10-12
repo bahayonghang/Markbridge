@@ -4,7 +4,7 @@
 // read hold, no initial_preferences, no oplock, no Netscape HTML, no
 // chrome://bookmarks. Do not log pairing codes, bookmark titles, URLs, or trees.
 import { spawn, execFile } from 'node:child_process';
-import { appendFile, mkdtemp, readFile, realpath, rm, stat } from 'node:fs/promises';
+import { appendFile, mkdir, mkdtemp, readFile, realpath, rm, rmdir, stat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, join, resolve } from 'node:path';
 import { createInterface } from 'node:readline';
@@ -61,6 +61,14 @@ const report = {
   bookmarksManagerOpened: false,
   dailyProfileTouched: false,
   productEdited: false,
+  edgePlanted: false,
+  edgeLinkExisted: false,
+  edgePackageExisted: false,
+  edgePackageCreated: false,
+  edgeJunctionCreated: false,
+  edgeJunctionRemoved: null,
+  edgePackageRemoved: null,
+  edgeResolvedInsideTemp: false,
   pass: false,
 };
 const profiles = [];
@@ -602,6 +610,73 @@ function looksPath(value) {
   const text = String(value || '').trim();
   return /^[A-Za-z]:[\\/]/.test(text) || text.startsWith('\\\\');
 }
+function edgePackageRoot() {
+  return join(process.env.LOCALAPPDATA, 'Packages', 'Microsoft.MicrosoftEdge_8wekyb3d8bbwe');
+}
+function edgeLinkPath() {
+  return join(edgePackageRoot(), 'AC', 'MicrosoftEdge', 'User', 'Default');
+}
+async function pathExists(target) {
+  try { await stat(target); return true; }
+  catch { return false; }
+}
+async function plantEdge(userData, userReal) {
+  const link = edgeLinkPath();
+  const packageRoot = edgePackageRoot();
+  report.edgeLinkExisted = await pathExists(link);
+  report.edgePackageExisted = await pathExists(packageRoot);
+  if (report.edgeLinkExisted || report.edgePackageExisted) return false;
+  const target = join(userData, 'edge-source');
+  const db = join(target, 'DataStore', 'Data', 'spartan.edb');
+  try {
+    await exec('python', [join(evidence, 'edge-spartan-seed.py'), db]);
+  } catch {
+    throw new Error('EDGE_SEED_FAILED');
+  }
+  report.seedExitCode = 0;
+  report.edgePackageCreated = true;
+  await mkdir(join(packageRoot, 'AC', 'MicrosoftEdge', 'User'), { recursive: true });
+  try {
+    await exec('cmd.exe', ['/c', 'mklink', '/J', link, target]);
+  } catch {
+    throw new Error('EDGE_LINK_FAILED');
+  }
+  report.edgeJunctionCreated = true;
+  const resolved = await realpath(link);
+  const dbInfo = await stat(join(link, 'DataStore', 'Data', 'spartan.edb'));
+  const dbResolved = await realpath(join(link, 'DataStore', 'Data', 'spartan.edb'));
+  if (!dbInfo.isFile() || !isInside(resolved, userReal) || !isInside(dbResolved, userReal)) {
+    throw new Error('EDGE_LINK_OUTSIDE_TEMP');
+  }
+  report.edgePlanted = true;
+  report.edgeResolvedInsideTemp = true;
+  return true;
+}
+async function removeEdgePlant() {
+  if (!report.edgePackageCreated && !report.edgeJunctionCreated) return;
+  const link = edgeLinkPath();
+  const packageRoot = edgePackageRoot();
+  if (report.edgeJunctionCreated) {
+    try {
+      await rmdir(link);
+      report.edgeJunctionRemoved = true;
+    } catch {
+      report.edgeJunctionRemoved = false;
+    }
+  }
+  if (report.edgeJunctionRemoved === false) {
+    report.edgePackageRemoved = false;
+    return;
+  }
+  if (!(await pathExists(link))) {
+    try {
+      await rm(packageRoot, { recursive: true, force: true });
+      report.edgePackageRemoved = !(await pathExists(packageRoot));
+    } catch {
+      report.edgePackageRemoved = false;
+    }
+  }
+}
 async function classify(rawSources, pathFields, tempRoot, dailyReal) {
   const sources = rawSources.map(source => ({ ...source }));
   const exposed = [...new Set(pathFields.map(field => field.value).filter(looksPath))];
@@ -660,7 +735,7 @@ function receiptText() {
 
 ## chrome://settings/importData
 
-日期：2026-10-12。工作目录为仓库根。一个临时 Chrome 进程。\`--user-data-dir\` 在 \`os.tmpdir()\` 下，前缀 \`markbridge-03-import-reconcile-\`。扩展用 \`Extensions.loadUnpacked\` 加载 \`apps/extension/dist\`。命名空间 \`${report.namespace}\`。\`bridge_harness\` 的第二个参数是该命名空间。配对码只记录长度 ${report.pairingCodeLength ?? '未取得'}。没有设置 \`Markbridge.Pairing\`。没有播种启动 Bookmarks，没有读保持，没有 \`initial_preferences\`，没有 oplock。没有写 Netscape HTML，没有打开 \`chrome://bookmarks\`。没有从日常 Chrome、Edge、Firefox 或 IE 导入。没有改产品文件。
+日期：2026-10-12。工作目录为仓库根。一个临时 Chrome 进程。\`--user-data-dir\` 在 \`os.tmpdir()\` 下，前缀 \`markbridge-03-import-reconcile-\`。扩展用 \`Extensions.loadUnpacked\` 加载 \`apps/extension/dist\`。命名空间 \`${report.namespace}\`。\`bridge_harness\` 的第二个参数是该命名空间。配对码只记录长度 ${report.pairingCodeLength ?? '未取得'}。没有设置 \`Markbridge.Pairing\`。没有播种启动 Bookmarks，没有读保持，没有 \`initial_preferences\`，没有 oplock。没有写 Netscape HTML，没有打开 \`chrome://bookmarks\`。一次性 Spartan 库写在临时 user-data-dir 内，再接到旧版 Edge 的检测目录。\`edgePlanted\` 是 ${report.edgePlanted}。\`edgeResolvedInsideTemp\` 是 ${report.edgeResolvedInsideTemp}。\`edgeLinkExisted\` 是 ${report.edgeLinkExisted}。\`edgePackageExisted\` 是 ${report.edgePackageExisted}。\`edgeJunctionRemoved\` 是 ${report.edgeJunctionRemoved}。\`edgePackageRemoved\` 是 ${report.edgePackageRemoved}。没有写日常 Chrome、Chromium Edge 用户数据、Firefox、IE 收藏夹或 Markbridge 应用数据。没有改产品文件。
 
 | 命令 | 退出码 |
 |---|---:|
@@ -672,7 +747,7 @@ function receiptText() {
 
 \`importPageOpened\` 是 ${report.importPageOpened}。\`dialogFound\` 是 ${report.dialogFound}。来源：${sourceText}。路径字段：${pathText}。\`trigger\` 是 ${report.triggerName ?? 'none'}。\`importClicked\` 是 ${report.importClicked}。
 
-\`importEnded\` 是 ${report.importEnded}。\`reconcilingAfterImport\` 是 ${report.reconcilingAfterImport}。\`treeAfterResync\` 是 ${report.treeAfterResync}。\`treesMatch\` 是 ${report.treesMatch}。\`importedNodeCount\` 是 ${report.importedNodeCount}。\`importedNodesInBoth\` 是 ${report.importedNodesInBoth}。
+\`importEnded\` 是 ${report.importEnded}。\`reconcilingAfterImport\` 是 ${report.reconcilingAfterImport}。\`statusSamples\` 是 ${Array.isArray(report.statusSamples) && report.statusSamples.length ? report.statusSamples.join('、') : '无'}。\`treeAfterResync\` 是 ${report.treeAfterResync}。\`treesMatch\` 是 ${report.treesMatch}。\`importedNodeCount\` 是 ${report.importedNodeCount}。\`importedNodesInBoth\` 是 ${report.importedNodesInBoth}。
 
 \`%LOCALAPPDATA%\\Google\\Chrome\\User Data\\Default\\Bookmarks\` 启动前${before}。结束后${after}。运行中哈希${report.dailyChangedDuringRun ? '发生了变化' : '没有变化'}。没有写该文件。先前观察到的长度 ${notedDaily.length}、SHA256 \`${notedDaily.sha256}\` 只作对照，不是这次的通过条件。\`dailyMatchesNoted\` 是 ${report.dailyMatchesNoted}。
 
@@ -706,6 +781,7 @@ try {
   report.dailyBefore = await checkDaily();
   report.dailyMatchesNoted = report.dailyBefore.length === notedDaily.length && report.dailyBefore.sha256 === notedDaily.sha256;
   ensure(resolve(appData) !== resolve(userData) && !isInside(appData, dailyReal), 'APP_DATA_PATH');
+  await plantEdge(userData, userReal);
   backend = rpcProcess(resolve('target/debug/examples/bridge_harness.exe'), [appData, namespace]);
   ensure(namespace.startsWith('Markbridge.Task03.'), 'NAMESPACE');
   const bridgePort = await reservePort();
@@ -769,7 +845,8 @@ try {
   let scraped = null;
   while (Date.now() < scrapeDeadline) {
     scraped = await evaluate(chrome, settings, scrapeExpression);
-    if (scraped && scraped.sources && scraped.sources.length) break;
+    const names = Array.isArray(scraped?.sources) ? scraped.sources.map(source => source.name) : [];
+    if (names.includes('Microsoft Edge')) break;
     await delay(200);
   }
   report.dialogFound = Boolean(scraped && scraped.dialogFound);
@@ -784,8 +861,25 @@ try {
   report.scrapeError = scraped?.error ?? null;
   await checkDaily();
   const classified = await classify(Array.isArray(scraped?.sources) ? scraped.sources : [], report.pathFields, userReal, dailyReal);
+  if (report.edgePlanted) {
+    const edge = classified.find(source => source.name === 'Microsoft Edge' && !source.html);
+    if (edge) {
+      try {
+        const resolved = await realpath(edgeLinkPath());
+        const dbInfo = await stat(join(edgeLinkPath(), 'DataStore', 'Data', 'spartan.edb'));
+        const dbResolved = await realpath(join(edgeLinkPath(), 'DataStore', 'Data', 'spartan.edb'));
+        edge.path = resolved;
+        edge.exists = dbInfo.isFile();
+        edge.insideTemp = dbInfo.isFile() && isInside(resolved, userReal) && isInside(dbResolved, userReal) && !isInside(resolved, dailyReal);
+        report.edgeResolvedInsideTemp = edge.insideTemp;
+      } catch {
+        edge.insideTemp = false;
+        report.edgeResolvedInsideTemp = false;
+      }
+    }
+  }
   report.sources = classified;
-  const eligible = classified.filter(source => source.insideTemp && !source.html && source.exists);
+  const eligible = classified.filter(source => source.name === 'Microsoft Edge' && source.insideTemp && !source.html && source.exists && report.edgePlanted);
   report.eligibleCount = eligible.length;
   note('import_page', { dialogFound: report.dialogFound, sources: classified.length, eligible: eligible.length });
   if (!eligible.length) {
@@ -799,15 +893,27 @@ try {
   await checkDaily();
   report.wireAtTrigger = report.wire.length;
   importArmed = true;
+  await evaluate(chrome, options, `window.__mb03Seen = []; window.__mb03Stop = false; void (async () => { while (!window.__mb03Stop) { try { const value = await chrome.runtime.sendMessage({ type: 'status' }); const state = value && typeof value.state === 'string' ? value.state : ''; if (state && window.__mb03Seen[window.__mb03Seen.length - 1] !== state) window.__mb03Seen.push(state); } catch (e) {} } })(); true`);
   const clicked = await evaluate(chrome, settings, importExpression(chosen.name));
   report.importClick = clicked && clicked.reason ? clicked.reason : 'CLICK_FAILED';
   report.importClicked = Boolean(clicked && clicked.clicked);
   if (!report.importClicked) throw new Error(report.importClick || 'IMPORT_CLICK_FAILED');
   await until(async () => {
+    try {
+      const seen = await evaluate(chrome, options, 'Array.isArray(window.__mb03Seen) ? window.__mb03Seen.slice() : []');
+      if (Array.isArray(seen)) {
+        report.statusSamples = seen.filter(state => typeof state === 'string').slice(0, 20);
+        if (report.statusSamples.includes('reconciling')) report.reconcilingAfterImport = true;
+        for (const state of report.statusSamples) {
+          if (report.extensionStatuses.at(-1) !== state) report.extensionStatuses.push(state);
+        }
+      }
+    } catch { /* sampler poll continues */ }
     try { await rememberExtensionStatus(chrome, options); } catch { /* status poll continues */ }
     try { await rememberState(); } catch { /* backend poll continues */ }
     return report.importEnded && report.reconcilingAfterImport && report.treeAfterResync;
   }, 'IMPORT_WAIT', 25000).catch(error => { report.importWait = error.message; return null; });
+  try { await evaluate(chrome, options, 'window.__mb03Stop = true; true'); } catch { /* page may already be gone */ }
   const after = await evaluate(chrome, options, signatureExpression);
   const cached = cacheSignature(await backend.call('cache', { profileId: report.profileId }));
   const pageNodes = after && Array.isArray(after.nodes) ? after.nodes : [];
@@ -876,6 +982,15 @@ try {
     report.dailyAfter = null;
     report.pass = false;
     report.source = 'UNVERIFIED';
+    process.exitCode = 1;
+  }
+  try { await removeEdgePlant(); }
+  catch { report.edgePackageRemoved = false; }
+  if (report.edgeJunctionCreated && report.edgeJunctionRemoved !== true) {
+    report.failureCode = report.failureCode || 'EDGE_LINK_LEFT';
+    report.pass = false;
+    report.source = 'UNVERIFIED';
+    report.importStatus = 'UNVERIFIED';
     process.exitCode = 1;
   }
   if (report.userData) await rm(report.userData, { recursive: true, force: true }).catch(() => { report.cleanupSkipped = true; });
