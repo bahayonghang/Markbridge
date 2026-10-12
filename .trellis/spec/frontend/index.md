@@ -1,6 +1,6 @@
 # Frontend Guidelines
 
-Read [Project baseline](../project-baseline.md) first. No framework or UI code is installed.
+Read [Project baseline](../project-baseline.md) first. Child 01 provides the React empty state, extension popup, and validated startup DTO. Other UI features remain planned.
 
 | Guide | Scope |
 |---|---|

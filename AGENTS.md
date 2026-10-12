@@ -1,4 +1,5 @@
 <!-- TRELLIS:START -->
+
 # Trellis Instructions
 
 These instructions are for AI assistants working in this project.
@@ -28,12 +29,14 @@ Markbridge 连接现有书签树。Floccus 等工具继续负责跨设备同步�
 
 ## 当前状态
 
-仓库处于规划阶段。规范在 `.trellis/spec/`。父子任务在 `.trellis/tasks/10-10-markbridge-workspace/`。没有产品代码、依赖清单或数据库。
+仓库已进入实施阶段。规范在 `.trellis/spec/`。父任务在 `.trellis/tasks/10-10-markbridge-workspace/`，子任务在同级目录。2026-10-10 用户已批准按当前父子任务规划开始实施，01 是首个实现目标。
 
-`implementation_approval` 为 `not_granted`。用户批准最新规划之前：
+`implementation_approval` 为 `granted`。实施按子任务依赖和验收门槛逐项推进：
 
-- 不创建应用骨架，不安装依赖，不实现产品功能。
-- 不对父任务或任一子任务执行 `task.py start`。
+2026-10-10 用户批准仅调整 01→02 启动门槛：01 自动检查通过，原生验收保留 UNVERIFIED，Windows 交付前补齐。其他依赖门槛不变。
+
+- 只对前置验收通过的子任务执行 `task.py start`，一次实施一个子任务。
+- 父任务负责协调和集成，不对父任务执行 `task.py start`。
 - 不修改真实 Chrome 配置、书签或已安装扩展。
 - 不提交、发布、归档，也不把应用安装到日常环境。这些动作需要单独授权。
 
@@ -89,7 +92,7 @@ Markbridge 连接现有书签树。Floccus 等工具继续负责跨设备同步�
 
 ## 规划中的技术选择
 
-实现获得批准后沿用父任务设计，不另行更换栈，也不在批准前创建这些目录：
+实施沿用已批准的父任务设计，不另行更换栈：
 
 - Tauri 2、Rust、React、TypeScript、Vite、pnpm workspace。
 - SQLite 使用 bundled rusqlite。运行时使用 tokio、reqwest、notify。

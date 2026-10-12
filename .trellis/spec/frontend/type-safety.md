@@ -14,6 +14,52 @@ Documentation fixture:
 
 The protocol task owns one schema with cross-language compatibility tests. Invalid AI output must leave bookmarks unchanged.
 
+## Foundation startup DTO
+
+### 1. Scope and trigger
+
+Child 01 defines one read-only startup DTO. Child 02 owns the paired transport protocol and persistent identities. Do not use the startup DTO as an authenticated connection state.
+
+### 2. Signatures
+
+- Rust: `markbridge_core::startup_state() -> markbridge_protocol::StartupState`.
+- Tauri command: `get_startup_state`, restricted to the `main` window label.
+- TypeScript: `parseStartupState(value: unknown): StartupState` in `packages/protocol/src/index.ts`.
+- Frontend: `getStartupState(): Promise<StartupState>` in `apps/desktop/src/backend.ts`.
+
+### 3. Contract
+
+The fixture is `tests/fixtures/protocol/startup-state.json`:
+
+```json
+{"protocolVersion":1,"state":"unpaired"}
+```
+
+Rust serde and schemars define the source. Generated JSON Schema and TypeScript belong in `packages/protocol/src/generated/`. Ajv validates unknown input before components use the DTO. This DTO contains no profile, browser tree, credential, or local path. Browser preview returns the same unpaired fixture shape; browser evidence does not prove Tauri IPC behavior.
+
+The generated schema uses JSON Schema draft 2020-12 and the numeric format `uint8`. Use Ajv2020 with strict validation. Register `uint8` as an integer from 0 through 255; keep the generated version bounds of 1 through 1. Do not disable strict mode to suppress an unknown format.
+
+### 4. Validation and errors
+
+| Condition | Result |
+|---|---|
+| Version 1, state unpaired, exact fields | Accept |
+| Missing field, unsupported version or state, additional field | `INVALID_STARTUP_STATE` at the TypeScript boundary |
+| Caller window label differs from main | `UNTRUSTED_WINDOW` from the Tauri command |
+| IPC or validation rejects | App shows a safe startup error; raw input is not displayed |
+
+### 5. Cases
+
+Good: the shared fixture passes validation. Base: startup remains unpaired and read-only. Bad: a payload with an extra credential field fails validation.
+
+### 6. Required tests
+
+`crates/protocol/src/lib.rs` checks fixture serialization and extra-field rejection. `packages/protocol/src/index.test.ts` checks runtime boundary validation. `apps/desktop/src/App.test.tsx` checks safe startup states. Protocol generation must detect a changed generated output and return a nonzero exit code. Native startup and window behavior require separate task receipts.
+
+### 7. Incorrect and correct usage
+
+Incorrect: cast an unknown IPC response to `StartupState` and render the response. Correct: pass the response through `parseStartupState`, then render only the validated state.
+
 ## Child 02 wire protocol
 
 ### 1. Scope and trigger
