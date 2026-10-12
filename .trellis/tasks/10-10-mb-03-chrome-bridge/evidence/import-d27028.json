@@ -1,0 +1,35 @@
+{
+  "suffix": "d27028",
+  "namespace": "Markbridge.Task03.d27028",
+  "startedAt": "2026-10-12T07:23:05.294Z",
+  "command": "node .trellis/tasks/10-10-mb-03-chrome-bridge/evidence/chrome-import-harness.mjs",
+  "wire": [],
+  "states": [],
+  "importEnded": false,
+  "resyncAfterImport": false,
+  "treeAfterResync": false,
+  "reconcilingAfterImport": false,
+  "treesMatch": false,
+  "probePresent": false,
+  "oplock": "RELEASED",
+  "launchedFromTempCopy": true,
+  "dailyProfileTouched": false,
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-03-import-N10dc9",
+  "step": "chrome",
+  "credentialBefore": {
+    "pairing": 0,
+    "namespace": 0
+  },
+  "chrome": "Chrome/155.0.8059.39",
+  "extensionId": "blbapbmincddiilocledaajcegiekbfk",
+  "failureCode": "CHROME_EXIT",
+  "driverCode": null,
+  "driverMessage": "CHROME_EXIT",
+  "credentialAfter": {
+    "pairing": 0,
+    "namespace": 0
+  },
+  "installedChromeIntact": true,
+  "finishedAt": "2026-10-12T07:28:47.483Z",
+  "exitCode": 1
+}

@@ -198,3 +198,31 @@ AC03-4 改为 PASS。V03 保持 NOT_RUN。V04 保持 UNVERIFIED。
 | V01 | `pnpm build:native`；`node .trellis/tasks/10-10-mb-03-chrome-bridge/evidence/v01-artifact-scan.mjs` | 0；0 | PASS | 扫描文件是这次 `pnpm build:native` 写出的 `D:\Documents\Code\Tauri\Markbridge\target\release\markbridge-desktop.exe`。12920832 字节。SHA256 `0d7557d9ed3e5c45b40e8ee88a777c12a50480e3e65d86012312619970c711bf`。字节扫描找到 `MARKBRIDGE_APP_DATA`。 |
 
 V02、V03、V04 与 AC03 各行未改。
+
+## Chrome import end
+
+日期：2026-10-12。工作目录为仓库根。只启动了一个临时 Chrome。用户数据目录是 `C:\Users\lyh\AppData\Local\Temp\markbridge-03-import-N10dc9\user-data`。进程映像在同一次运行的 `chrome-app`，没有改 `C:\Program Files\Google\Chrome\Application\initial_preferences`。日常 Chrome Profile、日常 Bookmarks 和已安装扩展未使用。没有打开书签管理器，没有读写 Netscape HTML，没有挂起主机。`Markbridge.Pairing` 在运行前和结束后都是 0。命名空间是 `Markbridge.Task03.d27028`，结束后该目标数是 0。
+
+| 命令 | 退出码 |
+|---|---:|
+| `node .trellis/tasks/10-10-mb-03-chrome-bridge/evidence/chrome-import-harness.mjs` | 1 |
+
+开始 2026-10-12T07:23:05Z，结束 2026-10-12T07:28:47Z。记录在 `evidence/import-d27028.json`。Chrome 为 `Chrome/155.0.8059.39`。`Extensions.loadUnpacked` 加载了 `apps/extension/dist`，扩展 id 为 `blbapbmincddiilocledaajcegiekbfk`。
+
+这次试的是首次运行 `initial_preferences` 里的 JSON 书签块，不是 HTML 文件。调试管线在扩展加载之后不再返回，进程随后退出，退出码 1。退出前直接读取临时资料的 `Bookmarks`：253 字节，仍是播种内容，没有该探针，也没有 `First Run` 哨兵。线上记录是空的，没有 `import_ended`。事件没有发出。
+
+导入保持 UNVERIFIED。V04 总行不改为 PASS。OS 休眠仍未跑。
+
+## 2026-10-12 trellis-check 导入
+
+复核没有再启动 Chrome，也没有重跑 harness。`git diff --name-only -- apps crates packages scripts tests` 无输出。`evidence/import-d27028.json` 的 `importEnded` 为 false，`exitCode` 为 1，`credentialBefore.pairing` 为 0，`credentialAfter.pairing` 为 0，`dailyProfileTouched` 为 false。上文「Chrome import end」引用该文件，导入与 V04 总行都未标 PASS。
+
+`%LOCALAPPDATA%\Google\Chrome\User Data\Default\Bookmarks` 长度 849515，SHA256 `DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82`。这次只读计算，没有写该文件。
+
+`evidence/chrome-import-harness.mjs` 的 `--user-data-dir` 在 `os.tmpdir()` 下 `markbridge-03-import-*` 的 `user-data`。启动页是 `about:blank`，扩展页是 `chrome-extension://…/options.html`。源码没有 `chrome://bookmarks`，也没有读写 Netscape HTML。`task.json` 的 status 是 `in_progress`。
+
+| 命令 | 退出码 |
+|---|---:|
+| `node .trellis/tasks/10-10-mb-03-chrome-bridge/evidence/chrome-import-harness.mjs` | 1 |
+
+导入保持 UNVERIFIED。V04 总行仍为 UNVERIFIED。OS 休眠仍未跑。03 未归档。
