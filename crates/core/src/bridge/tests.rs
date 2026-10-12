@@ -1590,6 +1590,551 @@ async fn confirmed_ai_title_uses_the_edit_path_and_undo_sends_the_previous_title
     bridge.shutdown().await.unwrap();
 }
 
+#[tokio::test]
+#[ignore = "ReqwestTransport against a loopback chat process; not the default suite"]
+async fn reqwest_ten_public_pages_apply_undo_and_cached_suggest() {
+    let base = std::env::var("MARKBRIDGE_AI_BASE").expect("MARKBRIDGE_AI_BASE");
+    let model = std::env::var("MARKBRIDGE_AI_MODEL").expect("MARKBRIDGE_AI_MODEL");
+    let evidence = std::env::var("MARKBRIDGE_AI_EVIDENCE").expect("MARKBRIDGE_AI_EVIDENCE");
+    let log_path = std::env::var("MARKBRIDGE_AI_LOG").expect("MARKBRIDGE_AI_LOG");
+    assert!(base.starts_with("http://127.0.0.1:"), "{base}");
+    assert!(!base.contains("0.0.0.0"));
+    let directory = tempfile::tempdir().unwrap();
+    let app_data = directory.path().display().to_string();
+    assert!(
+        !app_data
+            .to_ascii_lowercase()
+            .contains("com.markbridge.desktop")
+    );
+    let pairing = Arc::new(MemoryCredentials::default());
+    let models = Arc::new(MemoryCredentials::default());
+    let bridge = Bridge::open_with_model_store(
+        directory.path().join("cache.sqlite"),
+        pairing.clone(),
+        models.clone(),
+    )
+    .await
+    .unwrap();
+    let socket = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+    let port = socket.local_addr().unwrap().port();
+    drop(socket);
+    bridge.start(port).await.unwrap();
+    let (profile, secret) = paired(&bridge, "instance").await;
+    bridge
+        .authenticate(&origin(), &hello(&profile, "instance", "s", &secret))
+        .await
+        .unwrap();
+    let pages = live_pages();
+    let mut nodes = vec![fixture_node("root", None, 0, true, "root", None)];
+    for (index, (chrome_id, title, url)) in pages.iter().enumerate() {
+        nodes.push(fixture_node(
+            chrome_id,
+            Some("root"),
+            index as u64,
+            false,
+            title,
+            Some(url),
+        ));
+    }
+    accept_tree(&bridge, &profile, "s", 0, nodes).await;
+    let (tx, mut rx) = mpsc::unbounded_channel();
+    bridge
+        .bind_outbound(&profile, &Id::new("s").unwrap(), tx)
+        .await;
+    let settings = bridge
+        .save_ai_config(true, "ollama".into(), base.clone(), model.clone())
+        .await
+        .unwrap();
+    assert!(!settings.credential_configured);
+    assert!(models.0.lock().unwrap().is_empty());
+    let mut report = serde_json::json!({
+        "entry": "Bridge::open_with_model_store",
+        "transport": "ReqwestTransport",
+        "provider": "ollama",
+        "model": model,
+        "base": base,
+        "appData": app_data,
+        "credentialConfigured": settings.credential_configured,
+        "pages": [],
+    });
+    let mut ready: Option<LiveReady> = None;
+    let mut cached: Option<LiveReady> = None;
+    for (chrome_id, title, url) in &pages {
+        let before_log = log_rows(&log_path).len();
+        let preview = bridge
+            .content_preview(
+                profile.clone(),
+                Id::new(*chrome_id).unwrap(),
+                Id::new(format!("pv-{chrome_id}")).unwrap(),
+            )
+            .await;
+        let (preview_status, preview_failure) = match &preview {
+            Ok(value) => (
+                Some(json_name(&value.status)),
+                value.failure.0.map(|failure| json_name(&failure)),
+            ),
+            Err(error) => (None, Some(error.to_string())),
+        };
+        let suggestion = bridge
+            .suggest_ai(
+                profile.clone(),
+                Id::new(*chrome_id).unwrap(),
+                Id::new(format!("ai-{chrome_id}")).unwrap(),
+            )
+            .await;
+        let calls = log_rows(&log_path);
+        let new_calls = calls.get(before_log..).unwrap_or(&[]);
+        let row = page_row(
+            url,
+            title,
+            preview_status,
+            preview_failure,
+            suggestion.as_ref(),
+            new_calls,
+            &bridge,
+        )
+        .await;
+        if ready.is_none()
+            && row["state"] == "ready"
+            && row["evidenceInRequest"] == true
+            && let Ok(suggestion) = &suggestion
+        {
+            ready = Some(LiveReady {
+                chrome_id: (*chrome_id).to_owned(),
+                title: (*title).to_owned(),
+                url: (*url).to_owned(),
+                suggestion: suggestion.clone(),
+            });
+        }
+        if cached.is_none()
+            && row["scopeCachedText"] == true
+            && row["state"] == "ready"
+            && let Ok(suggestion) = &suggestion
+        {
+            cached = Some(LiveReady {
+                chrome_id: (*chrome_id).to_owned(),
+                title: (*title).to_owned(),
+                url: (*url).to_owned(),
+                suggestion: suggestion.clone(),
+            });
+        }
+        report["pages"].as_array_mut().unwrap().push(row);
+        write_report(&evidence, &report);
+    }
+    let cached = cached.expect("no cached suggestion");
+    let before = cache_stamp(&bridge, cached.suggestion.bookmark_id.clone(), &cached.url)
+        .await
+        .expect("cache missing before prepared suggest");
+    let before_log = log_rows(&log_path).len();
+    let pid = std::process::id();
+    let stop = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
+    let foreign = std::sync::Arc::new(StdMutex::new(Vec::<String>::new()));
+    let samples = std::sync::Arc::new(std::sync::atomic::AtomicUsize::new(0));
+    let sampler = {
+        let stop = stop.clone();
+        let foreign = foreign.clone();
+        let samples = samples.clone();
+        std::thread::spawn(move || {
+            while !stop.load(std::sync::atomic::Ordering::Relaxed) {
+                samples.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                for remote in established_foreign(pid) {
+                    let mut found = foreign.lock().unwrap();
+                    if !found.contains(&remote) {
+                        found.push(remote);
+                    }
+                }
+                std::thread::sleep(Duration::from_millis(20));
+            }
+        })
+    };
+    let started = std::time::Instant::now();
+    let prepared = bridge
+        .suggest_ai(
+            profile.clone(),
+            Id::new(&cached.chrome_id).unwrap(),
+            Id::new("ai-cache").unwrap(),
+        )
+        .await;
+    let elapsed_ms = started.elapsed().as_millis();
+    stop.store(true, std::sync::atomic::Ordering::Relaxed);
+    sampler.join().unwrap();
+    let after = cache_stamp(&bridge, cached.suggestion.bookmark_id.clone(), &cached.url)
+        .await
+        .expect("cache missing after prepared suggest");
+    let calls = log_rows(&log_path);
+    let new_calls = calls.get(before_log..).unwrap_or(&[]);
+    let prepared_row = page_row(
+        &cached.url,
+        &cached.title,
+        Some("cache".to_owned()),
+        None,
+        prepared.as_ref(),
+        new_calls,
+        &bridge,
+    )
+    .await;
+    report["prepared"] = serde_json::json!({
+        "page": prepared_row,
+        "fetchedAtBefore": before.0,
+        "fetchedAtAfter": after.0,
+        "fetchedAtUnchanged": before.0 == after.0,
+        "excerptCharsBefore": before.1.chars().count(),
+        "excerptUnchanged": before.1 == after.1,
+        "publicFetchObserved": !foreign.lock().unwrap().is_empty(),
+        "foreignEstablished": foreign.lock().unwrap().clone(),
+        "tcpSamples": samples.load(std::sync::atomic::Ordering::Relaxed),
+        "elapsedMs": elapsed_ms,
+        "contentPreviewCalled": false,
+    });
+    let ready = ready.expect("no ready suggestion");
+    {
+        let mut inner = bridge.inner.lock().await;
+        inner
+            .profiles
+            .get_mut(profile.as_str())
+            .unwrap()
+            .view
+            .connection = BridgeConnection::CachedReadOnly;
+    }
+    let draft = AiDraft {
+        job_id: ready.suggestion.job_id.clone(),
+        profile_id: profile.clone(),
+        chrome_id: Id::new(&ready.chrome_id).unwrap(),
+        input_fingerprint: ready.suggestion.input_fingerprint.clone(),
+        title: "已确认标题".into(),
+        tags: Vec::new(),
+        summary: RequiredNullable(None),
+        apply_title: true,
+        apply_tags: false,
+        apply_summary: false,
+    };
+    let readonly = bridge.apply_ai(draft.clone()).await.unwrap_err();
+    let operations_after_readonly = bridge
+        .list_operations(profile.clone())
+        .await
+        .unwrap()
+        .operations
+        .len();
+    {
+        let mut inner = bridge.inner.lock().await;
+        inner
+            .profiles
+            .get_mut(profile.as_str())
+            .unwrap()
+            .view
+            .connection = BridgeConnection::Live;
+    }
+    let applied = bridge.apply_ai(draft).await.unwrap();
+    let WireMessage::ApplyOperation { payload, .. } = rx.try_recv().unwrap() else {
+        panic!("missing apply");
+    };
+    let apply_title = match &payload.steps[0].payload {
+        Mutation::Update {
+            title: Some(title),
+            url: None,
+        } => title.as_str().to_owned(),
+        other => panic!("apply payload {other:?}"),
+    };
+    let before_node = payload.steps[0].expected_before.clone().unwrap();
+    let mut after_node = before_node.clone();
+    after_node.title = Title::new("已确认标题").unwrap();
+    let session = Id::new("s").unwrap();
+    let browser = applied.browser.0.clone().unwrap();
+    let receipt = envelope(
+        "operation_receipt",
+        &profile,
+        &session,
+        Some(payload.steps[0].request_id.clone()),
+        serde_json::json!({
+            "operationId": browser.operation_id,
+            "requestId": payload.steps[0].request_id,
+            "state": "applied",
+            "before": before_node,
+            "after": after_node,
+            "beforeChildIds": null,
+            "afterChildIds": null,
+            "errorCode": null
+        }),
+    )
+    .unwrap();
+    assert!(!bridge.receive(receipt).await.unwrap());
+    let event = title_event(&profile, &ready.chrome_id, 1, "已确认标题", &ready.url);
+    assert!(!bridge.receive(event).await.unwrap());
+    let revision = bridge
+        .state()
+        .await
+        .profiles
+        .iter()
+        .find(|item| item.profile_id == profile)
+        .unwrap()
+        .revision
+        .get();
+    let undone = bridge
+        .apply_edit(
+            profile.clone(),
+            revision,
+            EditAction::Undo {
+                operation_id: browser.operation_id.clone(),
+            },
+            false,
+        )
+        .await
+        .unwrap();
+    let WireMessage::ApplyOperation { payload, .. } = rx.try_recv().unwrap() else {
+        panic!("missing undo");
+    };
+    let (undo_title, undo_url) = match &payload.steps[0].payload {
+        Mutation::Update {
+            title: Some(title),
+            url: Some(url),
+        } => (title.as_str().to_owned(), url.as_str().to_owned()),
+        other => panic!("undo payload {other:?}"),
+    };
+    report["apply"] = serde_json::json!({
+        "url": ready.url,
+        "chromeId": ready.chrome_id,
+        "readonly": readonly.to_string(),
+        "operationsAfterReadonly": operations_after_readonly,
+        "applyState": json_name(&browser.state),
+        "applyTitle": apply_title,
+        "applyFailure": applied.failure.0.map(|failure| json_name(&failure)),
+        "undoState": json_name(&undone.state),
+        "undoTitle": undo_title,
+        "undoUrl": undo_url,
+    });
+    let audit = bridge.ai_audit_lines();
+    assert!(
+        !audit
+            .iter()
+            .any(|line| line.contains(&secret) || line.contains("http"))
+    );
+    report["auditHasUrl"] = serde_json::Value::Bool(false);
+    report["auditLines"] =
+        serde_json::Value::Array(audit.into_iter().map(serde_json::Value::String).collect());
+    write_report(&evidence, &report);
+    assert!(models.0.lock().unwrap().is_empty());
+    assert_eq!(report["pages"].as_array().unwrap().len(), 10);
+    assert!(
+        report["pages"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .all(|row| row["called"] == true)
+    );
+    assert_eq!(report["prepared"]["fetchedAtUnchanged"], true);
+    assert_eq!(report["prepared"]["excerptUnchanged"], true);
+    assert_eq!(report["prepared"]["publicFetchObserved"], false);
+    assert!(report["prepared"]["tcpSamples"].as_u64().unwrap() >= 1);
+    assert_eq!(report["prepared"]["page"]["state"], "ready");
+    assert_eq!(report["prepared"]["page"]["evidenceInRequest"], true);
+    assert_eq!(report["prepared"]["page"]["evidenceInCache"], true);
+    assert_eq!(report["prepared"]["page"]["scopeCachedText"], true);
+    assert_eq!(report["prepared"]["page"]["cacheHashMatchesRequest"], true);
+    assert_eq!(report["apply"]["readonly"], "READ_ONLY");
+    assert_eq!(report["apply"]["operationsAfterReadonly"], 0);
+    assert_eq!(report["apply"]["applyState"], "applying");
+    assert_eq!(report["apply"]["applyTitle"], "已确认标题");
+    assert_eq!(report["apply"]["undoState"], "rolling_back");
+    assert_eq!(report["apply"]["undoTitle"], ready.title);
+    assert_eq!(report["apply"]["undoUrl"], ready.url);
+    for row in report["pages"].as_array().unwrap() {
+        if row["state"] == "ready" {
+            assert_eq!(row["evidenceInRequest"], true);
+            assert_eq!(row["endpointLogged"], true);
+        }
+    }
+    bridge.shutdown().await.unwrap();
+}
+
+struct LiveReady {
+    chrome_id: String,
+    title: String,
+    url: String,
+    suggestion: AiSuggestion,
+}
+
+fn live_pages() -> Vec<(&'static str, &'static str, &'static str)> {
+    vec![
+        ("b01", "t01", "https://example.com/"),
+        ("b02", "t02", "https://example.org/"),
+        ("b03", "t03", "https://example.net/"),
+        ("b04", "t04", "https://httpbin.org/html"),
+        ("b05", "t05", "https://www.iana.org/domains/reserved"),
+        ("b06", "t06", "https://www.w3.org/"),
+        ("b07", "t07", "https://www.gnu.org/philosophy/free-sw.html"),
+        ("b08", "t08", "https://www.wikipedia.org/"),
+        ("b09", "t09", "https://www.rust-lang.org/"),
+        ("b10", "t10", "https://docs.python.org/3/library/index.html"),
+    ]
+}
+
+fn title_event(profile: &Id, chrome_id: &str, seq: u64, title: &str, url: &str) -> WireMessage {
+    serde_json::from_value(serde_json::json!({
+        "type": "event",
+        "protocolVersion": 1,
+        "profileId": profile,
+        "sessionId": "s",
+        "requestId": null,
+        "seq": seq,
+        "payload": {
+            "sourceEpoch": 1,
+            "event": {"kind": "changed", "chromeId": chrome_id, "title": title, "url": url}
+        }
+    }))
+    .unwrap()
+}
+
+fn log_rows(path: &str) -> Vec<serde_json::Value> {
+    let text = std::fs::read_to_string(path).unwrap_or_default();
+    text.lines()
+        .filter_map(|line| serde_json::from_str(line).ok())
+        .collect()
+}
+
+fn write_report(path: &str, report: &serde_json::Value) {
+    std::fs::write(path, serde_json::to_string_pretty(report).unwrap()).unwrap();
+}
+
+fn json_name<T: serde::Serialize>(value: &T) -> String {
+    serde_json::to_value(value)
+        .unwrap()
+        .as_str()
+        .unwrap()
+        .to_owned()
+}
+
+fn sha256_hex(text: &str) -> String {
+    use sha2::{Digest, Sha256};
+    let digest = Sha256::digest(text.as_bytes());
+    digest.iter().map(|byte| format!("{byte:02x}")).collect()
+}
+
+async fn cache_stamp(bridge: &Bridge, bookmark_id: Id, url: &str) -> Option<(u64, String)> {
+    let parsed = url::Url::parse(url).ok()?;
+    let fingerprint = crate::preview::url_fingerprint(&parsed);
+    let storage = {
+        let inner = bridge.inner.lock().await;
+        inner.storage().ok()?.share()
+    };
+    storage
+        .cached_text(bookmark_id, fingerprint)
+        .await
+        .ok()
+        .flatten()
+        .map(|(text, fetched)| (fetched, text))
+}
+
+async fn page_row(
+    url: &str,
+    title: &str,
+    preview_status: Option<String>,
+    preview_failure: Option<String>,
+    suggestion: std::result::Result<&AiSuggestion, &ErrorCode>,
+    calls: &[serde_json::Value],
+    bridge: &Bridge,
+) -> serde_json::Value {
+    let endpoint_logged = !calls.is_empty();
+    let forbidden_clear = calls.iter().all(|call| {
+        call["forbidden"]
+            .as_array()
+            .is_some_and(|items| items.is_empty())
+            && call["auth"] == false
+    });
+    match suggestion {
+        Err(error) => serde_json::json!({
+            "url": url,
+            "bookmarkTitle": title,
+            "called": true,
+            "previewStatus": preview_status,
+            "previewFailure": preview_failure,
+            "error": error.to_string(),
+            "state": null,
+            "failure": null,
+            "endpoint": null,
+            "model": null,
+            "endpointLogged": endpoint_logged,
+            "forbiddenClear": forbidden_clear,
+            "evidenceInRequest": false,
+            "evidenceInCache": false,
+            "scopeCachedText": false,
+        }),
+        Ok(suggestion) => {
+            let evidence = suggestion.evidence.0.clone();
+            let matched = evidence.as_ref().is_some_and(|evidence| {
+                calls.iter().any(|call| {
+                    call["quoted"] == true && call["evidence"].as_str() == Some(evidence)
+                })
+            });
+            let cache = cache_stamp(bridge, suggestion.bookmark_id.clone(), url).await;
+            let sent = cache
+                .as_ref()
+                .map(|(_, text)| text.chars().take(2_000).collect::<String>());
+            let evidence_in_cache = evidence.as_ref().is_some_and(|evidence| {
+                sent.as_ref()
+                    .is_some_and(|text| text.contains(evidence.as_str()))
+            });
+            let hash_matches = sent.as_ref().is_some_and(|text| {
+                let hash = sha256_hex(text);
+                calls
+                    .iter()
+                    .any(|call| call["pageSha256"].as_str() == Some(hash.as_str()))
+            });
+            serde_json::json!({
+                "url": url,
+                "bookmarkTitle": title,
+                "called": true,
+                "previewStatus": preview_status,
+                "previewFailure": preview_failure,
+                "error": null,
+                "state": json_name(&suggestion.state),
+                "failure": suggestion.failure.0.map(|failure| json_name(&failure)),
+                "failureMessage": suggestion.failure_message.0,
+                "endpoint": suggestion.endpoint_label.0,
+                "model": suggestion.model.0,
+                "title": suggestion.title.0,
+                "tags": suggestion.tags,
+                "summary": suggestion.summary.0,
+                "suggestedFolder": suggestion.suggested_folder.0,
+                "evidence": evidence,
+                "scopeCachedText": suggestion.scope.includes_cached_text,
+                "excerptChars": suggestion.scope.excerpt_chars,
+                "endpointLogged": endpoint_logged,
+                "forbiddenClear": forbidden_clear,
+                "evidenceInRequest": matched,
+                "evidenceInCache": evidence_in_cache,
+                "cacheHashMatchesRequest": hash_matches,
+            })
+        }
+    }
+}
+
+fn established_foreign(pid: u32) -> Vec<String> {
+    let output = match std::process::Command::new("netstat")
+        .args(["-ano", "-p", "tcp"])
+        .output()
+    {
+        Ok(output) => output,
+        Err(_) => return Vec::new(),
+    };
+    let text = String::from_utf8_lossy(&output.stdout);
+    let pid = pid.to_string();
+    let mut found = Vec::new();
+    for line in text.lines() {
+        let parts: Vec<&str> = line.split_whitespace().collect();
+        if parts.len() < 5 || parts[0] != "TCP" || parts[3] != "ESTABLISHED" || parts[4] != pid {
+            continue;
+        }
+        let remote = parts[2];
+        if remote.starts_with("127.") || remote.starts_with("[::1]") || remote.starts_with("::1") {
+            continue;
+        }
+        if !found.contains(&remote.to_owned()) {
+            found.push(remote.to_owned());
+        }
+    }
+    found
+}
+
 fn assert_no_bookmarks_bak(root: &std::path::Path) {
     let mut pending = vec![root.to_path_buf()];
     while let Some(directory) = pending.pop() {

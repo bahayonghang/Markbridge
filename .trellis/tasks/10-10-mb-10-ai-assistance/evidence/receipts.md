@@ -36,3 +36,79 @@ rustc 1.99.0 (b940084d7 2026-09-28)。Node v26.7.0。pnpm 12.12.0。`Get-Command
 ## 回退
 
 取消把作业标为 cancelled 并清空提案。清除凭据只删除模型密钥引用。已应用标题按 06 的撤销操作恢复。
+
+## 2026-10-11 隔离 loopback 端点
+
+上一节的 UNVERIFIED 行保持原样。这一节只记录这次产品调用。入口是 `Bridge::open_with_model_store`，传输是 `ReqwestTransport`。提供者 `ollama`，模型名 `markbridge-live`，base `http://127.0.0.1:12180`。产品把建议发到 `http://127.0.0.1:12180/api/chat`。本机没有 `ollama` 命令，没有下载模型。临时进程是 `evidence/loopback-chat.py`，只绑定 `127.0.0.1:12180`，PID 50196。`netstat` 本地地址是 `127.0.0.1:12180`，状态 `LISTENING`。响应体是 Ollama chat 的 `message.content`，里面一个建议对象。请求里没有 `tools`、`functions`、`tool_choice`，也没有 `Authorization`。`evidence` 取自该次请求的缓存页文本。端点日志 11 行，`quoted` 都是 true，页文本 SHA-256 与产品预览缓存一致。运行结束后 PID 50196 已不在。未配置模型密钥。应用数据目录 `C:\Users\lyh\AppData\Local\Temp\.tmpcarGiR`，路径不含 `com.markbridge.desktop`。
+
+`%LOCALAPPDATA%\Google\Chrome\User Data\Default\Bookmarks` 运行前和运行后都是长度 849515，SHA256 `DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82`。`cmdkey` 中 `Markbridge.Pairing` 与 `Markbridge.Model` 运行前后都是 0。未写 `Markbridge.Pairing`。
+
+| 项 | 状态 | 证据 |
+| --- | --- | --- |
+| AC10-4 | PASS | 下表 10 个公开 HTTPS 页面都由 `suggest_ai` 返回。确认写入与撤销走既有 `apply_ai` / `apply_edit`。 |
+| AC10-5 已准备模型 | PASS | 预览缓存已有 `https://example.com/` 的页文本后，只再调用一次 `suggest_ai`。`content_preview` 未再调用。`fetched_at` 保持 `1791763435466`。摘录文本不变。建议状态 `ready`。采样 7 次，进程没有非 loopback 的 `ESTABLISHED` TCP。 |
+| AC10-5 未准备模型 | PASS | 仍是上一节。文案 `缺少本地模型或端点。` 未改。 |
+| 父 V12 | PASS | 上一节的坏 schema、超长值、注入文本、取消和 429 夹具未改，核心库测试 64 通过。这一节记下 10 次产品调用，没有把未调用的页面写成成功。 |
+
+10 页的标签都是 `quote`，`summary` 与 `suggestedFolder` 都是 null。端点都是 `http://127.0.0.1:12180/api/chat`，模型都是 `markbridge-live`。
+
+| URL | 产品结果 |
+| --- | --- |
+| `https://example.com/` | `ready`。title / evidence：`This domain is for use in documentation`。缓存 157 字。 |
+| `https://example.org/` | `ready`。title / evidence：`This domain is for use in documentation`。缓存 157 字。 |
+| `https://example.net/` | `ready`。title / evidence：`This domain is for use in documentation`。缓存 157 字。 |
+| `https://httpbin.org/html` | `ready`。title / evidence：`Herman Melville - Moby-Dick`。缓存 1000 字。 |
+| `https://www.iana.org/domains/reserved` | `ready`。title / evidence：`D`。缓存 1000 字。这是该次请求页文本里第一段不含控制字符的片段。 |
+| `https://www.w3.org/` | `ready`。title / evidence：`The World Wide Web Consortium (W3C) deve`。缓存 184 字。 |
+| `https://www.gnu.org/philosophy/free-sw.html` | `ready`。title / evidence：`Since 1983, developing the free Unix sty`。缓存 152 字。 |
+| `https://www.wikipedia.org/` | `ready`。title / evidence：`Wikipedia is a free online encyclopedia,`。缓存 130 字。 |
+| `https://www.rust-lang.org/` | `ready`。title / evidence：`A language empowering everyone to build`。缓存 72 字。 |
+| `https://docs.python.org/3/library/index.html` | `ready`。title / evidence：`This library reference manual describes`。缓存 200 字。 |
+
+`b01` / `https://example.com/` 的确认更新：只读连接返回 `READ_ONLY`，当时 `operations` 为 0。改为 live 后，`apply_ai` 状态 `applying`，发出的标题是 `已确认标题`。撤销状态 `rolling_back`，恢复标题 `t01`、URL `https://example.com/`。原始记录在 `evidence/live-run.json`。
+
+已准备的那次建议使用同一条 `https://example.com/` 缓存。产品 evidence 仍是 `This domain is for use in documentation`。`scopeCachedText` 为 true。耗时 258 ms。
+
+| 命令 | 退出码 | 结果 |
+| --- | --- | --- |
+| `cargo test -p markbridge-core --lib reqwest_ten_public_pages --locked --offline -- --ignored --nocapture --test-threads=1` | 0 | PASS。1 passed，12.86s。环境变量 `MARKBRIDGE_AI_BASE=http://127.0.0.1:12180`，`MARKBRIDGE_AI_MODEL=markbridge-live`。 |
+| `cargo test -p markbridge-core --lib --locked --offline` | 0 | PASS。64 passed，1 ignored，10.43s。被忽略的是上面这条 live 测试。 |
+| `cargo clippy -p markbridge-core --all-targets --locked --offline -- -D warnings` | 0 | PASS。No issues found |
+| `cargo fmt -p markbridge-core -- --check` | 0 | PASS |
+
+## 2026-10-11 trellis-check 重跑
+
+上一节的 UNVERIFIED 行和实现者表格保持原样。这一节只记录这次重跑。入口是 `Bridge::open_with_model_store`，传输是 `ReqwestTransport`。`schema::parse_provider_body` 从响应正文的 `/message/content` 解析 title、tags、summary、suggestedFolder、evidence。测试源码没有写死这些建议字段。`evidenceInRequest` 为 true 时，端点日志的 `quoted` 为 true，且产品解析出的 evidence 等于该次请求日志中的 evidence。日志中的 evidence 取自该次请求里的缓存页文本。
+
+临时进程是 `evidence/loopback-chat.py`，绑定 `127.0.0.1:7235`。本机没有下载模型。结果只说明产品的 `ReqwestTransport` 消费了这个协议形状进程的 HTTP 正文。这一节不记录已下载模型的质量通过。
+
+shell 里的 `$env:` 赋值没有进入第一次 cargo。那次 0.00s 退出 101，原因是 `MARKBRIDGE_AI_BASE: NotPresent`，没有写入 `evidence/check-live-run.json`。下面的退出码来自同一 cargo 参数、四个变量已经进入进程环境的运行。
+
+| 命令 | 退出码 | 结果 |
+| --- | --- | --- |
+| `cargo test -p markbridge-core --lib reqwest_ten_public_pages --locked --offline -- --ignored --nocapture --test-threads=1` | 0 | PASS。1 passed，11.36s。`MARKBRIDGE_AI_BASE=http://127.0.0.1:7235`，`MARKBRIDGE_AI_MODEL=markbridge-live`，`MARKBRIDGE_AI_EVIDENCE=evidence/check-live-run.json`，`MARKBRIDGE_AI_LOG=evidence/check-endpoint.log`。 |
+
+端口 7235。证据文件 `evidence/check-live-run.json`。端点日志 `evidence/check-endpoint.log`，11 行。
+
+10 个不同的公开 HTTPS 页面，预览状态和 `suggest_ai` 状态都是 `ready`。每条 evidence 都在该次请求的缓存页文本中：`evidenceInRequest`、`evidenceInCache`、`cacheHashMatchesRequest` 都是 true，日志 `quoted` 都是 true。路径都是 `/api/chat`。`forbidden` 都是空数组，`auth` 都是 false。标签都是 `quote`。`summary` 与 `suggestedFolder` 都是 null。
+
+| URL | 产品结果 |
+| --- | --- |
+| `https://example.com/` | `ready`。title / evidence：`This domain is for use in documentation`。 |
+| `https://example.org/` | `ready`。title / evidence：`This domain is for use in documentation`。 |
+| `https://example.net/` | `ready`。title / evidence：`This domain is for use in documentation`。 |
+| `https://httpbin.org/html` | `ready`。title / evidence：`Herman Melville - Moby-Dick`。 |
+| `https://www.iana.org/domains/reserved` | `ready`。title / evidence：`D`。 |
+| `https://www.w3.org/` | `ready`。title / evidence：`The World Wide Web Consortium (W3C) deve`。 |
+| `https://www.gnu.org/philosophy/free-sw.html` | `ready`。title / evidence：`Since 1983, developing the free Unix sty`。 |
+| `https://www.wikipedia.org/` | `ready`。title / evidence：`Wikipedia is a free online encyclopedia,`。 |
+| `https://www.rust-lang.org/` | `ready`。title / evidence：`A language empowering everyone to build`。 |
+| `https://docs.python.org/3/library/index.html` | `ready`。title / evidence：`This library reference manual describes`。 |
+
+已准备的建议使用已有的 `https://example.com/` 缓存。`contentPreviewCalled` 为 false。`fetchedAtUnchanged` 为 true，两次都是 `1791763906829`。`publicFetchObserved` 为 false。`foreignEstablished` 为空。`tcpSamples` 为 6。确认前 `readonly` 为 `READ_ONLY`，`operationsAfterReadonly` 为 0。live 后 `applyState` 为 `applying`，标题是 `已确认标题`。撤销 `undoState` 为 `rolling_back`，标题回到 `t01`，URL 为 `https://example.com/`。
+
+`%LOCALAPPDATA%\Google\Chrome\User Data\Default\Bookmarks` 运行前和运行后都是长度 849515，SHA256 `DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82`。`cmdkey` 中 `Markbridge.Pairing` 与 `Markbridge.Model` 运行前后计数都是 0。应用数据目录 `C:\Users\lyh\AppData\Local\Temp\.tmp550V4P`，路径不含 `com.markbridge.desktop`。
+
+运行结束后没有 `python.exe` 仍在执行 `loopback-chat.py`，7235 没有 `LISTENING`。关闭后的 `TIME_WAIT` 仍在 `127.0.0.1`，属主 PID 为 0。
+
+判定：PASS。

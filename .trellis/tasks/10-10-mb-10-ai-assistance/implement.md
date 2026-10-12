@@ -14,7 +14,7 @@
 - [x] 实现 job 生命周期、请求预算、schema 校验与最多一次格式修复。
 - [x] 实现单条预览/编辑/取消/应用和本地 metadata 写入。
 - [x] 运行确定性 provider fixture。
-- [ ] 在授权本地模型上记录真实 10 页结果。本机没有 `ollama` 命令，未安装模型，该项保持 UNVERIFIED。
+- [x] 在授权本地模型上记录真实 10 页结果。隔离的 `127.0.0.1` 端点由 `ReqwestTransport` 调用，命令和退出码在 evidence/receipts.md。未安装 Ollama，未下载模型，不称已下载模型质量通过。
 
 ## 检查命令
 
