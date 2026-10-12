@@ -1,0 +1,111 @@
+{
+  "suffix": "e9d63e",
+  "namespace": "Markbridge.Task03.e9d63e",
+  "source": "replaced-bookmarks-json",
+  "startedAt": "2026-10-12T08:09:06.689Z",
+  "command": "node .trellis/tasks/10-10-mb-03-chrome-bridge/evidence/chrome-import-file-harness.mjs",
+  "phase": "between",
+  "wireFirst": [
+    "c:pair",
+    "s:pair_result",
+    "c:pair",
+    "s:pair_result",
+    "c:hello",
+    "s:hello_result",
+    "s:get_tree",
+    "c:tree_full"
+  ],
+  "wire": [
+    "c:hello",
+    "s:hello_result",
+    "s:get_tree",
+    "c:tree_full",
+    "s:ping",
+    "c:ping",
+    "s:pong",
+    "c:pong"
+  ],
+  "states": [
+    "live"
+  ],
+  "extensionStatuses": [
+    "connected"
+  ],
+  "importBegan": false,
+  "importEnded": false,
+  "resyncAfterImport": false,
+  "treeAfterResync": false,
+  "reconcilingAfterImport": false,
+  "backendReconcilingAfterImport": false,
+  "treesMatch": true,
+  "probePresentBefore": false,
+  "probePresent": true,
+  "chromeEmittedImportEnded": false,
+  "droppedByBridge": false,
+  "copiedExecutable": false,
+  "launchedFromTempCopy": false,
+  "dailyProfileTouched": false,
+  "productEdited": false,
+  "handshakes": 3,
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-03-import-file-m2GYk5",
+  "step": "second",
+  "credentialBefore": {
+    "pairing": 0,
+    "namespace": 0
+  },
+  "dailyBefore": {
+    "length": 849515,
+    "sha256": "DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82"
+  },
+  "portsDiffer": true,
+  "chrome": "Chrome/155.0.8059.39",
+  "extensionId": "blbapbmincddiilocledaajcegiekbfk",
+  "pairingCodeLength": 220,
+  "profileId": "p:8d3603a86def8c1b1e9dc5698cbbcee44dba93c08211133ac6cf4a9b3070d8d3",
+  "nodesBefore": 3,
+  "firstTreeMatched": true,
+  "extensionPersisted": true,
+  "extensionRecord": {
+    "location": 4,
+    "state": null,
+    "disableReasons": []
+  },
+  "developerMode": false,
+  "developerModeSet": true,
+  "bookmarksFileExisted": false,
+  "tempBookmarksBefore": 0,
+  "checksumAlgorithm": "utf16",
+  "tempBookmarksAfter": 903,
+  "extraNodeAdded": true,
+  "fileContainsProbe": true,
+  "bookmarksBakUnchanged": true,
+  "autoAttachFilter": true,
+  "chromeSecond": "Chrome/155.0.8059.39",
+  "extensionTargetSeen": false,
+  "optionsProtocol": "chrome-error:",
+  "optionsError": "OPTIONS_NOT_READY",
+  "startupWire": [],
+  "lateLoadUnpacked": true,
+  "workerSession": "5BC39B2208D8E8D20DB3C57404FC9993",
+  "probeInstalled": true,
+  "probeInstallPhase": "paused",
+  "secondHandshake": true,
+  "extensionPresent": true,
+  "optionsOpened": true,
+  "probeBegan": 0,
+  "probeEnded": 0,
+  "nodeCount": 4,
+  "treeDigest": "51525e57e696032bcc520dc8e792e16c665be5fd9001f4487b116ac7686a8904",
+  "pass": false,
+  "credentialAfter": {
+    "pairing": 0,
+    "namespace": 0
+  },
+  "dailyAfter": {
+    "length": 849515,
+    "sha256": "DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82"
+  },
+  "installedChromeIntact": true,
+  "finishedAt": "2026-10-12T08:09:48.619Z",
+  "exitCode": 1
+}

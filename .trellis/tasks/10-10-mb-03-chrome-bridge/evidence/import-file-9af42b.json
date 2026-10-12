@@ -1,0 +1,69 @@
+{
+  "suffix": "9af42b",
+  "namespace": "Markbridge.Task03.9af42b",
+  "source": "replaced-bookmarks-json",
+  "startedAt": "2026-10-12T08:02:04.948Z",
+  "command": "node .trellis/tasks/10-10-mb-03-chrome-bridge/evidence/chrome-import-file-harness.mjs",
+  "phase": "between",
+  "wireFirst": [
+    "c:pair",
+    "s:pair_result",
+    "c:pair",
+    "s:pair_result",
+    "c:hello",
+    "s:hello_result",
+    "s:get_tree",
+    "c:tree_full"
+  ],
+  "wire": [],
+  "states": [],
+  "extensionStatuses": [],
+  "importBegan": false,
+  "importEnded": false,
+  "resyncAfterImport": false,
+  "treeAfterResync": false,
+  "reconcilingAfterImport": false,
+  "backendReconcilingAfterImport": false,
+  "treesMatch": false,
+  "probePresentBefore": false,
+  "probePresent": false,
+  "chromeEmittedImportEnded": false,
+  "droppedByBridge": false,
+  "copiedExecutable": false,
+  "launchedFromTempCopy": false,
+  "dailyProfileTouched": false,
+  "productEdited": false,
+  "handshakes": 2,
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-03-import-file-uocYIl",
+  "step": "replace",
+  "credentialBefore": {
+    "pairing": 0,
+    "namespace": 0
+  },
+  "dailyBefore": {
+    "length": 849515,
+    "sha256": "DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82"
+  },
+  "portsDiffer": true,
+  "chrome": "Chrome/155.0.8059.39",
+  "extensionId": "blbapbmincddiilocledaajcegiekbfk",
+  "pairingCodeLength": 221,
+  "profileId": "p:eb49367f3eb34f7f1ea7c460088147e95aebfe710725d1cbd1fdca1023b1a1c0",
+  "nodesBefore": 3,
+  "firstTreeMatched": true,
+  "extensionPersisted": true,
+  "failureCode": "BOOKMARKS_MISSING",
+  "driverCode": null,
+  "driverMessage": "BOOKMARKS_MISSING",
+  "credentialAfter": {
+    "pairing": 0,
+    "namespace": 0
+  },
+  "dailyAfter": {
+    "length": 849515,
+    "sha256": "DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82"
+  },
+  "installedChromeIntact": true,
+  "finishedAt": "2026-10-12T08:02:26.335Z",
+  "exitCode": 1
+}

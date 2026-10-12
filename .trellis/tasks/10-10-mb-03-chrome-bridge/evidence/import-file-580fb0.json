@@ -1,0 +1,80 @@
+{
+  "suffix": "580fb0",
+  "namespace": "Markbridge.Task03.580fb0",
+  "source": "replaced-bookmarks-json",
+  "startedAt": "2026-10-12T08:05:21.862Z",
+  "command": "node .trellis/tasks/10-10-mb-03-chrome-bridge/evidence/chrome-import-file-harness.mjs",
+  "phase": "between",
+  "wireFirst": [
+    "c:pair",
+    "s:pair_result",
+    "c:pair",
+    "s:pair_result",
+    "c:hello",
+    "s:hello_result",
+    "s:get_tree",
+    "c:tree_full"
+  ],
+  "wire": [],
+  "states": [
+    "cached_read_only"
+  ],
+  "extensionStatuses": [],
+  "importBegan": false,
+  "importEnded": false,
+  "resyncAfterImport": false,
+  "treeAfterResync": false,
+  "reconcilingAfterImport": false,
+  "backendReconcilingAfterImport": false,
+  "treesMatch": false,
+  "probePresentBefore": false,
+  "probePresent": false,
+  "chromeEmittedImportEnded": false,
+  "droppedByBridge": false,
+  "copiedExecutable": false,
+  "launchedFromTempCopy": false,
+  "dailyProfileTouched": false,
+  "productEdited": false,
+  "handshakes": 2,
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-03-import-file-IHo7xo",
+  "step": "second",
+  "credentialBefore": {
+    "pairing": 0,
+    "namespace": 0
+  },
+  "dailyBefore": {
+    "length": 849515,
+    "sha256": "DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82"
+  },
+  "portsDiffer": true,
+  "chrome": "Chrome/155.0.8059.39",
+  "extensionId": "blbapbmincddiilocledaajcegiekbfk",
+  "pairingCodeLength": 221,
+  "profileId": "p:570caded2542bac94883e94607bc682ce2db59fb5b4b1e831468968cdb832fc0",
+  "nodesBefore": 3,
+  "firstTreeMatched": true,
+  "extensionPersisted": true,
+  "bookmarksFileExisted": false,
+  "tempBookmarksBefore": 0,
+  "checksumAlgorithm": "utf16",
+  "tempBookmarksAfter": 903,
+  "extraNodeAdded": true,
+  "fileContainsProbe": true,
+  "bookmarksBakUnchanged": true,
+  "autoAttachFilter": true,
+  "chromeSecond": "Chrome/155.0.8059.39",
+  "extensionPresent": false,
+  "optionsOpened": false,
+  "pass": false,
+  "credentialAfter": {
+    "pairing": 0,
+    "namespace": 0
+  },
+  "dailyAfter": {
+    "length": 849515,
+    "sha256": "DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82"
+  },
+  "installedChromeIntact": true,
+  "finishedAt": "2026-10-12T08:06:04.390Z",
+  "exitCode": 1
+}

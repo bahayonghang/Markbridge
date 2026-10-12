@@ -226,3 +226,43 @@ V02、V03、V04 与 AC03 各行未改。
 | `node .trellis/tasks/10-10-mb-03-chrome-bridge/evidence/chrome-import-harness.mjs` | 1 |
 
 导入保持 UNVERIFIED。V04 总行仍为 UNVERIFIED。OS 休眠仍未跑。03 未归档。
+
+## Bookmarks 文件替换
+
+日期：2026-10-12。工作目录为仓库根。第二个来源：临时 Chrome 配对后退出，只改该临时资料的 `Bookmarks` JSON，再启动同一资料。没有 `initial_preferences`，没有 oplock，没有 Netscape HTML，没有书签管理器，没有 `chrome://bookmarks`，没有挂起主机。没有改产品源码。
+
+`%LOCALAPPDATA%\Google\Chrome\User Data\Default\Bookmarks` 在运行前和结束后都是长度 849515，SHA256 `DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82`。`Markbridge.Pairing` 前后都是 0。命名空间 `Markbridge.Task03.e9d63e` 结束后是 0。配对码只记录长度 220。
+
+| 命令 | 退出码 |
+|---|---:|
+| `node .trellis/tasks/10-10-mb-03-chrome-bridge/evidence/chrome-import-file-harness.mjs` | 1 |
+
+观察文件是 `evidence/import-file-e9d63e.json`。开始 2026-10-12T08:09:06.689Z，结束 2026-10-12T08:09:48.619Z。Chrome 为 `Chrome/155.0.8059.39`。第一次启动的扩展 id 是 `blbapbmincddiilocledaajcegiekbfk`，全树 3 个节点，与缓存一致。退出后临时资料没有 `Bookmarks` 文件。向 `Default/Bookmarks` 写入一份 Chrome JSON，比第一次多一个书签。`Bookmarks.bak` 没有变化。
+
+第二次启动没有自己打开这个已写入 Preferences 的 unpacked 扩展。选项页协议是 `chrome-error:`。启动阶段线上是空的。之后用 `Extensions.loadUnpacked` 又加载了同一个 `apps/extension/dist`。服务工作线程在暂停时装上了 `onImportEnded` 探针，计数是 0。线上是 `hello`、`get_tree`、`tree_full` 和 ping/pong，没有 `import_ended`。扩展状态到了 `connected`。完整树与 `chrome.bookmarks.getTree()` 一致，4 个节点，多出的书签在两边都在。
+
+`import-file-baa97e.json`、`import-file-9af42b.json`、`import-file-0dfcbe.json`、`import-file-580fb0.json`、`import-file-b07930.json` 是同一条命令在这次观察前的中断，不是另一个来源。
+
+这个来源保持 UNVERIFIED。V04 总行不改为 PASS。OS 休眠仍未跑。
+
+## 2026-10-12 trellis-check Bookmarks 文件替换
+
+复核没有再启动 Chrome，没有重跑 `chrome-import-file-harness.mjs`，也没有重跑 `chrome-import-harness.mjs`。上文「Bookmarks 文件替换」未改。没有改 JSON。
+
+`evidence/import-file-e9d63e.json` 的 `command` 是 `node .trellis/tasks/10-10-mb-03-chrome-bridge/evidence/chrome-import-file-harness.mjs`。`exitCode` 是 1。`importEnded` 是 false。`chromeEmittedImportEnded` 是 false。`probeBegan` 是 0。`probeEnded` 是 0。`wire` 是 `c:hello`、`s:hello_result`、`s:get_tree`、`c:tree_full`、`s:ping`、`c:ping`、`s:pong`、`c:pong`，没有 `import_ended`。`startupWire` 是空的。`extensionStatuses` 只有 `connected`，没有 `reconciling`。`pass` 是 false。`treesMatch` 是 true。`probePresent` 是 true。`credentialBefore.pairing` 和 `credentialAfter.pairing` 都是 0。`dailyProfileTouched` 是 false。`productEdited` 是 false。
+
+`%LOCALAPPDATA%\Google\Chrome\User Data\Default\Bookmarks` 只读重算：长度 849515，SHA256 `DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82`。`dailyBefore` 和 `dailyAfter` 都是这两个值。没有写该文件。`Get-Item` 与 `Get-FileHash -Algorithm SHA256` 的退出码是 0。
+
+`git diff --name-only -- apps crates packages scripts tests` 无输出，退出码 0。`git status --short` 对这组路径和 `task.json` 也无输出，退出码 0。`task.json` 的 status 仍是 `in_progress`。
+
+`chrome-import-file-harness.mjs` 不读取、不写入 Netscape HTML，不打开 `chrome://bookmarks`，不使用 `initial_preferences`，不做 oplock。`--user-data-dir` 是临时目录 `markbridge-03-import-file-*` 下的 `user-data`。JSON 的 `root` 是 `C:\Users\lyh\AppData\Local\Temp\markbridge-03-import-file-m2GYk5`。它不指向日常 Profile。
+
+第二次启动时，Preferences 里仍有第一次的扩展记录：`extensionPersisted` 是 true。扩展目标当时不在：`extensionTargetSeen` 是 false，选项页协议是 `chrome-error:`，`optionsError` 是 `OPTIONS_NOT_READY`。`Extensions.loadUnpacked` 在这之后才调用，`lateLoadUnpacked` 是 true。`onImportEnded` 探针在后加载的 service worker 暂停时装上，`probeInstallPhase` 是 `paused`。第一次启动的扩展在书签模型加载时没有作为监听方。这次运行不能证明加载当时没有该事件。
+
+`import-file-baa97e.json`、`import-file-9af42b.json`、`import-file-0dfcbe.json`、`import-file-580fb0.json`、`import-file-b07930.json` 的 command 与这次相同。五份的 `importEnded` 都是 false，`exitCode` 都是 1。它们仍记为同一条命令在 `e9d63e` 之前的中断。
+
+| 命令 | 退出码 |
+|---|---:|
+| `node .trellis/tasks/10-10-mb-03-chrome-bridge/evidence/chrome-import-file-harness.mjs` | 1 |
+
+导入保持 UNVERIFIED。V04 总行保持 UNVERIFIED。OS 休眠仍未跑。03 未归档。

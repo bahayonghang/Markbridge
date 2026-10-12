@@ -1,0 +1,68 @@
+{
+  "suffix": "baa97e",
+  "namespace": "Markbridge.Task03.baa97e",
+  "source": "replaced-bookmarks-json",
+  "startedAt": "2026-10-12T08:00:58.352Z",
+  "command": "node .trellis/tasks/10-10-mb-03-chrome-bridge/evidence/chrome-import-file-harness.mjs",
+  "phase": "between",
+  "wireFirst": [
+    "c:pair",
+    "s:pair_result",
+    "c:pair",
+    "s:pair_result",
+    "c:hello",
+    "s:hello_result",
+    "s:get_tree",
+    "c:tree_full"
+  ],
+  "wire": [],
+  "states": [],
+  "extensionStatuses": [],
+  "importBegan": false,
+  "importEnded": false,
+  "resyncAfterImport": false,
+  "treeAfterResync": false,
+  "reconcilingAfterImport": false,
+  "backendReconcilingAfterImport": false,
+  "treesMatch": false,
+  "probePresentBefore": false,
+  "probePresent": false,
+  "chromeEmittedImportEnded": false,
+  "droppedByBridge": false,
+  "copiedExecutable": false,
+  "launchedFromTempCopy": false,
+  "dailyProfileTouched": false,
+  "productEdited": false,
+  "handshakes": 2,
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-03-import-file-9L4vGQ",
+  "step": "quit",
+  "credentialBefore": {
+    "pairing": 0,
+    "namespace": 0
+  },
+  "dailyBefore": {
+    "length": 849515,
+    "sha256": "DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82"
+  },
+  "portsDiffer": true,
+  "chrome": "Chrome/155.0.8059.39",
+  "extensionId": "blbapbmincddiilocledaajcegiekbfk",
+  "pairingCodeLength": 220,
+  "profileId": "p:a42b53104ea8f2595d9451e530b50c2925ef9070ee6823b759c4c8dac6b69b23",
+  "nodesBefore": 3,
+  "firstTreeMatched": true,
+  "failureCode": "PROFILE_STILL_RUNNING",
+  "driverCode": null,
+  "driverMessage": "PROFILE_STILL_RUNNING",
+  "credentialAfter": {
+    "pairing": 0,
+    "namespace": 0
+  },
+  "dailyAfter": {
+    "length": 849515,
+    "sha256": "DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82"
+  },
+  "installedChromeIntact": true,
+  "finishedAt": "2026-10-12T08:01:16.866Z",
+  "exitCode": 1
+}

@@ -1,0 +1,76 @@
+{
+  "suffix": "0dfcbe",
+  "namespace": "Markbridge.Task03.0dfcbe",
+  "source": "replaced-bookmarks-json",
+  "startedAt": "2026-10-12T08:03:29.600Z",
+  "command": "node .trellis/tasks/10-10-mb-03-chrome-bridge/evidence/chrome-import-file-harness.mjs",
+  "phase": "between",
+  "wireFirst": [
+    "c:pair",
+    "s:pair_result",
+    "c:pair",
+    "s:pair_result",
+    "c:hello",
+    "s:hello_result",
+    "s:get_tree",
+    "c:tree_full"
+  ],
+  "wire": [],
+  "states": [],
+  "extensionStatuses": [],
+  "importBegan": false,
+  "importEnded": false,
+  "resyncAfterImport": false,
+  "treeAfterResync": false,
+  "reconcilingAfterImport": false,
+  "backendReconcilingAfterImport": false,
+  "treesMatch": false,
+  "probePresentBefore": false,
+  "probePresent": false,
+  "chromeEmittedImportEnded": false,
+  "droppedByBridge": false,
+  "copiedExecutable": false,
+  "launchedFromTempCopy": false,
+  "dailyProfileTouched": false,
+  "productEdited": false,
+  "handshakes": 2,
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-03-import-file-TWnHfb",
+  "step": "replace",
+  "credentialBefore": {
+    "pairing": 0,
+    "namespace": 0
+  },
+  "dailyBefore": {
+    "length": 849515,
+    "sha256": "DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82"
+  },
+  "portsDiffer": true,
+  "chrome": "Chrome/155.0.8059.39",
+  "extensionId": "blbapbmincddiilocledaajcegiekbfk",
+  "pairingCodeLength": 221,
+  "profileId": "p:a3a26645ff1f52b57731ca859f5b9e2db4de2841ff44dad7b04a3c65ac305e84",
+  "nodesBefore": 3,
+  "firstTreeMatched": true,
+  "extensionPersisted": true,
+  "failureCode": "BOOKMARKS_MISSING",
+  "driverCode": null,
+  "driverMessage": "BOOKMARKS_MISSING",
+  "defaultExists": true,
+  "defaultEntryCount": 66,
+  "defaultNames": [
+    "BookmarkMergedSurfaceOrdering",
+    "Preferences",
+    "Secure Preferences"
+  ],
+  "credentialAfter": {
+    "pairing": 0,
+    "namespace": 0
+  },
+  "dailyAfter": {
+    "length": 849515,
+    "sha256": "DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82"
+  },
+  "installedChromeIntact": true,
+  "finishedAt": "2026-10-12T08:03:49.681Z",
+  "exitCode": 1
+}

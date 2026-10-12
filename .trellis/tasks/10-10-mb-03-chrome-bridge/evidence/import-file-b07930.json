@@ -1,0 +1,86 @@
+{
+  "suffix": "b07930",
+  "namespace": "Markbridge.Task03.b07930",
+  "source": "replaced-bookmarks-json",
+  "startedAt": "2026-10-12T08:06:58.244Z",
+  "command": "node .trellis/tasks/10-10-mb-03-chrome-bridge/evidence/chrome-import-file-harness.mjs",
+  "phase": "between",
+  "wireFirst": [
+    "c:pair",
+    "s:pair_result",
+    "c:pair",
+    "s:pair_result",
+    "c:hello",
+    "s:hello_result",
+    "s:get_tree",
+    "c:tree_full"
+  ],
+  "wire": [],
+  "states": [
+    "cached_read_only"
+  ],
+  "extensionStatuses": [],
+  "importBegan": false,
+  "importEnded": false,
+  "resyncAfterImport": false,
+  "treeAfterResync": false,
+  "reconcilingAfterImport": false,
+  "backendReconcilingAfterImport": false,
+  "treesMatch": false,
+  "probePresentBefore": false,
+  "probePresent": false,
+  "chromeEmittedImportEnded": false,
+  "droppedByBridge": false,
+  "copiedExecutable": false,
+  "launchedFromTempCopy": false,
+  "dailyProfileTouched": false,
+  "productEdited": false,
+  "handshakes": 2,
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-03-import-file-CixISS",
+  "step": "second",
+  "credentialBefore": {
+    "pairing": 0,
+    "namespace": 0
+  },
+  "dailyBefore": {
+    "length": 849515,
+    "sha256": "DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82"
+  },
+  "portsDiffer": true,
+  "chrome": "Chrome/155.0.8059.39",
+  "extensionId": "blbapbmincddiilocledaajcegiekbfk",
+  "pairingCodeLength": 220,
+  "profileId": "p:827b1b4f1e651bcb5cbb0d88bdd17967cb1544fd5e9414b1892a39d044f7c117",
+  "nodesBefore": 3,
+  "firstTreeMatched": true,
+  "extensionPersisted": true,
+  "extensionRecord": {
+    "location": 4,
+    "state": null,
+    "disableReasons": []
+  },
+  "bookmarksFileExisted": false,
+  "tempBookmarksBefore": 0,
+  "checksumAlgorithm": "utf16",
+  "tempBookmarksAfter": 903,
+  "extraNodeAdded": true,
+  "fileContainsProbe": true,
+  "bookmarksBakUnchanged": true,
+  "autoAttachFilter": true,
+  "chromeSecond": "Chrome/155.0.8059.39",
+  "extensionTargetSeen": false,
+  "extensionPresent": false,
+  "optionsOpened": false,
+  "pass": false,
+  "credentialAfter": {
+    "pairing": 0,
+    "namespace": 0
+  },
+  "dailyAfter": {
+    "length": 849515,
+    "sha256": "DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82"
+  },
+  "installedChromeIntact": true,
+  "finishedAt": "2026-10-12T08:07:48.524Z",
+  "exitCode": 1
+}
