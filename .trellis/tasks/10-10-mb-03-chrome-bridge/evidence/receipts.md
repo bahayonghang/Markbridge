@@ -430,3 +430,63 @@ JSON 里 `pass` 是 false，`hostSuspendedByThisRun` 是 false，`realOsResumeWh
 `git diff --name-only -- apps crates packages scripts tests` 无输出，退出码 0。`task.json` 的 status 仍是 `in_progress`，`completedAt` 仍是 null。
 
 这个来源保持 UNVERIFIED。导入保持 UNVERIFIED。OS 休眠保持 UNVERIFIED。V04 总行不改为 PASS。`pass` 保持 false。03 未归档。
+
+## powercfg 休眠历史
+
+日期：2026-10-12。主机没有被挂起，也没有被提权。没有调用 `SetSuspendState`、`rundll32`、`shutdown`、`psshutdown` 或 `powercfg -h`。没有发送 `WM_POWERBROADCAST`。没有查询 `Microsoft-Windows-Kernel-Power`。没有重跑 Chrome import harness。没有改 `apps`、`crates`、`packages`、`scripts`、`tests` 或 `task.json`。没有勾选 PRD。没有归档。
+
+| 命令 | 退出码 |
+|---|---:|
+| `powercfg /lastwake` | 0 |
+| `powercfg /a` | 0 |
+| `powercfg /sleepstudy /output C:\Users\lyh\AppData\Local\Temp\markbridge-v04-sleepstudy-2026-10-12.html /duration 7` | 1 |
+
+未重定向的 `powercfg /lastwake` 在新建控制台里输出一行 `Wake History Count - 0`。控制台画面里没有 `This command requires administrator privileges and must be executed from an elevated command prompt.`。退出码 0。Wake History Count 是 0。随后把 stdout 和 stderr 分别重定向到临时文件再执行，stdout 只有 `Wake History Count - 0`，stderr 为 0 字节，退出码仍是 0。管理员句子不在这两份文件中。
+
+`powercfg /a` 退出码 0。stdout 如下。可用休眠状态只有 `Standby (S0 Low Power Idle) Network Connected`。`Hibernate` 的不可用原因是 `Hibernation has not been enabled.`
+
+```text
+The following sleep states are available on this system:
+    Standby (S0 Low Power Idle) Network Connected
+
+The following sleep states are not available on this system:
+    Standby (S1)
+	The system firmware does not support this standby state.
+	This standby state is disabled when S0 low power idle is supported.
+
+    Standby (S2)
+	The system firmware does not support this standby state.
+	This standby state is disabled when S0 low power idle is supported.
+
+    Standby (S3)
+	This standby state is disabled when S0 low power idle is supported.
+
+    Hibernate
+	Hibernation has not been enabled.
+
+    Hybrid Sleep
+	Standby (S3) is not available.
+	Hibernation is not available.
+	The hypervisor does not support this standby state.
+
+    Fast Startup
+	Hibernation is not available.
+```
+
+`powercfg /sleepstudy /output C:\Users\lyh\AppData\Local\Temp\markbridge-v04-sleepstudy-2026-10-12.html /duration 7` 执行两次，退出码都是 1。第一次没有把 stderr 留在成功输出里，临时 HTML 没有生成。第二次把 stdout 和 stderr 分开保存：stdout 为 0 字节，stderr 是 `This command requires administrator privileges and must be executed from an elevated command prompt.` 同一路径上的 HTML 仍然没有生成。没有提权后再跑。
+
+这次没有产品的真实休眠或恢复观察。OS 休眠保持 UNVERIFIED。V04 总行保持 UNVERIFIED。导入保持 UNVERIFIED。03 未归档。
+
+## powercfg 休眠历史复核
+
+日期：2026-10-12。上一节里未重定向 `powercfg /lastwake` 的行数已按这次新建控制台的输出改正。其余句子与这次重跑一致，未改。这次没有提权，没有挂起主机，没有查询 `Microsoft-Windows-Kernel-Power`。没有改 `apps`、`crates`、`packages`、`scripts`、`tests` 或 `task.json`。没有归档。
+
+| 命令 | 退出码 |
+|---|---:|
+| `powercfg /lastwake` | 0 |
+| `powercfg /a` | 0 |
+| `powercfg /sleepstudy /output C:\Users\lyh\AppData\Local\Temp\markbridge-v04-sleepstudy-recheck-2026-10-12.html /duration 7` | 1 |
+
+`powercfg /lastwake` 退出码 0。Wake History Count 是 0。`powercfg /a` 退出码 0。可用休眠状态只有 `Standby (S0 Low Power Idle) Network Connected`。`powercfg /sleepstudy` 退出码 1。stdout 为 0 字节。stderr 是 `This command requires administrator privileges and must be executed from an elevated command prompt.` 临时 HTML 没有生成。
+
+OS 休眠保持 UNVERIFIED。V04 总行保持 UNVERIFIED。导入保持 UNVERIFIED。03 未归档。
