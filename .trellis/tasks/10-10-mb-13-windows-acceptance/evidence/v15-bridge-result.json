@@ -1,0 +1,116 @@
+{
+  "runStart": "2026-10-12T04:41:11.962Z",
+  "bookmarksBad": false,
+  "expectedBookmarks": "len=849515 sha256=DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82",
+  "afterBookmarks": "len=849515 sha256=DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82",
+  "namespace": "Markbridge.Task05.mb13-bridge-text-20261012",
+  "installDir": "C:\\Users\\lyh\\AppData\\Local\\Temp\\mb13-v15-bridge-install",
+  "appData": "C:\\Users\\lyh\\AppData\\Local\\Temp\\mb13-v15-bridge-data",
+  "webviewDir": "C:\\Users\\lyh\\AppData\\Local\\Temp\\mb13-v15-bridge-install\\webview2",
+  "chromeLaunched": false,
+  "pairClicked": false,
+  "listenerShown": true,
+  "listenerText": "127.0.0.1:49153",
+  "status": "未连接 · 只读",
+  "alerts": [],
+  "listenerLine": "本机连接\n127.0.0.1:49153",
+  "buttons": [
+    {
+      "text": "保存配置",
+      "disabled": false
+    },
+    {
+      "text": "保存密钥",
+      "disabled": false
+    },
+    {
+      "text": "清除凭据",
+      "disabled": false
+    },
+    {
+      "text": "测试连接",
+      "disabled": false
+    },
+    {
+      "text": "连接已启动",
+      "disabled": true
+    },
+    {
+      "text": "生成配对串",
+      "disabled": true
+    },
+    {
+      "text": "枚举资料",
+      "disabled": true
+    },
+    {
+      "text": "重新读取",
+      "disabled": true
+    }
+  ],
+  "visibleText": "跳至内容\nMarkbridge签桥\n未连接 · 只读\nChrome 连接\n本机同步\nAI 建议\n默认关闭\n\n模型只生成可编辑建议。确认前不写书签。密钥只进入系统凭据存储。\n\n启用 AI\n提供者\n未选择\nOllama\n兼容端点\n端点\n模型\n保存配置\n\n未保存密钥 · 尚未测试连接\n\n模型密钥\n保存密钥\n清除凭据\n测试连接\n书签\n尚未选择来源\n\n在文件夹或书签列表中使用方向键移动。向右展开文件夹，Enter 打开 http 或 https 链接。\n\n尚未接入书签来源。配对 Chrome 或接入只读文件后，可在此浏览。\n\n本机连接\n127.0.0.1:49153\n端口\n连接已启动\n\n默认端口 49153。端口占用时，更换端口后重试。\n\n配对 Chrome 扩展\n需在两端确认\n资料名称\n生成配对串\n\n复制配对串到扩展选项页，再核对下方的扩展身份。配对串有效期为 120 秒。\n\n已配对资料\n0 个资料\n\n尚未连接书签来源。完成配对后，可在此查看同步状态和节点计数。\n\n只读文件来源\n0 个来源\n用户数据目录\n枚举资料\n重新读取\n\n只读取 Local State 的资料名称和所选资料的 Bookmarks 文件。文件来源不能写入 Chrome。\n\n尚未接入只读文件来源。Chrome 关闭后，已接入的最后有效树仍可浏览。\n\n书签保留在 Chrome；标签和备注保留在本机。",
+  "windows": "TITLE Markbridge · 签桥\r\nCHILD Markbridge · 签桥\r\nCHILD Chrome Legacy Window",
+  "stderrAfterClick": "",
+  "stderr": "",
+  "stdout": "",
+  "exitCodes": {
+    "install": 0,
+    "start": 0,
+    "uninstall": 0
+  },
+  "obs": {
+    "install": "PASS",
+    "startExit": "PASS",
+    "uninstall": "PASS",
+    "clickStart": "CLICKED",
+    "listenerPort": "SHOWN",
+    "pairClick": "NOT_CLICKED",
+    "cmdkey": "PASS",
+    "ebwebview": "PASS",
+    "ai": "NOT_RUN",
+    "ac13_2": "FAIL",
+    "ac13_3": "NOT_RUN",
+    "ac13_4": "NOT_RUN",
+    "v15": "FAIL",
+    "v16": "UNVERIFIED"
+  },
+  "eb": {
+    "absent": false,
+    "files": 461,
+    "newer": 0,
+    "newest": "2026-10-12T03:17:48.577Z",
+    "names": []
+  },
+  "cmdkey": {
+    "pairing": 0,
+    "model": 0,
+    "task": 0
+  },
+  "notes": [
+    "runStart=2026-10-12T04:41:11.962Z",
+    "installer=true bytes=5589087 chromeLaunched=false",
+    "BEFORE bookmarks len=849515 sha256=DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82",
+    "BEFORE cmdkey pairing=0 model=0 task=0",
+    "BEFORE eb files=461 newer=0 newest=2026-10-12T03:17:48.577Z",
+    "BOOKMARKS before-install len=849515 sha256=DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82",
+    "INSTALL code=0 exe=true",
+    "BOOKMARKS after-install len=849515 sha256=DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82",
+    "BOOKMARKS before-launch len=849515 sha256=DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82",
+    "APP_START pid=29168",
+    "BEFORE_CLICK status= listener=",
+    "click 启动连接 true",
+    "AFTER_CLICK status=未连接 · 只读 listener=本机连接 127.0.0.1:49153 port=127.0.0.1:49153 alerts=0",
+    "listener visible; 生成配对串 not clicked",
+    "WM_CLOSE posted pid=29168",
+    "START_EXIT code=0",
+    "UNINSTALL code=0",
+    "REGISTRY value=C:\\Users\\lyh\\AppData\\Local\\Temp\\mb13-v15-bridge-install names=",
+    "REGISTRY_CLEAN DELETED",
+    "AFTER bookmarks len=849515 sha256=DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82",
+    "AFTER cmdkey pairing=0 model=0 task=0",
+    "AFTER eb files=461 newer=0 newest=2026-10-12T03:17:48.577Z names=",
+    "SQLITE exists=true name=markbridge.sqlite",
+    "WEBVIEW temp exists=true",
+    "desktop processes=0"
+  ]
+}

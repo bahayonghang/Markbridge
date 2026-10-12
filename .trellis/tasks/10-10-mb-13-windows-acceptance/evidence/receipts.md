@@ -320,3 +320,141 @@ AC13-2 为 FAIL。V15 为 FAIL。配对、同步、双预览、编辑和恢复�
 
 日常书签前后都是 849515 字节，SHA256 `DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82`。`WEBVIEW2_USER_DATA_FOLDER` 设在临时安装目录内的 `webview2`。结果没有「生成配对串」点击。配对是 FAIL。同步、两个预览、编辑和恢复是 NOT_RUN。AC13-2 是 FAIL。AC13-3 与 AC13-4 是 NOT_RUN。V16 是 UNVERIFIED。`Markbridge.Pairing` 与 `Markbridge.Model` 前后都是 0。结果文件没有凭据秘密、令牌或书签标题列表。
 
+## 2026-10-12 V15 启动后窗口文字
+
+04:41（UTC）。命令 `node .trellis/tasks/10-10-mb-13-windows-acceptance/evidence/v15-bridge-text.mjs`，退出码 0。没有重新构建。没有启动 Chrome，没有加载扩展。没有等待「实时同步」。判断在 `evidence/v15-bridge-result.json`。标准错误在 `evidence/v15-bridge-stderr.log`，0 字节。标准输出同样是 0 字节。
+
+安装包仍是现有的 `target/release/bundle/nsis/Markbridge_0.1.0_x64-setup.exe`，5589087 字节。安装到 `C:\Users\lyh\AppData\Local\Temp\mb13-v15-bridge-install`，安装进程退出码 0。`MARKBRIDGE_APP_DATA` 为 `C:\Users\lyh\AppData\Local\Temp\mb13-v15-bridge-data`，数据库文件名是 `markbridge.sqlite`。`MARKBRIDGE_CREDENTIAL_NAMESPACE` 为 `Markbridge.Task05.mb13-bridge-text-20261012`。`WEBVIEW2_USER_DATA_FOLDER` 为 `C:\Users\lyh\AppData\Local\Temp\mb13-v15-bridge-install\webview2`。没有安装到 `%LOCALAPPDATA%\Markbridge` 或 `%APPDATA%\com.markbridge.desktop`。
+
+应用 PID 29168。04:41:14.815 点击「启动连接」。04:41:16.364 读到页面文字。窗口标题是 `Markbridge · 签桥`。没有第二个顶层窗口，没有 alert。子窗口文字是 `Markbridge · 签桥` 和 `Chrome Legacy Window`。
+
+状态：`未连接 · 只读`。
+
+监听地址有显示：`127.0.0.1:49153`。
+
+这次读取里「生成配对串」的 `disabled` 为 true。没有点击「生成配对串」。
+
+点击后的 `document.body.innerText`：
+
+```text
+跳至内容
+Markbridge签桥
+未连接 · 只读
+Chrome 连接
+本机同步
+AI 建议
+默认关闭
+
+模型只生成可编辑建议。确认前不写书签。密钥只进入系统凭据存储。
+
+启用 AI
+提供者
+未选择
+Ollama
+兼容端点
+端点
+模型
+保存配置
+
+未保存密钥 · 尚未测试连接
+
+模型密钥
+保存密钥
+清除凭据
+测试连接
+书签
+尚未选择来源
+
+在文件夹或书签列表中使用方向键移动。向右展开文件夹，Enter 打开 http 或 https 链接。
+
+尚未接入书签来源。配对 Chrome 或接入只读文件后，可在此浏览。
+
+本机连接
+127.0.0.1:49153
+端口
+连接已启动
+
+默认端口 49153。端口占用时，更换端口后重试。
+
+配对 Chrome 扩展
+需在两端确认
+资料名称
+生成配对串
+
+复制配对串到扩展选项页，再核对下方的扩展身份。配对串有效期为 120 秒。
+
+已配对资料
+0 个资料
+
+尚未连接书签来源。完成配对后，可在此查看同步状态和节点计数。
+
+只读文件来源
+0 个来源
+用户数据目录
+枚举资料
+重新读取
+
+只读取 Local State 的资料名称和所选资料的 Bookmarks 文件。文件来源不能写入 Chrome。
+
+尚未接入只读文件来源。Chrome 关闭后，已接入的最后有效树仍可浏览。
+
+书签保留在 Chrome；标签和备注保留在本机。
+```
+
+`WM_CLOSE` 已发送。进程退出码 0。应用标准错误在退出后仍是空的。卸载进程退出码 0。`markbridge-desktop.exe` 和 `uninstall.exe` 已不在临时安装目录。该目录还留着本次创建的 `webview2`。`mb13-v15-bridge-data` 还有 `markbridge.sqlite`，204800 字节。这两个临时目录没有再删。`%LOCALAPPDATA%\Markbridge` 不存在。
+
+卸载后 `HKCU\Software\markbridge\Markbridge` 的默认值是本次临时安装路径，且没有其他值，随后删除了 `HKCU\Software\markbridge`。复查该键不存在。没有写 `HKLM` 或 `HKCU\Software\Policies`。
+
+日常书签运行前和运行后都是 849515 字节，SHA256 `DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82`。
+
+日常 `%LOCALAPPDATA%\com.markbridge.desktop\EBWebView` 运行开始 `2026-10-12T04:41:11.962Z`。结束后 461 个文件，比运行开始新的文件数是 0。最新仍是 `2026-10-12T03:17:48.577Z`。这些文件没有删除。
+
+`cmdkey` 里 `Markbridge.Pairing` 与 `Markbridge.Model` 前后都是 0。本次命名空间的目标数也是 0。没有打印或删除凭据。结束后 `markbridge-desktop` 进程数为 0。
+
+AI 为 NOT_RUN。AC13-3 为 NOT_RUN。AC13-4 为 NOT_RUN。V16 为 UNVERIFIED。AC13-2 为 FAIL。V15 为 FAIL。配对、同步、双预览、编辑和恢复没有跑。
+
+## 2026-10-12 V15 启动门与后续路径
+
+没有重新构建。安装包仍是 `target/release/bundle/nsis/Markbridge_0.1.0_x64-setup.exe`，5589087 字节。没有改产品代码。启动门改为：页面出现 `127.0.0.1:` 加端口，并且「生成配对串」可点。监听文字出现后再等最多 5 秒。不把「实时同步」当作启动门。
+
+04:50（UTC）。命令 `node .trellis/tasks/10-10-mb-13-windows-acceptance/evidence/v15-isolated.mjs`，退出码 0。安装目录 `C:\Users\lyh\AppData\Local\Temp\mb13-v15-startgate-install`。`MARKBRIDGE_APP_DATA` 为 `C:\Users\lyh\AppData\Local\Temp\mb13-v15-startgate-data`，数据库文件名是 `markbridge.sqlite`。`WEBVIEW2_USER_DATA_FOLDER` 为该安装目录下的 `webview2`。`MARKBRIDGE_CREDENTIAL_NAMESPACE` 为 `Markbridge.Task05.mb13-v15-startgate-20261012`。Chrome 用户数据目录为 `C:\Users\lyh\AppData\Local\Temp\mb13-v15-chrome-startgate`。扩展从 `apps/extension/dist` 经 CDP `Extensions.loadUnpacked` 加载。原始日志已复制到 `evidence/v15-gate-run.log`，判断在 `evidence/v15-gate-result.json`。
+
+04:50:16 点击「启动连接」。页面显示 `127.0.0.1:49153`，「生成配对串」当时已可点。启动门通过。随后读配对串的循环在按钮被 offer 禁用后继续等按钮，20 秒内没有读到文本框，抛出 `pairing code missing`。配对之后的步骤没有跑。这次的配对判定是 FAIL。同步、文本预览、独立预览窗口、确认编辑、重启不重放都是 NOT_RUN。
+
+04:53–04:54（UTC）。同一脚本改成只点击一次「生成配对串」，然后读取 `#pairing-code`。再次执行，退出码 0。新安装目录 `C:\Users\lyh\AppData\Local\Temp\mb13-v15-cont-install`。`MARKBRIDGE_APP_DATA` 为 `C:\Users\lyh\AppData\Local\Temp\mb13-v15-cont-data`。`WEBVIEW2_USER_DATA_FOLDER` 为该安装目录下的 `webview2`。命名空间为 `Markbridge.Task05.mb13-v15-cont-20261012`。Chrome 用户数据目录为 `C:\Users\lyh\AppData\Local\Temp\mb13-v15-chrome-cont`。日志在 `evidence/v15-run.log`，判断在 `evidence/v15-result.json`。没有设置 `Markbridge.Pairing`。没有打印或删除凭据。没有使用日常 Chrome 资料，没有写 `HKLM` 或 `HKCU\Software\Policies`，没有改 `C:\Program Files\Google\Chrome`。
+
+04:53:57 点击「启动连接」。`127.0.0.1:49153` 出现，「生成配对串」可点。随后点击「生成配对串」，配对串长度为 221。点击「确认此扩展」。
+
+| 观察 | 判定 | 记录 |
+|---|---|---|
+| 安装 | PASS | 进程退出码 0 |
+| 启动并退出 | PASS | `WM_CLOSE` 已发送，进程退出码 0 |
+| 重启 | NOT_RUN | 编辑回执未通过，脚本没有进入第二次启动 |
+| 卸载 | PASS | 进程退出码 0 |
+| 配对到 live | PASS | 点击了真实的「启动连接」和「生成配对串」，确认扩展后状态含「实时同步」 |
+| 一次同步 | PASS | 选中 `mb13-v15-example`。指标含「缓存节点」4、「来源版本」1，最近同步不是「尚未同步」 |
+| 文本预览 | PASS | 内容预览含 `Example Domain` |
+| 独立预览窗口 | PASS | 点击「打开应用内网页」。窗口标题含「网页预览」 |
+| 一次确认编辑和回执 | FAIL | 「预览修改」和「确认变更」都点到了。Chrome 有 1 条改后标题，网址仍是 `https://example.com/`。SQLite 一行 `applied` / `update`，回执列为 1。20 秒内页面没有「回执已确认」 |
+| 重启后不重放未回执写入 | NOT_RUN | 没有制造未回执写入 |
+| `cmdkey` | PASS | `Markbridge.Pairing` 与 `Markbridge.Model` 前后都是 0 |
+| 日常 EBWebView | PASS | 运行开始 `2026-10-12T04:53:50.854Z`。结束后 461 个文件，比运行开始新的文件数是 0。最新仍是 `2026-10-12T03:17:48.5775353Z`。这些文件没有删除 |
+| AI | NOT_RUN | `where.exe ollama` 退出码 1 |
+| AC13-3 | NOT_RUN | 没有生成 B10K |
+| AC13-4 | NOT_RUN | 没有把本次安装写成安装包清单或卸载策略 |
+| V16 | UNVERIFIED | 没有 Floccus 环境 |
+
+日常书签运行前和运行后都是 849515 字节，SHA256 `DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82`。
+
+AC13-2 为 FAIL。V15 为 FAIL。编辑回执的页面文字和重启不重放没有通过。
+
+## 2026-10-12 trellis-check V15 结果
+
+这次复查没有重装，没有启动安装程序、应用或 Chrome，没有删除 EBWebView，没有改 `v15-isolated.mjs`，没有勾 PRD。`git diff --name-only -- apps crates packages scripts` 没有输出。产品文件没有改动。
+
+`waitBridgeStarted` 要求页面出现 `127.0.0.1:` 加端口，并且「生成配对串」可点。`driveHappy` 在读取配对串之前调用它。`v15-result.json` 先记下 `listener 127.0.0.1:49153` 和 `pair button enabled`，然后才是「生成配对串」点击。
+
+日常书签前后都是 849515 字节，SHA256 `DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82`。`v15-result.json` 中配对、同步、文本预览、独立预览窗口是 PASS。编辑回执是 FAIL。重启是 NOT_RUN。AC13-2 是 FAIL。更早的 `v15-gate-result.json` 仍是配对 FAIL，其后步骤是 NOT_RUN。V15 仍是 FAIL。
+
+`v15-result.json`、`v15-gate-result.json`、`v15-bridge-result.json` 和本收据没有配对串、凭据、令牌或带秘密的书签网址。配对串只记了字符数 221。
+

@@ -11,16 +11,16 @@ const installer = path.join(repo, 'target/release/bundle/nsis/Markbridge_0.1.0_x
 const extensionDir = path.join(repo, 'apps/extension/dist');
 const chromeExe = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const tempRoot = path.resolve(process.env.TEMP || '');
-const installDir = path.join(tempRoot, 'mb13-v15-install');
-const appData = path.join(tempRoot, 'mb13-v15-data');
-const chromeDir = path.join(tempRoot, 'mb13-v15-chrome');
-const queryDir = path.join(tempRoot, 'mb13-v15-query');
+const installDir = path.join(tempRoot, 'mb13-v15-cont-install');
+const appData = path.join(tempRoot, 'mb13-v15-cont-data');
+const chromeDir = path.join(tempRoot, 'mb13-v15-chrome-cont');
+const queryDir = path.join(tempRoot, 'mb13-v15-cont-query');
 const webviewDir = path.join(installDir, 'webview2');
 const helperPath = path.join(tempRoot, 'mb13-v15-win.ps1');
 const pyPath = path.join(tempRoot, 'mb13-v15-ops.py');
 const logPath = path.join(evidenceDir, 'v15-run.log');
 const resultPath = path.join(evidenceDir, 'v15-result.json');
-const namespace = 'Markbridge.Task05.mb13-v15-20261012';
+const namespace = 'Markbridge.Task05.mb13-v15-cont-20261012';
 const bridgePort = 49153;
 const expectedBookmarks = 'len=849515 sha256=DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82';
 const dailyBookmarks = path.join(process.env.LOCALAPPDATA || '', 'Google/Chrome/User Data/Default/Bookmarks');
@@ -388,6 +388,7 @@ async function removeDir(dir) {
 }
 async function startApp() {
   if (!(await portFree(webPort))) webPort = await freePort();
+  if (!fs.existsSync(webviewDir) || !fs.statSync(webviewDir).isDirectory()) throw new Error('WEBVIEW2_USER_DATA_FOLDER refused');
   const env = appEnv();
   const child = spawn(path.join(installDir, 'markbridge-desktop.exe'), [], { env, cwd: appData, stdio: 'ignore', windowsHide: false });
   const exited = new Promise((resolve) => child.on('exit', (code, signal) => resolve({ code, signal })));
@@ -482,6 +483,39 @@ async function chromeBookmarks(title) {
   }, 10000, 400);
   return Array.isArray(value) ? value : [];
 }
+async function bridgeSurface() {
+  return withPage(async (client) => {
+    await client.call('Runtime.enable');
+    const value = await client.eval(`(() => {
+      const body = document.body ? document.body.innerText : '';
+      const match = body.match(/127\\.0\\.0\\.1:\\d+/);
+      const button = [...document.querySelectorAll('button')].find((item) => item.textContent.trim() === '生成配对串');
+      return { port: match ? match[0] : '', pairEnabled: !!(button && !button.disabled) };
+    })()`);
+    return value && value.port !== undefined ? value : null;
+  });
+}
+async function waitBridgeStarted() {
+  const started = await clickButton('启动连接');
+  note(`click 启动连接 ${started}`);
+  if (!started) return false;
+  const seen = await poll(async () => {
+    const surface = await bridgeSurface();
+    return surface && /^127\.0\.0\.1:\d+$/.test(surface.port || '') ? surface : null;
+  }, 20000, 200);
+  if (!seen || !seen.port) {
+    note('bridge listener absent');
+    return false;
+  }
+  note(`listener ${seen.port}`);
+  const enabled = seen.pairEnabled ? seen : await poll(async () => {
+    const surface = await bridgeSurface();
+    return surface && /^127\.0\.0\.1:\d+$/.test(surface.port || '') && surface.pairEnabled ? surface : null;
+  }, 5000, 200);
+  const ok = !!(enabled && enabled.pairEnabled && /^127\.0\.0\.1:\d+$/.test(enabled.port || ''));
+  note(`pair button ${ok ? 'enabled' : 'disabled'} port=${(enabled && enabled.port) || seen.port}`);
+  return ok;
+}
 async function waitLive() {
   const started = await clickButton('启动连接');
   note(`click 启动连接 ${started}`);
@@ -555,13 +589,28 @@ async function launchChrome() {
 async function driveHappy(run) {
   const page = await poll(async () => withPage(async () => ({ ok: true })), 45000, 500);
   if (!page) throw new Error('desktop debug page missing');
-  const live = await waitLive();
+  const live = await waitBridgeStarted();
   if (!live) { obs.pairingLive = 'FAIL'; throw new Error('bridge did not start'); }
+  let pairClicked = false;
   const codeRead = await poll(async () => {
-    if (!(await clickButton('生成配对串'))) return null;
-    const value = await withPage(async (client) => client.eval(`document.querySelector('#pairing-code')?.value || ''`));
-    return value && value.length > 20 ? value : null;
-  }, 20000, 500);
+    const surface = await withPage(async (client) => {
+      await client.call('Runtime.enable');
+      return client.eval(`(() => {
+        const code = document.querySelector('#pairing-code')?.value || '';
+        const button = [...document.querySelectorAll('button')].find((item) => item.textContent.trim() === '生成配对串');
+        const alert = [...document.querySelectorAll('[role="alert"]')].map((el) => el.innerText.trim()).filter(Boolean).join(' ');
+        return { chars: code.length, code: code.length > 20 ? code : '', canClick: !!(button && !button.disabled), alert: alert.slice(0, 180) };
+      })()`);
+    });
+    if (surface?.code) return surface.code;
+    if (!pairClicked && surface?.canClick) {
+      pairClicked = await clickButton('生成配对串', 3000);
+      note(`click 生成配对串 ${pairClicked}`);
+    } else if (surface) {
+      note(`pairing wait chars=${surface.chars} canClick=${surface.canClick} alert=${surface.alert || 'none'}`);
+    }
+    return null;
+  }, 20000, 300);
   if (typeof codeRead !== 'string') { obs.pairingLive = 'FAIL'; throw new Error('pairing code missing'); }
   note(`pairing code chars=${codeRead.length}`);
   const submitted = await extensionEval(`(() => { const input = document.querySelector('#pairing-code'); const form = document.querySelector('#pair-form'); if (!input || !form) return false; Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set.call(input, ${JSON.stringify(codeRead)}); form.requestSubmit(); return true; })()`);
@@ -712,6 +761,11 @@ async function main() {
   writeHelper();
   writePy();
   note(`runStart=${runStart.toISOString()}`);
+  note(`namespace=${namespace}`);
+  note(`installDir=${installDir}`);
+  note(`appData=${appData}`);
+  note(`webviewDir=${webviewDir}`);
+  note(`chromeDir=${chromeDir}`);
   note(`installer=${fs.existsSync(installer)} chrome=${fs.existsSync(chromeExe)} extension=${fs.existsSync(path.join(extensionDir, 'manifest.json'))} websocket=${typeof WebSocket === 'function'}`);
   if (!fs.existsSync(installer) || !fs.existsSync(chromeExe) || !fs.existsSync(path.join(extensionDir, 'manifest.json')) || typeof WebSocket !== 'function' || !tempRoot) {
     note('preflight missing; no process started');
