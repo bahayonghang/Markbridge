@@ -344,3 +344,54 @@ V02、V03、V04 与 AC03 各行未改。
 `chrome-import-hold-harness.mjs` 不读取、不写入 Netscape HTML。它不打开 `chrome://bookmarks`。它不写入 `initial_preferences`，只确认临时资料里没有该文件。`level1FirstRunHold` 保持 false。读保持是临时 `Bookmarks` 上的 `FSCTL_REQUEST_OPLOCK`。`--user-data-dir` 来自 `os.tmpdir()` 下的 `markbridge-03-import-hold-*`，其下是 `user-data`。`0fd93c` 的 `root` 是 `C:\Users\lyh\AppData\Local\Temp\markbridge-03-import-hold-Lesrwj`。
 
 导入保持 UNVERIFIED。V04 总行保持 UNVERIFIED。OS 休眠仍未跑。03 未归档。
+
+## OS 休眠日志
+
+日期：2026-10-12。工作目录为仓库根。这次没有休眠、没有休眠到硬盘、没有关机、没有重启。没有调用 `SetSuspendState`、`rundll32 powrprof.dll`、`shutdown /h`、`shutdown /s`、`shutdown /r`、`psshutdown` 或 `powercfg -h`。没有发送 `WM_POWERBROADCAST`。没有打开日常 Chrome Profile，没有改已安装扩展，没有写或恢复日常 `Bookmarks`。没有跑 `chrome-import-live-harness.mjs`、`chrome-import-hold-harness.mjs`、`chrome-import-file-harness.mjs` 或 `chrome-import-harness.mjs`。没有改产品源码。没有跑 `task.py`。
+
+只读命令是 `Get-WinEvent -FilterHashtable @{ LogName = 'System'; ProviderName = 'Microsoft-Windows-Kernel-Power' }`。退出码 0。System 日志里该提供方共 65 条，从 2026-10-01T16:03:10.0878022Z 到 2026-10-12T07:41:19.3455794Z。ID 只有 41、109、125、521、577。没有 42，没有 107，没有 506，没有 507。
+
+| ID | 条数 | 最近时间 (UTC) | 首行 |
+|---:|---:|---|---|
+| 41 | 1 | 2026-10-11T04:42:33.9056545Z | The system has rebooted without cleanly shutting down first. |
+| 109 | 10 | 2026-10-12T07:40:51.6567108Z | The kernel power manager has initiated a shutdown transition. |
+| 125 | 22 | 2026-10-12T07:41:17.1463924Z | ACPI thermal zone \\_TZ.TZ00 has been enumerated. |
+| 521 | 22 | 2026-10-12T07:41:19.3455794Z | Active battery count change. |
+| 577 | 10 | 2026-10-12T07:40:54.0507751Z | The system has prepared for a system initiated reboot from Active. |
+
+这五类都不是休眠进入或休眠恢复。41 是未正常关机后的重新启动。109 与 577 是关机或重启过渡。125 是 ACPI 热区枚举。521 是电池计数。同一日志里按 ID 42、107、506、507 过滤，结果是 0 条，包装命令退出码 1，错误文本是 `No events were found that match the specified selection criteria.`。`Microsoft-Windows-Power-Troubleshooter` 的事件 1 也不存在；那个提供方不计入 Kernel-Power。`Microsoft-Windows-Kernel-Power/Thermal-Operational` 只读到 2 条事件 116，首行是 ACPI 热区主动散热，不是休眠恢复。
+
+没有休眠/恢复一对时间。查询时 `markbridge-desktop.exe` 为 0，`bridge_harness.exe` 为 0，命令行指向 03 harness 脚本的 `node.exe` 为 0。没有进程被观察到跨过一次真实的 OS 休眠和恢复。
+
+源码路径只作阅读，不作为本次 OS 恢复已经触发的证据：
+
+- `apps/extension/src/bridge.ts`：`runtime.onStartup` 调用 `recover()`；`alarms.onAlarm` 在 `markbridge-recovery` 上调用 `recover()`；`alarms.create` 的 `periodInMinutes` 为 0.5。
+- `apps/desktop/src-tauri/src/main.rs`：`app.run` 调用 `on_run_event`；`RunEvent::Resumed` 调用 `bridge.rescan_file_mirrors()`。
+
+`RunEvent::Resumed` 的现有记录不是 OS 休眠。这次没有真实 OS 恢复发生在 `markbridge-desktop` 或隔离 `bridge_harness` 存活期间，所以上面三条路径都不能记成被 OS 恢复触发。
+
+观察文件是 `evidence/import-sleep-4a91e2.json`。`pass` 是 false。`realOsResumeWhileShippedProcessAlive` 是 false。`recoveryPathsFiredByOsResume` 是 false。
+
+`%LOCALAPPDATA%\Google\Chrome\User Data\Default\Bookmarks` 在查询前和查询后都是长度 850304，SHA256 `09F2A5C24BA0EE3E3AFF521B90B8509411C2BCDABFE743746A670B07515C1B9D`。两次 `Get-FileHash -Algorithm SHA256` 的退出码都是 0。最后写入时间仍是 2026-10-12T08:34:32.0604316Z。没有写该文件。
+
+`git diff --name-only -- apps crates packages scripts tests` 在写入这份证据前无输出。产品文件没有改。
+
+导入保持 UNVERIFIED。OS 休眠保持 UNVERIFIED。V04 总行不改为 PASS。03 未归档。
+
+## OS 休眠日志复核
+
+日期：2026-10-12。检查只追加本节。`evidence/import-sleep-4a91e2.json` 未改。更早的收据行未改。这次没有休眠、没有休眠到硬盘、没有关机、没有重启。没有发送 `WM_POWERBROADCAST`。没有调用 `SetSuspendState`、`rundll32 powrprof.dll`、`shutdown /h`、`shutdown /s`、`shutdown /r`、`psshutdown` 或 `powercfg -h`。没有打开日常 Chrome Profile，没有改已安装扩展，没有写或恢复日常 `Bookmarks`。没有跑 `chrome-import-live-harness.mjs`、`chrome-import-hold-harness.mjs`、`chrome-import-file-harness.mjs` 或 `chrome-import-harness.mjs`。没有改产品源码。没有跑 `task.py`。没有归档。
+
+复核命令是 `Get-WinEvent -FilterHashtable @{ LogName = 'System'; ProviderName = 'Microsoft-Windows-Kernel-Power' }`。退出码 0。System 日志里该提供方共 65 条，从 2026-10-01T16:03:10.0878022Z 到 2026-10-12T07:41:19.3455794Z。ID 只有 41（1）、109（10）、125（22）、521（22）、577（10）。这 65 条里 ID 42、107、506、507 的条数都是 0。与 JSON 的 `exitCode`、`eventCount`、`ids`、`sleepEvent42`、`resumeEvent107`、`modernStandbyEntry506`、`modernStandbyExit507` 一致。
+
+109 共 10 条，首行都是 `The kernel power manager has initiated a shutdown transition.` 577 共 10 条，首行都是 `The system has prepared for a system initiated reboot from Active.` 这 20 条的消息里没有 sleep、standby、hibernate 或 resume from。109 记录关机过渡。577 记录从 Active 准备的系统发起重启。两类都保持关机或重启过渡，不改记为 OS 休眠。
+
+同一提供方再按 ID 42、107、506、507 过滤。事件数 0。退出码 1。错误文本是 `No events were found that match the specified selection criteria.` 该退出码 1 只表示没有匹配事件。它不构成休眠观察。
+
+JSON 里 `pass` 是 false，`hostSuspendedByThisRun` 是 false，`realOsResumeWhileShippedProcessAlive` 是 false，`recoveryPathsFiredByOsResume` 是 false。复核查询时 `markbridge-desktop` 为 0，`bridge_harness` 为 0，命令行指向 03 harness 的 `node.exe` 为 0。没有进程被观察到跨过一次真实的 OS 休眠和恢复。`RunEvent::Resumed` 仍不记为 OS 休眠。
+
+`%LOCALAPPDATA%\Google\Chrome\User Data\Default\Bookmarks` 只读重算：`FileAccess.Read`，`FileShare.ReadWrite`。长度 850304。SHA256 `09F2A5C24BA0EE3E3AFF521B90B8509411C2BCDABFE743746A670B07515C1B9D`。最后写入时间仍是 2026-10-12T08:34:32.0604316Z。与 JSON 的 `dailyBefore` 和 `dailyAfter` 相同。该读取退出码 0。没有写该文件。没有输出标题、URL 或树。
+
+`git diff --name-only -- apps crates packages scripts tests` 无输出，退出码 0。`git status --short --branch -- .trellis/tasks/10-10-mb-03-chrome-bridge/task.json apps crates packages scripts tests` 只有 `## main`，退出码 0。`task.json` 的 status 仍是 `in_progress`，`completedAt` 仍是 null。
+
+导入保持 UNVERIFIED。OS 休眠保持 UNVERIFIED。V04 总行不改为 PASS。03 未归档。

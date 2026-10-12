@@ -1,0 +1,109 @@
+{
+  "suffix": "4a91e2",
+  "source": "microsoft-windows-kernel-power-system-log",
+  "result": "UNVERIFIED",
+  "osSleep": "UNVERIFIED",
+  "import": "UNVERIFIED",
+  "v04": "UNVERIFIED",
+  "archived": false,
+  "pass": false,
+  "hostSuspendedByThisRun": false,
+  "fakePowerBroadcastSent": false,
+  "command": "Get-WinEvent -FilterHashtable @{ LogName = 'System'; ProviderName = 'Microsoft-Windows-Kernel-Power' }",
+  "exitCode": 0,
+  "logName": "System",
+  "provider": "Microsoft-Windows-Kernel-Power",
+  "eventCount": 65,
+  "oldestUtc": "2026-10-01T16:03:10.0878022Z",
+  "newestUtc": "2026-10-12T07:41:19.3455794Z",
+  "ids": [
+    {
+      "id": 41,
+      "count": 1,
+      "sleepOrResume": false,
+      "latestUtc": "2026-10-11T04:42:33.9056545Z",
+      "message": "The system has rebooted without cleanly shutting down first. This error could be caused if the system stopped responding, crashed, or lost power unexpectedly."
+    },
+    {
+      "id": 109,
+      "count": 10,
+      "sleepOrResume": false,
+      "latestUtc": "2026-10-12T07:40:51.6567108Z",
+      "message": "The kernel power manager has initiated a shutdown transition."
+    },
+    {
+      "id": 125,
+      "count": 22,
+      "sleepOrResume": false,
+      "latestUtc": "2026-10-12T07:41:17.1463924Z",
+      "message": "ACPI thermal zone \\_TZ.TZ00 has been enumerated."
+    },
+    {
+      "id": 521,
+      "count": 22,
+      "sleepOrResume": false,
+      "latestUtc": "2026-10-12T07:41:19.3455794Z",
+      "message": "Active battery count change."
+    },
+    {
+      "id": 577,
+      "count": 10,
+      "sleepOrResume": false,
+      "latestUtc": "2026-10-12T07:40:54.0507751Z",
+      "message": "The system has prepared for a system initiated reboot from Active."
+    }
+  ],
+  "sleepEvent42": null,
+  "resumeEvent107": null,
+  "modernStandbyEntry506": null,
+  "modernStandbyExit507": null,
+  "latestSleepUtc": null,
+  "latestResumeUtc": null,
+  "sleepResumePair": null,
+  "idFilter": {
+    "ids": [42, 107, 506, 507],
+    "eventCount": 0,
+    "exitCode": 1,
+    "error": "No events were found that match the specified selection criteria."
+  },
+  "powerTroubleshooterEvent1": {
+    "provider": "Microsoft-Windows-Power-Troubleshooter",
+    "logName": "System",
+    "present": false,
+    "countedAsKernelPower": false
+  },
+  "thermalOperational": {
+    "logName": "Microsoft-Windows-Kernel-Power/Thermal-Operational",
+    "eventId": 116,
+    "countRead": 2,
+    "sleepOrResume": false,
+    "message": "ACPI thermal zone \\_TZ.TZ00 has engaged active cooling."
+  },
+  "processesAtQuery": {
+    "markbridgeDesktop": 0,
+    "bridgeHarness": 0,
+    "nodeHarness": 0,
+    "aliveAcrossSleepResumePair": false
+  },
+  "realOsResumeWhileShippedProcessAlive": false,
+  "recoveryPathsRead": [
+    "apps/extension/src/bridge.ts runtime.onStartup calls recover()",
+    "apps/extension/src/bridge.ts alarms.onAlarm markbridge-recovery calls recover(); alarms.create periodInMinutes 0.5",
+    "apps/desktop/src-tauri/src/main.rs app.run calls on_run_event; RunEvent::Resumed calls bridge.rescan_file_mirrors()"
+  ],
+  "recoveryPathsFiredByOsResume": false,
+  "runEventResumedIsOsSleep": false,
+  "dailyProfileTouched": false,
+  "dailyChromeProfileOpened": false,
+  "installedExtensionChanged": false,
+  "productEdited": false,
+  "dailyBefore": {
+    "length": 850304,
+    "sha256": "09F2A5C24BA0EE3E3AFF521B90B8509411C2BCDABFE743746A670B07515C1B9D"
+  },
+  "dailyAfter": {
+    "length": 850304,
+    "sha256": "09F2A5C24BA0EE3E3AFF521B90B8509411C2BCDABFE743746A670B07515C1B9D"
+  },
+  "output": "evidence/import-sleep-4a91e2.json"
+}
