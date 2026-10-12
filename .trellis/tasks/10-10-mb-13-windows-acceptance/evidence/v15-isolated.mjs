@@ -11,16 +11,16 @@ const installer = path.join(repo, 'target/release/bundle/nsis/Markbridge_0.1.0_x
 const extensionDir = path.join(repo, 'apps/extension/dist');
 const chromeExe = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const tempRoot = path.resolve(process.env.TEMP || '');
-const installDir = path.join(tempRoot, 'mb13-v15-pkg-install');
-const appData = path.join(tempRoot, 'mb13-v15-pkg-data');
-const chromeDir = path.join(tempRoot, 'mb13-v15-chrome-pkg');
-const queryDir = path.join(tempRoot, 'mb13-v15-pkg-query');
+const installDir = path.join(tempRoot, 'mb13-v15-recv-install');
+const appData = path.join(tempRoot, 'mb13-v15-recv-data');
+const chromeDir = path.join(tempRoot, 'mb13-v15-chrome-recv');
+const queryDir = path.join(tempRoot, 'mb13-v15-recv-query');
 const webviewDir = path.join(installDir, 'webview2');
-const helperPath = path.join(tempRoot, 'mb13-v15-pkg-win.ps1');
-const pyPath = path.join(tempRoot, 'mb13-v15-pkg-ops.py');
-const logPath = path.join(evidenceDir, 'v15-pkg-run.log');
-const resultPath = path.join(evidenceDir, 'v15-pkg-result.json');
-const namespace = 'Markbridge.Task05.mb13-v15-pkg-20261012';
+const helperPath = path.join(tempRoot, 'mb13-v15-recv-win.ps1');
+const pyPath = path.join(tempRoot, 'mb13-v15-recv-ops.py');
+const logPath = path.join(evidenceDir, 'v15-recv-run.log');
+const resultPath = path.join(evidenceDir, 'v15-recv-result.json');
+const namespace = 'Markbridge.Task05.mb13-v15-recv-20261012';
 const bridgePort = 49153;
 const expectedBookmarks = 'len=849515 sha256=DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82';
 const dailyBookmarks = path.join(process.env.LOCALAPPDATA || '', 'Google/Chrome/User Data/Default/Bookmarks');
@@ -397,17 +397,17 @@ async function startApp() {
   log(`APP_START pid=${child.pid}`);
   return run;
 }
-async function closeApp(run) {
-  const posted = await helper('close', ['-RootPid', String(run.pid)]);
-  note(`WM_CLOSE ${posted} pid=${run.pid}`);
-  const result = await Promise.race([run.exited, sleep(20000).then(() => null)]);
+async function closeApp(appRun) {
+  const posted = await helper('close', ['-RootPid', String(appRun.pid)]);
+  note(`WM_CLOSE ${posted} pid=${appRun.pid}`);
+  const result = await Promise.race([appRun.exited, sleep(20000).then(() => null)]);
   if (result) return result;
-  await run('taskkill', ['/PID', String(run.pid), '/T', '/F']);
-  return Promise.race([run.exited, sleep(10000).then(() => ({ code: null, signal: 'kill-timeout' }))]);
+  await run('taskkill', ['/PID', String(appRun.pid), '/T', '/F']);
+  return Promise.race([appRun.exited, sleep(10000).then(() => ({ code: null, signal: 'kill-timeout' }))]);
 }
-async function killApp(run) {
-  await run('taskkill', ['/PID', String(run.pid), '/T', '/F']);
-  return Promise.race([run.exited, sleep(10000).then(() => ({ code: null, signal: 'kill-timeout' }))]);
+async function killApp(appRun) {
+  await run('taskkill', ['/PID', String(appRun.pid), '/T', '/F']);
+  return Promise.race([appRun.exited, sleep(10000).then(() => ({ code: null, signal: 'kill-timeout' }))]);
 }
 async function withPage(fn) {
   const list = await jsonList(webPort);
