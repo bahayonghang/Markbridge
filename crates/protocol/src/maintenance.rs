@@ -128,7 +128,8 @@ fn text_schema(max: usize, nullable: bool) -> schemars::Schema {
     } else {
         serde_json::json!("string")
     };
-    schemars::Schema::try_from(serde_json::json!({"type": kind, "maxLength": max})).expect("text schema")
+    schemars::Schema::try_from(serde_json::json!({"type": kind, "maxLength": max}))
+        .expect("text schema")
 }
 
 fn title_schema(_: &mut schemars::SchemaGenerator) -> schemars::Schema {

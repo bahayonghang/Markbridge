@@ -22,13 +22,12 @@ export function inspectNativeArtifact(data) {
   }
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  assert.equal(process.platform, 'win32', 'Native foundation build targets Windows only.');
+export function nativeReleaseContext(workspaceRoot) {
   const inherited = process.env.CARGO_ENCODED_RUSTFLAGS?.split('\x1f')
     ?? process.env.RUSTFLAGS?.trim().split(/\s+/).filter(Boolean)
     ?? [];
   const prefixes = [
-    [root, '/workspace'],
+    [workspaceRoot, '/workspace'],
     [resolve(process.env.CARGO_HOME ?? resolve(homedir(), '.cargo')), '/cargo-home'],
     [resolve(process.env.RUSTUP_HOME ?? resolve(homedir(), '.rustup')), '/rustup-home'],
     [homedir(), '/build-home'],
@@ -39,17 +38,30 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       flags.push(`--remap-path-prefix=${path}=${destination}`);
     }
   }
-  const cli = resolve(root, 'apps/desktop/node_modules/@tauri-apps/cli/tauri.js');
-  const targetDirectory = resolve(root, process.env.CARGO_TARGET_DIR ?? 'target');
-  const build = spawnSync(process.execPath, [cli, 'build', '--no-bundle', '--', '--locked'], {
+  const targetDirectory = resolve(workspaceRoot, process.env.CARGO_TARGET_DIR ?? 'target');
+  return {
+    cli: resolve(workspaceRoot, 'apps/desktop/node_modules/@tauri-apps/cli/tauri.js'),
+    targetDirectory,
+    artifact: resolve(targetDirectory, 'release/markbridge-desktop.exe'),
+    env: {
+      ...process.env,
+      CARGO_TARGET_DIR: targetDirectory,
+      CARGO_ENCODED_RUSTFLAGS: flags.join('\x1f'),
+    },
+  };
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  assert.equal(process.platform, 'win32', 'Native foundation build targets Windows only.');
+  const release = nativeReleaseContext(root);
+  const build = spawnSync(process.execPath, [release.cli, 'build', '--no-bundle', '--', '--locked'], {
     cwd: resolve(root, 'apps/desktop'),
-    env: { ...process.env, CARGO_TARGET_DIR: targetDirectory, CARGO_ENCODED_RUSTFLAGS: flags.join('\x1f') },
+    env: release.env,
     stdio: 'inherit',
   });
   if (build.error) throw build.error;
   if (build.status !== 0) process.exit(build.status ?? 1);
-  const artifact = resolve(targetDirectory, 'release/markbridge-desktop.exe');
-  const data = await readFile(artifact);
+  const data = await readFile(release.artifact);
   inspectNativeArtifact(data);
   console.log(`Native release artifact: PASS; ${data.length} bytes; SHA256 ${createHash('sha256').update(data).digest('hex')}.`);
 }

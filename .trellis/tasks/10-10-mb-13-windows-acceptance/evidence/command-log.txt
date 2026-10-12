@@ -1,0 +1,31 @@
+mb13 gates 2026-10-11T23:05:26.1109854-04:00
+HEAD 1f101ead77e832cec2e52893168bfb148d02cb85
+OS Microsoft Windows NT 10.0.26300.0
+Windows Windows 10 Pro 26H2 build 26300
+WebView2 154.0.4258.62
+Chrome file version 155.0.8059.39
+node v26.7.0
+pnpm 12.12.0
+cargo cargo 1.99.0 (5f94df478 2026-08-27)
+rustc rustc 1.99.0 (b940084d7 2026-09-28)
+BEFORE bookmarks FILE len=849515 mtime=2026-10-11T09:22:27.9570134Z sha256=DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82 C:\Users\lyh\AppData\Local\Google\Chrome\User Data\Default\Bookmarks
+BEFORE roaming DIR files=3 newest=2026-10-11T09:20:16.3460420Z C:\Users\lyh\AppData\Roaming\com.markbridge.desktop
+BEFORE local-id DIR files=457 newest=2026-10-11T21:32:20.1215263Z C:\Users\lyh\AppData\Local\com.markbridge.desktop
+BEFORE local-install ABSENT C:\Users\lyh\AppData\Local\Markbridge
+BEFORE pairing 0
+BEFORE model 0
+01-install	0	pnpm install --frozen-lockfile	2026-10-11T23:05:26.8955480-04:00	2026-10-11T23:05:27.2737616-04:00
+02-lint	0	pnpm lint	2026-10-11T23:05:27.2802253-04:00	2026-10-11T23:05:29.7682561-04:00
+03-typecheck	0	pnpm typecheck	2026-10-11T23:05:29.7705221-04:00	2026-10-11T23:05:33.4370432-04:00
+04-test	1	pnpm test	2026-10-11T23:05:33.4393921-04:00	2026-10-11T23:06:24.8096124-04:00
+05-protocol	0	pnpm protocol:check	2026-10-11T23:06:24.8115077-04:00	2026-10-11T23:06:33.5877514-04:00
+06-e2e	1	pnpm test:e2e	2026-10-11T23:06:33.5896223-04:00	2026-10-11T23:07:00.2305973-04:00
+07-build	1	pnpm build	2026-10-11T23:07:00.2327199-04:00	2026-10-11T23:07:02.0247239-04:00
+08-fmt	1	cargo fmt --all -- --check	2026-10-11T23:07:02.0262629-04:00	2026-10-11T23:07:02.9383748-04:00
+09-clippy	101	cargo clippy --workspace --all-targets -- -D warnings	2026-10-11T23:07:02.9396294-04:00	2026-10-11T23:07:10.8009417-04:00
+10-cargo-test	0	cargo test --workspace --locked	2026-10-11T23:07:10.8021837-04:00	2026-10-11T23:07:25.4356785-04:00
+11-build-native-wrapper	killed	pnpm build:native	2026-10-11T23:07:25-04:00	stdout ended with scan PASS, Start-Process did not return, wrapper killed
+11-build-native	0	pnpm build:native	rerun after wrapper kill	23007744 bytes SHA256 0889fa3059eb2ec69ddbf66aed03b78454847d99c6018018422ef304cd0f134a
+12-build-package	0	pnpm build:package	Markbridge_0.1.0_x64-setup.exe 5589020 bytes SHA256 42ffa6b292ed9ccd341005e368c2bbcd82709d257c07482930c55472979094b1
+13-tauri-build-unmapped	NOT_RUN	pnpm --filter @markbridge/desktop tauri build	bare tauri build does not remap paths
+14-isolated-run	0	pwsh isolated-run.ps1	install 0, start 0, restart 0, uninstall 0

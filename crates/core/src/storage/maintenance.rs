@@ -2,9 +2,15 @@ use super::{Storage, storage_error};
 use markbridge_protocol::{ErrorCode, Id, SourceEpoch, TagCommand};
 use rusqlite::{OptionalExtension, params};
 
-pub(super) fn sync_metadata_fts(conn: &rusqlite::Connection, bookmark_id: &str) -> Result<(), ErrorCode> {
-    conn.execute("DELETE FROM metadata_fts WHERE bookmark_id=?1", [bookmark_id])
-        .map_err(storage_error)?;
+pub(super) fn sync_metadata_fts(
+    conn: &rusqlite::Connection,
+    bookmark_id: &str,
+) -> Result<(), ErrorCode> {
+    conn.execute(
+        "DELETE FROM metadata_fts WHERE bookmark_id=?1",
+        [bookmark_id],
+    )
+    .map_err(storage_error)?;
     conn.execute(
         "INSERT INTO metadata_fts(bookmark_id, profile_id, summary, note) SELECT m.bookmark_id, c.profile_id, COALESCE(m.summary, ''), COALESCE(m.note, '') FROM bookmark_metadata m JOIN bookmarks_cache c ON c.bookmark_id=m.bookmark_id WHERE m.bookmark_id=?1",
         [bookmark_id],
@@ -256,9 +262,11 @@ impl Storage {
         profile_id: Id,
         query: String,
     ) -> Result<Vec<TextHitRow>, ErrorCode> {
-        self.call(move |conn| search_text(conn, &profile_id, &query)).await
+        self.call(move |conn| search_text(conn, &profile_id, &query))
+            .await
     }
 
+    #[cfg(test)]
     pub(crate) async fn rebuild_text_index(&self) -> Result<(), ErrorCode> {
         self.call(|conn| {
             conn.execute("DELETE FROM metadata_fts", [])

@@ -2045,6 +2045,7 @@ version = "0.1.0"
 dependencies = [
  "markbridge-core",
  "markbridge-protocol",
+ "serde",
  "tauri",
  "tauri-build",
  "tokio",

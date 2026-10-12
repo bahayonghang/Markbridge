@@ -797,7 +797,11 @@ pub fn plan_bookmark_cleanup(nodes: &[BookmarkNode], chrome_ids: &[Id]) -> Resul
                 child_ids: child_ids_of(&index, parent.as_str()),
             });
         }
-        changes.push(change(EditField::Existence, Some(node.title.as_str()), None)?);
+        changes.push(change(
+            EditField::Existence,
+            Some(node.title.as_str()),
+            None,
+        )?);
         steps.push(step(
             Some(node.chrome_id.clone()),
             Some(node.clone()),

@@ -23,8 +23,8 @@ mod tests {
 
 pub mod ai;
 pub mod bridge;
-mod maintenance;
 pub mod editing;
+mod maintenance;
 pub mod mirror;
 pub mod organization;
 pub mod preview;

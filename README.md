@@ -40,6 +40,8 @@ pnpm --filter @markbridge/desktop tauri dev
 
 Windows release 验证使用 `pnpm build:native`。该命令以当前 workspace、Cargo、Rustup 和用户目录生成临时编译路径映射，使用 `--locked` 构建 `target/release/markbridge-desktop.exe`，随后扫描可执行文件。不生成安装包，不安装或运行应用；自定义 `CARGO_TARGET_DIR` 时，相对路径以 workspace 根目录为基准，构建子进程和扫描器共用同一绝对目录。直接运行 Tauri build 不经过该路径映射和扫描入口，产物不满足该 release 验证合同。
 
+`pnpm build:package` 先运行上述无安装包构建和扫描，再以同一映射、`--no-sign` 和 `--no-binary-patching` 生成当前用户 NSIS。`bundle.active` 仍是 false。该包未签名，不是已发布版本。
+
 ## 验证命令
 
 | 命令 | 检查范围 |
@@ -49,6 +51,7 @@ Windows release 验证使用 `pnpm build:native`。该命令以当前 workspace�
 | `pnpm test` | Vitest 启动/协议行为与双语言互通；Node manifest、capability、生成漂移和原生产物扫描反例 |
 | `pnpm build` | 前端和扩展生产构建，协议消费者检查，产物扫描 |
 | `pnpm build:native` | Windows release 可执行文件构建、编译路径映射、UTF-8/UTF-16 产物扫描；不生成安装包 |
+| `pnpm build:package` | 先执行 `build:native`，再生成未签名、未发布的当前用户 NSIS，并扫描包内可执行文件 |
 | `pnpm protocol:generate` | Rust serde/schemars → JSON Schema → TypeScript |
 | `pnpm protocol:check` | 在内存重新生成并比较已跟踪 schema/类型；漂移退出非零 |
 | `pnpm test:e2e` | Playwright 浏览器空态、键盘焦点和窗口尺寸；没有原生 Tauri 或已安装扩展断言 |

@@ -66,16 +66,23 @@ pub fn verdict_for(url: &str, rows: &[Observation]) -> (LinkVerdict, Option<u16>
     };
     let verdict = match last.class.as_str() {
         "alive" => LinkVerdict::Alive,
-        "gone" if matched.iter().any(|row| {
-            row.class == "gone" && last.observed_at.saturating_sub(row.observed_at) >= RECHECK_GAP_MS
-        }) => LinkVerdict::Candidate,
+        "gone"
+            if matched.iter().any(|row| {
+                row.class == "gone"
+                    && last.observed_at.saturating_sub(row.observed_at) >= RECHECK_GAP_MS
+            }) =>
+        {
+            LinkVerdict::Candidate
+        }
         "gone" => LinkVerdict::Pending,
         _ => LinkVerdict::Unknown,
     };
     (verdict, last.http_status, checks)
 }
 
-pub fn classify_probe(result: &Result<ProbeHit, ProbeError>) -> Option<(&'static str, Option<u16>)> {
+pub fn classify_probe(
+    result: &Result<ProbeHit, ProbeError>,
+) -> Option<(&'static str, Option<u16>)> {
     match result {
         Err(ProbeError::Cancelled) => None,
         Err(ProbeError::Denied(PreviewFailure::TimedOut)) => Some(("unknown", None)),

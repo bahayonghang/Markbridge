@@ -218,7 +218,9 @@ impl Bridge {
             watches: Arc::new(Mutex::new(BTreeMap::new())),
             preview: Gate::default(),
             links: Gate::default(),
-            link_net: Arc::new(std::sync::Mutex::new(Arc::new(crate::preview::SystemNetwork))),
+            link_net: Arc::new(std::sync::Mutex::new(Arc::new(
+                crate::preview::SystemNetwork,
+            ))),
         };
         bridge.arm_saved_watches().await;
         Ok(bridge)

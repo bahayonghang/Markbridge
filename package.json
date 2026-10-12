@@ -11,6 +11,7 @@
     "test": "vitest run && node --test scripts/protocol.test.mjs scripts/foundation.test.mjs scripts/native-artifact.test.mjs",
     "build": "pnpm -r build && node scripts/check-artifacts.mjs",
     "build:native": "node scripts/native-build.mjs",
+    "build:package": "node scripts/native-package.mjs",
     "protocol:generate": "node scripts/protocol.mjs --write",
     "protocol:check": "node scripts/protocol.mjs --check",
     "test:e2e": "playwright test"

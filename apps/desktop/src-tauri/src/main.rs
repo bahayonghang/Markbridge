@@ -5,8 +5,8 @@ use markbridge_protocol::{
     AiApplyResult, AiConnection, AiDraft, AiSettings, AiSuggestion, ApplyResult, BookmarkNode,
     BridgeState, ChromeProfileList, ContentPreview, Counter, EditAction, EditDocument, EditPreview,
     ErrorCode, Id, LibraryCount, LibraryDetail, LibraryNodes, LibraryPage, LibrarySearch,
-    MaintenanceReport, MirrorTree, OperationList, OrganizationFolder, OrganizationPlan, PairingOffer,
-    TagCatalog, TagCommand, TextSearchPage, TitleEncodingPreview,
+    MaintenanceReport, MirrorTree, OperationList, OrganizationFolder, OrganizationPlan,
+    PairingOffer, TagCatalog, TagCommand, TextSearchPage, TitleEncodingPreview,
 };
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -721,18 +721,32 @@ async fn preview_cleanup(
         .await
 }
 
-#[tauri::command]
-async fn confirm_cleanup(
-    window: tauri::WebviewWindow,
-    bridge: tauri::State<'_, Bridge>,
+#[derive(serde::Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct ConfirmCleanupArgs {
     profile_id: Id,
     expected_revision: u64,
     chrome_ids: Vec<Id>,
     keeper_chrome_id: Id,
     confirm: bool,
     second_confirm: bool,
+}
+
+#[tauri::command]
+async fn confirm_cleanup(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    args: ConfirmCleanupArgs,
 ) -> Result<MaintenanceReport, ErrorCode> {
     trusted(&window)?;
+    let ConfirmCleanupArgs {
+        profile_id,
+        expected_revision,
+        chrome_ids,
+        keeper_chrome_id,
+        confirm,
+        second_confirm,
+    } = args;
     bridge
         .confirm_cleanup(
             profile_id,

@@ -361,7 +361,10 @@ pub(super) async fn accept_receipt(
         profile.writes_blocked = blocked.iter().any(|item| item == profile_id);
     }
     if state == OperationState::Applied && before.undo_of.is_none() {
-        inner.storage()?.apply_merge(record.operation_id.clone()).await?;
+        inner
+            .storage()?
+            .apply_merge(record.operation_id.clone())
+            .await?;
     }
     if state == OperationState::RolledBack
         && let Some(original) = before.undo_of.clone()

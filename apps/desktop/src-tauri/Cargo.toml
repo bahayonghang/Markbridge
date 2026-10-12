@@ -11,6 +11,7 @@ tauri-build = { version = "2", features = [] }
 custom-protocol = ["tauri/custom-protocol"]
 
 [dependencies]
+serde.workspace = true
 tauri = { version = "2", features = [] }
 tokio = { version = "1", features = ["sync", "time"] }
 markbridge-core.workspace = true

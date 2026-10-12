@@ -587,18 +587,19 @@ async fn probe_follow(raw: &str, net: &dyn Network) -> Result<ProbeHit, ProbeErr
                 .map_err(|error| ProbeError::Denied(redirect_error(error)))?;
             continue;
         }
-        if (200..300).contains(&status.code) && status.body.is_empty() {
-            if let Ok(got) = read_status(&checked, "GET", true, addr, net).await {
-                if let Some(location) = got.location {
-                    if hop == MAX_REDIRECTS {
-                        return Err(ProbeError::Denied(PreviewFailure::RedirectDenied));
-                    }
-                    current = guard::redirect_target(&checked.url, &location)
-                        .map_err(|error| ProbeError::Denied(redirect_error(error)))?;
-                    continue;
+        if (200..300).contains(&status.code)
+            && status.body.is_empty()
+            && let Ok(got) = read_status(&checked, "GET", true, addr, net).await
+        {
+            if let Some(location) = got.location {
+                if hop == MAX_REDIRECTS {
+                    return Err(ProbeError::Denied(PreviewFailure::RedirectDenied));
                 }
-                status = got;
+                current = guard::redirect_target(&checked.url, &location)
+                    .map_err(|error| ProbeError::Denied(redirect_error(error)))?;
+                continue;
             }
+            status = got;
         }
         return Ok(ProbeHit {
             status: status.code,

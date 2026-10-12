@@ -18,6 +18,28 @@ const MSG_NONE: &str = "没有可移除的重复项。";
 const MSG_SECOND: &str = "删除超过 20 项需要再次确认。";
 const MSG_PROTECTED: &str = "包含不可删除的书签。没有删除。";
 
+struct CleanupReportArgs<'a> {
+    inner: &'a mut Inner,
+    profile_id: &'a Id,
+    expected_revision: u64,
+    chrome_ids: &'a [Id],
+    keeper_chrome_id: &'a Id,
+    request_id: Id,
+    confirm: bool,
+    second_confirm: bool,
+}
+
+struct AssembleArgs<'a> {
+    inner: &'a Inner,
+    profile_id: &'a Id,
+    chrome_ids: &'a [Id],
+    request_id: Id,
+    cleanup: Option<CleanupView>,
+    failure: Option<ErrorCode>,
+    failure_message: Option<String>,
+    running: bool,
+}
+
 impl Bridge {
     pub async fn inspect_library(
         &self,
@@ -26,8 +48,17 @@ impl Bridge {
     ) -> Result<MaintenanceReport> {
         let request_id = random_id("mnt")?;
         let inner = self.inner.lock().await;
-        self.assemble(&inner, &profile_id, &chrome_ids, request_id, None, None, None, false)
-            .await
+        self.assemble(AssembleArgs {
+            inner: &inner,
+            profile_id: &profile_id,
+            chrome_ids: &chrome_ids,
+            request_id,
+            cleanup: None,
+            failure: None,
+            failure_message: None,
+            running: false,
+        })
+        .await
     }
 
     pub async fn check_links(
@@ -40,16 +71,16 @@ impl Bridge {
         if scope.is_empty() || scope.len() > maintenance::SCOPE_LIMIT {
             let inner = self.inner.lock().await;
             return self
-                .assemble(
-                    &inner,
-                    &profile_id,
-                    &scope,
+                .assemble(AssembleArgs {
+                    inner: &inner,
+                    profile_id: &profile_id,
+                    chrome_ids: &scope,
                     request_id,
-                    None,
-                    Some(ErrorCode::InvalidMessage),
-                    Some(MSG_SCOPE.to_owned()),
-                    false,
-                )
+                    cleanup: None,
+                    failure: Some(ErrorCode::InvalidMessage),
+                    failure_message: Some(MSG_SCOPE.to_owned()),
+                    running: false,
+                })
                 .await;
         }
         let flag = self.links.begin(&request_id).await;
@@ -85,23 +116,25 @@ impl Bridge {
             .lock()
             .unwrap_or_else(|error| error.into_inner())
             .clone();
-        if let Err(error) = maintenance::run_link_check(&storage, &profile_id, &targets, &flag, net).await {
+        if let Err(error) =
+            maintenance::run_link_check(&storage, &profile_id, &targets, &flag, net).await
+        {
             flag.cancel();
             return Err(error);
         }
         drop(storage);
         let cancelled = flag.is_cancelled();
         let inner = self.inner.lock().await;
-        self.assemble(
-            &inner,
-            &profile_id,
-            &scope,
+        self.assemble(AssembleArgs {
+            inner: &inner,
+            profile_id: &profile_id,
+            chrome_ids: &scope,
             request_id,
-            None,
-            cancelled.then_some(ErrorCode::Cancelled),
-            cancelled.then(|| MSG_CANCEL.to_owned()),
-            false,
-        )
+            cleanup: None,
+            failure: cancelled.then_some(ErrorCode::Cancelled),
+            failure_message: cancelled.then(|| MSG_CANCEL.to_owned()),
+            running: false,
+        })
         .await
     }
 
@@ -119,16 +152,16 @@ impl Bridge {
     ) -> Result<MaintenanceReport> {
         let request_id = random_id("mnt")?;
         let mut inner = self.inner.lock().await;
-        self.cleanup_report(
-            &mut inner,
-            &profile_id,
+        self.cleanup_report(CleanupReportArgs {
+            inner: &mut inner,
+            profile_id: &profile_id,
             expected_revision,
-            &chrome_ids,
-            &keeper_chrome_id,
+            chrome_ids: &chrome_ids,
+            keeper_chrome_id: &keeper_chrome_id,
             request_id,
-            false,
-            false,
-        )
+            confirm: false,
+            second_confirm: false,
+        })
         .await
     }
 
@@ -143,16 +176,16 @@ impl Bridge {
     ) -> Result<MaintenanceReport> {
         let request_id = random_id("mnt")?;
         let mut inner = self.inner.lock().await;
-        self.cleanup_report(
-            &mut inner,
-            &profile_id,
+        self.cleanup_report(CleanupReportArgs {
+            inner: &mut inner,
+            profile_id: &profile_id,
             expected_revision,
-            &chrome_ids,
-            &keeper_chrome_id,
+            chrome_ids: &chrome_ids,
+            keeper_chrome_id: &keeper_chrome_id,
             request_id,
             confirm,
             second_confirm,
-        )
+        })
         .await
     }
 
@@ -192,17 +225,17 @@ impl Bridge {
             .unwrap_or_else(|error| error.into_inner()) = net;
     }
 
-    async fn cleanup_report(
-        &self,
-        inner: &mut Inner,
-        profile_id: &Id,
-        expected_revision: u64,
-        chrome_ids: &[Id],
-        keeper_chrome_id: &Id,
-        request_id: Id,
-        confirm: bool,
-        second_confirm: bool,
-    ) -> Result<MaintenanceReport> {
+    async fn cleanup_report(&self, args: CleanupReportArgs<'_>) -> Result<MaintenanceReport> {
+        let CleanupReportArgs {
+            inner,
+            profile_id,
+            expected_revision,
+            chrome_ids,
+            keeper_chrome_id,
+            request_id,
+            confirm,
+            second_confirm,
+        } = args;
         let revision = inner
             .profiles
             .get(profile_id.as_str())
@@ -212,48 +245,51 @@ impl Bridge {
             .get();
         if revision != expected_revision {
             return self
-                .assemble(
+                .assemble(AssembleArgs {
                     inner,
                     profile_id,
                     chrome_ids,
                     request_id,
-                    None,
-                    Some(ErrorCode::StaleProposal),
-                    Some(MSG_STALE.to_owned()),
-                    false,
-                )
+                    cleanup: None,
+                    failure: Some(ErrorCode::StaleProposal),
+                    failure_message: Some(MSG_STALE.to_owned()),
+                    running: false,
+                })
                 .await;
         }
-        let view = match self.cleanup_view(inner, profile_id, chrome_ids, keeper_chrome_id).await {
+        let view = match self
+            .cleanup_view(inner, profile_id, chrome_ids, keeper_chrome_id)
+            .await
+        {
             Ok(view) => view,
             Err(ViewFail::Text(message)) => {
                 return self
-                    .assemble(
+                    .assemble(AssembleArgs {
                         inner,
                         profile_id,
                         chrome_ids,
                         request_id,
-                        None,
-                        Some(ErrorCode::InvalidMessage),
-                        Some(message.to_owned()),
-                        false,
-                    )
+                        cleanup: None,
+                        failure: Some(ErrorCode::InvalidMessage),
+                        failure_message: Some(message.to_owned()),
+                        running: false,
+                    })
                     .await;
             }
             Err(ViewFail::Code(error)) => return Err(error),
         };
         if !confirm {
             return self
-                .assemble(
+                .assemble(AssembleArgs {
                     inner,
                     profile_id,
                     chrome_ids,
                     request_id,
-                    Some(view),
-                    Some(ErrorCode::Cancelled),
-                    Some(MSG_CONFIRM.to_owned()),
-                    false,
-                )
+                    cleanup: Some(view),
+                    failure: Some(ErrorCode::Cancelled),
+                    failure_message: Some(MSG_CONFIRM.to_owned()),
+                    running: false,
+                })
                 .await;
         }
         let profile = inner
@@ -265,16 +301,16 @@ impl Bridge {
             || profile.outbound.is_none()
         {
             return self
-                .assemble(
+                .assemble(AssembleArgs {
                     inner,
                     profile_id,
                     chrome_ids,
                     request_id,
-                    Some(view),
-                    Some(ErrorCode::ReadOnly),
-                    Some(MSG_OFFLINE.to_owned()),
-                    false,
-                )
+                    cleanup: Some(view),
+                    failure: Some(ErrorCode::ReadOnly),
+                    failure_message: Some(MSG_OFFLINE.to_owned()),
+                    running: false,
+                })
                 .await;
         }
         if profile.busy || profile.writes_blocked || profile.batch_hold.is_some() {
@@ -294,45 +330,39 @@ impl Bridge {
             .metadata
             .tag_union
             .iter()
-            .filter(|tag| {
-                !view
-                    .keeper
-                    .tags
-                    .iter()
-                    .any(|existing| existing == *tag)
-            })
+            .filter(|tag| !view.keeper.tags.iter().any(|existing| existing == *tag))
             .cloned()
             .collect();
         let planned = match crate::editing::plan_bookmark_cleanup(&nodes, &removal_ids) {
             Ok(plan) => plan,
             Err(ErrorCode::ProtectedNode) => {
                 return self
-                    .assemble(
+                    .assemble(AssembleArgs {
                         inner,
                         profile_id,
                         chrome_ids,
                         request_id,
-                        Some(view),
-                        Some(ErrorCode::ProtectedNode),
-                        Some(MSG_PROTECTED.to_owned()),
-                        false,
-                    )
+                        cleanup: Some(view),
+                        failure: Some(ErrorCode::ProtectedNode),
+                        failure_message: Some(MSG_PROTECTED.to_owned()),
+                        running: false,
+                    })
                     .await;
             }
             Err(error) => return Err(error),
         };
         if planned.requires_second_confirm && !second_confirm {
             return self
-                .assemble(
+                .assemble(AssembleArgs {
                     inner,
                     profile_id,
                     chrome_ids,
                     request_id,
-                    Some(view),
-                    Some(ErrorCode::Cancelled),
-                    Some(MSG_SECOND.to_owned()),
-                    false,
-                )
+                    cleanup: Some(view),
+                    failure: Some(ErrorCode::Cancelled),
+                    failure_message: Some(MSG_SECOND.to_owned()),
+                    running: false,
+                })
                 .await;
         }
         let operation_id = crate::editing::operation_id()?;
@@ -372,16 +402,16 @@ impl Bridge {
         let mut view = view;
         view.operation_id = RequiredNullable(Some(applied.operation_id));
         view.operation_state = RequiredNullable(Some(applied.state));
-        self.assemble(
+        self.assemble(AssembleArgs {
             inner,
             profile_id,
             chrome_ids,
             request_id,
-            Some(view),
-            None,
-            None,
-            false,
-        )
+            cleanup: Some(view),
+            failure: None,
+            failure_message: None,
+            running: false,
+        })
         .await
     }
 
@@ -410,7 +440,8 @@ impl Bridge {
             if member.chrome_id == keeper.chrome_id {
                 continue;
             }
-            let Some(member_key) = member.url.as_deref().and_then(maintenance::normalize_url) else {
+            let Some(member_key) = member.url.as_deref().and_then(maintenance::normalize_url)
+            else {
                 return Err(ViewFail::Text(MSG_SAME));
             };
             if member_key != key {
@@ -422,7 +453,7 @@ impl Bridge {
             return Err(ViewFail::Text(MSG_NONE));
         }
         let mut tags = BTreeSet::new();
-        for member in std::iter::once(keeper).chain(removals.iter().map(|member| *member)) {
+        for member in std::iter::once(keeper).chain(removals.iter().copied()) {
             for tag in &member.tags {
                 tags.insert(maintenance::clip(tag, 32));
             }
@@ -450,17 +481,17 @@ impl Bridge {
         })
     }
 
-    async fn assemble(
-        &self,
-        inner: &Inner,
-        profile_id: &Id,
-        chrome_ids: &[Id],
-        request_id: Id,
-        cleanup: Option<CleanupView>,
-        failure: Option<ErrorCode>,
-        failure_message: Option<String>,
-        running: bool,
-    ) -> Result<MaintenanceReport> {
+    async fn assemble(&self, args: AssembleArgs<'_>) -> Result<MaintenanceReport> {
+        let AssembleArgs {
+            inner,
+            profile_id,
+            chrome_ids,
+            request_id,
+            cleanup,
+            failure,
+            failure_message,
+            running,
+        } = args;
         let _ = self;
         let profile = inner
             .profiles

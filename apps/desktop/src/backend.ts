@@ -304,7 +304,7 @@ export async function previewCleanup(profileId: string, expectedRevision: number
 
 export async function confirmCleanup(profileId: string, expectedRevision: number, chromeIds: string[], keeperChromeId: string, confirm: boolean, secondConfirm: boolean): Promise<MaintenanceReport> {
   if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
-  return parseMaintenanceReport(await invoke<unknown>('confirm_cleanup', { profileId, expectedRevision, chromeIds, keeperChromeId, confirm, secondConfirm }));
+  return parseMaintenanceReport(await invoke<unknown>('confirm_cleanup', { args: { profileId, expectedRevision, chromeIds, keeperChromeId, confirm, secondConfirm } }));
 }
 
 export async function searchLibraryText(profileId: string, query: string): Promise<TextSearchPage> {

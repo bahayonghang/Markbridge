@@ -3,11 +3,11 @@ use crate::preview::Network;
 use futures_util::{SinkExt, StreamExt, future::BoxFuture};
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use std::sync::atomic::{AtomicUsize, Ordering};
+use std::{collections::HashMap, sync::Mutex as StdMutex, time::Duration};
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     net::{TcpListener, TcpStream},
 };
-use std::{collections::HashMap, sync::Mutex as StdMutex, time::Duration};
 use tokio_tungstenite::{
     connect_async,
     tungstenite::{Message, client::IntoClientRequest},
@@ -2628,7 +2628,10 @@ impl Network for LinkNet {
         })
     }
 
-    fn connect(&self, addr: SocketAddr) -> BoxFuture<'static, std::result::Result<TcpStream, PreviewFailure>> {
+    fn connect(
+        &self,
+        addr: SocketAddr,
+    ) -> BoxFuture<'static, std::result::Result<TcpStream, PreviewFailure>> {
         let routes = self.routes.clone();
         let dials = self.dials.clone();
         Box::pin(async move {
@@ -2641,7 +2644,11 @@ impl Network for LinkNet {
     }
 }
 
-async fn serve_link(mut socket: TcpStream, missing_hits: Arc<AtomicUsize>, seen: Arc<StdMutex<Vec<String>>>) {
+async fn serve_link(
+    mut socket: TcpStream,
+    missing_hits: Arc<AtomicUsize>,
+    seen: Arc<StdMutex<Vec<String>>>,
+) {
     let mut buf = vec![0_u8; 4096];
     let n = match tokio::time::timeout(Duration::from_secs(2), socket.read(&mut buf)).await {
         Ok(Ok(n)) => n,
@@ -2660,7 +2667,7 @@ async fn serve_link(mut socket: TcpStream, missing_hits: Arc<AtomicUsize>, seen:
         "/limit" => (429, ""),
         "/missing" => {
             let hit = missing_hits.fetch_add(1, Ordering::SeqCst);
-            (if hit % 2 == 0 { 404 } else { 410 }, "")
+            (if hit.is_multiple_of(2) { 404 } else { 410 }, "")
         }
         "/gone" => (410, ""),
         "/login" => (200, r#"<form><input type="password"></form>"#),
@@ -2729,17 +2736,94 @@ async fn duplicate_groups_do_not_merge_query_fragment_or_metadata() {
         .unwrap();
     let tree = vec![
         fixture_node("0", None, 0, true, "root", None),
-        fixture_node("10", Some("0"), 0, false, "host", Some("https://Example.com/a")),
-        fixture_node("11", Some("0"), 1, false, "port", Some("https://example.com:443/a")),
-        fixture_node("12", Some("0"), 2, false, "query", Some("https://example.com/a?x=1")),
-        fixture_node("13", Some("0"), 3, false, "fragment", Some("https://example.com/a#frag")),
-        fixture_node("14", Some("0"), 4, false, "slash", Some("https://example.com/a/")),
-        fixture_node("15", Some("0"), 5, false, "scheme", Some("http://example.com/a")),
-        fixture_node("16", Some("0"), 6, false, "bare", Some("https://example.com")),
-        fixture_node("17", Some("0"), 7, false, "root-slash", Some("https://example.com/")),
-        fixture_node("18", Some("0"), 8, false, "user", Some("http://user:pass@example.com/a")),
-        fixture_node("19", Some("0"), 9, false, "custom-port", Some("http://example.com:8080/a")),
-        fixture_node("20", Some("0"), 10, false, "path-case", Some("https://example.com/A")),
+        fixture_node(
+            "10",
+            Some("0"),
+            0,
+            false,
+            "host",
+            Some("https://Example.com/a"),
+        ),
+        fixture_node(
+            "11",
+            Some("0"),
+            1,
+            false,
+            "port",
+            Some("https://example.com:443/a"),
+        ),
+        fixture_node(
+            "12",
+            Some("0"),
+            2,
+            false,
+            "query",
+            Some("https://example.com/a?x=1"),
+        ),
+        fixture_node(
+            "13",
+            Some("0"),
+            3,
+            false,
+            "fragment",
+            Some("https://example.com/a#frag"),
+        ),
+        fixture_node(
+            "14",
+            Some("0"),
+            4,
+            false,
+            "slash",
+            Some("https://example.com/a/"),
+        ),
+        fixture_node(
+            "15",
+            Some("0"),
+            5,
+            false,
+            "scheme",
+            Some("http://example.com/a"),
+        ),
+        fixture_node(
+            "16",
+            Some("0"),
+            6,
+            false,
+            "bare",
+            Some("https://example.com"),
+        ),
+        fixture_node(
+            "17",
+            Some("0"),
+            7,
+            false,
+            "root-slash",
+            Some("https://example.com/"),
+        ),
+        fixture_node(
+            "18",
+            Some("0"),
+            8,
+            false,
+            "user",
+            Some("http://user:pass@example.com/a"),
+        ),
+        fixture_node(
+            "19",
+            Some("0"),
+            9,
+            false,
+            "custom-port",
+            Some("http://example.com:8080/a"),
+        ),
+        fixture_node(
+            "20",
+            Some("0"),
+            10,
+            false,
+            "path-case",
+            Some("https://example.com/A"),
+        ),
     ];
     accept_tree(&bridge, &profile, "s", 0, tree).await;
     bridge
@@ -2762,26 +2846,47 @@ async fn duplicate_groups_do_not_merge_query_fragment_or_metadata() {
         )
         .await
         .unwrap();
-    let ids: Vec<_> = ["10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"]
-        .into_iter()
-        .map(|id| Id::new(id).unwrap())
-        .collect();
+    let ids: Vec<_> = [
+        "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20",
+    ]
+    .into_iter()
+    .map(|id| Id::new(id).unwrap())
+    .collect();
     let report = bridge.inspect_library(profile.clone(), ids).await.unwrap();
     assert!(report.failure.0.is_none());
     assert_eq!(
         group_members(&report),
         vec![
-            ("https://example.com/".into(), vec!["16".into(), "17".into()]),
-            ("https://example.com/a".into(), vec!["10".into(), "11".into()]),
+            (
+                "https://example.com/".into(),
+                vec!["16".into(), "17".into()]
+            ),
+            (
+                "https://example.com/a".into(),
+                vec!["10".into(), "11".into()]
+            ),
         ]
     );
     let host = report
         .duplicates
         .iter()
-        .find(|group| group.members.iter().any(|member| member.chrome_id.as_str() == "10"))
+        .find(|group| {
+            group
+                .members
+                .iter()
+                .any(|member| member.chrome_id.as_str() == "10")
+        })
         .unwrap();
-    let keeper = host.members.iter().find(|member| member.chrome_id.as_str() == "10").unwrap();
-    let other = host.members.iter().find(|member| member.chrome_id.as_str() == "11").unwrap();
+    let keeper = host
+        .members
+        .iter()
+        .find(|member| member.chrome_id.as_str() == "10")
+        .unwrap();
+    let other = host
+        .members
+        .iter()
+        .find(|member| member.chrome_id.as_str() == "11")
+        .unwrap();
     assert_eq!(keeper.note, "保留备注");
     assert!(keeper.tags.is_empty());
     assert_eq!(other.tags, vec!["稍后".to_owned()]);
@@ -2814,7 +2919,14 @@ async fn link_probe_keeps_unknown_and_rechecks_gone() {
     let mut tree = vec![fixture_node("0", None, 0, true, "root", None)];
     let mut ids = Vec::new();
     for (index, (chrome, url)) in rows.iter().enumerate() {
-        tree.push(fixture_node(chrome, Some("0"), index as u64, false, chrome, Some(url)));
+        tree.push(fixture_node(
+            chrome,
+            Some("0"),
+            index as u64,
+            false,
+            chrome,
+            Some(url),
+        ));
         ids.push(Id::new(*chrome).unwrap());
     }
     accept_tree(&bridge, &profile, "s", 0, tree).await;
@@ -2828,7 +2940,10 @@ async fn link_probe_keeps_unknown_and_rechecks_gone() {
         .await
         .unwrap();
     assert_eq!(empty.failure.0, Some(ErrorCode::InvalidMessage));
-    assert_eq!(empty.failure_message.0.as_deref(), Some("未选择范围。没有发出请求。"));
+    assert_eq!(
+        empty.failure_message.0.as_deref(),
+        Some("未选择范围。没有发出请求。")
+    );
     assert!(seen.lock().unwrap().is_empty());
     let first = bridge
         .check_links(profile.clone(), ids.clone(), Id::new("mnt-1").unwrap())
@@ -2846,7 +2961,14 @@ async fn link_probe_keeps_unknown_and_rechecks_gone() {
     assert_eq!(link_row(&first, "login").verdict, LinkVerdict::Unknown);
     assert_eq!(link_row(&first, "login").http_status.0, Some(200));
     assert_eq!(link_row(&first, "ok").verdict, LinkVerdict::Alive);
-    for chrome in ["loop", "private", "linklocal", "multicast", "metadata", "userinfo"] {
+    for chrome in [
+        "loop",
+        "private",
+        "linklocal",
+        "multicast",
+        "metadata",
+        "userinfo",
+    ] {
         assert_eq!(link_row(&first, chrome).verdict, LinkVerdict::Unknown);
         assert!(link_row(&first, chrome).http_status.0.is_none());
         assert_ne!(link_row(&first, chrome).verdict, LinkVerdict::Candidate);
@@ -2858,8 +2980,20 @@ async fn link_probe_keeps_unknown_and_rechecks_gone() {
     assert_eq!(count_seen(&seen_now, "GET /gone"), 0);
     assert_eq!(count_seen(&seen_now, "HEAD /login"), 1);
     assert_eq!(count_seen(&seen_now, "GET /login"), 1);
-    assert!(calls.lock().unwrap().iter().all(|host| host == "allowed.test"));
-    assert!(dials.lock().unwrap().iter().all(|addr| addr.ip() == IpAddr::V4(Ipv4Addr::new(203, 0, 113, 10))));
+    assert!(
+        calls
+            .lock()
+            .unwrap()
+            .iter()
+            .all(|host| host == "allowed.test")
+    );
+    assert!(
+        dials
+            .lock()
+            .unwrap()
+            .iter()
+            .all(|addr| addr.ip() == IpAddr::V4(Ipv4Addr::new(203, 0, 113, 10)))
+    );
     let again = bridge
         .check_links(profile.clone(), ids.clone(), Id::new("mnt-2").unwrap())
         .await
@@ -2897,7 +3031,14 @@ async fn link_timeout_is_unknown() {
         0,
         vec![
             fixture_node("0", None, 0, true, "root", None),
-            fixture_node("hang", Some("0"), 0, false, "hang", Some("http://allowed.test/hang")),
+            fixture_node(
+                "hang",
+                Some("0"),
+                0,
+                false,
+                "hang",
+                Some("http://allowed.test/hang"),
+            ),
         ],
     )
     .await;
@@ -2964,10 +3105,13 @@ async fn link_check_cancel_does_not_block_tree_or_edit() {
     .await
     .expect("four probes");
     let revision = revision_of(&bridge, &profile).await;
-    tokio::time::timeout(Duration::from_millis(500), bridge.tree(profile.clone(), None, Some(1)))
-        .await
-        .expect("tree")
-        .unwrap();
+    tokio::time::timeout(
+        Duration::from_millis(500),
+        bridge.tree(profile.clone(), None, Some(1)),
+    )
+    .await
+    .expect("tree")
+    .unwrap();
     tokio::time::timeout(
         Duration::from_millis(500),
         bridge.preview_edit(
@@ -2990,7 +3134,10 @@ async fn link_check_cancel_does_not_block_tree_or_edit() {
         .unwrap()
         .unwrap();
     assert_eq!(report.failure.0, Some(ErrorCode::Cancelled));
-    assert_eq!(report.failure_message.0.as_deref(), Some("检查已取消。未继续请求其余地址。"));
+    assert_eq!(
+        report.failure_message.0.as_deref(),
+        Some("检查已取消。未继续请求其余地址。")
+    );
     assert_eq!(seen.lock().unwrap().len(), 4);
     assert!(link_row(&report, "s0").verdict != LinkVerdict::Candidate);
     server.abort();
@@ -3016,24 +3163,42 @@ async fn cleanup_preview_confirm_receipt_and_undo() {
             fixture_node("10", Some("0"), 0, false, "keeper", Some(same)),
             fixture_node("11", Some("0"), 1, false, "gone-a", Some(same)),
             fixture_node("21", Some("0"), 2, false, "gone-b", Some(same)),
-            fixture_node("12", Some("0"), 3, false, "query", Some("https://example.com/item?x=1")),
+            fixture_node(
+                "12",
+                Some("0"),
+                3,
+                false,
+                "query",
+                Some("https://example.com/item?x=1"),
+            ),
             fixture_node("13", Some("0"), 4, false, "extra", Some(same)),
         ],
     )
     .await;
     let mut rx = bind_session(&bridge, &profile, "s").await;
-    for (chrome, note, tag) in [("10", "保留备注", "阅读"), ("11", "另一备注", "稍后"), ("21", "第三条", "归档"), ("13", "旁路", "不要动")] {
+    for (chrome, note, tag) in [
+        ("10", "保留备注", "阅读"),
+        ("11", "另一备注", "稍后"),
+        ("21", "第三条", "归档"),
+        ("13", "旁路", "不要动"),
+    ] {
         bridge
             .mutate_tags(
                 profile.clone(),
-                TagCommand::SetNote { chrome_ids: vec![Id::new(chrome).unwrap()], note: note.into() },
+                TagCommand::SetNote {
+                    chrome_ids: vec![Id::new(chrome).unwrap()],
+                    note: note.into(),
+                },
             )
             .await
             .unwrap();
         bridge
             .mutate_tags(
                 profile.clone(),
-                TagCommand::Add { chrome_ids: vec![Id::new(chrome).unwrap()], name: tag.into() },
+                TagCommand::Add {
+                    chrome_ids: vec![Id::new(chrome).unwrap()],
+                    name: tag.into(),
+                },
             )
             .await
             .unwrap();
@@ -3056,51 +3221,114 @@ async fn cleanup_preview_confirm_receipt_and_undo() {
         .set_summary(keeper_id.clone(), Some("保留摘要".into()))
         .await
         .unwrap();
-    let scope = vec![Id::new("10").unwrap(), Id::new("11").unwrap(), Id::new("21").unwrap()];
+    let scope = vec![
+        Id::new("10").unwrap(),
+        Id::new("11").unwrap(),
+        Id::new("21").unwrap(),
+    ];
     let revision = revision_of(&bridge, &profile).await;
     let preview = bridge
-        .preview_cleanup(profile.clone(), revision, scope.clone(), Id::new("10").unwrap())
+        .preview_cleanup(
+            profile.clone(),
+            revision,
+            scope.clone(),
+            Id::new("10").unwrap(),
+        )
         .await
         .unwrap();
     let view = preview.cleanup.0.clone().unwrap();
     assert_eq!(view.keeper.chrome_id.as_str(), "10");
     assert_eq!(view.keeper.note, "保留备注");
-    let mut removal_ids: Vec<_> = view.removals.iter().map(|member| member.chrome_id.as_str().to_owned()).collect();
+    let mut removal_ids: Vec<_> = view
+        .removals
+        .iter()
+        .map(|member| member.chrome_id.as_str().to_owned())
+        .collect();
     removal_ids.sort();
     assert_eq!(removal_ids, vec!["11".to_owned(), "21".to_owned()]);
     assert!(view.metadata.tag_union.iter().any(|tag| tag == "阅读"));
     assert!(view.metadata.tag_union.iter().any(|tag| tag == "稍后"));
     assert!(view.metadata.tag_union.iter().any(|tag| tag == "归档"));
-    assert!(view.metadata.note_conflicts.iter().any(|item| item.note == "另一备注"));
-    assert!(view.metadata.note_conflicts.iter().any(|item| item.note == "第三条"));
+    assert!(
+        view.metadata
+            .note_conflicts
+            .iter()
+            .any(|item| item.note == "另一备注")
+    );
+    assert!(
+        view.metadata
+            .note_conflicts
+            .iter()
+            .any(|item| item.note == "第三条")
+    );
     assert_eq!(view.metadata.keeper_note, "保留备注");
-    assert_eq!(view.metadata.handling, "保留项备注保持不变。标签取并集。摘要不合并。");
+    assert_eq!(
+        view.metadata.handling,
+        "保留项备注保持不变。标签取并集。摘要不合并。"
+    );
     assert!(view.operation_id.0.is_none());
     assert!(rx.try_recv().is_err());
     let held = bridge
-        .confirm_cleanup(profile.clone(), revision, scope.clone(), Id::new("10").unwrap(), false, false)
+        .confirm_cleanup(
+            profile.clone(),
+            revision,
+            scope.clone(),
+            Id::new("10").unwrap(),
+            false,
+            false,
+        )
         .await
         .unwrap();
     assert_eq!(held.failure.0, Some(ErrorCode::Cancelled));
-    assert_eq!(held.failure_message.0.as_deref(), Some("未确认清理。没有删除书签。"));
+    assert_eq!(
+        held.failure_message.0.as_deref(),
+        Some("未确认清理。没有删除书签。")
+    );
     assert!(rx.try_recv().is_err());
     {
         let mut inner = bridge.inner.lock().await;
-        inner.profiles.get_mut(profile.as_str()).unwrap().view.connection = BridgeConnection::CachedReadOnly;
+        inner
+            .profiles
+            .get_mut(profile.as_str())
+            .unwrap()
+            .view
+            .connection = BridgeConnection::CachedReadOnly;
     }
     let offline = bridge
-        .confirm_cleanup(profile.clone(), revision, scope.clone(), Id::new("10").unwrap(), true, false)
+        .confirm_cleanup(
+            profile.clone(),
+            revision,
+            scope.clone(),
+            Id::new("10").unwrap(),
+            true,
+            false,
+        )
         .await
         .unwrap();
     assert_eq!(offline.failure.0, Some(ErrorCode::ReadOnly));
-    assert_eq!(offline.failure_message.0.as_deref(), Some("未连接。不能写入浏览器。"));
+    assert_eq!(
+        offline.failure_message.0.as_deref(),
+        Some("未连接。不能写入浏览器。")
+    );
     assert!(rx.try_recv().is_err());
     {
         let mut inner = bridge.inner.lock().await;
-        inner.profiles.get_mut(profile.as_str()).unwrap().view.connection = BridgeConnection::Live;
+        inner
+            .profiles
+            .get_mut(profile.as_str())
+            .unwrap()
+            .view
+            .connection = BridgeConnection::Live;
     }
     let confirmed = bridge
-        .confirm_cleanup(profile.clone(), revision, scope.clone(), Id::new("10").unwrap(), true, false)
+        .confirm_cleanup(
+            profile.clone(),
+            revision,
+            scope.clone(),
+            Id::new("10").unwrap(),
+            true,
+            false,
+        )
         .await
         .unwrap();
     assert!(confirmed.failure.0.is_none());
@@ -3110,39 +3338,94 @@ async fn cleanup_preview_confirm_receipt_and_undo() {
     };
     assert_eq!(payload.operation_id, operation_id);
     assert_eq!(payload.steps.len(), 2);
-    assert_eq!(payload.steps[0].expected_before.as_ref().unwrap().chrome_id.as_str(), "21");
-    assert_eq!(payload.steps[1].expected_before.as_ref().unwrap().chrome_id.as_str(), "11");
-    assert!(payload.steps.iter().all(|step| matches!(step.payload, Mutation::Delete {})));
+    assert_eq!(
+        payload.steps[0]
+            .expected_before
+            .as_ref()
+            .unwrap()
+            .chrome_id
+            .as_str(),
+        "21"
+    );
+    assert_eq!(
+        payload.steps[1]
+            .expected_before
+            .as_ref()
+            .unwrap()
+            .chrome_id
+            .as_str(),
+        "11"
+    );
+    assert!(
+        payload
+            .steps
+            .iter()
+            .all(|step| matches!(step.payload, Mutation::Delete {}))
+    );
     for (index, step) in payload.steps.iter().enumerate() {
         let before = step.expected_before.clone().unwrap();
-        assert!(!bridge
-            .receive(operation_receipt(&profile, &operation_id, &step.request_id, Some(&before), None))
-            .await
-            .unwrap());
-        assert!(!bridge
-            .receive(maintenance_event(
-                &profile,
-                (index + 1) as u64,
-                &BookmarkEvent::Removed {
-                    chrome_id: before.chrome_id.clone(),
-                    parent_id: before.parent_id.clone().unwrap(),
-                    position: before.position,
-                    subtree: vec![before],
-                },
-            ))
-            .await
-            .unwrap());
+        assert!(
+            !bridge
+                .receive(operation_receipt(
+                    &profile,
+                    &operation_id,
+                    &step.request_id,
+                    Some(&before),
+                    None
+                ))
+                .await
+                .unwrap()
+        );
+        assert!(
+            !bridge
+                .receive(maintenance_event(
+                    &profile,
+                    (index + 1) as u64,
+                    &BookmarkEvent::Removed {
+                        chrome_id: before.chrome_id.clone(),
+                        parent_id: before.parent_id.clone().unwrap(),
+                        position: before.position,
+                        subtree: vec![before],
+                    },
+                ))
+                .await
+                .unwrap()
+        );
     }
     let listed = bridge.list_operations(profile.clone()).await.unwrap();
     assert_eq!(
-        listed.operations.iter().find(|item| item.operation_id == operation_id).unwrap().state,
+        listed
+            .operations
+            .iter()
+            .find(|item| item.operation_id == operation_id)
+            .unwrap()
+            .state,
         OperationState::Applied
     );
-    let meta = bridge.inner.lock().await.storage().unwrap().metadata(keeper_id.clone()).await.unwrap().unwrap();
+    let meta = bridge
+        .inner
+        .lock()
+        .await
+        .storage()
+        .unwrap()
+        .metadata(keeper_id.clone())
+        .await
+        .unwrap()
+        .unwrap();
     assert_eq!(meta.summary.as_deref(), Some("保留摘要"));
     assert_eq!(meta.note, "保留备注");
-    let merged = bridge.inspect_library(profile.clone(), vec![Id::new("10").unwrap(), Id::new("13").unwrap()]).await.unwrap();
-    let keeper = merged.links.iter().find(|row| row.chrome_id.as_str() == "10").unwrap();
+    let merged = bridge
+        .inspect_library(
+            profile.clone(),
+            vec![Id::new("10").unwrap(), Id::new("13").unwrap()],
+        )
+        .await
+        .unwrap();
+    let keeper = merged
+        .links
+        .iter()
+        .find(|row| row.chrome_id.as_str() == "10")
+        .unwrap();
     let _ = keeper;
     let keeper_member = merged
         .duplicates
@@ -3154,14 +3437,26 @@ async fn cleanup_preview_confirm_receipt_and_undo() {
     assert!(keeper_member.tags.iter().any(|tag| tag == "稍后"));
     assert!(keeper_member.tags.iter().any(|tag| tag == "归档"));
     assert!(!keeper_member.tags.iter().any(|tag| tag == "不要动"));
-    assert!(cached_tree(&bridge, &profile).await.iter().any(|node| node.chrome_id.as_str() == "13"));
-    assert!(cached_tree(&bridge, &profile).await.iter().all(|node| node.chrome_id.as_str() != "11" && node.chrome_id.as_str() != "21"));
+    assert!(
+        cached_tree(&bridge, &profile)
+            .await
+            .iter()
+            .any(|node| node.chrome_id.as_str() == "13")
+    );
+    assert!(
+        cached_tree(&bridge, &profile)
+            .await
+            .iter()
+            .all(|node| node.chrome_id.as_str() != "11" && node.chrome_id.as_str() != "21")
+    );
     let revision = revision_of(&bridge, &profile).await;
     let undone = bridge
         .apply_edit(
             profile.clone(),
             revision,
-            EditAction::Undo { operation_id: operation_id.clone() },
+            EditAction::Undo {
+                operation_id: operation_id.clone(),
+            },
             false,
         )
         .await
@@ -3171,10 +3466,20 @@ async fn cleanup_preview_confirm_receipt_and_undo() {
         panic!("missing undo");
     };
     for (index, step) in payload.steps.iter().enumerate() {
-        let Mutation::Create { parent_id, position, title, url } = &step.payload else {
+        let Mutation::Create {
+            parent_id,
+            position,
+            title,
+            url,
+        } = &step.payload
+        else {
             panic!("undo step");
         };
-        let chrome = if title.as_str() == "gone-a" { "11" } else { "21" };
+        let chrome = if title.as_str() == "gone-a" {
+            "11"
+        } else {
+            "21"
+        };
         let node = BookmarkNode {
             chrome_id: Id::new(chrome).unwrap(),
             parent_id: Some(parent_id.clone()),
@@ -3187,32 +3492,77 @@ async fn cleanup_preview_confirm_receipt_and_undo() {
             date_added: None,
             date_last_used: None,
         };
-        assert!(!bridge
-            .receive(operation_receipt(&profile, &payload.operation_id, &step.request_id, None, Some(&node)))
-            .await
-            .unwrap());
-        assert!(!bridge
-            .receive(maintenance_event(&profile, (index + 3) as u64, &BookmarkEvent::Created { node }))
-            .await
-            .unwrap());
+        assert!(
+            !bridge
+                .receive(operation_receipt(
+                    &profile,
+                    &payload.operation_id,
+                    &step.request_id,
+                    None,
+                    Some(&node)
+                ))
+                .await
+                .unwrap()
+        );
+        assert!(
+            !bridge
+                .receive(maintenance_event(
+                    &profile,
+                    (index + 3) as u64,
+                    &BookmarkEvent::Created { node }
+                ))
+                .await
+                .unwrap()
+        );
     }
     let restored = bridge.list_operations(profile.clone()).await.unwrap();
     assert_eq!(
-        restored.operations.iter().find(|item| item.operation_id == operation_id).unwrap().state,
+        restored
+            .operations
+            .iter()
+            .find(|item| item.operation_id == operation_id)
+            .unwrap()
+            .state,
         OperationState::RolledBack
     );
-    let meta = bridge.inner.lock().await.storage().unwrap().metadata(keeper_id).await.unwrap().unwrap();
+    let meta = bridge
+        .inner
+        .lock()
+        .await
+        .storage()
+        .unwrap()
+        .metadata(keeper_id)
+        .await
+        .unwrap()
+        .unwrap();
     assert_eq!(meta.note, "保留备注");
     assert_eq!(meta.summary.as_deref(), Some("保留摘要"));
     let after = bridge
-        .inspect_library(profile.clone(), vec![Id::new("10").unwrap(), Id::new("11").unwrap(), Id::new("13").unwrap()])
+        .inspect_library(
+            profile.clone(),
+            vec![
+                Id::new("10").unwrap(),
+                Id::new("11").unwrap(),
+                Id::new("13").unwrap(),
+            ],
+        )
         .await
         .unwrap();
-    let keeper = after.duplicates.iter().flat_map(|group| group.members.iter()).find(|member| member.chrome_id.as_str() == "10").unwrap();
+    let keeper = after
+        .duplicates
+        .iter()
+        .flat_map(|group| group.members.iter())
+        .find(|member| member.chrome_id.as_str() == "10")
+        .unwrap();
     assert!(keeper.tags.iter().any(|tag| tag == "阅读"));
     assert!(!keeper.tags.iter().any(|tag| tag == "稍后"));
     assert!(!keeper.tags.iter().any(|tag| tag == "归档"));
-    let returned = after.duplicates.iter().flat_map(|group| group.members.iter()).find(|member| member.chrome_id.as_str() == "11").unwrap();
+    let returned = after
+        .duplicates
+        .iter()
+        .flat_map(|group| group.members.iter())
+        .find(|member| member.chrome_id.as_str() == "11")
+        .unwrap();
     assert_eq!(returned.note, "另一备注");
     assert!(returned.tags.iter().any(|tag| tag == "稍后"));
     bridge.shutdown().await.unwrap();
@@ -3233,12 +3583,27 @@ async fn text_search_is_profile_scoped() {
         .unwrap();
     let tree = vec![
         fixture_node("0", None, 0, true, "root", None),
-        fixture_node("42", Some("0"), 0, false, "Alpha", Some("https://example.com/a")),
+        fixture_node(
+            "42",
+            Some("0"),
+            0,
+            false,
+            "Alpha",
+            Some("https://example.com/a"),
+        ),
     ];
     accept_tree(&bridge, &profile_a, "sa", 0, tree.clone()).await;
     accept_tree(&bridge, &profile_b, "sb", 0, tree).await;
     async fn bookmark_for(bridge: &Bridge, profile: &Id) -> Id {
-        let epoch = bridge.inner.lock().await.profiles.get(profile.as_str()).unwrap().identity.source_epoch;
+        let epoch = bridge
+            .inner
+            .lock()
+            .await
+            .profiles
+            .get(profile.as_str())
+            .unwrap()
+            .identity
+            .source_epoch;
         bridge
             .inner
             .lock()
@@ -3260,7 +3625,10 @@ async fn text_search_is_profile_scoped() {
         bridge
             .mutate_tags(
                 profile.clone(),
-                TagCommand::SetNote { chrome_ids: vec![Id::new("42").unwrap()], note: "reading list".into() },
+                TagCommand::SetNote {
+                    chrome_ids: vec![Id::new("42").unwrap()],
+                    note: "reading list".into(),
+                },
             )
             .await
             .unwrap();
@@ -3274,25 +3642,63 @@ async fn text_search_is_profile_scoped() {
             .await
             .unwrap();
     }
-    let blank = bridge.search_text(profile_a.clone(), String::new()).await.unwrap();
+    let blank = bridge
+        .search_text(profile_a.clone(), String::new())
+        .await
+        .unwrap();
     assert!(blank.hits.is_empty());
     assert_eq!(
-        bridge.search_text(profile_a.clone(), "x".repeat(201)).await.unwrap_err(),
+        bridge
+            .search_text(profile_a.clone(), "x".repeat(201))
+            .await
+            .unwrap_err(),
         ErrorCode::InvalidMessage
     );
     for query in ["签", "书签", "re", "reading", "书签摘"] {
-        let page = bridge.search_text(profile_a.clone(), query.into()).await.unwrap();
-        assert!(page.hits.iter().any(|hit| hit.bookmark_id == id_a), "{query}");
-        assert!(page.hits.iter().all(|hit| hit.bookmark_id != id_b), "{query}");
+        let page = bridge
+            .search_text(profile_a.clone(), query.into())
+            .await
+            .unwrap();
+        assert!(
+            page.hits.iter().any(|hit| hit.bookmark_id == id_a),
+            "{query}"
+        );
+        assert!(
+            page.hits.iter().all(|hit| hit.bookmark_id != id_b),
+            "{query}"
+        );
     }
-    let other = bridge.search_text(profile_b.clone(), "书签摘".into()).await.unwrap();
+    let other = bridge
+        .search_text(profile_b.clone(), "书签摘".into())
+        .await
+        .unwrap();
     assert!(other.hits.iter().any(|hit| hit.bookmark_id == id_b));
     assert!(other.hits.iter().all(|hit| hit.bookmark_id != id_a));
-    bridge.inner.lock().await.storage().unwrap().rebuild_text_index().await.unwrap();
-    let meta = bridge.inner.lock().await.storage().unwrap().metadata(id_a.clone()).await.unwrap().unwrap();
+    bridge
+        .inner
+        .lock()
+        .await
+        .storage()
+        .unwrap()
+        .rebuild_text_index()
+        .await
+        .unwrap();
+    let meta = bridge
+        .inner
+        .lock()
+        .await
+        .storage()
+        .unwrap()
+        .metadata(id_a.clone())
+        .await
+        .unwrap()
+        .unwrap();
     assert_eq!(meta.summary.as_deref(), Some("本地书签摘要"));
     assert_eq!(meta.note, "reading list");
-    let again = bridge.search_text(profile_a.clone(), "书签摘".into()).await.unwrap();
+    let again = bridge
+        .search_text(profile_a.clone(), "书签摘".into())
+        .await
+        .unwrap();
     assert!(again.hits.iter().any(|hit| hit.bookmark_id == id_a));
     bridge.shutdown().await.unwrap();
 }

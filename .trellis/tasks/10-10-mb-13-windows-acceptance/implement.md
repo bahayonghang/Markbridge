@@ -18,7 +18,7 @@
 
 ## 检查命令
 
-以下为实施后的计划命令；当前产品代码尚不存在，全部 NOT_RUN。01 负责提供这些统一入口；命令变更需同步所有引用。
+以下为该子任务验收时执行的命令；该子任务尚未运行这些检查，状态为 NOT_RUN。基础入口由 01 提供；命令变更需同步父计划和受影响任务。
 
 ```text
 pnpm install --frozen-lockfile
@@ -28,11 +28,14 @@ pnpm test
 pnpm protocol:check
 pnpm test:e2e
 pnpm build
+pnpm build:native
 cargo fmt --all -- --check
 cargo clippy --workspace --all-targets -- -D warnings
 cargo test --workspace --locked
 pnpm --filter @markbridge/desktop tauri build
 ```
+
+01 的 `pnpm build:native` 只构建并扫描 Windows release 可执行文件，不生成安装包。13 实现打包入口时必须复用动态路径重映射与扫描规则，并检查安装包内的实际可执行文件；不得用未重映射的裸构建替代该产物门槛。实际打包入口在 13 实施时记录到父计划和 README。
 
 为 AC13-* 添加行为测试，不写仅复述实现的测试。涉及安全/写入/恢复时保留故障注入与反例。完整检查和原生步骤按父级 V01–V15；V16 独立外部证据 执行。
 
