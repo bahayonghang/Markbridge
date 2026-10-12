@@ -490,3 +490,19 @@ The following sleep states are not available on this system:
 `powercfg /lastwake` 退出码 0。Wake History Count 是 0。`powercfg /a` 退出码 0。可用休眠状态只有 `Standby (S0 Low Power Idle) Network Connected`。`powercfg /sleepstudy` 退出码 1。stdout 为 0 字节。stderr 是 `This command requires administrator privileges and must be executed from an elevated command prompt.` 临时 HTML 没有生成。
 
 OS 休眠保持 UNVERIFIED。V04 总行保持 UNVERIFIED。导入保持 UNVERIFIED。03 未归档。
+
+## sudo sleepstudy
+
+日期：2026-10-12。父会话执行 `sudo powercfg /sleepstudy /output C:\Users\lyh\AppData\Local\Temp\grok-goal-48052dce33c9\implementer\sleepstudy.html /duration 7`。20 秒后捕获输出为空。进程在退出前被终止，因此没有退出码。没有打印 wake count。主机没有被挂起。
+
+当场核对：当前进程不是管理员（not elevated）。`HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Sudo` 的 Enabled=1。`C:\Users\lyh\AppData\Local\Temp\grok-goal-48052dce33c9\implementer\sleepstudy.html` 不存在（html absent）。没有 wake 观察。
+
+这次记录没有再执行 `sudo`，没有调用 `Start-Process -Verb RunAs`，没有提权，没有挂起主机，没有查询 `Microsoft-Windows-Kernel-Power`。没有改 `apps`、`crates`、`packages`、`scripts`、`tests` 或 `task.json`。没有归档。
+
+OS 休眠保持 UNVERIFIED。V04 总行保持 UNVERIFIED。导入不标 PASS，保持 UNVERIFIED。03 未归档。
+
+## sudo sleepstudy 复核
+
+日期：2026-10-12。上一节与这次当场核对一致，句子未改。当前进程不是管理员。`HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Sudo` 的 Enabled=1。`C:\Users\lyh\AppData\Local\Temp\grok-goal-48052dce33c9\implementer\sleepstudy.html` 不存在。这次没有执行 `sudo`，没有提权，没有挂起主机，没有查询 `Microsoft-Windows-Kernel-Power`。没有改 `apps`、`crates`、`packages`、`scripts`、`tests` 或 `task.json`。没有归档。`git diff --name-only -- apps crates packages scripts tests` 无输出。`task.json` 的 status 仍是 `in_progress`。
+
+OS 休眠保持 UNVERIFIED。V04 总行保持 UNVERIFIED。导入保持 UNVERIFIED。03 未归档。
