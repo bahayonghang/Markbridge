@@ -184,3 +184,102 @@ V01 仍是 FAIL。上表里 `pnpm test`、`pnpm test:e2e`、`pnpm build` 的退�
 | `pnpm test:e2e` | 0 | PASS。6 通过、0 失败 |
 
 这四条是 PASS。历史 V01 FAIL 行保留。这次重跑的四条退出码都是 0，不把历史 V01 改成 PASS。AC13-2 仍是 FAIL。V15 仍是 FAIL。AC13-3 仍是 NOT_RUN。AC13-4 仍是 NOT_RUN。V16 仍是 UNVERIFIED。
+
+## 2026-10-12 安装包文件清单
+
+00:05（-04:00）。没有运行 `pnpm build:package`，没有运行 `tauri build`，没有执行安装程序。
+
+`C:\Program Files\7-Zip\7z.exe` 与 `C:\Program Files (x86)\7-Zip\7z.exe` 都不存在。`where.exe 7z` 退出码 0，解析到 `C:\Users\lyh\scoop\shims\7z.exe`。`scripts/native-package.mjs` 先试这两个路径，都不能执行时再调用 PATH 上的 `7z`。脚本不包含该 scoop 路径。`7z i` 退出码 0。清单和解压使用的命令是 PATH 上的 `7z`。
+
+`7z l` 退出码 0。`7z e` 退出码 0。临时解压目录已删除。
+
+安装包：`target/release/bundle/nsis/Markbridge_0.1.0_x64-setup.exe`。5589087 字节。SHA256 `3757c2e9d31143b5d773c9cb3b5520d26425e4e927530af8e33a6705ceeb61b3`。长度和 SHA256 与上文 2026-10-11 trellis-check 记录的安装包相同。该节写明未签名、未发布。没有重做签名检查。抽出的 `markbridge-desktop.exe` 在删除临时目录前读到 `FileVersion` 与 `ProductVersion` 都是 `0.1.0`。
+
+`7z l` 输出：
+
+```
+7-Zip 26.04 (x64) : Copyright (c) 1999-2026 Igor Pavlov : 2026-10-05
+
+Scanning the drive for archives:
+1 file, 5589087 bytes (5459 KiB)
+
+Listing archive: D:\Documents\Code\Tauri\Markbridge\target\release\bundle\nsis\Markbridge_0.1.0_x64-setup.exe
+
+--
+Path = D:\Documents\Code\Tauri\Markbridge\target\release\bundle\nsis\Markbridge_0.1.0_x64-setup.exe
+Type = Nsis
+Physical Size = 5589087
+Method = LZMA:23
+Solid = +
+Headers Size = 73350
+Embedded Stub Size = 52736
+SubType = NSIS-3 Unicode
+
+   Date      Time    Attr         Size   Compressed  Name
+------------------- ----- ------------ ------------  ------------------------
+                    .....        12288      5536347  $PLUGINSDIR\System.dll
+2025-12-01 10:27:58 .....        26494               $PLUGINSDIR\modern-wizard.bmp
+                    .....         9728               $PLUGINSDIR\nsDialogs.dll
+                    .....        34304               $PLUGINSDIR\nsis_tauri_utils.dll
+                    .....        13316               $PLUGINSDIR\StartMenu.dll
+                    .....        15360               $PLUGINSDIR\NSISdl.dll
+2026-10-11 23:27:54 .....     23007744               markbridge-desktop.exe
+                    .....                            uninstall.exe
+------------------- ----- ------------ ------------  ------------------------
+2026-10-11 23:27:54           23119234      5536347  8 files
+```
+
+抽出的 `markbridge-desktop.exe`：23007744 字节。SHA256 `fdc98cb94ee67815f0bbc457787693c12160c17483506b62a927ed2170088a8b`。`target/release/markbridge-desktop.exe` 长度与 SHA256 相同，字节比较结果为 true。
+
+文件清单缺口已关闭。README 里和升级、用户数据有关的原文是：「升级先生成一致性备份，失败保留旧库；旧版本拒绝读取更高 schema，不通过删除数据库恢复。」以及「源码回退应保留 Trellis、`ref/`、既有文件和用户数据。」原文没有写安装包卸载或升级如何保护用户数据。AC13-4 仍是 NOT_RUN。AC13-2 仍是 FAIL。V15 仍是 FAIL。V16 仍是 UNVERIFIED。没有勾 PRD。
+
+## 2026-10-12 trellis-check 安装包清单
+
+00:09–00:11（-04:00）。没有运行 `pnpm build:package`，没有运行 `tauri build`，没有执行安装程序。没有改 `scripts/native-package.mjs`。
+
+`git diff --numstat -- scripts/native-build.mjs` 没有输出。`inspectNativeArtifact` 和 `--remap-path-prefix` 仍在 `scripts/native-build.mjs`。`scripts/native-package.mjs` 的未提交差异只改 7-Zip 查找。该文件仍调用 `inspectNativeArtifact` 两次，源码不含 `remap-path-prefix`，不含 `scoop`。
+
+候选顺序：`C:\Program Files\7-Zip\7z.exe`，`C:\Program Files (x86)\7-Zip\7z.exe`，然后 PATH 上的 `7z`。这两个 Program Files 路径都不存在。`where.exe 7z` 退出码 0，结果是 `C:\Users\lyh\scoop\shims\7z.exe`。脚本没有写这条 scoop 路径。`7z i` 退出码 0。
+
+从 `const sevenZipCandidates` 到列出安装包之前的源码做了桩调用。三个命令都不能执行时，日志是 `NSIS content list: NOT_RUN; 7-Zip is absent.`。`C:\Program Files\7-Zip\7z.exe` 能执行时，调用停在该路径，没有再试 x86 和 PATH。前两个路径不可访问且 PATH 上的 `7z` 能执行时，顺序是两次 access，然后 `7z` 参数 `i`。桩没有启动打包。
+
+`7z l` 退出码 0。安装包 `target/release/bundle/nsis/Markbridge_0.1.0_x64-setup.exe` 为 5589087 字节，SHA256 `3757c2e9d31143b5d773c9cb3b5520d26425e4e927530af8e33a6705ceeb61b3`。长度和 SHA256 与给出的值相同。
+
+`7z l` 输出：
+
+```
+7-Zip 26.04 (x64) : Copyright (c) 1999-2026 Igor Pavlov : 2026-10-05
+
+Scanning the drive for archives:
+1 file, 5589087 bytes (5459 KiB)
+
+Listing archive: D:\Documents\Code\Tauri\Markbridge\target\release\bundle\nsis\Markbridge_0.1.0_x64-setup.exe
+
+--
+Path = D:\Documents\Code\Tauri\Markbridge\target\release\bundle\nsis\Markbridge_0.1.0_x64-setup.exe
+Type = Nsis
+Physical Size = 5589087
+Method = LZMA:23
+Solid = +
+Headers Size = 73350
+Embedded Stub Size = 52736
+SubType = NSIS-3 Unicode
+
+   Date      Time    Attr         Size   Compressed  Name
+------------------- ----- ------------ ------------  ------------------------
+                    .....        12288      5536347  $PLUGINSDIR\System.dll
+2025-12-01 10:27:58 .....        26494               $PLUGINSDIR\modern-wizard.bmp
+                    .....         9728               $PLUGINSDIR\nsDialogs.dll
+                    .....        34304               $PLUGINSDIR\nsis_tauri_utils.dll
+                    .....        13316               $PLUGINSDIR\StartMenu.dll
+                    .....        15360               $PLUGINSDIR\NSISdl.dll
+2026-10-11 23:27:54 .....     23007744               markbridge-desktop.exe
+                    .....                            uninstall.exe
+------------------- ----- ------------ ------------  ------------------------
+2026-10-11 23:27:54           23119234      5536347  8 files
+```
+
+`7z e` 退出码 0。临时目录 `C:\Users\lyh\AppData\Local\Temp\mb13-check-6dfeef1a9ead40bf838036930b903a6e`。抽出的 `markbridge-desktop.exe` 为 23007744 字节，SHA256 `fdc98cb94ee67815f0bbc457787693c12160c17483506b62a927ed2170088a8b`。`target/release/markbridge-desktop.exe` 长度与 SHA256 相同。字节 `SequenceEqual` 为 true。临时目录已删除，复查不存在。
+
+README 写有：「升级先生成一致性备份，失败保留旧库；旧版本拒绝读取更高 schema，不通过删除数据库恢复。」以及「源码回退应保留 Trellis、`ref/`、既有文件和用户数据。」原文没有写安装包卸载或升级如何保护用户数据。AC13-4 仍是 NOT_RUN。AC13-2 仍是 FAIL。V15 仍是 FAIL。V16 仍是 UNVERIFIED。没有勾 PRD。
+

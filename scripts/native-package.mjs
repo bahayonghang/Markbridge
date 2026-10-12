@@ -17,17 +17,26 @@ function sha256(data) {
   return createHash('sha256').update(data).digest('hex');
 }
 
-async function listAndScanInstaller(installer, releaseBytes) {
-  let sevenZip = null;
+function sevenZipRuns(command) {
+  const probe = spawnSync(command, ['i'], { stdio: 'ignore' });
+  return probe.error == null && probe.status === 0;
+}
+
+async function resolveSevenZip() {
   for (const candidate of sevenZipCandidates) {
     try {
       await access(candidate);
-      sevenZip = candidate;
-      break;
     } catch {
-      // Try the next installed 7-Zip path.
+      continue;
     }
+    if (sevenZipRuns(candidate)) return candidate;
   }
+  if (sevenZipRuns('7z')) return '7z';
+  return null;
+}
+
+async function listAndScanInstaller(installer, releaseBytes) {
+  const sevenZip = await resolveSevenZip();
   if (sevenZip === null) {
     console.log('NSIS content list: NOT_RUN; 7-Zip is absent.');
     return;
