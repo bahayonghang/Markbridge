@@ -34,7 +34,7 @@
     "scripts/check-artifacts.mjs",
     "tests/e2e/foundation.spec.ts"
   ],
-  "notes": "AC03-1 through AC03-4 have receipts. V04 host sleep stays UNVERIFIED. Archive waits for that parent gate. No publication or daily Chrome changes.",
+  "notes": "AC03-1 through AC03-4 have receipts. 2026-10-12 import observation PASS in evidence/import-reconcile-818d78.json. V04 row stays UNVERIFIED because host sleep was not observed. Archive waits for that parent gate. No publication or daily Chrome changes.",
   "meta": {
     "sequence": "03",
     "milestone": "M1",
