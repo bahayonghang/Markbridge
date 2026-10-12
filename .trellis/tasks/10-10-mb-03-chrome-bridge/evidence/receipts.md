@@ -308,3 +308,39 @@ V02、V03、V04 与 AC03 各行未改。
 出厂监听没有在书签模型加载完成之前装上。`listenerAttachedBeforeModelFinished` 是 false。恢复前加载直方图的 count 已经是 1，`getTree` 当时 0 ms 返回，探针已经在树里。线上没有 `import_ended`，探针计数也是 0。这些观察都在模型加载完成之后。这次运行不能证明加载当时没有该事件。
 
 导入保持 UNVERIFIED。V04 总行保持 UNVERIFIED。OS 休眠仍未跑。03 未归档。
+
+## Bookmarks 读保持
+
+日期：2026-10-12。工作目录为仓库根。启动前把一份普通 Chrome Bookmarks JSON 写进临时资料的 `Default\Bookmarks`，并保持对该文件的读，使书签模型完不成加载。保持用的是 `FSCTL_REQUEST_OPLOCK`，不是 `initial_preferences`，也不是首次运行的 level-1 保持。调试管线在读保持期间有应答。第一条 CDP 命令是 `Target.setAutoAttach`，`waitForDebuggerOnStart` 为 true，第二条是 `Extensions.loadUnpacked`。出厂监听装上时 `Bookmarks.Storage.TimeToLoadAtStartup2` 仍没有样本，计数按 0 记录，然后才放开这次读。只有一个 Chrome 进程，`loadUnpacked` 只调用一次。没有 Netscape HTML，没有书签管理器，没有 `chrome://bookmarks`，没有挂起主机。没有改产品源码。没有设置 `Markbridge.Pairing`。
+
+临时目录前缀是 `markbridge-03-import-hold-`。`0fd93c` 的 `root` 是 `C:\Users\lyh\AppData\Local\Temp\markbridge-03-import-hold-Lesrwj`。命名空间是 `Markbridge.Task03.0fd93c`。配对码只记录长度 220。`Markbridge.Pairing` 前后都是 0。该命名空间结束后是 0。
+
+| 命令 | 退出码 |
+|---|---:|
+| `node .trellis/tasks/10-10-mb-03-chrome-bridge/evidence/chrome-import-hold-harness.mjs` | 1 |
+
+观察文件是 `evidence/import-hold-0fd93c.json`。开始 2026-10-12T08:58:39.155Z，结束 2026-10-12T08:59:05.521Z。Chrome 为 `Chrome/155.0.8059.39`。扩展 id 是 `blbapbmincddiilocledaajcegiekbfk`。`chromeLaunchCount` 是 1。`loadUnpackedCalls` 是 1。`listenerAttachedBeforeModelFinished` 是 true。`histogramBeforeResume` 和 `histogramAtListener` 都是 0。放开之后探针 began 0、ended 0，结束时仍是 0。线上是 `pair`、`hello`、`get_tree`、`tree_full` 和 ping/pong，没有 `import_ended`。扩展状态只有 `connected`，没有 `reconciling`。后端连接状态经过 `reconciling` 后到 `live`。完整树与 `chrome.bookmarks.getTree()` 一致，4 个节点，探针在两边都在。`pass` 是 false。`chromeEmittedImportEnded` 是 false。`droppedByBridge` 是 false。
+
+这个来源保持 UNVERIFIED。V04 总行不改为 PASS。OS 休眠仍未跑。缺少该事件不是产品缺陷。
+
+`%LOCALAPPDATA%\Google\Chrome\User Data\Default\Bookmarks` 在这次启动前和结束后都是长度 850304，SHA256 `09F2A5C24BA0EE3E3AFF521B90B8509411C2BCDABFE743746A670B07515C1B9D`。`dailyProfileTouched` 是 false。命令结束后只读重算仍是这两个值。文件里没有文本 `mb03-live-probe`。
+
+`git diff --name-only -- apps crates packages scripts tests` 无输出。产品文件没有改。
+
+## 2026-10-12 trellis-check Bookmarks 读保持
+
+复核没有再启动 Chrome，没有重跑 `chrome-import-hold-harness.mjs`、`chrome-import-live-harness.mjs`、`chrome-import-file-harness.mjs` 或 `chrome-import-harness.mjs`，没有写或恢复日常 `Bookmarks`。上文「Bookmarks 读保持」未改。没有改 `evidence/import-hold-0fd93c.json`。没有跑 `task.py`。没有改产品文件。
+
+`evidence/import-hold-0fd93c.json` 的 `command` 是 `node .trellis/tasks/10-10-mb-03-chrome-bridge/evidence/chrome-import-hold-harness.mjs`。`exitCode` 是 1。`importEnded` 是 false。`chromeEmittedImportEnded` 是 false。`droppedByBridge` 是 false。`probeBegan` 是 0。`probeEnded` 是 0。`probeAfterRelease` 是 began 0、ended 0。`chromeLaunchCount` 是 1。`loadUnpackedCalls` 是 1。`holdStatus` 是 `RELEASED`。`level1FirstRunHold` 是 false。`initialPreferences` 是 false。`pass` 是 false。`extensionStatuses` 只有 `connected`。`reconcilingAfterImport` 是 false。`reconcilingReached` 是 false。`wire` 是 `c:pair`、`s:pair_result`、`c:pair`、`s:pair_result`、`c:hello`、`s:hello_result`、`s:get_tree`、`c:tree_full`、`s:ping`、`c:ping`、`c:pong`、`s:pong`，没有 `import_ended`。`states` 是 `null`、`reconciling`、`live`。这三项由 `rememberState()` 写入，来源是后端 profile connection。扩展状态没有 `reconciling`。后端 connection 里的 `reconciling` 不计入导入核对。
+
+`listenerAttachedBeforeModelFinished` 是 true。`histogramBeforeResume`、`histogramAtListener`、`histogramAfterListeners` 都是 0。`bookmarkLoadHistograms` 是 `[]`。`histogramError` 是 null。`histogramCount` 在 `Browser.getHistograms` 没有返回行时返回 0，并把这些行写入 `bookmarkLoadHistograms`。这次 0 表示查询 `Bookmarks.Storage.TimeToLoad` 当时没有样本，不是某一行上的 count。`histogramCount` 只在 `prepareWorker` 中调用，两次都在 `releaseHold()` 之前。放开读保持之后没有再取直方图。`cdpOrder` 只保留前 12 条，后面的 CDP 调用不在这份列表里。
+
+`probePresent` 是 true。`nodeCount` 和 `seedNodeCount` 都是 4。`treesMatch` 是 true。模型加载了播种内容。`import_ended` 的缺失在这次加载之后：放开后和结束时的探针都是 began 0、ended 0，线上没有 `import_ended`。`chromeEmittedImportEnded` 为 false，没有观察到该事件发出后被桥丢掉。
+
+`%LOCALAPPDATA%\Google\Chrome\User Data\Default\Bookmarks` 只读重算：长度 850304，SHA256 `09F2A5C24BA0EE3E3AFF521B90B8509411C2BCDABFE743746A670B07515C1B9D`。与 JSON 的 `dailyBefore` 和 `dailyAfter` 相同。字节搜索没有 `mb03-live-probe`。打开方式是 `FileAccess.Read`，共享是 `FileShare.ReadWrite`。没有写该文件。该命令退出码是 0。
+
+`git diff --name-only -- apps crates packages scripts tests` 无输出，退出码 0。`git status --short --branch` 对这组路径和 `task.json` 只有 `## main`，退出码 0。`task.json` 的 status 仍是 `in_progress`，`completedAt` 仍是 null。
+
+`chrome-import-hold-harness.mjs` 不读取、不写入 Netscape HTML。它不打开 `chrome://bookmarks`。它不写入 `initial_preferences`，只确认临时资料里没有该文件。`level1FirstRunHold` 保持 false。读保持是临时 `Bookmarks` 上的 `FSCTL_REQUEST_OPLOCK`。`--user-data-dir` 来自 `os.tmpdir()` 下的 `markbridge-03-import-hold-*`，其下是 `user-data`。`0fd93c` 的 `root` 是 `C:\Users\lyh\AppData\Local\Temp\markbridge-03-import-hold-Lesrwj`。
+
+导入保持 UNVERIFIED。V04 总行保持 UNVERIFIED。OS 休眠仍未跑。03 未归档。
