@@ -36,19 +36,26 @@ pub(crate) fn parse_provider_body(body: &str) -> Result<Validated, ()> {
     if let Ok(valid) = parse_model_text(body) {
         return Ok(valid);
     }
+    parse_model_text(&provider_content(body)?)
+}
+
+pub(crate) fn provider_content(body: &str) -> Result<String, ()> {
     let value: serde_json::Value = serde_json::from_str(body).map_err(|_| ())?;
     let content = value
         .pointer("/message/content")
         .or_else(|| value.pointer("/choices/0/message/content"));
     let Some(content) = content else {
-        return Err(());
+        return if value.is_object() {
+            Ok(body.to_owned())
+        } else {
+            Err(())
+        };
     };
-    let text = match content {
-        serde_json::Value::String(text) => text.clone(),
-        serde_json::Value::Object(_) | serde_json::Value::Array(_) => content.to_string(),
-        _ => return Err(()),
-    };
-    parse_model_text(&text)
+    match content {
+        serde_json::Value::String(text) => Ok(text.clone()),
+        serde_json::Value::Object(_) | serde_json::Value::Array(_) => Ok(content.to_string()),
+        _ => Err(()),
+    }
 }
 
 pub(crate) fn validate_edit(

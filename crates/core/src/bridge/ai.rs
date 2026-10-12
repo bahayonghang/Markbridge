@@ -10,7 +10,7 @@ use markbridge_protocol::{
 use super::{Bridge, Result, credentials::CredentialStore};
 use crate::ai::{self, ModelSecrets};
 
-struct Secrets(Arc<dyn CredentialStore>);
+pub(super) struct Secrets(Arc<dyn CredentialStore>);
 
 impl ModelSecrets for Secrets {
     fn read(&self, reference: &str) -> std::result::Result<Option<String>, ErrorCode> {
@@ -44,7 +44,7 @@ impl CredentialStore for EmptyCredentials {
 }
 
 impl Bridge {
-    fn secrets(&self) -> Secrets {
+    pub(super) fn secrets(&self) -> Secrets {
         Secrets(self.model_credentials.clone())
     }
 

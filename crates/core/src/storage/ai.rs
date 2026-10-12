@@ -157,7 +157,7 @@ impl Storage {
     ) -> Result<bool, ErrorCode> {
         self.call(move |conn| {
             let changed = conn.execute(
-                "UPDATE ai_jobs SET state=?2, proposal=?3, error_code=?4 WHERE id=?1 AND state='running'",
+                "UPDATE ai_jobs SET state=?2, proposal=?3, error_code=?4 WHERE id=?1 AND kind='single' AND state='running'",
                 params![id.as_str(), state, proposal, error_code],
             ).map_err(storage_error)?;
             Ok(changed == 1)
@@ -167,7 +167,7 @@ impl Storage {
     pub(crate) async fn cancel_ai_job(&self, id: Id) -> Result<(), ErrorCode> {
         self.call(move |conn| {
             conn.execute(
-                "UPDATE ai_jobs SET state='cancelled', error_code='CANCELLED', proposal=NULL WHERE id=?1 AND state IN ('running','ready')",
+                "UPDATE ai_jobs SET state='cancelled', error_code='CANCELLED', proposal=NULL WHERE id=?1 AND kind='single' AND state IN ('running','ready')",
                 [id.as_str()],
             ).map_err(storage_error)?;
             Ok(())
@@ -200,7 +200,7 @@ impl Storage {
         self.call(move |conn| {
             let changed = conn
                 .execute(
-                    "UPDATE ai_jobs SET state='applying' WHERE id=?1 AND state='ready'",
+                    "UPDATE ai_jobs SET state='applying' WHERE id=?1 AND kind='single' AND state='ready'",
                     [id.as_str()],
                 )
                 .map_err(storage_error)?;
@@ -212,7 +212,7 @@ impl Storage {
     pub(crate) async fn release_ai_job(&self, id: Id) -> Result<(), ErrorCode> {
         self.call(move |conn| {
             conn.execute(
-                "UPDATE ai_jobs SET state='ready' WHERE id=?1 AND state='applying'",
+                "UPDATE ai_jobs SET state='ready' WHERE id=?1 AND kind='single' AND state='applying'",
                 [id.as_str()],
             )
             .map_err(storage_error)?;
@@ -225,7 +225,7 @@ impl Storage {
         self.call(move |conn| {
             let changed = conn
                 .execute(
-                    "UPDATE ai_jobs SET state='applied' WHERE id=?1 AND state='applying'",
+                    "UPDATE ai_jobs SET state='applied' WHERE id=?1 AND kind='single' AND state='applying'",
                     [id.as_str()],
                 )
                 .map_err(storage_error)?;
@@ -249,6 +249,112 @@ impl Storage {
             Ok(())
         }).await
     }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct OrganizationJob {
+    pub id: Id,
+    pub profile_id: Id,
+    pub fingerprint: String,
+    pub state: String,
+    pub proposal: String,
+    pub error_code: Option<String>,
+    pub operation_id: Option<String>,
+}
+
+impl Storage {
+    pub(crate) async fn insert_organization_job(
+        &self,
+        job: OrganizationJob,
+        model: String,
+        endpoint: String,
+    ) -> Result<(), ErrorCode> {
+        self.call(move |conn| {
+            conn.execute(
+                "INSERT INTO ai_jobs(id, kind, profile_id, input_fingerprint, model_reference, provider_reference, state, proposal, error_code, operation_id) VALUES(?1,'organization',?2,?3,?4,?5,?6,?7,?8,?9)",
+                params![job.id.as_str(), job.profile_id.as_str(), job.fingerprint, model, endpoint, job.state, job.proposal, job.error_code, job.operation_id],
+            ).map_err(storage_error)?;
+            Ok(())
+        }).await
+    }
+
+    pub(crate) async fn update_organization_job(
+        &self,
+        job: OrganizationJob,
+    ) -> Result<(), ErrorCode> {
+        self.call(move |conn| {
+            let changed = conn.execute(
+                "UPDATE ai_jobs SET input_fingerprint=?2, state=?3, proposal=?4, error_code=?5, operation_id=?6 WHERE id=?1 AND kind='organization'",
+                params![job.id.as_str(), job.fingerprint, job.state, job.proposal, job.error_code, job.operation_id],
+            ).map_err(storage_error)?;
+            if changed != 1 {
+                return Err(ErrorCode::InvalidMessage);
+            }
+            Ok(())
+        }).await
+    }
+
+    pub(crate) async fn organization_job(
+        &self,
+        id: Id,
+    ) -> Result<Option<OrganizationJob>, ErrorCode> {
+        self.call(move |conn| {
+            load_organization(conn, "id=?1 AND kind='organization'", &[id.as_str()])
+        })
+        .await
+    }
+
+    pub(crate) async fn organization_job_by_operation(
+        &self,
+        operation_id: String,
+    ) -> Result<Option<OrganizationJob>, ErrorCode> {
+        self.call(move |conn| {
+            load_organization(
+                conn,
+                "operation_id=?1 AND kind='organization'",
+                &[&operation_id],
+            )
+        })
+        .await
+    }
+}
+
+fn load_organization(
+    conn: &rusqlite::Connection,
+    clause: &str,
+    values: &[&str],
+) -> Result<Option<OrganizationJob>, ErrorCode> {
+    let sql = format!(
+        "SELECT id, profile_id, input_fingerprint, state, proposal, error_code, operation_id FROM ai_jobs WHERE {clause}"
+    );
+    let row = conn
+        .query_row(&sql, rusqlite::params_from_iter(values.iter()), |row| {
+            Ok((
+                row.get::<_, String>(0)?,
+                row.get::<_, String>(1)?,
+                row.get::<_, String>(2)?,
+                row.get::<_, String>(3)?,
+                row.get::<_, Option<String>>(4)?,
+                row.get::<_, Option<String>>(5)?,
+                row.get::<_, Option<String>>(6)?,
+            ))
+        })
+        .optional()
+        .map_err(storage_error)?;
+    row.map(
+        |(id, profile, fingerprint, state, proposal, error_code, operation_id)| {
+            Ok(OrganizationJob {
+                id: Id::new(id)?,
+                profile_id: Id::new(profile)?,
+                fingerprint,
+                state,
+                proposal: proposal.unwrap_or_default(),
+                error_code,
+                operation_id,
+            })
+        },
+    )
+    .transpose()
 }
 
 fn setting(conn: &rusqlite::Connection, key: &str) -> Result<Option<String>, ErrorCode> {

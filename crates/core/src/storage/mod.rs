@@ -24,6 +24,7 @@ const MIGRATIONS: &[&str] = &[
     include_str!("migrations/003_mirror.sql"),
     include_str!("migrations/004_tags.sql"),
     include_str!("migrations/005_preview.sql"),
+    include_str!("migrations/006_organization.sql"),
 ];
 pub const SCHEMA_VERSION: u32 = MIGRATIONS.len() as u32;
 type Result<T> = std::result::Result<T, ErrorCode>;

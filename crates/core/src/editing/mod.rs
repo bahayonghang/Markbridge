@@ -614,6 +614,243 @@ fn plan_delete(nodes: &[BookmarkNode], chrome_id: &Id) -> Result<Plan, ErrorCode
     })
 }
 
+#[derive(Clone, Debug)]
+pub struct ReclassFolder {
+    pub local_id: Id,
+    pub parent_local: Option<Id>,
+    pub name: String,
+}
+
+#[derive(Clone, Debug)]
+pub struct ReclassMove {
+    pub chrome_id: Id,
+    pub folder_local: Id,
+}
+
+pub fn choose_anchor(nodes: &[BookmarkNode], parents: &[Id]) -> Result<Id, ErrorCode> {
+    let index = index(nodes)?;
+    if let Some(first) = parents.first()
+        && parents.iter().all(|item| item == first)
+        && let Some(parent) = index.by_id.get(first.as_str()).copied()
+        && can_create_under(&index, parent)
+    {
+        return Ok(first.clone());
+    }
+    nodes
+        .iter()
+        .find(|node| {
+            node.folder_type == Some(FolderType::BookmarksBar) && can_create_under(&index, node)
+        })
+        .map(|node| node.chrome_id.clone())
+        .ok_or(ErrorCode::ProtectedNode)
+}
+
+/// Creates reviewed folders, then moves bookmarks. The plan has no delete step.
+pub fn plan_reclassify(
+    nodes: &[BookmarkNode],
+    anchor: &Id,
+    folders: &[ReclassFolder],
+    moves: &[ReclassMove],
+) -> Result<Plan, ErrorCode> {
+    if folders.is_empty() && moves.is_empty() {
+        return Err(ErrorCode::InvalidMessage);
+    }
+    let index = index(nodes)?;
+    let anchor_node = index
+        .by_id
+        .get(anchor.as_str())
+        .copied()
+        .ok_or(ErrorCode::InvalidTree)?;
+    if !can_create_under(&index, anchor_node) {
+        return Err(ErrorCode::ProtectedNode);
+    }
+    let ordered = order_folders(folders)?;
+    let mut steps = Vec::new();
+    let mut changes = Vec::new();
+    let mut request_of: HashMap<Id, Id> = HashMap::new();
+    let mut created_under: HashMap<String, u64> = HashMap::new();
+    let anchor_start = child_ids_of(&index, anchor.as_str()).len() as u64;
+    for folder in ordered {
+        let parent_id = if let Some(parent) = &folder.parent_local {
+            request_of
+                .get(parent)
+                .cloned()
+                .ok_or(ErrorCode::InvalidTree)?
+        } else {
+            anchor.clone()
+        };
+        let key = parent_id.as_str().to_owned();
+        let start = if folder.parent_local.is_none() {
+            anchor_start
+        } else {
+            0
+        };
+        let count = created_under.entry(key).or_insert(start);
+        let position = *count;
+        *count += 1;
+        let title = markbridge_protocol::Title::new(&folder.name)?;
+        changes.push(change(EditField::Existence, None, Some(title.as_str()))?);
+        let created = step(
+            None,
+            None,
+            None,
+            Mutation::Create {
+                parent_id,
+                position: markbridge_protocol::Position::new(position)?,
+                title,
+                url: None,
+            },
+        )?;
+        request_of.insert(folder.local_id.clone(), created.request_id.clone());
+        steps.push(created);
+    }
+    let mut move_at: HashMap<String, u64> = HashMap::new();
+    for item in moves {
+        let parent_id = request_of
+            .get(&item.folder_local)
+            .cloned()
+            .ok_or(ErrorCode::InvalidTree)?;
+        let node = index
+            .by_id
+            .get(item.chrome_id.as_str())
+            .copied()
+            .ok_or(ErrorCode::InvalidTree)?;
+        if node.kind != NodeKind::Bookmark || !can_remove_or_move(&index, node) {
+            return Err(if node.kind == NodeKind::Bookmark {
+                ErrorCode::ProtectedNode
+            } else {
+                ErrorCode::InvalidTree
+            });
+        }
+        let count = move_at
+            .entry(item.folder_local.as_str().to_owned())
+            .or_insert(0);
+        let position = *count;
+        *count += 1;
+        changes.push(change(
+            EditField::Parent,
+            node.parent_id.as_ref().map(|value| value.as_str()),
+            Some(parent_id.as_str()),
+        )?);
+        steps.push(step(
+            Some(item.chrome_id.clone()),
+            Some(node.clone()),
+            None,
+            Mutation::Move {
+                parent_id,
+                position: markbridge_protocol::Position::new(position)?,
+            },
+        )?);
+    }
+    Ok(Plan {
+        affected: steps.len() as u64,
+        requires_second_confirm: false,
+        steps,
+        changes,
+        orders: vec![],
+        restores: vec![],
+        undo_of: None,
+        conflicts: vec![],
+    })
+}
+
+pub fn plan_empty_cleanup(
+    nodes: &[BookmarkNode],
+    folder_ids: &[Id],
+    confirm: bool,
+) -> Result<Plan, ErrorCode> {
+    if !confirm {
+        return Err(ErrorCode::Cancelled);
+    }
+    let index = index(nodes)?;
+    let mut steps = Vec::new();
+    let mut changes = Vec::new();
+    for id in folder_ids {
+        let node = index
+            .by_id
+            .get(id.as_str())
+            .copied()
+            .ok_or(ErrorCode::InvalidTree)?;
+        if node.kind != NodeKind::Folder {
+            return Err(ErrorCode::InvalidMessage);
+        }
+        if !child_ids_of(&index, id.as_str()).is_empty() {
+            continue;
+        }
+        if !can_remove_or_move(&index, node) {
+            return Err(ErrorCode::ProtectedNode);
+        }
+        changes.push(change(
+            EditField::Existence,
+            Some(node.title.as_str()),
+            None,
+        )?);
+        steps.push(step(
+            Some(id.clone()),
+            Some(node.clone()),
+            None,
+            Mutation::Delete {},
+        )?);
+    }
+    Ok(Plan {
+        affected: steps.len() as u64,
+        requires_second_confirm: steps.len() as u64 > LARGE_DELETE,
+        steps,
+        changes,
+        orders: vec![],
+        restores: vec![],
+        undo_of: None,
+        conflicts: vec![],
+    })
+}
+
+fn order_folders(folders: &[ReclassFolder]) -> Result<Vec<&ReclassFolder>, ErrorCode> {
+    let mut by_id: HashMap<&str, &ReclassFolder> = HashMap::new();
+    for folder in folders {
+        if by_id.insert(folder.local_id.as_str(), folder).is_some() {
+            return Err(ErrorCode::InvalidTree);
+        }
+    }
+    let mut incoming: HashMap<&str, usize> = HashMap::new();
+    let mut children: HashMap<&str, Vec<&str>> = HashMap::new();
+    for folder in folders {
+        incoming.entry(folder.local_id.as_str()).or_insert(0);
+        if let Some(parent) = &folder.parent_local {
+            if !by_id.contains_key(parent.as_str()) {
+                return Err(ErrorCode::InvalidTree);
+            }
+            *incoming.entry(folder.local_id.as_str()).or_insert(0) += 1;
+            children
+                .entry(parent.as_str())
+                .or_default()
+                .push(folder.local_id.as_str());
+        }
+    }
+    let mut ready: Vec<&str> = folders
+        .iter()
+        .filter(|folder| incoming.get(folder.local_id.as_str()).copied().unwrap_or(1) == 0)
+        .map(|folder| folder.local_id.as_str())
+        .collect();
+    let mut ordered = Vec::new();
+    while let Some(id) = ready.pop() {
+        ordered.push(*by_id.get(id).ok_or(ErrorCode::InvalidTree)?);
+        if let Some(list) = children.get(id) {
+            for child in list {
+                let left = incoming.get_mut(child).ok_or(ErrorCode::InvalidTree)?;
+                *left = left.saturating_sub(1);
+                if *left == 0 {
+                    ready.push(child);
+                }
+            }
+        }
+    }
+    if ordered.len() != folders.len() {
+        Err(ErrorCode::InvalidTree)
+    } else {
+        Ok(ordered)
+    }
+}
+
 fn plan_undo(
     nodes: &[BookmarkNode],
     stored: &StoredEdit,
@@ -625,7 +862,7 @@ fn plan_undo(
     ) {
         return Err(ErrorCode::UncertainWrite);
     }
-    let index = index(nodes)?;
+    let mut working = nodes.to_vec();
     let mut steps = Vec::new();
     let mut changes = Vec::new();
     let mut restores = Vec::new();
@@ -634,6 +871,7 @@ fn plan_undo(
         if !original.applied {
             continue;
         }
+        let index = index(&working)?;
         let outcome = if matches!(original.payload, Mutation::Delete {}) {
             restore_deleted(&index, original, &stored.orders, locals, &stored.snapshot)
         } else {
@@ -641,6 +879,10 @@ fn plan_undo(
         };
         match outcome {
             Ok(inverse) => {
+                let mut preview = working.clone();
+                if preview_steps(&mut preview, &inverse.steps).is_ok() {
+                    working = preview;
+                }
                 changes.extend(inverse.changes);
                 restores.extend(inverse.restores);
                 steps.extend(inverse.steps);
@@ -1033,6 +1275,128 @@ fn next_id(prefix: &str) -> Result<Id, ErrorCode> {
 
 pub fn operation_id() -> Result<Id, ErrorCode> {
     next_id("op")
+}
+
+fn preview_steps(nodes: &mut Vec<BookmarkNode>, steps: &[OperationStep]) -> Result<(), ErrorCode> {
+    for step in steps {
+        match &step.payload {
+            Mutation::Move {
+                parent_id,
+                position,
+            } => {
+                let target = step.target.clone().ok_or(ErrorCode::InvalidMessage)?;
+                place(nodes, &target, parent_id, position.get())?;
+            }
+            Mutation::Delete {} => {
+                let target = step.target.clone().ok_or(ErrorCode::InvalidMessage)?;
+                let parent = nodes
+                    .iter()
+                    .find(|node| node.chrome_id == target)
+                    .and_then(|node| node.parent_id.clone());
+                let before = nodes.len();
+                nodes.retain(|node| node.chrome_id != target);
+                if nodes.len() == before {
+                    return Err(ErrorCode::InvalidTree);
+                }
+                if let Some(parent) = parent {
+                    compact(nodes, &parent);
+                }
+            }
+            Mutation::Update { title, url } => {
+                let target = step.target.clone().ok_or(ErrorCode::InvalidMessage)?;
+                let node = nodes
+                    .iter_mut()
+                    .find(|node| node.chrome_id == target)
+                    .ok_or(ErrorCode::InvalidTree)?;
+                if let Some(title) = title {
+                    node.title = title.clone();
+                }
+                if let Some(url) = url {
+                    node.url = Some(url.clone());
+                }
+            }
+            Mutation::Reorder { child_ids } => {
+                for (index, id) in child_ids.iter().enumerate() {
+                    let node = nodes
+                        .iter_mut()
+                        .find(|node| &node.chrome_id == id)
+                        .ok_or(ErrorCode::InvalidTree)?;
+                    node.position = markbridge_protocol::Position::new(index as u64)?;
+                }
+            }
+            Mutation::Create { .. } => {}
+        }
+    }
+    Ok(())
+}
+
+fn place(
+    nodes: &mut [BookmarkNode],
+    target: &Id,
+    parent: &Id,
+    index: u64,
+) -> Result<(), ErrorCode> {
+    let old_parent = nodes
+        .iter()
+        .find(|node| &node.chrome_id == target)
+        .ok_or(ErrorCode::InvalidTree)?
+        .parent_id
+        .clone();
+    if let Some(old) = &old_parent {
+        compact_except(nodes, old, target);
+    }
+    for node in nodes.iter_mut() {
+        if node.parent_id.as_ref() == Some(parent)
+            && &node.chrome_id != target
+            && node.position.get() >= index
+        {
+            node.position = markbridge_protocol::Position::new(node.position.get() + 1)?;
+        }
+    }
+    let node = nodes
+        .iter_mut()
+        .find(|node| &node.chrome_id == target)
+        .ok_or(ErrorCode::InvalidTree)?;
+    node.parent_id = Some(parent.clone());
+    node.position = markbridge_protocol::Position::new(index)?;
+    compact(nodes, parent);
+    Ok(())
+}
+
+fn compact(nodes: &mut [BookmarkNode], parent: &Id) {
+    let mut ids: Vec<Id> = nodes
+        .iter()
+        .filter(|node| node.parent_id.as_ref() == Some(parent))
+        .map(|node| node.chrome_id.clone())
+        .collect();
+    ids.sort_by(|left, right| {
+        let left_node = nodes.iter().find(|node| &node.chrome_id == left).unwrap();
+        let right_node = nodes.iter().find(|node| &node.chrome_id == right).unwrap();
+        left_node
+            .position
+            .get()
+            .cmp(&right_node.position.get())
+            .then(left.as_str().cmp(right.as_str()))
+    });
+    for (index, id) in ids.into_iter().enumerate() {
+        if let Some(node) = nodes.iter_mut().find(|node| node.chrome_id == id) {
+            node.position =
+                markbridge_protocol::Position::new(index as u64).unwrap_or(node.position);
+        }
+    }
+}
+
+fn compact_except(nodes: &mut [BookmarkNode], parent: &Id, except: &Id) {
+    let saved = nodes
+        .iter_mut()
+        .find(|node| &node.chrome_id == except)
+        .map(|node| node.parent_id.take());
+    compact(nodes, parent);
+    if let Some(parent_id) = saved.flatten()
+        && let Some(node) = nodes.iter_mut().find(|node| &node.chrome_id == except)
+    {
+        node.parent_id = Some(parent_id);
+    }
 }
 
 fn index(nodes: &[BookmarkNode]) -> Result<Index<'_>, ErrorCode> {

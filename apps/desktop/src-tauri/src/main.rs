@@ -5,7 +5,8 @@ use markbridge_protocol::{
     AiApplyResult, AiConnection, AiDraft, AiSettings, AiSuggestion, ApplyResult, BookmarkNode,
     BridgeState, ChromeProfileList, ContentPreview, Counter, EditAction, EditDocument, EditPreview,
     ErrorCode, Id, LibraryCount, LibraryDetail, LibraryNodes, LibraryPage, LibrarySearch,
-    MirrorTree, OperationList, PairingOffer, TagCatalog, TagCommand, TitleEncodingPreview,
+    MirrorTree, OperationList, OrganizationFolder, OrganizationPlan, PairingOffer, TagCatalog,
+    TagCommand, TitleEncodingPreview,
 };
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -537,6 +538,108 @@ async fn cancel_ai(
 }
 
 #[tauri::command]
+async fn propose_organization(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    profile_id: Id,
+    chrome_ids: Vec<Id>,
+) -> Result<OrganizationPlan, ErrorCode> {
+    trusted(&window)?;
+    bridge.propose_organization(profile_id, chrome_ids).await
+}
+
+#[tauri::command]
+async fn review_organization(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    job_id: Id,
+    folders: Vec<OrganizationFolder>,
+) -> Result<OrganizationPlan, ErrorCode> {
+    trusted(&window)?;
+    bridge.review_organization(job_id, folders).await
+}
+
+#[tauri::command]
+async fn assign_organization(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    job_id: Id,
+) -> Result<OrganizationPlan, ErrorCode> {
+    trusted(&window)?;
+    bridge.assign_organization(job_id).await
+}
+
+#[tauri::command]
+async fn edit_organization(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    job_id: Id,
+    chrome_id: Id,
+    target_folder_id: Id,
+    rejected: bool,
+) -> Result<OrganizationPlan, ErrorCode> {
+    trusted(&window)?;
+    bridge
+        .edit_organization(job_id, chrome_id, target_folder_id, rejected)
+        .await
+}
+
+#[tauri::command]
+async fn apply_organization(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    job_id: Id,
+    plan_hash: Id,
+) -> Result<OrganizationPlan, ErrorCode> {
+    trusted(&window)?;
+    bridge.apply_organization(job_id, plan_hash).await
+}
+
+#[tauri::command]
+async fn pause_organization(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    job_id: Id,
+) -> Result<OrganizationPlan, ErrorCode> {
+    trusted(&window)?;
+    bridge.pause_organization(job_id).await
+}
+
+#[tauri::command]
+async fn cancel_organization(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    job_id: Id,
+) -> Result<OrganizationPlan, ErrorCode> {
+    trusted(&window)?;
+    bridge.cancel_organization(job_id).await
+}
+
+#[tauri::command]
+async fn cleanup_organization(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    job_id: Id,
+    confirm: bool,
+    second_confirm: bool,
+) -> Result<OrganizationPlan, ErrorCode> {
+    trusted(&window)?;
+    bridge
+        .cleanup_organization(job_id, confirm, second_confirm)
+        .await
+}
+
+#[tauri::command]
+async fn organization_plan(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    job_id: Id,
+) -> Result<OrganizationPlan, ErrorCode> {
+    trusted(&window)?;
+    bridge.organization_plan(job_id).await
+}
+
+#[tauri::command]
 async fn apply_ai(
     window: tauri::WebviewWindow,
     bridge: tauri::State<'_, Bridge>,
@@ -708,6 +811,15 @@ fn main() {
             suggest_ai,
             cancel_ai,
             apply_ai,
+            propose_organization,
+            review_organization,
+            assign_organization,
+            edit_organization,
+            apply_organization,
+            pause_organization,
+            cancel_organization,
+            cleanup_organization,
+            organization_plan,
             content_preview,
             cancel_content_preview,
             open_http_url,

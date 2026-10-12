@@ -28,7 +28,7 @@ MV3 CSP prohibits runtime Function/eval compilation. Consume static Ajv standalo
 
 Use `bookmarks`, `storage`, and `alarms` for implemented capabilities. Page capture additionally requires `scripting` and host authorization or an extension activeTab gesture. A desktop button cannot grant activeTab.
 
-Verify profile, request ID, expected before-state, and protected status before mutation. Serialize writes per profile. Chrome has no compare-and-swap; external edits can race. Verify postconditions and stop on conflicts.
+Verify profile, request ID, expected before-state, and protected status before mutation. Serialize writes per profile. Chrome has no compare-and-swap; external edits can race. Verify postconditions and stop on conflicts. A create or move whose `parentId` is absent from the tree resolves that id through `createdByRequest` for the same operation. An unmapped parent returns `CONFLICT` and does not create or move.
 
 Native tests use disposable profiles and cover wrong token/profile, worker restart, duplicate commands, missing acknowledgments, import, reorder, protected nodes, and interrupted apply.
 

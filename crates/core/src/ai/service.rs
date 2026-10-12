@@ -772,6 +772,107 @@ fn classify(
     }
 }
 
+pub(crate) struct RawPrompt {
+    pub system: String,
+    pub user: String,
+    pub schema_name: &'static str,
+    pub schema: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum ModelTextError {
+    Disabled,
+    Cancelled,
+    TimedOut,
+    RateLimited,
+    Unreachable,
+    Invalid,
+}
+
+pub(crate) async fn model_text(
+    storage: &Storage,
+    secrets: &dyn ModelSecrets,
+    transport: &dyn ModelTransport,
+    flag: &CancelFlag,
+    prompt: &RawPrompt,
+    repair: Option<&str>,
+) -> Result<String, ModelTextError> {
+    let config = storage
+        .ai_config()
+        .await
+        .map_err(|_| ModelTextError::Unreachable)?;
+    if !config.enabled {
+        return Err(ModelTextError::Disabled);
+    }
+    let Some((kind, endpoint, model)) = ready(&config) else {
+        return Err(ModelTextError::Disabled);
+    };
+    let bearer =
+        bearer(secrets, config.credential_configured).map_err(|_| ModelTextError::Unreachable)?;
+    if flag.is_cancelled() {
+        return Err(ModelTextError::Cancelled);
+    }
+    let response = transport
+        .post(&ModelRequest {
+            url: endpoint.url,
+            body: prompt_body(
+                kind,
+                &model,
+                config.schema_supported == Some(true),
+                prompt,
+                repair,
+            ),
+            bearer,
+            cancel: flag.clone(),
+        })
+        .await;
+    if flag.is_cancelled() {
+        return Err(ModelTextError::Cancelled);
+    }
+    match response {
+        Err(ModelError::Cancelled) => Err(ModelTextError::Cancelled),
+        Err(ModelError::TimedOut) => Err(ModelTextError::TimedOut),
+        Err(ModelError::Unreachable) => Err(ModelTextError::Unreachable),
+        Ok(response) if response.status == 429 => Err(ModelTextError::RateLimited),
+        Ok(response) if response.status == 200 => {
+            schema::provider_content(&response.body).map_err(|_| ModelTextError::Invalid)
+        }
+        Ok(response) if response.status == 400 || response.status == 422 => {
+            Err(ModelTextError::Invalid)
+        }
+        Ok(_) => Err(ModelTextError::Unreachable),
+    }
+}
+
+fn prompt_body(
+    kind: AiProviderKind,
+    model: &str,
+    schema_mode: bool,
+    prompt: &RawPrompt,
+    repair: Option<&str>,
+) -> String {
+    let mut messages = vec![
+        serde_json::json!({"role": "system", "content": prompt.system}),
+        serde_json::json!({"role": "user", "content": prompt.user}),
+    ];
+    if let Some(repair) = repair {
+        messages.push(serde_json::json!({"role": "user", "content": format!("The previous output was invalid. Return only the JSON object.\n{}", truncate_chars(repair, 2_000))}));
+    }
+    let mut payload = serde_json::json!({"model": model, "messages": messages, "stream": false});
+    if schema_mode {
+        match kind {
+            AiProviderKind::Ollama => payload["format"] = prompt.schema.clone(),
+            AiProviderKind::Compatible => {
+                payload["response_format"] = serde_json::json!({
+                    "type": "json_schema",
+                    "json_schema": {"name": prompt.schema_name, "schema": prompt.schema}
+                });
+            }
+        }
+    }
+    payload.to_string()
+}
+
 async fn send(
     call: &Call<'_>,
     repair: Option<&str>,

@@ -97,6 +97,24 @@ async function run(bookmarks: BookmarkPort, store: WriteStore, steps: OperationS
 }
 
 describe('extension write executor', () => {
+  it('moves into a folder created in the same operation and restores sibling order', async () => {
+    const fixture = port(tree());
+    const alpha = flat('2', '1', 0, 'Alpha', 'https://alpha.test/');
+    const moved = flat('2', 'n1', 0, 'Alpha', 'https://alpha.test/');
+    const created = flat('n1', '1', 2, '阅读');
+    const sent = await run(fixture.bookmarks, emptyStore(), [
+      step({ requestId: 'req-folder', target: null, expectedBefore: null, payload: { kind: 'create', parentId: '1', position: 2, title: '阅读' } }),
+      step({ requestId: 'req-move', target: '2', expectedBefore: alpha, payload: { kind: 'move', parentId: 'req-folder', position: 0 } }),
+      step({ requestId: 'req-back', target: '2', expectedBefore: moved, payload: { kind: 'move', parentId: '1', position: 0 } }),
+      step({ requestId: 'req-delete', target: 'n1', expectedBefore: created, payload: { kind: 'delete' } }),
+    ]);
+    expect(sent.map((item) => item.split(':')[1])).toEqual(['applied', 'applied', 'applied', 'applied']);
+    expect(fixture.find('n1')).toBeNull();
+    expect(fixture.find('2')?.parent?.id).toBe('1');
+    expect(fixture.find('2')?.index).toBe(0);
+    expect(fixture.find('3')?.index).toBe(1);
+  });
+
   it('creates, updates, moves, reorders, and deletes through the bookmark port', async () => {
     const fixture = port(tree());
     const store = emptyStore();

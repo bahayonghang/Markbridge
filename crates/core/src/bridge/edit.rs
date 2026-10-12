@@ -109,6 +109,8 @@ impl Bridge {
                 sender,
                 plan,
                 encodings: Vec::new(),
+                send_limit: None,
+                operation_id: None,
             },
         )
         .await
@@ -547,6 +549,8 @@ pub(super) struct PlannedCommit<'a> {
     pub sender: mpsc::UnboundedSender<WireMessage>,
     pub plan: Plan,
     pub encodings: Vec<EncodingBody>,
+    pub send_limit: Option<usize>,
+    pub operation_id: Option<Id>,
 }
 
 pub(super) async fn commit_planned(
@@ -563,15 +567,29 @@ pub(super) async fn commit_planned(
         sender,
         plan,
         encodings,
+        send_limit,
+        operation_id,
     } = commit;
-    let operation = editing::operation_id()?;
+    if let Some(held) = inner
+        .profiles
+        .get(profile_id.as_str())
+        .and_then(|profile| profile.batch_hold.clone())
+        && plan.undo_of.as_ref() != Some(&held)
+    {
+        return Err(ErrorCode::Conflict);
+    }
+    let operation = operation_id.unwrap_or(editing::operation_id()?);
+    let limit = send_limit.unwrap_or(plan.steps.len()).min(plan.steps.len());
+    if limit == 0 {
+        return Err(ErrorCode::InvalidMessage);
+    }
     let message = apply_message(
         profile_id,
         session,
         &operation,
         epoch,
         revision,
-        &plan.steps,
+        &plan.steps[..limit],
     )?;
     let rows = inner
         .storage()?
@@ -633,6 +651,9 @@ pub(super) async fn commit_planned(
     }
     if let Some(profile) = inner.profiles.get_mut(profile_id.as_str()) {
         profile.busy = true;
+        if send_limit.is_some() {
+            profile.batch_hold = Some(operation.clone());
+        }
     }
     if sender.send(message).is_err() {
         let _ = inner
@@ -647,6 +668,9 @@ pub(super) async fn commit_planned(
         }
         if let Some(profile) = inner.profiles.get_mut(profile_id.as_str()) {
             profile.busy = false;
+            if profile.batch_hold.as_ref() == Some(&operation) {
+                profile.batch_hold = None;
+            }
         }
         bridge.publish(inner);
         return Err(ErrorCode::ReadOnly);
@@ -717,6 +741,24 @@ fn preview_of(profile_id: &Id, revision: Counter, plan: &Plan, writable: bool) -
         error_code: RequiredNullable(error),
         changes: plan.changes.iter().take(50).cloned().collect(),
     }
+}
+
+pub(super) fn one_step(
+    profile: &Id,
+    session: &Id,
+    operation: &Id,
+    epoch: SourceEpoch,
+    revision: Counter,
+    step: &OperationStep,
+) -> Result<WireMessage> {
+    apply_message(
+        profile,
+        session,
+        operation,
+        epoch,
+        revision,
+        std::slice::from_ref(step),
+    )
 }
 
 fn apply_message(

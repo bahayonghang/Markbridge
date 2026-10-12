@@ -137,10 +137,16 @@ async function executeStep(port: BookmarkPort, operationId: string, step: Operat
     return receipt(operationId, step.requestId, 'applied', { before: target, after: flatten([updated])[0] ?? null });
   }
   if (step.payload.kind === 'move') {
-    if (!canMove(target, byId) || contains(byId, target.chromeId, step.payload.parentId)) return receipt(operationId, step.requestId, 'failed', { errorCode: contains(byId, target.chromeId, step.payload.parentId) ? 'INVALID_TREE' : 'PROTECTED_NODE', before: target });
-    const parent = byId.get(step.payload.parentId);
+    let parentId = step.payload.parentId;
+    if (!byId.has(parentId)) {
+      const mapped = createdByRequest.get(parentId);
+      if (!mapped) return receipt(operationId, step.requestId, 'failed', { errorCode: 'CONFLICT', before: target });
+      parentId = mapped;
+    }
+    if (!canMove(target, byId) || contains(byId, target.chromeId, parentId)) return receipt(operationId, step.requestId, 'failed', { errorCode: contains(byId, target.chromeId, parentId) ? 'INVALID_TREE' : 'PROTECTED_NODE', before: target });
+    const parent = byId.get(parentId);
     if (!parent || !canCreate(parent, byId)) return receipt(operationId, step.requestId, 'failed', { errorCode: 'PROTECTED_NODE', before: target });
-    const moved = await port.move(target.chromeId, { parentId: step.payload.parentId, index: step.payload.position });
+    const moved = await port.move(target.chromeId, { parentId, index: step.payload.position });
     return receipt(operationId, step.requestId, 'applied', { before: target, after: flatten([moved])[0] ?? null });
   }
   if (step.payload.kind === 'reorder') {

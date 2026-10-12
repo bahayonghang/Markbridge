@@ -605,3 +605,213 @@ fn undo_delete_recreates_descendants_under_new_parent_ids() {
     assert_eq!(undo.restores.len(), 2);
     assert_eq!(undo.restores[1].old_chrome_id, id("child"));
 }
+
+#[test]
+fn reclassify_creates_folders_before_moves_and_has_no_delete() {
+    let plan = plan_reclassify(
+        &sample(),
+        &id("bar"),
+        &[ReclassFolder {
+            local_id: id("fld1"),
+            parent_local: None,
+            name: "阅读".into(),
+        }],
+        &[ReclassMove {
+            chrome_id: id("item"),
+            folder_local: id("fld1"),
+        }],
+    )
+    .unwrap();
+    assert!(plan.steps.len() >= 2);
+    assert!(
+        plan.steps
+            .iter()
+            .all(|step| !matches!(step.payload, Mutation::Delete {}))
+    );
+    assert!(matches!(plan.steps[0].payload, Mutation::Create { .. }));
+    match &plan.steps[1].payload {
+        Mutation::Move { parent_id, .. } => assert_eq!(parent_id, &plan.steps[0].request_id),
+        other => panic!("expected move, got {other:?}"),
+    }
+    let cycle = plan_reclassify(
+        &sample(),
+        &id("bar"),
+        &[
+            ReclassFolder {
+                local_id: id("fld1"),
+                parent_local: Some(id("fld2")),
+                name: "甲".into(),
+            },
+            ReclassFolder {
+                local_id: id("fld2"),
+                parent_local: Some(id("fld1")),
+                name: "乙".into(),
+            },
+        ],
+        &[],
+    );
+    assert_eq!(cycle.unwrap_err(), ErrorCode::InvalidTree);
+}
+
+#[test]
+fn unconfirmed_cleanup_does_not_plan_a_delete() {
+    let nodes = sample();
+    assert_eq!(
+        plan_empty_cleanup(&nodes, &[id("item")], false).unwrap_err(),
+        ErrorCode::Cancelled
+    );
+    assert_eq!(
+        plan_empty_cleanup(&nodes, &[id("item")], true).unwrap_err(),
+        ErrorCode::InvalidMessage
+    );
+    let kept = plan_empty_cleanup(&nodes, &[id("folder")], true).unwrap();
+    assert!(kept.steps.is_empty());
+    let mut with_empty = nodes;
+    with_empty.push(node("empty", Some("bar"), 3, "空", None));
+    assert!(plan_empty_cleanup(&with_empty, &[id("empty"), id("item")], true).is_err());
+    let plan = plan_empty_cleanup(&with_empty, &[id("empty")], true).unwrap();
+    assert_eq!(plan.steps.len(), 1);
+    assert!(matches!(plan.steps[0].payload, Mutation::Delete {}));
+}
+
+#[test]
+fn undo_of_create_then_move_restores_the_folder_index_before_delete() {
+    let mut current = vec![
+        node("0", None, 0, "", None),
+        node("bar", Some("0"), 0, "栏", None),
+        node(
+            "next",
+            Some("bar"),
+            0,
+            "Next",
+            Some("https://example.test/next"),
+        ),
+        node("fld", Some("bar"), 1, "阅读", None),
+        node(
+            "item",
+            Some("fld"),
+            0,
+            "A & B <C>",
+            Some("https://example.test/?q=1&x=<y>"),
+        ),
+    ];
+    current[1].folder_type = Some(FolderType::BookmarksBar);
+    let created = node("fld", Some("bar"), 2, "阅读", None);
+    let before = node(
+        "item",
+        Some("bar"),
+        0,
+        "A & B <C>",
+        Some("https://example.test/?q=1&x=<y>"),
+    );
+    let after = node(
+        "item",
+        Some("fld"),
+        0,
+        "A & B <C>",
+        Some("https://example.test/?q=1&x=<y>"),
+    );
+    let stored = StoredEdit {
+        operation_id: id("op-reclass"),
+        state: OperationState::Applied,
+        orders: vec![],
+        snapshot: current.clone(),
+        steps: vec![
+            StoredStep {
+                request_id: id("req-create"),
+                payload: Mutation::Create {
+                    parent_id: id("bar"),
+                    position: Position::new(2).unwrap(),
+                    title: Title::new("阅读").unwrap(),
+                    url: None,
+                },
+                before: None,
+                after: Some(created),
+                before_child_ids: None,
+                after_child_ids: None,
+                applied: true,
+            },
+            StoredStep {
+                request_id: id("req-move"),
+                payload: Mutation::Move {
+                    parent_id: id("fld"),
+                    position: Position::new(0).unwrap(),
+                },
+                before: Some(before),
+                after: Some(after.clone()),
+                before_child_ids: None,
+                after_child_ids: None,
+                applied: true,
+            },
+        ],
+    };
+    let undo = plan(
+        &current,
+        &EditAction::Undo {
+            operation_id: id("op-reclass"),
+        },
+        &[],
+        Some(&stored),
+    )
+    .unwrap();
+    assert!(undo.conflicts.is_empty());
+    match &undo.steps[0].payload {
+        Mutation::Move {
+            parent_id,
+            position,
+        } => {
+            assert_eq!(parent_id, &id("bar"));
+            assert_eq!(position.get(), 0);
+        }
+        other => panic!("expected move back, got {other:?}"),
+    }
+    assert!(matches!(undo.steps[1].payload, Mutation::Delete {}));
+    assert!(
+        undo.steps
+            .iter()
+            .all(|step| !matches!(step.payload, Mutation::Update { .. }))
+    );
+
+    current
+        .iter_mut()
+        .find(|node| node.chrome_id.as_str() == "item")
+        .unwrap()
+        .title = Title::new("Changed").unwrap();
+    let titled = plan(
+        &current,
+        &EditAction::Undo {
+            operation_id: id("op-reclass"),
+        },
+        &[],
+        Some(&stored),
+    )
+    .unwrap();
+    assert!(matches!(titled.steps[0].payload, Mutation::Move { .. }));
+
+    current
+        .iter_mut()
+        .find(|node| node.chrome_id.as_str() == "item")
+        .unwrap()
+        .parent_id = Some(id("bar"));
+    current
+        .iter_mut()
+        .find(|node| node.chrome_id.as_str() == "item")
+        .unwrap()
+        .position = Position::new(2).unwrap();
+    let conflict = plan(
+        &current,
+        &EditAction::Undo {
+            operation_id: id("op-reclass"),
+        },
+        &[],
+        Some(&stored),
+    )
+    .unwrap();
+    assert!(
+        conflict
+            .steps
+            .iter()
+            .all(|step| !matches!(step.payload, Mutation::Move { .. }))
+    );
+    assert!(!conflict.conflicts.is_empty());
+}

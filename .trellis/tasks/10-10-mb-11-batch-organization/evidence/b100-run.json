@@ -1,0 +1,1435 @@
+{
+  "browser": "Chrome/155.0.8059.39",
+  "chromePids": 12,
+  "command": "cargo test -p markbridge-core --lib --locked disposable_chrome_b100 -- --ignored --nocapture --test-threads=1",
+  "dailyAfter": {
+    "length": 849515,
+    "sha256": "DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82"
+  },
+  "dailyBefore": {
+    "length": 849515,
+    "sha256": "DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82"
+  },
+  "externalEditKept": true,
+  "interrupted": {
+    "applied": [
+      [
+        0,
+        39
+      ]
+    ],
+    "pending": [
+      [
+        40,
+        92
+      ]
+    ],
+    "phase": "applying",
+    "uncertain": [
+      [
+        39,
+        40
+      ]
+    ]
+  },
+  "paired": true,
+  "recovered": {
+    "applied": [
+      [
+        0,
+        39
+      ]
+    ],
+    "pending": [
+      [
+        40,
+        92
+      ]
+    ],
+    "phase": "partial",
+    "receipts": [
+      {
+        "kind": "create",
+        "ordinal": 0,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 1,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 2,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 3,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 4,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 5,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 6,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 7,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 8,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 9,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 10,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 11,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 12,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 13,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 14,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 15,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 16,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 17,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 18,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 19,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 20,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 21,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 22,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 23,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 24,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 25,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 26,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 27,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 28,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 29,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 30,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 31,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 32,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 33,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 34,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 35,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 36,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 37,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 38,
+        "state": "applied"
+      },
+      {
+        "kind": "move",
+        "ordinal": 39,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 40,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 41,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 42,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 43,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 44,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 45,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 46,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 47,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 48,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 49,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 50,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 51,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 52,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 53,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 54,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 55,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 56,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 57,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 58,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 59,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 60,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 61,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 62,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 63,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 64,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 65,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 66,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 67,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 68,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 69,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 70,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 71,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 72,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 73,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 74,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 75,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 76,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 77,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 78,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 79,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 80,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 81,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 82,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 83,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 84,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 85,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 86,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 87,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 88,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 89,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 90,
+        "state": null
+      },
+      {
+        "kind": "move",
+        "ordinal": 91,
+        "state": null
+      }
+    ],
+    "uncertain": [
+      [
+        39,
+        40
+      ]
+    ]
+  },
+  "rollback": {
+    "nestedFolder": "分类",
+    "noteKept": true,
+    "restored": true,
+    "siblings": [
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 0,
+        "title": "RollA",
+        "urlKey": "a502c05fabaadc7c"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 1,
+        "title": "RollB",
+        "urlKey": "de7b2d0b07b63ff1"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 2,
+        "title": "留在原位",
+        "urlKey": "0abe488fb13064e6"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 3,
+        "title": "中文 | 分隔",
+        "urlKey": "d284f0c68a0dfded"
+      }
+    ],
+    "summaryKept": true,
+    "tree": [
+      {
+        "children": [
+          {
+            "children": [],
+            "host": "example.test",
+            "kind": "bookmark",
+            "position": 0,
+            "title": "RollA",
+            "urlKey": "a502c05fabaadc7c"
+          },
+          {
+            "children": [],
+            "host": "example.test",
+            "kind": "bookmark",
+            "position": 1,
+            "title": "RollB",
+            "urlKey": "de7b2d0b07b63ff1"
+          },
+          {
+            "children": [],
+            "host": "example.test",
+            "kind": "bookmark",
+            "position": 2,
+            "title": "留在原位",
+            "urlKey": "0abe488fb13064e6"
+          },
+          {
+            "children": [],
+            "host": "example.test",
+            "kind": "bookmark",
+            "position": 3,
+            "title": "中文 | 分隔",
+            "urlKey": "d284f0c68a0dfded"
+          }
+        ],
+        "host": "",
+        "kind": "folder",
+        "position": 0,
+        "title": "分类",
+        "urlKey": ""
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 1,
+        "title": "Item 000",
+        "urlKey": "4b4017334be345a1"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 2,
+        "title": "条目 001",
+        "urlKey": "4b4017334be345a1"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 3,
+        "title": "Item 002",
+        "urlKey": "5b1f200b9040b256"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 4,
+        "title": "条目 003",
+        "urlKey": "8c2c9be779d6506a"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 5,
+        "title": "Item 004",
+        "urlKey": "6671fd06a468e12c"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 6,
+        "title": "条目 005",
+        "urlKey": "0897ff89f108c742"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 7,
+        "title": "Item 006",
+        "urlKey": "6dc5b0cbde5c33cc"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 8,
+        "title": "条目 007",
+        "urlKey": "57d355509b056b6b"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 9,
+        "title": "Item 008",
+        "urlKey": "a684336c594eaa8d"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 10,
+        "title": "条目 009",
+        "urlKey": "880385296c619d33"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 11,
+        "title": "Item 010",
+        "urlKey": "5debc9dd8fa37d54"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 12,
+        "title": "条目 011",
+        "urlKey": "f19cc223af29eb83"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 13,
+        "title": "Item 012",
+        "urlKey": "ce89ed1b53011130"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 14,
+        "title": "条目 013",
+        "urlKey": "166cdd55f920ce7c"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 15,
+        "title": "Item 014",
+        "urlKey": "93f2aaee11138bf5"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 16,
+        "title": "条目 015",
+        "urlKey": "b6970e0c708072a2"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 17,
+        "title": "Item 016",
+        "urlKey": "17788168a015fcf3"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 18,
+        "title": "条目 017",
+        "urlKey": "df1cb5a82fed62b3"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 19,
+        "title": "Item 018",
+        "urlKey": "c2eaf579a2e80694"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 20,
+        "title": "条目 019",
+        "urlKey": "e990be14b8e5846b"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 21,
+        "title": "Item 020",
+        "urlKey": "95967cfcd4133b9b"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 22,
+        "title": "条目 021",
+        "urlKey": "10308ba95edf2001"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 23,
+        "title": "Item 022",
+        "urlKey": "cfe4ad62b0abbdd6"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 24,
+        "title": "条目 023",
+        "urlKey": "6d50322d3e2f5def"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 25,
+        "title": "Item 024",
+        "urlKey": "f6fb74d2cb85ed04"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 26,
+        "title": "条目 025",
+        "urlKey": "9679b6f4a28ff1c8"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 27,
+        "title": "Item 026",
+        "urlKey": "6dda046f5bd7adae"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 28,
+        "title": "条目 027",
+        "urlKey": "013b1c4443c1e164"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 29,
+        "title": "Item 028",
+        "urlKey": "6515e7afc657fdcb"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 30,
+        "title": "条目 029",
+        "urlKey": "8b10d3fd88305ec2"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 31,
+        "title": "Item 030",
+        "urlKey": "64ecd95bb1954855"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 32,
+        "title": "条目 031",
+        "urlKey": "67583ecbf6d22adf"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 33,
+        "title": "Item 032",
+        "urlKey": "d5890116cea6054d"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 34,
+        "title": "条目 033",
+        "urlKey": "a460adbc43bbeea6"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 35,
+        "title": "Item 034",
+        "urlKey": "dfa7061bd362aa5a"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 36,
+        "title": "条目 035",
+        "urlKey": "c7e22c2a1ee7686e"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 37,
+        "title": "Item 036",
+        "urlKey": "eb86db971495e654"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 38,
+        "title": "条目 037",
+        "urlKey": "505a64b7aab6ff8e"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 39,
+        "title": "Item 038",
+        "urlKey": "388a27a9d6d26dd3"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 40,
+        "title": "条目 039",
+        "urlKey": "c397f73245772e40"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 41,
+        "title": "Item 040",
+        "urlKey": "8a4f53055efe3f45"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 42,
+        "title": "条目 041",
+        "urlKey": "02990df5bd22e181"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 43,
+        "title": "Item 042",
+        "urlKey": "aae7abc5d3a788a8"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 44,
+        "title": "条目 043",
+        "urlKey": "6e56ba2bd8949f6f"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 45,
+        "title": "Item 044",
+        "urlKey": "5ae18e3427652150"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 46,
+        "title": "条目 045",
+        "urlKey": "bc158fda925c5351"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 47,
+        "title": "Item 046",
+        "urlKey": "eaf44a93537e1a18"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 48,
+        "title": "条目 047",
+        "urlKey": "7bff0275372393e1"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 49,
+        "title": "Item 048",
+        "urlKey": "034616a620c75029"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 50,
+        "title": "条目 049",
+        "urlKey": "132c158e1c2f83e2"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 51,
+        "title": "Item 050",
+        "urlKey": "15389624a1892d85"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 52,
+        "title": "条目 051",
+        "urlKey": "856120e371ca49f1"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 53,
+        "title": "Item 052",
+        "urlKey": "594764007fad3f78"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 54,
+        "title": "条目 053",
+        "urlKey": "8d02769e0b53c99a"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 55,
+        "title": "Item 054",
+        "urlKey": "585ce35f1d187d48"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 56,
+        "title": "条目 055",
+        "urlKey": "dd0c06997cf930f3"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 57,
+        "title": "Item 056",
+        "urlKey": "9b3978c8ec5d2616"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 58,
+        "title": "条目 057",
+        "urlKey": "9befb986e55dd359"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 59,
+        "title": "Item 058",
+        "urlKey": "e84985a0539cf87d"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 60,
+        "title": "条目 059",
+        "urlKey": "4ff0d7da439e77b3"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 61,
+        "title": "Item 060",
+        "urlKey": "c0b0a9cc872d3a31"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 62,
+        "title": "条目 061",
+        "urlKey": "e3e86c70129098db"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 63,
+        "title": "Item 062",
+        "urlKey": "c6216c24b6ed70bf"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 64,
+        "title": "条目 063",
+        "urlKey": "45aaa299aeacdd11"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 65,
+        "title": "Item 064",
+        "urlKey": "fde9ba4ee42d3e3e"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 66,
+        "title": "条目 065",
+        "urlKey": "cb26f2da23f0be5b"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 67,
+        "title": "Item 066",
+        "urlKey": "e28af1329ba5ef58"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 68,
+        "title": "条目 067",
+        "urlKey": "7339c53ce52dc7be"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 69,
+        "title": "Item 068",
+        "urlKey": "f4ced2516b12e964"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 70,
+        "title": "条目 069",
+        "urlKey": "1fcb2b5ebb81337f"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 71,
+        "title": "Item 070",
+        "urlKey": "c51e5e2ffe5b4c7a"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 72,
+        "title": "条目 071",
+        "urlKey": "4dfb59948c6dae69"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 73,
+        "title": "Item 072",
+        "urlKey": "f09de4e6c7f360ed"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 74,
+        "title": "条目 073",
+        "urlKey": "6b958be84c584729"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 75,
+        "title": "Item 074",
+        "urlKey": "8feb2fe2cc50ed49"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 76,
+        "title": "条目 075",
+        "urlKey": "7d42442e84f1ba3a"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 77,
+        "title": "Item 076",
+        "urlKey": "8bc04e5fd5bb5116"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 78,
+        "title": "条目 077",
+        "urlKey": "9758fcdbae7eb4f0"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 79,
+        "title": "Item 078",
+        "urlKey": "4e6875c60754e966"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 80,
+        "title": "条目 079",
+        "urlKey": "d29bad14535c1fff"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 81,
+        "title": "Item 080",
+        "urlKey": "73bad490485ab0cf"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 82,
+        "title": "条目 081",
+        "urlKey": "1e78652f9d136e86"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 83,
+        "title": "Item 082",
+        "urlKey": "22cd24a9760633d6"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 84,
+        "title": "条目 083",
+        "urlKey": "a0744da741390817"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 85,
+        "title": "Item 084",
+        "urlKey": "7b8659b831ea4f61"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 86,
+        "title": "条目 085",
+        "urlKey": "3d7f5b68b22c67cd"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 87,
+        "title": "Item 086",
+        "urlKey": "9fd4129e82266470"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 88,
+        "title": "条目 087",
+        "urlKey": "cd14f7b56aaefac7"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 89,
+        "title": "Item 088",
+        "urlKey": "dd2d90690fe1f0e0"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 90,
+        "title": "条目 089",
+        "urlKey": "3810fe9dbd7f726b"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 91,
+        "title": "Item 090",
+        "urlKey": "3e3c1583d7733044"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 92,
+        "title": "条目 091",
+        "urlKey": "b9d4fa04600a91a1"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 93,
+        "title": "Item 092",
+        "urlKey": "9825820c4788d36c"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 94,
+        "title": "条目 093",
+        "urlKey": "48026b307bf3eb57"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 95,
+        "title": "Item 094",
+        "urlKey": "8e39bfdf1f286433"
+      },
+      {
+        "children": [],
+        "host": "example.test",
+        "kind": "bookmark",
+        "position": 96,
+        "title": "条目 095",
+        "urlKey": "dbfca97f02678c65"
+      }
+    ]
+  },
+  "shape": {
+    "bookmarkCount": 100,
+    "chineseTitle": true,
+    "deletes": 0,
+    "duplicateKeys": [
+      "4b4017334be345a1"
+    ],
+    "duplicateUrl": true,
+    "englishTitle": true,
+    "nestedChildTitles": [
+      "RollA",
+      "RollB",
+      "留在原位",
+      "中文 | 分隔"
+    ],
+    "nestedFolders": 1,
+    "protected": [
+      {
+        "deleted": false,
+        "folderType": null,
+        "moved": false,
+        "root": true,
+        "unmodifiable": false
+      },
+      {
+        "deleted": false,
+        "folderType": "bookmarks-bar",
+        "moved": false,
+        "root": false,
+        "unmodifiable": false
+      },
+      {
+        "deleted": false,
+        "folderType": "other",
+        "moved": false,
+        "root": false,
+        "unmodifiable": false
+      }
+    ],
+    "separator": "|",
+    "unselectedStayed": true
+  },
+  "status": "PASS",
+  "unselected": [
+    {
+      "position": 0,
+      "stayed": true,
+      "title": "RollA"
+    },
+    {
+      "position": 1,
+      "stayed": true,
+      "title": "RollB"
+    },
+    {
+      "position": 2,
+      "stayed": true,
+      "title": "留在原位"
+    },
+    {
+      "position": 3,
+      "stayed": true,
+      "title": "中文 | 分隔"
+    }
+  ]
+}

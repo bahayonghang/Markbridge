@@ -2135,6 +2135,374 @@ fn established_foreign(pid: u32) -> Vec<String> {
     found
 }
 
+fn org_nodes() -> Vec<BookmarkNode> {
+    let mut nodes = vec![
+        fixture_node("0", None, 0, true, "root", None),
+        fixture_node("1", Some("0"), 0, true, "栏", None),
+        fixture_node(
+            "10",
+            Some("1"),
+            0,
+            false,
+            "Alpha",
+            Some("https://example.com/Alpha"),
+        ),
+        fixture_node("11", Some("1"), 1, true, "已有", None),
+        fixture_node(
+            "21",
+            Some("11"),
+            0,
+            false,
+            "Gamma",
+            Some("https://example.com/Gamma"),
+        ),
+        fixture_node("12", Some("1"), 2, true, "空", None),
+        fixture_node(
+            "20",
+            Some("1"),
+            3,
+            false,
+            "Beta",
+            Some("https://example.com/Beta"),
+        ),
+    ];
+    nodes[1].folder_type = Some(FolderType::BookmarksBar);
+    nodes
+}
+
+async fn live_org() -> (
+    Bridge,
+    tempfile::TempDir,
+    Arc<MemoryCredentials>,
+    Id,
+    String,
+) {
+    let (bridge, directory, credentials) = fixture().await;
+    let (profile, secret) = paired(&bridge, "instance").await;
+    bridge
+        .authenticate(&origin(), &hello(&profile, "instance", "s", &secret))
+        .await
+        .unwrap();
+    accept_tree(&bridge, &profile, "s", 0, org_nodes()).await;
+    (bridge, directory, credentials, profile, secret)
+}
+
+async fn bind_session(
+    bridge: &Bridge,
+    profile: &Id,
+    session: &str,
+) -> mpsc::UnboundedReceiver<WireMessage> {
+    let (tx, rx) = mpsc::unbounded_channel();
+    bridge
+        .bind_outbound(profile, &Id::new(session).unwrap(), tx)
+        .await;
+    rx
+}
+
+async fn insert_ready_job(bridge: &Bridge, profile: &Id, chrome_ids: &[&str]) -> (Id, Id) {
+    let inner = bridge.inner.lock().await;
+    let active = inner.profiles.get(profile.as_str()).unwrap();
+    let revision = active.view.revision.get();
+    let epoch = active.identity.source_epoch;
+    let cached = inner
+        .storage()
+        .unwrap()
+        .bookmarks(profile.clone(), epoch)
+        .await
+        .unwrap();
+    let mut ids = HashMap::new();
+    for row in &cached {
+        if row.deleted_at.is_none() {
+            ids.insert(
+                row.node.chrome_id.as_str().to_owned(),
+                row.bookmark_id.as_str().to_owned(),
+            );
+        }
+    }
+    let mut scope = Vec::new();
+    for chrome in chrome_ids {
+        let node = active
+            .nodes
+            .iter()
+            .find(|node| node.chrome_id.as_str() == *chrome)
+            .unwrap();
+        scope.push(crate::organization::ScopeRow {
+            chrome_id: (*chrome).to_owned(),
+            bookmark_id: ids[*chrome].clone(),
+            parent_id: node.parent_id.as_ref().unwrap().as_str().to_owned(),
+            position: node.position.get(),
+            title: node.title.as_str().to_owned(),
+            url: node.url.as_ref().map(|url| url.as_str().to_owned()),
+        });
+    }
+    let scope = crate::organization::sorted_scope(scope);
+    let mut record = crate::organization::Record {
+        profile_id: profile.as_str().to_owned(),
+        source_epoch: epoch.get(),
+        source_revision: revision,
+        fingerprint: crate::organization::input_fingerprint(
+            profile.as_str(),
+            epoch.get(),
+            revision,
+            &scope,
+        ),
+        anchor_id: "1".to_owned(),
+        sampled: scope.len() as u64,
+        scope,
+        folders: vec![crate::organization::FolderRow {
+            folder_id: "fld-read".to_owned(),
+            name: "阅读".to_owned(),
+            parent_folder_id: None,
+            reviewed: true,
+        }],
+        assignments: Vec::new(),
+        phase: "ready".to_owned(),
+        plan_hash: String::new(),
+        operation_id: None,
+        dispatched: Vec::new(),
+        backup_verified: false,
+        failure: None,
+        failure_message: None,
+    };
+    for row in &record.scope {
+        record.assignments.push(crate::organization::AssignRow {
+            chrome_id: row.chrome_id.clone(),
+            bookmark_id: row.bookmark_id.clone(),
+            source_parent_id: row.parent_id.clone(),
+            source_label: row.label(),
+            target_folder_id: "fld-read".to_owned(),
+            cited_input_id: row.chrome_id.clone(),
+            cited_folder_id: "fld-read".to_owned(),
+            rejected: false,
+        });
+    }
+    crate::organization::rehash(&mut record);
+    let job = crate::organization::job_id().unwrap();
+    let hash = Id::new(&record.plan_hash).unwrap();
+    inner
+        .storage()
+        .unwrap()
+        .insert_organization_job(
+            crate::storage::ai::OrganizationJob {
+                id: job.clone(),
+                profile_id: profile.clone(),
+                fingerprint: record.fingerprint.clone(),
+                state: record.phase.clone(),
+                proposal: serde_json::to_string(&record).unwrap(),
+                error_code: None,
+                operation_id: None,
+            },
+            "stub".to_owned(),
+            "http://127.0.0.1:9/api/chat".to_owned(),
+        )
+        .await
+        .unwrap();
+    (job, hash)
+}
+
+fn changed_title(profile: &Id, seq: u64, chrome: &str, title: &str, url: &str) -> WireMessage {
+    serde_json::from_value(serde_json::json!({
+        "type": "event",
+        "protocolVersion": 1,
+        "profileId": profile,
+        "sessionId": "s",
+        "requestId": null,
+        "seq": seq,
+        "payload": {
+            "sourceEpoch": 1,
+            "event": {"kind": "changed", "chromeId": chrome, "title": title, "url": url}
+        }
+    }))
+    .unwrap()
+}
+
+#[tokio::test]
+async fn apply_organization_returns_before_edit_when_the_cached_revision_changes() {
+    let (bridge, _directory, _credentials, profile, _secret) = live_org().await;
+    let mut outbound = bind_session(&bridge, &profile, "s").await;
+    let (job, hash) = insert_ready_job(&bridge, &profile, &["10"]).await;
+    let before = bridge
+        .state()
+        .await
+        .profiles
+        .iter()
+        .find(|item| item.profile_id == profile)
+        .unwrap()
+        .revision
+        .get();
+    assert!(
+        !bridge
+            .receive(changed_title(
+                &profile,
+                1,
+                "10",
+                "Alpha external",
+                "https://example.com/Alpha",
+            ))
+            .await
+            .unwrap()
+    );
+    let after = bridge
+        .state()
+        .await
+        .profiles
+        .iter()
+        .find(|item| item.profile_id == profile)
+        .unwrap()
+        .revision
+        .get();
+    assert_ne!(after, before);
+    assert_eq!(
+        cached_tree(&bridge, &profile)
+            .await
+            .iter()
+            .find(|node| node.chrome_id.as_str() == "10")
+            .unwrap()
+            .title
+            .as_str(),
+        "Alpha external"
+    );
+    let plan = bridge.apply_organization(job, hash).await.unwrap();
+    assert_eq!(plan.phase, OrganizationPhase::Invalid);
+    assert_eq!(plan.failure.0, Some(ErrorCode::StaleProposal));
+    assert_eq!(
+        plan.failure_message.0.as_deref(),
+        Some(crate::organization::MSG_STALE)
+    );
+    assert_ne!(plan.source_revision.get(), after);
+    assert!(plan.operation_id.0.is_none());
+    assert!(outbound.try_recv().is_err());
+    assert!(
+        bridge
+            .list_operations(profile.clone())
+            .await
+            .unwrap()
+            .operations
+            .is_empty()
+    );
+    bridge.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn cleanup_organization_without_confirm_does_not_delete() {
+    let (bridge, _directory, _credentials, profile, _secret) = live_org().await;
+    let mut outbound = bind_session(&bridge, &profile, "s").await;
+    let (job, _hash) = insert_ready_job(&bridge, &profile, &["10"]).await;
+    let before = cached_tree(&bridge, &profile).await;
+    let plan = bridge
+        .cleanup_organization(job, false, false)
+        .await
+        .unwrap();
+    assert_eq!(plan.failure.0, Some(ErrorCode::Cancelled));
+    assert_eq!(
+        plan.failure_message.0.as_deref(),
+        Some(crate::organization::MSG_NO_DELETE)
+    );
+    assert!(outbound.try_recv().is_err());
+    assert!(
+        bridge
+            .list_operations(profile.clone())
+            .await
+            .unwrap()
+            .operations
+            .is_empty()
+    );
+    let after = cached_tree(&bridge, &profile).await;
+    assert_eq!(after, before);
+    for chrome in ["10", "11", "12", "21"] {
+        assert!(
+            after.iter().any(|node| node.chrome_id.as_str() == chrome),
+            "{chrome}"
+        );
+    }
+    bridge.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn restart_leaves_a_dispatched_step_uncertain_and_does_not_replay() {
+    let (bridge, directory, credentials, profile, secret) = live_org().await;
+    let mut outbound = bind_session(&bridge, &profile, "s").await;
+    let (job, hash) = insert_ready_job(&bridge, &profile, &["10", "20"]).await;
+    let plan = bridge.apply_organization(job.clone(), hash).await.unwrap();
+    assert_eq!(plan.phase, OrganizationPhase::Applying);
+    let operation_id = plan.operation_id.0.clone().unwrap();
+    let WireMessage::ApplyOperation { payload, .. } = outbound.try_recv().unwrap() else {
+        panic!("missing first apply");
+    };
+    assert_eq!(payload.steps.len(), 1);
+    assert!(matches!(payload.steps[0].payload, Mutation::Create { .. }));
+    let created = fixture_node("90", Some("1"), 4, true, "阅读", None);
+    let session = Id::new("s").unwrap();
+    let receipt = envelope(
+        "operation_receipt",
+        &profile,
+        &session,
+        Some(payload.steps[0].request_id.clone()),
+        serde_json::json!({
+            "operationId": operation_id,
+            "requestId": payload.steps[0].request_id,
+            "state": "applied",
+            "before": null,
+            "after": created,
+            "beforeChildIds": null,
+            "afterChildIds": null,
+            "errorCode": null
+        }),
+    )
+    .unwrap();
+    assert!(!bridge.receive(receipt).await.unwrap());
+    let WireMessage::ApplyOperation { payload: next, .. } = outbound.try_recv().unwrap() else {
+        panic!("missing second apply");
+    };
+    assert_eq!(next.steps.len(), 1);
+    assert!(matches!(next.steps[0].payload, Mutation::Move { .. }));
+    assert_ne!(next.steps[0].request_id, payload.steps[0].request_id);
+    assert!(outbound.try_recv().is_err());
+    let path = directory.path().join("cache.sqlite");
+    bridge.shutdown().await.unwrap();
+    let bridge = Bridge::open(&path, credentials).await.unwrap();
+    let recovered = bridge.organization_plan(job.clone()).await.unwrap();
+    assert_eq!(recovered.phase, OrganizationPhase::Partial);
+    assert_eq!(recovered.applied[0].start.get(), 0);
+    assert_eq!(recovered.applied[0].end.get(), 1);
+    assert_eq!(recovered.uncertain[0].start.get(), 1);
+    assert_eq!(recovered.uncertain[0].end.get(), 2);
+    assert_eq!(recovered.pending[0].start.get(), 2);
+    assert_eq!(recovered.pending[0].end.get(), 3);
+    let stored = bridge.list_operations(profile.clone()).await.unwrap();
+    assert_eq!(
+        stored
+            .operations
+            .iter()
+            .find(|item| item.operation_id == operation_id)
+            .unwrap()
+            .state,
+        OperationState::Uncertain
+    );
+    bridge
+        .authenticate(&origin(), &hello(&profile, "instance", "s2", &secret))
+        .await
+        .unwrap();
+    let mut restarted = bind_session(&bridge, &profile, "s2").await;
+    accept_tree(&bridge, &profile, "s2", 0, org_nodes()).await;
+    while let Ok(message) = restarted.try_recv() {
+        assert!(
+            !matches!(message, WireMessage::ApplyOperation { .. }),
+            "restart replayed a browser write"
+        );
+    }
+    let again = bridge.organization_plan(job).await.unwrap();
+    assert_eq!(again.applied[0].end.get(), 1);
+    assert_eq!(again.uncertain[0].start.get(), 1);
+    assert_eq!(again.uncertain[0].end.get(), 2);
+    assert_eq!(again.pending[0].start.get(), 2);
+    assert_eq!(again.pending[0].end.get(), 3);
+    bridge.shutdown().await.unwrap();
+}
+
+#[path = "b100.rs"]
+mod b100;
+
 fn assert_no_bookmarks_bak(root: &std::path::Path) {
     let mut pending = vec![root.to_path_buf()];
     while let Some(directory) = pending.pop() {

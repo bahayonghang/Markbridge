@@ -25,6 +25,7 @@ pub mod ai;
 pub mod bridge;
 pub mod editing;
 pub mod mirror;
+pub mod organization;
 pub mod preview;
 pub mod storage;
 pub mod tags;

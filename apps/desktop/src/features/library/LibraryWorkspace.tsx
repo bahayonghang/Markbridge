@@ -5,6 +5,7 @@ import {
   type EditAction,
 } from '../../backend';
 import { AiSuggest } from '../ai/AiSuggest';
+import { OrganizationDesk } from '../organization/OrganizationDesk';
 import { ContentPreviewPanel } from '../preview/ContentPreview';
 import { WebPreviewPanel } from '../preview/WebPreview';
 import { EditDesk } from './EditDesk';
@@ -355,6 +356,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId }: {
   const visibleNodes = filtering ? tagMatches : !searching ? folderNodes : profile ? profileHits.slice(0, SEARCH_LIMIT) : searchHits.slice(0, SEARCH_LIMIT);
   const visible = visibleNodes.map(toListRow);
   const pickedIds = [...picked].sort();
+  const pickedBookmarks = pickedIds.filter((id) => activeIndex.nodes.get(id)?.kind === 'bookmark');
   const tagIds = pickedIds.length > 0 ? pickedIds : bookmarkId ? [bookmarkId] : [];
   function togglePick(chromeId: string) {
     setPicked((current) => {
@@ -621,6 +623,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId }: {
               <WebPreviewPanel profileId={profile.profileId} profileName={profile.displayName} chromeId={detailView.chromeId} url={detailView.url ?? null} native={native} />
             </>}
           </>}
+          {profile?.connection === 'live' && pickedBookmarks.length > 0 && <OrganizationDesk profileId={profile.profileId} revision={profile.revision} live chromeIds={pickedBookmarks} />}
           {profile?.connection === 'live' && <EditDesk
             profileId={profile.profileId}
             revision={profile.revision}

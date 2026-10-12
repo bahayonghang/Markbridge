@@ -48,6 +48,8 @@ pub mod preview;
 pub use preview::*;
 pub mod ai;
 pub use ai::*;
+pub mod organization;
+pub use organization::*;
 
 #[cfg(test)]
 mod wire_tests;

@@ -100,6 +100,8 @@ impl Bridge {
                 sender,
                 plan: prepared.plan,
                 encodings: prepared.encodings,
+                send_limit: None,
+                operation_id: None,
             },
         )
         .await?;

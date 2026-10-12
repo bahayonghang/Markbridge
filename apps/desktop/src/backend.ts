@@ -3,10 +3,10 @@ import { listen } from '@tauri-apps/api/event';
 import {
   parseApplyResult, parseBridgeState, parseChromeProfileList, parseEditDocument, parseEditPreview,
   parseLibraryCount, parseLibraryDetail, parseLibraryNodes, parseLibraryPage, parseLibrarySearch,
-  parseAiApply, parseAiConnection, parseAiSettings, parseAiSuggestion, parseContentPreview, parseMirrorTree, parseOperationList, parsePairingOffer, parseStartupState, parseTagCatalog, parseTitleEncoding, parseWebPreview,
+  parseAiApply, parseAiConnection, parseAiSettings, parseAiSuggestion, parseContentPreview, parseMirrorTree, parseOperationList, parseOrganizationPlan, parsePairingOffer, parseStartupState, parseTagCatalog, parseTitleEncoding, parseWebPreview,
   type AiApplyResult, type AiConnection, type AiSettings, type AiSuggestion, type ApplyResult, type BridgeState, type ChromeProfileList, type ContentPreview, type EditDocument, type EditPreview,
   type LibraryCount, type LibraryDetail, type LibraryNodes, type LibraryPage, type LibrarySearch,
-  type MirrorTree, type OperationList, type PairingOffer, type StartupState, type TagCatalog, type TitleEncodingPreview, type WebPreviewState,
+  type MirrorTree, type OperationList, type OrganizationFolder, type OrganizationPlan, type PairingOffer, type StartupState, type TagCatalog, type TitleEncodingPreview, type WebPreviewState,
 } from '@markbridge/protocol';
 
 export type EditAction =
@@ -240,6 +240,51 @@ export async function suggestAi(profileId: string, chromeId: string, requestId: 
 export async function cancelAi(requestId: string): Promise<void> {
   if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
   await invoke('cancel_ai', { requestId });
+}
+
+export async function proposeOrganization(profileId: string, chromeIds: string[]): Promise<OrganizationPlan> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseOrganizationPlan(await invoke<unknown>('propose_organization', { profileId, chromeIds }));
+}
+
+export async function reviewOrganization(jobId: string, folders: OrganizationFolder[]): Promise<OrganizationPlan> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseOrganizationPlan(await invoke<unknown>('review_organization', { jobId, folders }));
+}
+
+export async function assignOrganization(jobId: string): Promise<OrganizationPlan> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseOrganizationPlan(await invoke<unknown>('assign_organization', { jobId }));
+}
+
+export async function editOrganization(jobId: string, chromeId: string, targetFolderId: string, rejected: boolean): Promise<OrganizationPlan> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseOrganizationPlan(await invoke<unknown>('edit_organization', { jobId, chromeId, targetFolderId, rejected }));
+}
+
+export async function applyOrganization(jobId: string, planHash: string): Promise<OrganizationPlan> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseOrganizationPlan(await invoke<unknown>('apply_organization', { jobId, planHash }));
+}
+
+export async function pauseOrganization(jobId: string): Promise<OrganizationPlan> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseOrganizationPlan(await invoke<unknown>('pause_organization', { jobId }));
+}
+
+export async function cancelOrganization(jobId: string): Promise<OrganizationPlan> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseOrganizationPlan(await invoke<unknown>('cancel_organization', { jobId }));
+}
+
+export async function cleanupOrganization(jobId: string, confirm: boolean, secondConfirm: boolean): Promise<OrganizationPlan> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseOrganizationPlan(await invoke<unknown>('cleanup_organization', { jobId, confirm, secondConfirm }));
+}
+
+export async function organizationPlan(jobId: string): Promise<OrganizationPlan> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseOrganizationPlan(await invoke<unknown>('organization_plan', { jobId }));
 }
 
 export async function applyAi(draft: AiDraft): Promise<AiApplyResult> {

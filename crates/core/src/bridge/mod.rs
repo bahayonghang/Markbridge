@@ -3,6 +3,7 @@ mod ai;
 pub mod credentials;
 mod edit;
 mod file_mirror;
+mod organization;
 mod sync;
 mod tags;
 mod transport;
@@ -53,6 +54,7 @@ struct ActiveProfile {
     outbound: Option<mpsc::UnboundedSender<WireMessage>>,
     busy: bool,
     writes_blocked: bool,
+    batch_hold: Option<Id>,
 }
 struct Listener {
     stop: watch::Sender<bool>,
@@ -184,6 +186,7 @@ impl Bridge {
                     outbound: None,
                     busy: false,
                     writes_blocked,
+                    batch_hold: None,
                 },
             );
         }
@@ -573,6 +576,7 @@ impl Bridge {
                 outbound: None,
                 busy: false,
                 writes_blocked: false,
+                batch_hold: None,
             },
         );
         inner.pending.remove(profile_id.as_str());
@@ -657,6 +661,7 @@ impl Bridge {
             inner.authenticated(profile_id, session_id)?;
             let receipt = payload.as_ref().clone();
             edit::accept_receipt(&mut inner, profile_id, &receipt).await?;
+            organization::on_receipt(self, &mut inner, profile_id, &receipt.operation_id).await?;
             self.publish(&mut inner);
             return Ok(false);
         }
@@ -779,6 +784,7 @@ impl Bridge {
             && let Some(profile) = inner.profiles.get_mut(profile_id.as_str())
         {
             profile.writes_blocked = true;
+            profile.batch_hold = None;
         }
         self.publish(&mut inner);
     }

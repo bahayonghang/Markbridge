@@ -1,0 +1,328 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OrganizationPlan",
+  "type": "object",
+  "properties": {
+    "anchorId": {
+      "$ref": "#/$defs/Id"
+    },
+    "applied": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/OrganizationRange"
+      },
+      "maxItems": 1000
+    },
+    "assignments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/OrganizationAssignment"
+      },
+      "maxItems": 900
+    },
+    "backupVerified": {
+      "type": "boolean"
+    },
+    "failed": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/OrganizationRange"
+      },
+      "maxItems": 1000
+    },
+    "failure": {
+      "$ref": "#/$defs/RequiredNullable2"
+    },
+    "failureMessage": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 80
+    },
+    "folders": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/OrganizationFolder"
+      },
+      "maxItems": 12
+    },
+    "impact": {
+      "$ref": "#/$defs/Counter"
+    },
+    "inputFingerprint": {
+      "$ref": "#/$defs/Id"
+    },
+    "jobId": {
+      "$ref": "#/$defs/Id"
+    },
+    "operationId": {
+      "$ref": "#/$defs/RequiredNullable"
+    },
+    "pending": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/OrganizationRange"
+      },
+      "maxItems": 1000
+    },
+    "phase": {
+      "$ref": "#/$defs/OrganizationPhase"
+    },
+    "planHash": {
+      "$ref": "#/$defs/Id"
+    },
+    "profileId": {
+      "$ref": "#/$defs/Id"
+    },
+    "sampled": {
+      "$ref": "#/$defs/Counter"
+    },
+    "scope": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/OrganizationScopeItem"
+      },
+      "maxItems": 900
+    },
+    "scopeCount": {
+      "$ref": "#/$defs/Counter"
+    },
+    "sourceEpoch": {
+      "$ref": "#/$defs/SourceEpoch"
+    },
+    "sourceRevision": {
+      "$ref": "#/$defs/Counter"
+    },
+    "uncertain": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/OrganizationRange"
+      },
+      "maxItems": 1000
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "jobId",
+    "profileId",
+    "sourceEpoch",
+    "sourceRevision",
+    "inputFingerprint",
+    "planHash",
+    "phase",
+    "sampled",
+    "scopeCount",
+    "anchorId",
+    "folders",
+    "scope",
+    "assignments",
+    "impact",
+    "failure",
+    "failureMessage",
+    "operationId",
+    "backupVerified",
+    "applied",
+    "pending",
+    "uncertain",
+    "failed"
+  ],
+  "$defs": {
+    "Counter": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 9007199254740991,
+      "minimum": 0
+    },
+    "ErrorCode": {
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "INVALID_MESSAGE",
+            "UNSUPPORTED_VERSION",
+            "FRAME_TOO_LARGE",
+            "LIMIT_EXCEEDED",
+            "INVALID_TREE",
+            "UNPAIRED",
+            "READ_ONLY",
+            "WRONG_PROFILE",
+            "STALE_PROPOSAL",
+            "PROTECTED_NODE",
+            "UNCERTAIN_WRITE",
+            "FETCH_DENIED",
+            "INVALID_AI_OUTPUT",
+            "STORAGE_ERROR",
+            "STORAGE_NEWER_SCHEMA",
+            "MIGRATION_FAILED",
+            "CONFLICT",
+            "CANCELLED"
+          ]
+        },
+        {
+          "description": "The selected Chrome directory is missing, unreadable, or not a User Data directory.",
+          "type": "string",
+          "const": "PATH_UNAVAILABLE"
+        }
+      ]
+    },
+    "Id": {
+      "type": "string",
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*(?![\\s\\S])"
+    },
+    "OrganizationAssignment": {
+      "type": "object",
+      "properties": {
+        "bookmarkId": {
+          "$ref": "#/$defs/Id"
+        },
+        "chromeId": {
+          "$ref": "#/$defs/Id"
+        },
+        "citedFolderId": {
+          "$ref": "#/$defs/Id"
+        },
+        "citedInputId": {
+          "$ref": "#/$defs/Id"
+        },
+        "rejected": {
+          "type": "boolean"
+        },
+        "sourceLabel": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "sourceParentId": {
+          "$ref": "#/$defs/Id"
+        },
+        "targetFolderId": {
+          "$ref": "#/$defs/Id"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "chromeId",
+        "bookmarkId",
+        "sourceParentId",
+        "sourceLabel",
+        "targetFolderId",
+        "citedInputId",
+        "citedFolderId",
+        "rejected"
+      ]
+    },
+    "OrganizationFolder": {
+      "type": "object",
+      "properties": {
+        "folderId": {
+          "$ref": "#/$defs/Id"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 60,
+          "minLength": 1
+        },
+        "parentFolderId": {
+          "$ref": "#/$defs/RequiredNullable"
+        },
+        "reviewed": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "folderId",
+        "name",
+        "parentFolderId",
+        "reviewed"
+      ]
+    },
+    "OrganizationPhase": {
+      "type": "string",
+      "enum": [
+        "folders",
+        "reviewed",
+        "assigning",
+        "ready",
+        "invalid",
+        "applying",
+        "paused",
+        "partial",
+        "applied",
+        "cancelled",
+        "failed"
+      ]
+    },
+    "OrganizationRange": {
+      "type": "object",
+      "properties": {
+        "end": {
+          "$ref": "#/$defs/Counter"
+        },
+        "start": {
+          "$ref": "#/$defs/Counter"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "start",
+        "end"
+      ]
+    },
+    "OrganizationScopeItem": {
+      "type": "object",
+      "properties": {
+        "bookmarkId": {
+          "$ref": "#/$defs/Id"
+        },
+        "chromeId": {
+          "$ref": "#/$defs/Id"
+        },
+        "sourceLabel": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "sourceParentId": {
+          "$ref": "#/$defs/Id"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "chromeId",
+        "bookmarkId",
+        "sourceParentId",
+        "sourceLabel"
+      ]
+    },
+    "RequiredNullable": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Id"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "RequiredNullable2": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ErrorCode"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "SourceEpoch": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 9007199254740991,
+      "minimum": 1
+    }
+  }
+}
