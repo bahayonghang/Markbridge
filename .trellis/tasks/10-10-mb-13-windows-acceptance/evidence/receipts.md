@@ -283,3 +283,40 @@ SubType = NSIS-3 Unicode
 
 README 写有：「升级先生成一致性备份，失败保留旧库；旧版本拒绝读取更高 schema，不通过删除数据库恢复。」以及「源码回退应保留 Trellis、`ref/`、既有文件和用户数据。」原文没有写安装包卸载或升级如何保护用户数据。AC13-4 仍是 NOT_RUN。AC13-2 仍是 FAIL。V15 仍是 FAIL。V16 仍是 UNVERIFIED。没有勾 PRD。
 
+## 2026-10-12 V15 隔离运行
+
+04:27–04:28（UTC）。命令 `node .trellis/tasks/10-10-mb-13-windows-acceptance/evidence/v15-isolated.mjs`，退出码 0。没有重新构建，没有勾 PRD。日志在 `evidence/v15-run.log`，判断在 `evidence/v15-result.json`。
+
+安装包仍是现有的 `target/release/bundle/nsis/Markbridge_0.1.0_x64-setup.exe`。安装到 `C:\Users\lyh\AppData\Local\Temp\mb13-v15-install`。`MARKBRIDGE_APP_DATA` 为 `C:\Users\lyh\AppData\Local\Temp\mb13-v15-data`，数据库文件名是 `markbridge.sqlite`。`MARKBRIDGE_CREDENTIAL_NAMESPACE` 为 `Markbridge.Task05.mb13-v15-20261012`。`WEBVIEW2_USER_DATA_FOLDER` 为 `C:\Users\lyh\AppData\Local\Temp\mb13-v15-install\webview2`。Chrome 使用 `C:\Users\lyh\AppData\Local\Temp\mb13-v15-chrome`。扩展从 `apps/extension/dist` 经 CDP `Extensions.loadUnpacked` 加载，扩展身份长度为 32。没有使用日常 Chrome 资料，没有加载已安装扩展。
+
+日常书签文件运行前和运行后都是 849515 字节，SHA256 `DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82`。
+
+| 观察 | 判定 | 记录 |
+|---|---|---|
+| 安装 | PASS | 进程退出码 0 |
+| 启动并退出 | PASS | 进程退出码 0。`WM_CLOSE` 已发送 |
+| 重启 | NOT_RUN | 没有第二次启动 |
+| 卸载 | PASS | 进程退出码 0 |
+| 配对到 live | FAIL | 点击了「启动连接」。脚本接着等待「实时同步」30 秒。这个文字要配对完成后才会出现。脚本没有点击「生成配对串」，没有把配对串交给扩展 |
+| 一次同步 | NOT_RUN | 没有进入已配对状态 |
+| 文本预览 | NOT_RUN | 没有选中书签 |
+| 独立预览窗口 | NOT_RUN | 没有点击「打开应用内网页」 |
+| 一次确认编辑和回执 | NOT_RUN | 没有确认变更 |
+| 重启后不重放未回执写入 | NOT_RUN | 没有制造未回执写入 |
+| `cmdkey` | PASS | `Markbridge.Pairing` 与 `Markbridge.Model` 前后都是 0。没有打印或删除既有凭据 |
+| 日常 EBWebView | PASS | 运行开始 `2026-10-12T04:27:17.972Z`。结束后 461 个文件，比运行开始新的文件数是 0。最新仍是 `2026-10-12T03:17:48.5775353Z`。这些文件没有删除 |
+| AI | NOT_RUN | `where.exe ollama` 退出码 1。没有调用模型 |
+| AC13-3 | NOT_RUN | 没有生成 B10K |
+| AC13-4 | NOT_RUN | 没有把本次安装写成安装包清单或卸载策略证据 |
+| V16 | UNVERIFIED | 没有 Floccus 环境 |
+
+临时 WebView2 目录有 162 个文件。日常 `%LOCALAPPDATA%\com.markbridge.desktop\EBWebView` 没有新文件。卸载后 `HKCU\Software\markbridge\Markbridge` 的默认值是本次临时安装路径，且没有其他值，随后删除了 `HKCU\Software\markbridge`。没有写 `HKLM` 或 `HKCU\Software\Policies`。结束后 `markbridge-desktop` 进程数为 0，命令行含 `mb13-v15-chrome` 的 Chrome 进程数为 0。
+
+AC13-2 为 FAIL。V15 为 FAIL。配对、同步、双预览、编辑和恢复都没有完成。
+
+## 2026-10-12 V15 证据复查
+
+这次复查只读 `v15-isolated.mjs`、`v15-result.json` 和上面的收据。没有重装，没有启动应用或 Chrome。V15 仍是 FAIL。
+
+日常书签前后都是 849515 字节，SHA256 `DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82`。`WEBVIEW2_USER_DATA_FOLDER` 设在临时安装目录内的 `webview2`。结果没有「生成配对串」点击。配对是 FAIL。同步、两个预览、编辑和恢复是 NOT_RUN。AC13-2 是 FAIL。AC13-3 与 AC13-4 是 NOT_RUN。V16 是 UNVERIFIED。`Markbridge.Pairing` 与 `Markbridge.Model` 前后都是 0。结果文件没有凭据秘密、令牌或书签标题列表。
+
