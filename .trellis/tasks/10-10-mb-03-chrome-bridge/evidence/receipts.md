@@ -548,3 +548,26 @@ OS 休眠保持 UNVERIFIED。V04 总行保持 UNVERIFIED。导入保持 UNVERIFI
 `%LOCALAPPDATA%\Google\Chrome\User Data\Default\Bookmarks` 启动前长度 850304，SHA256 `09F2A5C24BA0EE3E3AFF521B90B8509411C2BCDABFE743746A670B07515C1B9D`。结束后长度 850304，SHA256 `09F2A5C24BA0EE3E3AFF521B90B8509411C2BCDABFE743746A670B07515C1B9D`。运行中哈希没有变化。没有写该文件。先前观察到的长度 850304、SHA256 `09F2A5C24BA0EE3E3AFF521B90B8509411C2BCDABFE743746A670B07515C1B9D` 只作对照，不是这次的通过条件。`dailyMatchesNoted` 是 true。
 
 这次临时目录内的非 HTML 来源走完了 import_ended、扩展 reconciling 和随后的完整树。V04 总行不改为 PASS。OS 休眠保持 UNVERIFIED。03 未归档。
+
+## OS 休眠只读复核
+
+日期：2026-10-12。工作目录为仓库根。当前进程不是管理员。这次没有挂起主机，没有休眠到硬盘，没有关机，没有重启。没有提权，没有执行 `sudo`。没有调用 `SetSuspendState`、`rundll32 powrprof.dll`、`shutdown`、`psshutdown` 或 `powercfg -h`。没有发送 `WM_POWERBROADCAST`。没有跑 `powercfg /sleepstudy`。没有打开日常 Chrome Profile，没有改已安装扩展，没有写日常 `Bookmarks`。没有重跑导入 harness。没有改产品源码。没有跑 `task.py`。没有归档。
+
+| 命令 | 退出码 |
+|---|---:|
+| `powercfg /lastwake` | 0 |
+| `powercfg /a` | 0 |
+| `Get-WinEvent -FilterHashtable @{ LogName = 'System'; ProviderName = 'Microsoft-Windows-Kernel-Power' }` | 0 |
+| 同一提供方按 ID 42、107、187、506、507、566 分别过滤 | 1 |
+
+`powercfg /lastwake` 的 Wake History Count 是 0。`powercfg /a` 的可用休眠状态仍只有 `Standby (S0 Low Power Idle) Network Connected`。`Hibernate` 仍是 `Hibernation has not been enabled.`
+
+Kernel-Power 共 65 条，从 2026-10-01T16:03:10.0878022Z 到 2026-10-12T07:41:19.3455794Z。ID 仍是 41（1）、109（10）、125（22）、521（22）、577（10）。109 的首行是 `The kernel power manager has initiated a shutdown transition.` 577 的首行是 `The system has prepared for a system initiated reboot from Active.` 这两类仍是关机或重启过渡。ID 42、107、187、506、507、566 都是 0 条。过滤命令的退出码 1 只表示没有匹配事件，错误文本是 `No events were found that match the specified selection criteria.` 它不是休眠观察。
+
+查询时 `markbridge-desktop` 为 0，`bridge_harness` 为 0，命令行指向 03 harness 的 `node.exe` 为 0。没有进程跨过一次真实的 OS 休眠和恢复。`RunEvent::Resumed` 的已有测试记录仍不是 OS 休眠。
+
+日常 `Bookmarks` 只读重算使用 `FileAccess.Read` 与 `FileShare.ReadWrite`。长度 850304。SHA256 `09F2A5C24BA0EE3E3AFF521B90B8509411C2BCDABFE743746A670B07515C1B9D`。最后写入时间仍是 2026-10-12T08:34:32.0604316Z。该读取退出码 0。没有写该文件。
+
+`git diff --name-only -- apps crates packages scripts tests` 无输出，退出码 0。`task.json` 的 status 仍是 `in_progress`，`completedAt` 仍是 null。
+
+导入这一项仍以上一节 `evidence/import-reconcile-818d78.json` 的 PASS 为准。OS 休眠保持 UNVERIFIED。V04 总行保持 UNVERIFIED。03 未归档。04 未开始核对。
