@@ -1,8 +1,10 @@
 # 执行计划
 
+2026-10-10 用户批准仅调整 01→02 启动门槛：01 自动检查通过，原生验收保留 UNVERIFIED，Windows 交付前补齐。其他依赖门槛不变。
+
 ## 状态与启动条件
 
-本任务为父规划，不直接作为产品实现目标。15 个子任务均保持 planning。只有用户批准最新规划后，才对依赖已满足的子任务运行 task.py start。01 是首个实现目标。
+本任务负责父级协调，不直接作为产品实现目标。2026-10-10 用户已批准当前规划实施。仅对前置验收通过的子任务运行 task.py start，尚未启动的子任务保持 planning。01 是首个实现目标。
 
 每个子任务拥有 prd.md、design.md、implement.md、implement.jsonl、check.jsonl。父子关系是范围关系；依赖另存于 task-map.md 和各子任务 meta.depends_on。Trellis 不自动执行依赖门槛。
 
@@ -16,9 +18,11 @@
 
 01–04 为 M1 内部工程检查点，不单独宣传为用户可用发布。每个子任务必须能单独构建/检查，不以未来子任务掩盖当前失败。M1–M4 各自有可用产品闭环。13 的集成检查不能代替前面各任务的运行检查。
 
+当前结果、依赖阻塞和恢复步骤见 [实施状态](execution-status.md)。02 已通过本地验收，03 于 2026-10-11 启动。01 原生验收仍为 UNVERIFIED，Windows 交付前补齐。04 及后续子任务仍须核对各自前置验收。
+
 ## 计划建立的命令
 
-以下命令是待 01 创建的项目接口，当前 NOT_RUN。01 必须将 scripts/README/CI 保持一致。
+以下命令已由 01 创建。实际运行结论见各子任务证据；命令表定义检查职责。scripts/README/CI 必须保持一致。
 
 | 命令 | 责任 |
 |---|---|
@@ -27,11 +31,14 @@
 | pnpm typecheck | 前端、扩展、共享协议 TypeScript |
 | pnpm test | Vitest 单次执行全部单元/组件测试 |
 | pnpm build | 前端、协议消费者和扩展生产构建 |
+| pnpm build:native | Windows 原生 release 可执行文件构建与路径/已知密钥模式扫描；不生成安装包，不代表原生交互通过 |
 | pnpm protocol:check | 生成协议与已提交类型/schema 无差异 |
 | pnpm test:e2e | 可自动化的浏览器工作台与扩展用例；不代表原生 Tauri |
 | cargo fmt --all -- --check | Rust 格式 |
 | cargo clippy --workspace --all-targets -- -D warnings | Rust lint |
 | cargo test --workspace --locked | Rust 测试 |
+| cargo build -p markbridge-core --example bridge_harness --locked | 03 临时原生验收驱动，复用生产 Bridge，不在 listener 增加测试接口 |
+| node .trellis/tasks/10-10-mb-03-chrome-bridge/evidence/chrome-native-harness.mjs | 03 两个临时 Chrome Profile、独立应用目录和凭据命名空间；实际浏览器配对/同步/恢复，排除 Tauri GUI |
 | pnpm --filter @markbridge/desktop tauri dev | Windows 原生交互检查 |
 | pnpm --filter @markbridge/desktop tauri build | 本地打包；不自动发布 |
 

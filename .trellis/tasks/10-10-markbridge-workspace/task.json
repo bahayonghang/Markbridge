@@ -43,10 +43,10 @@
     ".trellis/tasks/10-10-markbridge-workspace/task-map.md",
     ".trellis/tasks/10-10-markbridge-workspace/verification.md"
   ],
-  "notes": "Parent owns requirements and integration; start an approved child, not this parent. Bootstrap completed separately; product code not started.",
+  "notes": "Implementation authorized for the current plan. Parent coordinates requirements and integration; activate one child after its prerequisite acceptance passes. Commits, archives, publication, system installation and daily Chrome changes remain separately authorized.",
   "meta": {
-    "implementation_approval": "not_granted",
-    "planning_status": "ready_for_review",
+    "implementation_approval": "granted",
+    "planning_status": "approved",
     "windows_v1_children": [
       "10-10-mb-01-foundation",
       "10-10-mb-02-identity-storage-protocol",
@@ -70,6 +70,12 @@
       "previews": "content_and_full_webpage",
       "tags": "local_default_optional_title_encoding",
       "platform": "windows_first_macos_linux_follow_up"
-    }
+    },
+    "approval_evidence": "2026-10-10 user request: 请根据当前trellis任务规划开始实施trellis父任务以及对应的子任务",
+    "execution_status": "child_03_implementation_in_progress",
+    "active_child": "10-10-mb-03-chrome-bridge",
+    "next_child": "10-10-mb-04-readonly-mirror",
+    "execution_evidence": "execution-status.md",
+    "dependency_exception": "2026-10-10 user explicitly approved starting02 with01 native acceptance UNVERIFIED; complete01 native acceptance before Windows delivery. Other prerequisite gates unchanged."
   }
 }

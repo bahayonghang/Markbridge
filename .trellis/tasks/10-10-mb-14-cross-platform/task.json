@@ -37,8 +37,9 @@
     "requirements": [
       "R15"
     ],
-    "implementation_approval": "not_granted",
-    "planning_status": "ready_for_review",
-    "delivery_scope": "follow_up"
+    "implementation_approval": "granted",
+    "planning_status": "approved",
+    "delivery_scope": "follow_up",
+    "approval_evidence": "Parent approval_evidence; dependencies and per-child acceptance remain required"
   }
 }

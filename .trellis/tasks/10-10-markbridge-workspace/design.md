@@ -6,6 +6,8 @@
 
 Rust serde DTO + schemars 生成 JSON Schema，TypeScript 类型由 schema 生成，运行时以 Ajv 校验边界。共享协议包放在 packages/protocol，Rust 类型放在 crates/protocol。CI 检查生成结果无漂移。SQLite 由后台单一存储工作线程持有连接，异步调用方不阻塞 tokio。
 
+03 接入 MV3 时，共享 wire 校验器由 Ajv 在构建时生成 standalone 模块。扩展运行时不调用 Function 或 eval；生成校验器仍以 Rust schema 为唯一来源，protocol:check 同时检查校验器漂移。
+
 最低实施目标建议 Windows 11 x64，当前稳定 Chrome 且最低 134；Chrome 134 提供更明确的浏览器根目录属性。其余 Windows 架构与 Windows 10 不在首版原生验收声明中。M5 单独适配 macOS/Linux。没有已安装依赖或现有版本基线；01 创建后需在 README 固化实际支持版本。
 
 最小方案是扩展读写 + 本地树 + 人工编辑。用户已要求两种预览和 AI，因此分阶段扩展该闭环。纯文件读写方案不能满足安全写回；Native Messaging 需额外桥接进程和系统注册，首版采用已在参考方案中的 loopback WebSocket。完整网页采用独立 WebviewWindow，避开多子 WebView 的实验性 API；同窗口网页分栏另需明确改变该决定。
@@ -30,7 +32,7 @@ Chrome bookmark tree <--> MV3 extension <--> authenticated loopback WS
 
 只读文件监听永不成为写回通路。网页脚本和模型输出均属于不可信输入。Chrome 的外部修改通过扩展事件进入缓存，不通过前端乐观状态直接确认。
 
-拟建目录：apps/desktop/src、apps/desktop/src-tauri、apps/extension、crates/core、crates/protocol、packages/protocol、tests/fixtures、docs。上述目录尚不存在，不在规划阶段创建应用骨架。
+目标目录：apps/desktop/src、apps/desktop/src-tauri、apps/extension、crates/core、crates/protocol、packages/protocol、tests/fixtures、docs。01 已创建工程基础所需目录；其他目录仅在对应子任务需要时创建。实际功能和证据以子任务验收记录为准。
 
 ## 3. Profile 与身份
 
@@ -51,9 +53,14 @@ Chrome bookmark tree <--> MV3 extension <--> authenticated loopback WS
 - 配对/连接：pair、pair_result、hello、hello_result、ping、pong。
 - 同步：get_tree、tree_full、event、resync_required。事件明确区分 created/changed/moved/removed/reordered/import_began/import_ended，各自携带完整所需字段。
 - 写入：apply_operation、operation_receipt、get_operation_status。每个子操作有独立 requestId、kind、目标、expectedBefore 和 payload。
+- 排序子操作另带 expectedChildIds，保存预期旧兄弟序列；旧序列与目标 childIds 必须唯一、在节点数量限额内，且集合相同。expectedBefore 必须是目标文件夹；其他操作的 expectedChildIds 为空。回执的 beforeChildIds/afterChildIds 记录实际观察的文件夹序列，结果不确定时允许缺少 after 序列。前后集合可以不同以保留外部改动证据，不能将期望值伪装为观察结果。
 - 导出由桌面完成，协议不伪造 Chrome export_html API。
 
 初版限制单帧 16 MiB、树最多 100,000 节点、深度 256、单字段长度和数组数量；超过限制返回明确不支持且保留旧缓存，不截断为成功。主验收数据量 10,000。边界值写入 schema 并有测试，后续调整需同时更新文档与门槛。
+
+02 将协议 v1 的字段限额固化为：ID 为 1–128 个 ASCII 字符，按整串匹配格式 `[A-Za-z0-9][A-Za-z0-9._:-]*`，拒绝尾部换行，标题为 0–4,096 个 Unicode 标量，URL 为 1–16,384 个 Unicode 标量，显示名为 1–128 个 Unicode 标量，配对凭据为 32–1,024 个 Unicode 标量。单个 operation 最多 1,000 步，position 最大 100,000；非负整数不得超过 JavaScript MAX_SAFE_INTEGER（9,007,199,254,740,991），sourceEpoch 从 1 开始。帧限额按 UTF-8 字节计。原始书签 URL 保留浏览器数据，预览导航另受 09 的 HTTP(S) 限制。
+
+WireMessage 以顶层 type 判别消息，公共字段为 protocolVersion、profileId、sessionId、requestId、seq 和 payload。命令和应答必须有 requestId，其他消息该字段为 null；只有事件携带 seq，其他消息该字段为 null。pair 中的 profileId 是桌面创建的拟配对身份；该字段本身不证明认证，03 仍须验证 Origin、凭据和身份绑定。
 
 在线每 20 秒应用级心跳；在 worker 活跃期间以 1/2/4/8/16/30 秒带抖动重连。注册 alarms 和 onStartup 唤醒，恢复时确认 alarm 存在；至少 0.5 分钟周期只负责后台唤醒，不能承诺断线 3 秒内恢复。提供显式重新连接按钮。
 
@@ -63,6 +70,8 @@ Chrome bookmark tree <--> MV3 extension <--> authenticated loopback WS
 
 SQLite 在单事务中提交树和 sourceRevision，然后向前端发布 revision 事件。UI 先订阅再加载快照，按 revision 忽略重复、发现缺口重取。浏览器确认的状态是展示基础，待执行草稿单独保存。
 
+folderType 接受 bookmarks-bar、other、mobile、managed 四个 Chrome API 值。03 补齐 02 枚举遗漏的 managed，不改变原有值和写入保护规则。根数量及各 folderType 数量均不固定。依据：[Chrome bookmarks API](https://developer.chrome.com/docs/extensions/reference/api/bookmarks)，2026-10-11 核对。
+
 只读监听父目录以兼容 Bookmarks 原子替换，300 ms 去抖、失败重读保持上次有效树；每 30 秒校验元数据并在唤醒后重扫。读取 Chrome Local State 时只取 profile 显示信息，不导出其他隐私。在线来源优先于关联文件来源，切换来源始终显示来源和时间。
 
 所有在线写操作要求状态 live、profile 一致和预览基础有效。离线可编辑标签/备注、查看缓存；首版不排队离线浏览器写命令，避免重连后隐式回放。恢复后用户重新确认提案。
@@ -71,7 +80,7 @@ SQLite 在单事务中提交树和 sourceRevision，然后向前端发布 revisi
 
 | 表 | 关键字段与约束 |
 |---|---|
-| profiles | id、instance_id、source_epoch、display_name、pairing_state、last_synced_at；秘密仅存凭据引用 |
+| profiles | id、instance_id、source_epoch、display_name、paired_origin、pairing_state、last_synced_at；秘密仅存凭据引用 |
 | mirror_sources | id、用户选择路径、可空 paired_profile_id、association_status |
 | bookmarks_cache | bookmark_id 主键、profile_id、source_epoch、chrome_id 唯一组合、parent_id、position、node_kind、原始 title/url、folder_type、unmodifiable、revision、deleted_at |
 | bookmark_metadata | bookmark_id 主键、display_title、summary、note、updated_at；不存模型密钥 |

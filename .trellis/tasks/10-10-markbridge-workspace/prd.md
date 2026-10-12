@@ -2,13 +2,13 @@
 
 ## 目标与状态
 
-建立本地优先的 Tauri 桌面应用，连接 Chrome 书签，提供实时查看、编辑、标签、网页预览和 AI 整理。本文与子任务组成可审阅的完整规划。状态：planning；产品实现尚未开始。
+建立本地优先的 Tauri 桌面应用，连接 Chrome 书签，提供实时查看、编辑、标签、网页预览和 AI 整理。2026-10-10 用户已批准按当前规划开始实施。父任务负责协调；子任务按依赖和验收门槛依次启动，01 为首个目标。
 
-用户已授权完成 bootstrap 和创建父子任务。用户另已确认：两种预览都需要；标签默认本地保存，可选写入标题；Windows 首版，macOS／Linux 后续适配。技术方案是待审阅的实现建议，任务创建不代表实现批准。
+用户已授权完成 bootstrap、创建父子任务，并批准当前规划的实施。用户另已确认：两种预览都需要；标签默认本地保存，可选写入标题；Windows 首版，macOS／Linux 后续适配。提交、归档、发布和日常环境安装仍需单独授权。
 
 ## 当前事实
 
-仓库只有 Trellis 脚手架和参考文档，没有产品代码、依赖清单或数据库。`00-bootstrap-guidelines` 已完成；规范明确记录 greenfield 状态。`ref/Markbridge-实施方案.md` 是设计输入且被 Git 忽略，本文保留独立执行所需需求。技术纠错和来源见 [research/technical-findings.md](research/technical-findings.md)。
+规划建立时仓库只有 Trellis 脚手架和参考文档。`00-bootstrap-guidelines` 已完成；01 已创建工程基础源码，原生交互保持 UNVERIFIED。02 的共享协议与 SQLite 模块已通过本地验收，桌面尚未接入数据库。尚无配对或书签功能。当前结论见 [实施状态](execution-status.md)。`ref/Markbridge-实施方案.md` 是设计输入且被 Git 忽略，本文保留独立执行所需需求。技术纠错和来源见 [research/technical-findings.md](research/technical-findings.md)。
 
 ## 需求与验收
 
@@ -53,5 +53,6 @@ M5 的跨平台与语义检索各自为后续子任务，不阻塞 Windows 首�
 - [技术研究](research/technical-findings.md)：对基础方案的纠错与取舍。
 - [环境记录](research/environment.md)：已核查工具和未核查运行环境。
 - [规划检查](planning-validation.md)：任务结构、依赖、上下文与授权状态验证。
+- [实施状态](execution-status.md)：当前结果、未验证项目和依赖阻塞；规划检查保留为历史记录。
 
-产品范围问题已由用户答复。完整网页采用独立应用内窗口、首版原生验收环境和具体技术栈作为方案一并提交最终审阅；尚未获得实现批准。
+产品范围、独立网页窗口、Windows 首版原生验收环境和技术栈已随当前规划获得实施批准。审批依据记录在父任务 task.json 的 meta.approval_evidence。
