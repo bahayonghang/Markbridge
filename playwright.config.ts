@@ -1,11 +1,12 @@
 import { execFileSync } from 'node:child_process';
+import { stripVTControlCharacters } from 'node:util';
 import { defineConfig } from '@playwright/test';
 
 function selectedDevPort() {
   if (process.env.MARKBRIDGE_DEV_PORT) return Number(process.env.MARKBRIDGE_DEV_PORT);
-  const raw = execFileSync(process.execPath, ['scripts/dev-port.mjs'], { encoding: 'utf8' })
-    .replace(/\u001b\[[0-9;]*m/g, '')
-    .trim();
+  const raw = stripVTControlCharacters(
+    execFileSync(process.execPath, ['scripts/dev-port.mjs'], { encoding: 'utf8' }),
+  ).trim();
   const port = Number(raw);
   if (!Number.isInteger(port)) throw new Error('DEV_PORT_INVALID');
   process.env.MARKBRIDGE_DEV_PORT = String(port);
