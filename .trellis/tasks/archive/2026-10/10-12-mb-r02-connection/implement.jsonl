@@ -1,0 +1,13 @@
+{"file": ".trellis/spec/project-baseline.md", "reason": "跨任务硬约束；现状存在性以父审计为准"}
+{"file": ".trellis/tasks/archive/2026-10/10-12-mb-workspace-redesign/design.md", "reason": "跨子任务数据和交互合同"}
+{"file": ".trellis/tasks/archive/2026-10/10-12-mb-workspace-redesign/visual-design.md", "reason": "蓝色工作台视觉与尺寸规范"}
+{"file": ".trellis/tasks/archive/2026-10/10-12-mb-workspace-redesign/research/current-state.md", "reason": "源码缺口与旧验收状态"}
+{"file": ".trellis/tasks/archive/2026-10/10-12-mb-r02-connection/prd.md", "reason": "本项可观察验收"}
+{"file": ".trellis/tasks/archive/2026-10/10-12-mb-r02-connection/design.md", "reason": "本项边界"}
+{"file": ".trellis/spec/frontend/hook-guidelines.md", "reason": "受影响层规范"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "受影响层规范"}
+{"file": ".trellis/spec/extension/index.md", "reason": "受影响层规范"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "受影响层规范"}
+{"file": ".trellis/tasks/archive/2026-10/10-12-mb-workspace-redesign/gate-change-2026-10-13.md", "reason": "用户明确调整真实休眠门槛"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "R01 已建立的工作台与键盘合同"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "浏览器与原生证据分层"}

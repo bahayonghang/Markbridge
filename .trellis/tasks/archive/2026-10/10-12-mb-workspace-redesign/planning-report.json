@@ -1,0 +1,29 @@
+{
+  "tasks": 9,
+  "children": 8,
+  "trellis_context_validations": 9,
+  "dependency_graph": "acyclic",
+  "requirements": [
+    "U01",
+    "U02",
+    "U03",
+    "U04",
+    "U05",
+    "U06",
+    "U07",
+    "U08",
+    "U09",
+    "U10"
+  ],
+  "local_markdown_links": 34,
+  "product_tests": "NOT_RUN",
+  "native_tests": "NOT_RUN",
+  "prototype_screenshots": 14,
+  "prototype_errors": 0,
+  "prototype_network_requests": 0,
+  "contrast_ratios": {
+    "ink_on_white": 15.01,
+    "muted_on_white": 5.4,
+    "blue_on_white": 5.37
+  }
+}

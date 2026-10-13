@@ -1,0 +1,99 @@
+{
+  "runId": "e5e26b2a",
+  "startedAt": "2026-10-13T11:50:08.655Z",
+  "controls": [
+    {
+      "control": "single_detail_sections_hidden_preview_and_explicit_unsaved_draft_leave",
+      "status": "PASS"
+    },
+    {
+      "control": "offline_notes_batch_tag_add_remove_and_chrome_titles_unchanged",
+      "status": "PASS"
+    },
+    {
+      "control": "twenty_a_b_cycles_discard_late_real_ipc_results",
+      "status": "PASS",
+      "delayedReads": 40
+    },
+    {
+      "control": "optional_title_encoding_requires_opt_in_and_full_review_cancel_zero_write",
+      "status": "PASS"
+    },
+    {
+      "control": "long_url_five_native_sizes_content_tab_failed_web_and_suspended_chrome_handoff",
+      "status": "PASS",
+      "handoff": {
+        "missing": false,
+        "parent": 99540,
+        "imageName": "rundll32.exe",
+        "handler": true,
+        "urlMatched": true,
+        "childCount": 0,
+        "threadCount": 1,
+        "suspendedThreadCount": 1,
+        "threadState": "5:5",
+        "ntStatus": 0,
+        "suspendCount": 1
+      }
+    },
+    {
+      "control": "closing_detail_restores_same_scrolled_list_position",
+      "status": "PASS",
+      "beforeClose": 780,
+      "afterClose": 780
+    }
+  ],
+  "errors": [],
+  "environment": {
+    "os": "Windows 11 Pro",
+    "release": "10.0.26300",
+    "cpu": "Intel(R) Core(TM) Ultra 9 275HX",
+    "logicalCpus": 24,
+    "memoryBytes": 68143853568,
+    "node": "v26.7.0",
+    "exeBytes": 23772160,
+    "exeSha256": "f43fa1827d0b2b1a9d740cc997c34c880c7a6dda7b253d2dc733d4ec6afff7b1",
+    "extensionHash": "7deb42c27dc23bca5e9277734d5d41a9c49d0c18d89e4b2475a703e3147b2040"
+  },
+  "isolationRoot": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-r05-native-2DqqWs",
+  "webview": "Edg/155.0.4283.45",
+  "chrome": "Chrome/155.0.8059.39",
+  "switchCycle": 20,
+  "titleStep": "cancel",
+  "viewports": [
+    {
+      "width": 1440,
+      "height": 900,
+      "scale": 1.25
+    },
+    {
+      "width": 1100,
+      "height": 760,
+      "scale": 1.25
+    },
+    {
+      "width": 640,
+      "height": 760,
+      "scale": 1.25
+    },
+    {
+      "width": 1100,
+      "height": 480,
+      "scale": 1.25
+    },
+    {
+      "width": 640,
+      "height": 480,
+      "scale": 1.25
+    }
+  ],
+  "ipcObserver": {
+    "installed": true,
+    "calls": 120,
+    "visiblePreviewCalls": 1,
+    "delayedTagReads": 43
+  },
+  "status": "PASS",
+  "temporaryCredentialsRemoved": true,
+  "finishedAt": "2026-10-13T11:50:46.093Z"
+}

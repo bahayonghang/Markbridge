@@ -1,0 +1,10 @@
+# R03 implementation preparation
+
+Read on 2026-10-13 while R02 was in independent check; R03 has not started yet. This note records existing evidence, not new acceptance.
+
+- Current parent design requires a revision-bound paged query over source/folder/text/tag intersection. Search limit 200 must be a page limit, and lists over 10000 items must remain reachable. Never increase the Chrome wire tree cap as a shortcut.
+- Legacy 05 evidence is archived at `.trellis/tasks/archive/2026-10/10-10-mb-05-library-workspace/evidence/receipts.md`. Its first native search failed at about 250 ms because the UI awaited a 200 ms debounce. The accepted fix made loaded-cache results interactive on input, with backend refresh later. This is a warning for R03: include debounce and rendering in latency, not just SQL time.
+- Latest legacy V06 evidence is `.trellis/tasks/10-10-mb-13-windows-acceptance/evidence/b10k-result.json` and its adjacent `b10k-measure.mjs`. Seed 20261010, 10000 bookmarks, 1000 folders, depth 20, 11004 cached nodes. Three process-start-to-operable-cache samples and 30 input-to-result samples (first excluded from warm statistics); percentile is sorted[ceil(n*p)-1]. Old numbers cannot establish redesigned performance.
+- R03 must reproduce the agreed machine/fixture measurement on the final native build, with 3 cold launches each <=3000 ms and warm p95 <=200 ms. Use only isolated app/credential/WebView directories and synthetic data. Do not run old harnesses without auditing their paths and default app data.
+- R02 added current-source status and guarded source switching. Preserve single useBridge, source-dependent child resets, explicit discard/cancel, visible focus return, and per-switch generations (including A -> B -> A). Main owns task bookkeeping and task-local native measurement scripts; implementation owns product/contracts/automatic tests.
+- Real OS sleep is deferred until before R08 completion by explicit user instruction. This does not waive any R03 pagination, selection, or performance acceptance.

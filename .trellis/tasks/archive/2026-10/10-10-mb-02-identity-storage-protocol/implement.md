@@ -7,7 +7,7 @@
 - [x] 用户已批准最新父规划和该任务范围。
 - [x] 用户已批准 01→02 启动例外：01 自动检查通过，原生验收保留 UNVERIFIED，在 Windows 交付前补齐。
 - [x] 阅读当前 git status/diff、该任务三份规划文件及两个上下文清单。
-- [x] 运行 `python .trellis/scripts/task.py validate .trellis/tasks/10-10-mb-02-identity-storage-protocol`；两个清单各 9 项通过。
+- [x] 运行 `python .trellis/scripts/task.py validate .trellis/tasks/archive/2026-10/10-10-mb-02-identity-storage-protocol`；两个清单各 9 项通过。
 - [x] 已对该子任务运行 task.py start。父任务不代替子任务启动。
 
 ## 实施顺序

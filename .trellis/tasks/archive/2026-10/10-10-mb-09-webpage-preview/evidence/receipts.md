@@ -2,7 +2,7 @@
 
 日期：2026-10-11。任务保持 `in_progress`。未提交，未归档，未 push。
 
-检查只重跑了一次 `node .trellis/tasks/10-10-mb-09-webpage-preview/evidence/native-preview.mjs`，退出码 0。`handedToSystem` 由这次观察计算，不是写死的 true。没有恢复 `\system32\rundll32.exe` 后缀判据。
+检查只重跑了一次 `node .trellis/tasks/archive/2026-10/10-10-mb-09-webpage-preview/evidence/native-preview.mjs`，退出码 0。`handedToSystem` 由这次观察计算，不是写死的 true。没有恢复 `\system32\rundll32.exe` 后缀判据。
 
 ## 验收
 
@@ -23,7 +23,7 @@
 | `cargo test -p markbridge-desktop --locked` | 0 | PASS。11 passed。未重跑 `cargo test --workspace --locked`。 |
 | `pnpm test` | 1 | Vitest 11 files / 91 tests passed。`node --test` 仅 `scripts/foundation.test.mjs` 失败：扩展 manifest 权限含 `scripting` 与 `activeTab`。未改该测试，也未改扩展 manifest。 |
 | `pnpm lint` | 1 | 4 个错误都在 `.omp/extensions/trellis/index.ts`。未改该文件。 |
-| `node .trellis/tasks/10-10-mb-09-webpage-preview/evidence/native-preview.mjs` | 0 | 本次检查只跑了这一次。标准输出 `{"passed":true,"failed":[],"error":null}`。 |
+| `node .trellis/tasks/archive/2026-10/10-10-mb-09-webpage-preview/evidence/native-preview.mjs` | 0 | 本次检查只跑了这一次。标准输出 `{"passed":true,"failed":[],"error":null}`。 |
 | `pnpm --filter @markbridge/desktop tauri dev` | — | NOT_RUN |
 | `pnpm --filter @markbridge/desktop tauri build` | — | NOT_RUN |
 | `pnpm build:native` | — | NOT_RUN |

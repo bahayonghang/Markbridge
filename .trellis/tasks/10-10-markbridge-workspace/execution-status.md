@@ -1,5 +1,22 @@
 # 实施状态
 
+更新：2026-10-13。当前用户授权本地提交及归档已完成任务；未授权 push、发布、签名或日常安装。父任务只协调集成，不执行 task.py start。
+
+## 当前结论
+
+| 范围 | 状态 | 依据 / 下一步 |
+|---|---|---|
+| 原子任务 01–12 | completed | 已有各自验收证据；03/04 的同一真实睡眠项按用户明确豁免结案，历史 V04 UNVERIFIED、实际 NOT_RUN 保留 |
+| 改版父任务及 R01–R08 | completed | 书签优先的蓝色工作台、完整日常流程、自动与原生集成证据；本轮提交前补条件撤销外部子节点保护 |
+| 13 Windows 交付 | in_progress | 旧包的安装/性能 PASS 保留；当前版诊断导出与 NSIS 安装验收仍需完成 |
+| 14 macOS / Linux | planning | 依赖 13；需平台实现及各自真实原生机器，缺环境不得称支持 |
+| 15 可选本地语义检索 | planning | 依赖 12、13，不依赖 14；需实现和真实模型质量/性能 |
+| 原父任务 | in_progress | 13/14/15 未完，不把 Windows 里程碑当全部完成 |
+
+下一轮从既有 13 恢复。见 [本轮审计](../../../docs/implementation-status-2026-10-13.md)、[完整后续 Prompt](../../../docs/next-session-prompt.md) 和 [R08 最终复核](../archive/2026-10/10-12-mb-r08-acceptance/evidence/precommit-closeout.md)。下面是原始历史记录，不能用其中旧状态推断当前实现或重复实施。
+
+# 2026-10-11 历史实施状态
+
 2026-10-10 用户批准仅调整 01→02 启动门槛：01 自动检查通过，原生验收保留 UNVERIFIED，Windows 交付前补齐。其他依赖门槛不变。
 
 日期：2026-10-11。用户已批准当前父子任务规划实施。父任务负责需求覆盖、依赖与集成协调，不作为 task.py start 的目标。
@@ -10,12 +27,12 @@
 |---|---|---|
 | 当前父子规划实施授权 | PASS | 父任务 task.json 的 meta.approval_evidence；15 个子任务均记录 granted |
 | bootstrap 前置 | PASS | archive/2026-10/00-bootstrap-guidelines/validation.md |
-| 01 基础源码与本地自动检查 | PASS | [01 收据](../10-10-mb-01-foundation/evidence/receipts.md)；[独立复核](../10-10-mb-01-foundation/evidence/check-review.md) |
-| 01 原生进程启动 | PASS | [进程记录](../10-10-mb-01-foundation/evidence/native-process.md)；只证明启动和窗口句柄 |
+| 01 基础源码与本地自动检查 | PASS | [01 收据](../archive/2026-10/10-10-mb-01-foundation/evidence/receipts.md)；[独立复核](../archive/2026-10/10-10-mb-01-foundation/evidence/check-review.md) |
+| 01 原生进程启动 | PASS | [进程记录](../archive/2026-10/10-10-mb-01-foundation/evidence/native-process.md)；只证明启动和窗口句柄 |
 | 01 原生空态、尺寸、错误展示和两次正常关闭 | UNVERIFIED | 原生 UI 工具无法连接 native pipe；没有原生截图或交互证据 |
 | 01 原生 release 产物扫描 | PASS | 01 历史产物；首次 457 处绝对路径命中已保留为 FAIL，修复后扫描通过；02 产物同样只对应其历史源码 |
 | 01 正式验收 | UNVERIFIED | task.json 保持 in_progress；必要原生项目尚未满足 |
-| 02 | PASS | AC02-1～4、完整本地自动检查、独立复核和最终 Windows release 扫描通过，见 [02 收据](../10-10-mb-02-identity-storage-protocol/evidence/receipts.md)；未提交或归档，生命周期保留 in_progress |
+| 02 | PASS | AC02-1～4、完整本地自动检查、独立复核和最终 Windows release 扫描通过，见 [02 收据](../archive/2026-10/10-10-mb-02-identity-storage-protocol/evidence/receipts.md)；未提交或归档，生命周期保留 in_progress |
 | 03 | UNVERIFIED | 已在 02 验收后启动，分层实现和集成检查进行中；首次真实 Chrome 配对后未进入 live，保留 FAIL，原因未查明 |
 | 04–13 | NOT_RUN | 保持 planning；03 尚未验收，04 不启动；其他任务仍须逐项核对前置 |
 | 14–15 | NOT_RUN | 保持 planning；后续 M5，依赖同样未满足 |

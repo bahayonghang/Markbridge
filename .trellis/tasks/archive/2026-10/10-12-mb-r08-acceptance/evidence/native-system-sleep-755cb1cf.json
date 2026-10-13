@@ -1,0 +1,50 @@
+{
+  "runId": "755cb1cf",
+  "mode": "sleep",
+  "startedAt": "2026-10-13T14:19:46.459Z",
+  "scope": "Own isolated window across actual monitors; genuine Kernel-Power sleep/resume events required for sleep acceptance",
+  "displays": [],
+  "errors": [],
+  "environment": {
+    "os": "Windows 11 Pro",
+    "release": "10.0.26300",
+    "cpu": "Intel(R) Core(TM) Ultra 9 275HX",
+    "logicalCpus": 24,
+    "memoryBytes": 68143853568,
+    "node": "v26.7.0",
+    "exeBytes": 24054272,
+    "exeSha256": "804d920746f677cb257d8efdf6589a77a70bbf346e162dd6f68803197db63910",
+    "extensionHash": "567f50146319a2b6f013f773308910f29bc56585a62075dbaf0f9b3cf1ff22c5"
+  },
+  "isolationRoot": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-r08-native-Zv5HWw",
+  "webview": "Edg/155.0.4283.45",
+  "chrome": "Chrome/155.0.8059.39",
+  "initialCursor": [
+    1,
+    "cb9af470-fb40-4d6b-aec4-a5bf77564a5d",
+    0,
+    1
+  ],
+  "before": {
+    "profileId": "p:b30059685454c8d70811efcb00e8b8fd9b65600be4bf51bbcaafbf1b3e93cf10",
+    "instanceId": "6f6d5c6d-22f3-408c-81d8-19781a9b1552",
+    "displayName": "R08 系统验收",
+    "connection": "live",
+    "nodeCount": 16,
+    "revision": 1,
+    "lastSyncedAt": 1791901189065,
+    "errorCode": null
+  },
+  "beforeCursor": [
+    1,
+    "cb9af470-fb40-4d6b-aec4-a5bf77564a5d",
+    0,
+    1
+  ],
+  "operationCount": 0,
+  "sleepReadyAt": "2026-10-13T14:19:50.475Z",
+  "status": "NOT_RUN",
+  "pending": "Manual sleep not performed; observation cancelled and isolated resources closed",
+  "temporaryCredentialsRemoved": true,
+  "finishedAt": "2026-10-13T14:22:27.875Z"
+}

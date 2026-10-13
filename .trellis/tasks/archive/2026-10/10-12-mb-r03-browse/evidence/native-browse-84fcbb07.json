@@ -1,0 +1,94 @@
+{
+  "runId": "84fcbb07",
+  "startedAt": "2026-10-13T09:10:47.735Z",
+  "scope": "R03 actual native paged cache and keyboard, synthetic 10001 siblings",
+  "controls": [
+    {
+      "control": "all_10001_siblings_reachable_without_duplicate",
+      "status": "PASS",
+      "total": 10001,
+      "revision": 1,
+      "sourceEpoch": 1
+    },
+    {
+      "control": "stale_revision_rejected",
+      "status": "PASS"
+    },
+    {
+      "control": "folder_text_tag_intersection_and_explicit_note_scope",
+      "status": "PASS"
+    },
+    {
+      "control": "ctrl_shift_and_ctrl_a_select_only_loaded_200",
+      "status": "PASS"
+    },
+    {
+      "control": "keyboard_reaches_10001st_list_item_with_virtual_rows",
+      "status": "PASS"
+    },
+    {
+      "control": "ctrl_a_selects_all_10001_after_loading_all_pages",
+      "status": "PASS"
+    },
+    {
+      "control": "query_change_clears_selection_with_visible_notice",
+      "status": "PASS"
+    },
+    {
+      "control": "search_results_beyond_200_reachable_by_keyboard",
+      "status": "PASS"
+    },
+    {
+      "control": "native_deep_path_and_readonly_empty_folder",
+      "status": "PASS"
+    }
+  ],
+  "errors": [],
+  "screenshots": [
+    {
+      "name": "list-last-item",
+      "width": 1100,
+      "height": 760,
+      "scale": 1.25
+    },
+    {
+      "name": "search-last-item",
+      "width": 1100,
+      "height": 760,
+      "scale": 1.25
+    },
+    {
+      "name": "deep-chinese-path",
+      "width": 1100,
+      "height": 760,
+      "scale": 1.25
+    },
+    {
+      "name": "failure-mirror-pagination",
+      "width": 1100,
+      "height": 760,
+      "scale": 1.25
+    }
+  ],
+  "environment": {
+    "os": "Windows 11 Pro",
+    "release": "10.0.26300",
+    "cpu": "Intel(R) Core(TM) Ultra 9 275HX",
+    "logicalCpus": 24,
+    "memoryBytes": 68143853568,
+    "node": "v26.7.0",
+    "exeBytes": 23160320,
+    "exeSha256": "a134443c3a19a2b806f77bcf43c34e7a9bc55a44408ce9684b9f84bf8fde0b86"
+  },
+  "isolationRoot": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-r03-native-e5dWUQ",
+  "fixture": {
+    "totalNodes": 10025,
+    "sameFolderBookmarks": 10001,
+    "deepestFolderDepth": 20
+  },
+  "webview": "Edg/154.0.4258.62",
+  "status": "FAIL",
+  "failedStage": "mirror-pagination",
+  "failureCode": "NATIVE_ASSERTION_OR_ACTION_FAILED",
+  "finishedAt": "2026-10-13T09:11:10.044Z"
+}

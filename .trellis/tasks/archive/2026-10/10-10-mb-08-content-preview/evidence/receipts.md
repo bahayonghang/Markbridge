@@ -30,7 +30,7 @@
 | `pnpm lint` | 1 | 仅 `.omp/extensions/trellis/index.ts`：`no-useless-assignment` 3 条，`no-empty` 1 条。未改该文件。 |
 | `node --test scripts/foundation.test.mjs` | 1 | 权限断言仍期望 `bookmarks`、`storage`、`alarms`。清单已增加 `scripting` 和 `activeTab`。本任务未改 `scripts/foundation.test.mjs`。另一条 capability 测试通过。 |
 | `pnpm exec vitest run apps/extension/src/capture.test.ts` | 0 | 1 passed。注入函数在没有外部绑定的环境里仍跳过输入框。 |
-| `node .trellis/tasks/10-10-mb-08-content-preview/evidence/chrome-capture-harness.mjs` | 0 | 运行 id `f0edec26-610a-4405-9100-222fd727e127`。Chrome/155.0.8059.39。五条观察 PASS。临时目录已删。日常 Bookmarks 长度 849515，SHA256 `DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82`。`Markbridge.Pairing` 前后都是 0。检查后另行核对，长度、SHA256 和 Pairing 目标数仍是这三项。Chrome 安装文件长度与写入时间未变。 |
+| `node .trellis/tasks/archive/2026-10/10-10-mb-08-content-preview/evidence/chrome-capture-harness.mjs` | 0 | 运行 id `f0edec26-610a-4405-9100-222fd727e127`。Chrome/155.0.8059.39。五条观察 PASS。临时目录已删。日常 Bookmarks 长度 849515，SHA256 `DD95B7E69602227CAC98CEEE037DFF6DD359BC42AA1D27913D272A0F2DA20F82`。`Markbridge.Pairing` 前后都是 0。检查后另行核对，长度、SHA256 和 Pairing 目标数仍是这三项。Chrome 安装文件长度与写入时间未变。 |
 
 ## 范围
 

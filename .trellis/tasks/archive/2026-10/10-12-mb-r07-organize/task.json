@@ -1,0 +1,48 @@
+{
+  "id": "mb-r07-organize",
+  "name": "mb-r07-organize",
+  "title": "整理中心与 AI 设置整合",
+  "description": "迁移已有重复失效检查和 AI 流程，明确范围与结果",
+  "status": "completed",
+  "dev_type": "frontend",
+  "scope": "workspace-redesign",
+  "package": null,
+  "priority": "P1",
+  "creator": "lyh",
+  "assignee": "lyh",
+  "createdAt": "2026-10-12",
+  "completedAt": "2026-10-13",
+  "branch": "main",
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": "0bd492bf28e888e17eee5b9247751d9b61d6fd1c",
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "10-12-mb-workspace-redesign",
+  "relatedFiles": [
+    "apps/desktop/src/features/ai/AiSettings.tsx",
+    "apps/desktop/src/features/ai/AiSuggest.tsx",
+    "apps/desktop/src/features/organization/OrganizationDesk.tsx",
+    "apps/desktop/src/features/maintenance/MaintenanceDesk.tsx"
+  ],
+  "notes": "",
+  "meta": {
+    "implementation_approval": "granted",
+    "planning_status": "approved",
+    "depends_on": [
+      "10-12-mb-r04-editing",
+      "10-12-mb-r05-details",
+      "10-12-mb-r06-history"
+    ],
+    "requirements": [
+      "U08",
+      "U10"
+    ],
+    "legacy_gate": "原10/11/12功能回归；不添加新模型算法或无授权云调用。",
+    "approval_evidence": "2026-10-13 user: 批准这个方案，开始按照顺序实施",
+    "verification": "PASS: independent check; 178+6 tests, 146 Rust, 58 e2e; native-organize-874dbc46/native-web-e34f302e",
+    "closeout_code_commit": "0bd492bf28e888e17eee5b9247751d9b61d6fd1c",
+    "archive_branch_note": "Local main-branch work with no PR; user authorized local commit and archive. Used --skip-branch-validation rather than inventing a feature branch."
+  }
+}

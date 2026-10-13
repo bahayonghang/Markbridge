@@ -1,0 +1,65 @@
+{
+  "id": "mb-03-chrome-bridge",
+  "name": "mb-03-chrome-bridge",
+  "title": "Chrome 扩展配对与实时同步",
+  "description": "Chrome 扩展配对与实时同步；属于 Markbridge 父规划，独立验收并记录失败与恢复边界",
+  "status": "completed",
+  "dev_type": "fullstack",
+  "scope": "markbridge",
+  "package": null,
+  "priority": "P1",
+  "creator": "lyh",
+  "assignee": "lyh",
+  "createdAt": "2026-10-10",
+  "completedAt": "2026-10-13",
+  "branch": "main",
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "10-10-markbridge-workspace",
+  "relatedFiles": [
+    "apps/extension",
+    "apps/desktop/src",
+    "apps/desktop/src-tauri/src/main.rs",
+    "crates/core/src/bridge",
+    "crates/core/src/storage",
+    "crates/core/examples/bridge_harness.rs",
+    "crates/core/examples/credential_probe.rs",
+    "crates/protocol",
+    "packages/protocol",
+    "scripts/protocol.mjs",
+    "scripts/check-artifacts.mjs",
+    "tests/e2e/foundation.spec.ts"
+  ],
+  "notes": "AC03-1 through AC03-4 PASS; 2026-10-13 closeout applies the user waiver to the same actual OS sleep gate. Sleep execution NOT_RUN, original V04 UNVERIFIED; acceptance decision WAIVED. See evidence/closeout-2026-10-13.md. No daily Chrome changes or publication.",
+  "meta": {
+    "sequence": "03",
+    "milestone": "M1",
+    "depends_on": [
+      "10-10-mb-02-identity-storage-protocol"
+    ],
+    "requirements": [
+      "R02",
+      "R03"
+    ],
+    "implementation_approval": "granted",
+    "planning_status": "approved",
+    "delivery_scope": "windows_v1",
+    "approval_evidence": "Parent approval_evidence; dependencies and per-child acceptance remain required",
+    "acceptance": {
+      "AC03-1": "PASS",
+      "AC03-2": "PASS",
+      "AC03-3": "PASS",
+      "AC03-4": "PASS"
+    },
+    "sleep_gate_status": "waived_by_user",
+    "sleep_gate_execution": "NOT_RUN",
+    "sleep_gate_waiver_evidence": "2026-10-13 user: 这一条不用管，使用的时候也不会睡眠",
+    "closeout_evidence": "evidence/closeout-2026-10-13.md",
+    "closeout_code_commit": "0bd492bf28e888e17eee5b9247751d9b61d6fd1c",
+    "archive_branch_note": "Local main-branch work with no PR; user authorized local commit and archive. Used --skip-branch-validation rather than inventing a feature branch."
+  }
+}

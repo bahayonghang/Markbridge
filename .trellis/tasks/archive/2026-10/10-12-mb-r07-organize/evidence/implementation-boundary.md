@@ -1,0 +1,11 @@
+# R07 implementation boundary
+
+The existing organize page stacks maintenance and organization controls, loses useful state when live/selection changes, disables link cancellation during its request, and places single-item AI in the narrow content detail. AI input/endpoint disclosure currently appears after generation. Confirmed AI apply/undo cancellation text incorrectly promises zero browser writes.
+
+Implement one persistent OrganizeWorkspace with explicit current-selection or directory scope, three mutually visible work areas, existing engines, source/epoch/revision guards, clear result/history paths and truthful cancellation. Reuse the validated full cache tree and existing querySnapshot for a directory subtree; show the exact bookmark count and enforce existing 1000 maintenance/900 organization limits without sampling the user scope. Preserve state when changing application sections, invalidate unconfirmed proposals when scope or revision changes, and keep confirmed receipts reachable through history.
+
+Files: OrganizeWorkspace, existing MaintenanceDesk/OrganizationDesk/AiSuggest/AiSettings, App/LibraryWorkspace navigation, backend.ts optional organization request id, scoped styles, focused unit/e2e tests and test-only backend fixture. Main session owns the necessary initial organization request cancellation in Rust, native evidence, task metadata and consolidated specs.
+
+Visual thesis: the existing blue selected state, white working surface, 1px separators and Segoe UI/Chinese system typography remain the direction. Content: source and scope, check type, broad result review, explicit apply. Interaction: no navigation animation; existing short pointer press feedback only. Plain CSS tokens are the sole styling strategy; no cards, network fonts, new dependencies or decorative assets.
+
+No new models, provider algorithms, write executor, database migration, full-library restore, public-fetch exception, daily Chrome access or installation. Local config reads are allowed; opening a workspace starts no model, link probe or mutation. Verify actual cancellation/late results, disabled read-only writes, revision invalidation, navigation retention and five desktop sizes, then lint/typecheck/build and focused regressions. Browser fixtures and main-session native acceptance remain distinct evidence.

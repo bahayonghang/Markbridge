@@ -1,0 +1,14 @@
+{
+  "capturedAt": "2026-10-13T10:38:51.055Z",
+  "roots": [
+    "crates/core",
+    "crates/protocol",
+    "apps/desktop/src-tauri/src",
+    "apps/extension/src",
+    "packages/protocol/src"
+  ],
+  "files": 215,
+  "sha256": "fcafd14fb03eedfff4fe5c89fae9e697f5c895e02fc7c83d7e992f4c5d1acedf",
+  "nativeExe": "f0de19a1e33cbec0e2a8ad3fc96c8092de47b737a6bc00248bb14c66e85c323a",
+  "purpose": "Core and extension source fingerprint before CSS-only long-path fix"
+}

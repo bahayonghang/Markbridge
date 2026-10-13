@@ -1,0 +1,11 @@
+   Compiling markbridge-core v0.1.0 (D:\Documents\Code\Tauri\Markbridge\crates\core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.67s
+     Running unittests src\lib.rs (target\debug\deps\markbridge_core-1d38520d03228fbd.exe)
+
+running 4 tests
+test storage::library::tests::library_query_b10k_diagnostic ... ignored, set MARKBRIDGE_LIBRARY_BENCH_FIXTURE to the isolated B10K nodes.json
+test storage::tests::library_query_preserves_tree_order_and_total_on_empty_or_past_end_pages ... ok
+test storage::tests::library_query_intersects_folder_text_tags_and_optional_sidecar_without_profile_leaks ... ok
+test storage::tests::library_pages_reach_10001_and_reject_revision_and_epoch_changes ... ok
+
+test result: ok. 3 passed; 0 failed; 1 ignored; 0 measured; 93 filtered out; finished in 2.83s

@@ -1,0 +1,59 @@
+{
+  "runId": "25137adc",
+  "startedAt": "2026-10-13T08:20:08.178Z",
+  "machine": {
+    "version": "Windows 11 Pro",
+    "release": "10.0.26300",
+    "arch": "x64"
+  },
+  "scope": "R02 actual Tauri + two temporary Chrome profiles; no daily profile or mock IPC",
+  "controls": [
+    {
+      "control": "port_conflict_recovery_through_ui",
+      "status": "PASS"
+    },
+    {
+      "control": "invalid_extension_ticket_creates_no_profile",
+      "status": "PASS"
+    },
+    {
+      "control": "explicit_two_end_pairing",
+      "status": "PASS",
+      "profileId": "p:531b8b362bc12feb105854f19be15061ec31a17032727437ad5cc261db3ef97c",
+      "nodeCount": 4
+    },
+    {
+      "control": "explicit_two_end_pairing",
+      "status": "PASS",
+      "profileId": "p:980750dfd8a9337f637bca4c587e101b185a65f010720927ff12bee3ab098643",
+      "nodeCount": 4
+    },
+    {
+      "control": "equal_chrome_id_distinct_profile_ui",
+      "status": "PASS",
+      "sharedChromeId": "5"
+    },
+    {
+      "control": "selected_source_is_readonly_while_peer_remains_live",
+      "status": "PASS"
+    },
+    {
+      "control": "temporary_chrome_restart_reconciles_cache",
+      "status": "PASS"
+    },
+    {
+      "control": "revoke_requires_explicit_confirmation",
+      "status": "PASS"
+    }
+  ],
+  "errors": [],
+  "realOsSleep": "DEFERRED_BY_USER_TO_R08",
+  "isolationRoot": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-r02-native-h3DhVP",
+  "nativeHash": "70910f598dbcc6c2a0a5b6e51c1adbc7369b9a625d030c25e8358cca46885f93",
+  "extensionHash": "813f6266f083880a59b1542b7ea11e2657bcad45adf114874a33534f16117921",
+  "webview": "Edg/154.0.4258.62",
+  "chrome": "Chrome/155.0.8059.39",
+  "status": "PASS",
+  "temporaryCredentialsRemoved": true,
+  "finishedAt": "2026-10-13T08:20:21.628Z"
+}

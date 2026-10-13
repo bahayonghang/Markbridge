@@ -18,7 +18,7 @@
 
 01–04 为 M1 内部工程检查点，不单独宣传为用户可用发布。每个子任务必须能单独构建/检查，不以未来子任务掩盖当前失败。M1–M4 各自有可用产品闭环。13 的集成检查不能代替前面各任务的运行检查。
 
-当前结果、依赖阻塞和恢复步骤见 [实施状态](execution-status.md)。02 已通过本地验收，03 于 2026-10-11 启动。01 原生验收仍为 UNVERIFIED，Windows 交付前补齐。04 及后续子任务仍须核对各自前置验收。
+当前结果、依赖阻塞和恢复步骤见 [实施状态](execution-status.md)。2026-10-13 原 01–12 与改版 R01–R08 已完成；本轮同步实际睡眠豁免后 03/04 结案。下一实施目标为既有 13，随后 14/15；后两者互不依赖，14 环境缺失时可继续 15。
 
 ## 计划建立的命令
 
@@ -38,7 +38,7 @@
 | cargo clippy --workspace --all-targets -- -D warnings | Rust lint |
 | cargo test --workspace --locked | Rust 测试 |
 | cargo build -p markbridge-core --example bridge_harness --locked | 03 临时原生验收驱动，复用生产 Bridge，不在 listener 增加测试接口 |
-| node .trellis/tasks/10-10-mb-03-chrome-bridge/evidence/chrome-native-harness.mjs | 03 两个临时 Chrome Profile、独立应用目录和凭据命名空间；实际浏览器配对/同步/恢复，排除 Tauri GUI |
+| node .trellis/tasks/archive/2026-10/10-10-mb-03-chrome-bridge/evidence/chrome-native-harness.mjs | 03 两个临时 Chrome Profile、独立应用目录和凭据命名空间；实际浏览器配对/同步/恢复，排除 Tauri GUI |
 | pnpm --filter @markbridge/desktop tauri dev | Windows 原生交互检查 |
 | pnpm --filter @markbridge/desktop tauri build | 本地打包；不自动发布 |
 
@@ -65,3 +65,13 @@
 Windows 首版要求 01–13 通过其正式验收及 verification.md 的 Windows 项。M5 允许单独排期。父任务整体完成还要求 14/15 完成，或用户明确变更范围并更新需求映射。
 
 规划交付只校验任务结构、文档一致性、上下文引用、依赖无环和需求覆盖，不运行不存在的应用命令。
+
+## 2026-10-13 新版任务门槛调整
+
+用户明确将真实 OS 休眠/唤醒验收移至新版 R08 完成前，允许新版 R02–R07 继续实施。旧 V04 保持 UNVERIFIED，不改写本任务收据或完成状态；其他门槛不变。详见 ../10-12-mb-workspace-redesign/gate-change-2026-10-13.md。
+
+2026-10-13 后续决定：用户明确“这一条不用管，使用的时候也不会睡眠”，豁免新版 R08 的真实睡眠验收，取代上述新版完成前门槛。本旧任务的 V04 仍 UNVERIFIED，收据和状态不改写；不将豁免记作测试通过。详见新版 gate-change-2026-10-13.md 当前决定。
+
+## 2026-10-13 提交归档审计
+
+当前用户明确要求提交改动并归档已完成任务，授权适用于本轮。03/04 的其余 AC 已通过，同一真实睡眠项按既有用户决定 WAIVED 后完成；原始 V04 UNVERIFIED / 实际 NOT_RUN 保留。13/14/15 和本父任务仍未完成。前述“旧状态不改写”是当时阶段决定，现以本节及 execution-status.md 的证据映射为准。

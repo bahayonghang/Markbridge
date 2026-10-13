@@ -1,0 +1,79 @@
+{
+  "runId": "06d81276",
+  "phase": "baseline",
+  "startedAt": "2026-10-13T08:40:13.567Z",
+  "scope": "R03 real native B10K cached profile; no daily Chrome and no mock IPC",
+  "seed": 20261010,
+  "coldDefinition": "process spawn to visible MB05BAR tree, cached profile source and enabled search",
+  "searchDefinition": "browser performance.now before input event to exact marker title rendered and next animation frame",
+  "percentile": "sorted[ceil(n * ratio)-1]; warm excludes first of 30 input samples",
+  "coldMs": [
+    788.1954,
+    731.6992,
+    663.1261000000004
+  ],
+  "searchMs": [
+    8,
+    4.899999998509884,
+    5,
+    5,
+    4.199999999254942,
+    4.399999998509884,
+    3.699999999254942,
+    4.5,
+    3.400000002235174,
+    7,
+    4.199999999254942,
+    4,
+    3.800000000745058,
+    3.600000001490116,
+    3.899999998509884,
+    3.599999997764826,
+    4,
+    4.100000001490116,
+    3.5,
+    3.600000001490116,
+    7.400000002235174,
+    3.699999999254942,
+    3.300000000745058,
+    4.700000002980232,
+    3.800000000745058,
+    4,
+    3.5,
+    3.600000001490116,
+    3.699999999254942,
+    3.699999999254942
+  ],
+  "errors": [],
+  "environment": {
+    "os": "Windows 11 Pro",
+    "release": "10.0.26300",
+    "cpu": "Intel(R) Core(TM) Ultra 9 275HX",
+    "logicalCpus": 24,
+    "memoryBytes": 68143853568,
+    "node": "v26.7.0",
+    "exeBytes": 23043584,
+    "exeSha256": "4ccba488f378b7d2f03165b601d8ac3ecc85c80ebda7792a42d21462b19719fd"
+  },
+  "fixture": {
+    "bookmarks": 10000,
+    "folders": 1000,
+    "maxDepth": 20,
+    "nodes": 11004
+  },
+  "isolationRoot": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-r03-native-lieLiY",
+  "webview": "Edg/154.0.4258.62",
+  "devicePixelRatio": 1.25,
+  "cold": {
+    "p50": 731.6992,
+    "p95": 788.1954,
+    "max": 788.1954
+  },
+  "warm": {
+    "p50": 3.899999998509884,
+    "p95": 7,
+    "max": 7.400000002235174
+  },
+  "status": "PASS",
+  "finishedAt": "2026-10-13T08:40:29.928Z"
+}

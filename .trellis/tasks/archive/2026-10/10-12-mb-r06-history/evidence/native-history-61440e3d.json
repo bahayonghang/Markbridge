@@ -1,0 +1,58 @@
+{
+  "runId": "61440e3d",
+  "startedAt": "2026-10-13T12:51:10.495Z",
+  "controls": [
+    {
+      "control": "history_reached_without_selected_bookmark_and_displays_types_times_counts_and_values",
+      "status": "PASS"
+    },
+    {
+      "control": "complete_delete_undo_preview_cancel_has_zero_effects",
+      "status": "PASS"
+    },
+    {
+      "control": "ui_delete_undo_restores_tree_sparse_sibling_order_and_local_note_with_traceable_ids",
+      "status": "PASS",
+      "restoredCount": 3,
+      "state": "rolled_back"
+    },
+    {
+      "control": "external_change_conflict_preserves_chrome_value_and_truthful_history_state",
+      "status": "PASS"
+    },
+    {
+      "control": "partial_batch_history_recovers_only_confirmed_steps_preserving_external_and_unexecuted_items",
+      "status": "PASS",
+      "original": "partial",
+      "undoSteps": 2
+    },
+    {
+      "control": "offline_history_remains_readable_undo_disabled_and_export_entry_available",
+      "status": "PASS"
+    }
+  ],
+  "errors": [],
+  "environment": {
+    "os": "Windows 11 Pro",
+    "release": "10.0.26300",
+    "cpu": "Intel(R) Core(TM) Ultra 9 275HX",
+    "logicalCpus": 24,
+    "memoryBytes": 68143853568,
+    "node": "v26.7.0",
+    "exeBytes": 24033280,
+    "exeSha256": "89c17f5a9b59f08dd9f14654c4958597cc6a478665dd20ad5bf42fc5b6885178",
+    "extensionHash": "567f50146319a2b6f013f773308910f29bc56585a62075dbaf0f9b3cf1ff22c5"
+  },
+  "isolationRoot": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-r06-native-yyijZd",
+  "webview": "Edg/155.0.4283.45",
+  "chrome": "Chrome/155.0.8059.39",
+  "restoredIdentity": {
+    "oldBookmarkId": "b:06365c1bae4e7b2877d2edb10adba2d2",
+    "currentBookmarkId": "b:be15efb5d579f824212986387357236d",
+    "oldChromeId": "8",
+    "newChromeId": "17"
+  },
+  "status": "PASS",
+  "temporaryCredentialsRemoved": true,
+  "finishedAt": "2026-10-13T12:51:26.532Z"
+}

@@ -1,0 +1,72 @@
+{
+  "id": "mb-workspace-redesign",
+  "name": "mb-workspace-redesign",
+  "title": "Markbridge 日常书签管理与界面重设计",
+  "description": "以蓝色简洁桌面风格重设计工作台，补齐 Chrome 接入、浏览搜索、编辑多选整理、备份撤销的日常流程",
+  "status": "completed",
+  "dev_type": "docs",
+  "scope": "workspace-redesign",
+  "package": null,
+  "priority": "P1",
+  "creator": "lyh",
+  "assignee": "lyh",
+  "createdAt": "2026-10-12",
+  "completedAt": "2026-10-13",
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": "0bd492bf28e888e17eee5b9247751d9b61d6fd1c",
+  "pr_url": null,
+  "subtasks": [],
+  "children": [
+    "10-12-mb-r01-shell",
+    "10-12-mb-r02-connection",
+    "10-12-mb-r03-browse",
+    "10-12-mb-r04-editing",
+    "10-12-mb-r05-details",
+    "10-12-mb-r06-history",
+    "10-12-mb-r07-organize",
+    "10-12-mb-r08-acceptance"
+  ],
+  "parent": null,
+  "relatedFiles": [
+    ".trellis\\tasks\\10-12-mb-workspace-redesign\\prd.md",
+    ".trellis\\tasks\\10-12-mb-workspace-redesign\\design.md",
+    ".trellis\\tasks\\10-12-mb-workspace-redesign\\visual-design.md",
+    ".trellis\\tasks\\10-12-mb-workspace-redesign\\task-map.md",
+    ".trellis\\tasks\\10-12-mb-workspace-redesign\\verification.md"
+  ],
+  "notes": "",
+  "meta": {
+    "implementation_approval": "granted",
+    "planning_status": "approved",
+    "user_decisions": {
+      "style": "Codex and Apple inspired restrained light desktop, blue accent",
+      "priority": "complete everyday bookmark management flow"
+    },
+    "planning_consent": "2026-10-12 explicit user request to create parent and child tasks; style and scope confirmed in follow-up",
+    "legacy_parent": "10-10-markbridge-workspace",
+    "approval_evidence": "2026-10-13 user: 批准这个方案，开始按照顺序实施",
+    "active_child": null,
+    "execution_status": "completed_with_user_waiver",
+    "completed_children": [
+      "10-12-mb-r01-shell",
+      "10-12-mb-r02-connection",
+      "10-12-mb-r03-browse",
+      "10-12-mb-r04-editing",
+      "10-12-mb-r05-details",
+      "10-12-mb-r06-history",
+      "10-12-mb-r07-organize",
+      "10-12-mb-r08-acceptance"
+    ],
+    "sleep_gate_due": null,
+    "sleep_gate_status": "waived_by_user",
+    "sleep_gate_execution": "NOT_RUN",
+    "sleep_gate_waiver_evidence": "2026-10-13 user: 这一条不用管，使用的时候也不会睡眠",
+    "sleep_gate_waiver_document": ".trellis/tasks/archive/2026-10/10-12-mb-workspace-redesign/gate-change-2026-10-13.md",
+    "verification": "U01-U10 covered; retained G01-G10 accepted. Actual sleep excluded by user waiver (NOT_RUN), legacy V04 remains UNVERIFIED. R08 evidence/receipts.md and check-report.md.",
+    "precommit_review": ".trellis/tasks/archive/2026-10/10-12-mb-r08-acceptance/evidence/precommit-closeout.md",
+    "closeout_code_commit": "0bd492bf28e888e17eee5b9247751d9b61d6fd1c",
+    "archive_branch_note": "Local main-branch work with no PR; user authorized local commit and archive. Used --skip-branch-validation rather than inventing a feature branch."
+  }
+}

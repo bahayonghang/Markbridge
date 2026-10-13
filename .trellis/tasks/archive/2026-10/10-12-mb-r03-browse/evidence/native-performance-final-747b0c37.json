@@ -1,0 +1,81 @@
+{
+  "runId": "747b0c37",
+  "phase": "final",
+  "startedAt": "2026-10-13T09:20:53.350Z",
+  "scope": "R03 real native B10K cached profile; no daily Chrome and no mock IPC",
+  "seed": 20261010,
+  "coldDefinition": "process spawn to visible MB05BAR tree, cached profile source and enabled search",
+  "searchDefinition": "browser performance.now before input event to exact marker title rendered and next animation frame",
+  "percentile": "sorted[ceil(n * ratio)-1]; warm excludes first of 30 input samples",
+  "coldMs": [
+    723.9188,
+    642.1895,
+    648.6320000000001
+  ],
+  "searchMs": [
+    119.59999999776483,
+    137.29999999701977,
+    131.69999999925494,
+    117.59999999776483,
+    118.69999999925494,
+    120.89999999850988,
+    136.19999999925494,
+    143.5,
+    156.39999999850988,
+    170.70000000298023,
+    133.69999999925494,
+    164.30000000074506,
+    148,
+    144.40000000223517,
+    130.19999999925494,
+    151.5,
+    158,
+    120.60000000149012,
+    124.10000000149012,
+    161.09999999776483,
+    156,
+    140.09999999776483,
+    158.69999999925494,
+    171.5,
+    176.89999999850988,
+    169.19999999925494,
+    207.89999999850988,
+    222.80000000074506,
+    204.5,
+    186.89999999850988
+  ],
+  "errors": [],
+  "environment": {
+    "os": "Windows 11 Pro",
+    "release": "10.0.26300",
+    "cpu": "Intel(R) Core(TM) Ultra 9 275HX",
+    "logicalCpus": 24,
+    "memoryBytes": 68143853568,
+    "node": "v26.7.0",
+    "exeBytes": 23160320,
+    "exeSha256": "7c2ee3f39caeebacb63be248a47ba58556dd23cd58cc0393c86b5fd385ad1b7f"
+  },
+  "fixture": {
+    "bookmarks": 10000,
+    "folders": 1000,
+    "maxDepth": 20,
+    "nodes": 11004
+  },
+  "isolationRoot": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-r03-native-Wufkmd",
+  "webview": "Edg/154.0.4258.62",
+  "devicePixelRatio": 1.25,
+  "cold": {
+    "p50": 648.6320000000001,
+    "p95": 723.9188,
+    "max": 723.9188
+  },
+  "warm": {
+    "p50": 151.5,
+    "p95": 207.89999999850988,
+    "max": 222.80000000074506
+  },
+  "status": "FAIL",
+  "failedStage": "warm-search",
+  "failureCode": "WARM_SEARCH_P95_OVER_200MS",
+  "finishedAt": "2026-10-13T09:21:13.822Z"
+}

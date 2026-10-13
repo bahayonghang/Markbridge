@@ -56,7 +56,7 @@ Native release artifact: PASS; 8845312 bytes; SHA256 5d07b834567111786eb31927c51
 | `cargo clippy --workspace --all-targets -- -D warnings` | 0 | PASS |
 | `cargo test --workspace --locked` | 0 | PASS，Rust 2 项；其他目标 0 项 |
 | `pnpm test:e2e` | 0 | PASS，1100×760 和 640×480 浏览器空态 2 项 |
-| `python .trellis/scripts/task.py validate .trellis/tasks/10-10-mb-01-foundation` | 0 | PASS，implement/check 各 11 项有效 |
+| `python .trellis/scripts/task.py validate .trellis/tasks/archive/2026-10/10-10-mb-01-foundation` | 0 | PASS，implement/check 各 11 项有效 |
 | `git diff --check` | 0 | PASS |
 | `pnpm build:native` 修复后 | 0 | PASS，最终 locked release EXE 构建和扫描 |
 

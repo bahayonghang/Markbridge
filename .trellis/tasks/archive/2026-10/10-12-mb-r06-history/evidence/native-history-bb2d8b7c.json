@@ -1,0 +1,46 @@
+{
+  "runId": "bb2d8b7c",
+  "startedAt": "2026-10-13T12:43:00.973Z",
+  "controls": [
+    {
+      "control": "history_reached_without_selected_bookmark_and_displays_types_times_counts_and_values",
+      "status": "PASS"
+    },
+    {
+      "control": "complete_delete_undo_preview_cancel_has_zero_effects",
+      "status": "PASS"
+    },
+    {
+      "control": "ui_delete_undo_restores_tree_sparse_sibling_order_and_local_note_with_traceable_ids",
+      "status": "PASS",
+      "restoredCount": 3,
+      "state": "rolled_back"
+    }
+  ],
+  "errors": [],
+  "environment": {
+    "os": "Windows 11 Pro",
+    "release": "10.0.26300",
+    "cpu": "Intel(R) Core(TM) Ultra 9 275HX",
+    "logicalCpus": 24,
+    "memoryBytes": 68143853568,
+    "node": "v26.7.0",
+    "exeBytes": 24033280,
+    "exeSha256": "77efe5e31122a3e7572c3f2170a27526ea010755f13150ad645fd874e754cdc7",
+    "extensionHash": "567f50146319a2b6f013f773308910f29bc56585a62075dbaf0f9b3cf1ff22c5"
+  },
+  "isolationRoot": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-r06-native-S3sNon",
+  "webview": "Edg/155.0.4283.45",
+  "chrome": "Chrome/155.0.8059.39",
+  "restoredIdentity": {
+    "oldBookmarkId": "b:ed2377cc27d638300103468ae97f008c",
+    "currentBookmarkId": "b:bdc0a22e1fac26bf8e91971a2696696b",
+    "oldChromeId": "8",
+    "newChromeId": "17"
+  },
+  "status": "FAIL",
+  "failedStage": "external-conflict",
+  "failureCode": "UNDO_NOT_CONFIRMED",
+  "temporaryCredentialsRemoved": true,
+  "finishedAt": "2026-10-13T12:43:44.314Z"
+}

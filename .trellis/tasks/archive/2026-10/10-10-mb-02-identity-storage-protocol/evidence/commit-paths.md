@@ -9,19 +9,19 @@ Counts: 02-whole 24. 02-slice 22. Not in the 02 commit: 65 [03], 51 [other-task]
 .trellis/spec/backend/database-guidelines.md
 .trellis/spec/backend/error-handling.md
 .trellis/spec/project-baseline.md
-.trellis/tasks/10-10-mb-02-identity-storage-protocol/design.md
-.trellis/tasks/10-10-mb-02-identity-storage-protocol/implement.md
-.trellis/tasks/10-10-mb-02-identity-storage-protocol/prd.md
-.trellis/tasks/10-10-mb-02-identity-storage-protocol/task.json
-.trellis/tasks/10-10-mb-02-identity-storage-protocol/evidence/check-gates.jsonl
-.trellis/tasks/10-10-mb-02-identity-storage-protocol/evidence/check-review.md
-.trellis/tasks/10-10-mb-02-identity-storage-protocol/evidence/check-source-manifest.jsonl
-.trellis/tasks/10-10-mb-02-identity-storage-protocol/evidence/closeout-check.json
-.trellis/tasks/10-10-mb-02-identity-storage-protocol/evidence/implementation-report.md
-.trellis/tasks/10-10-mb-02-identity-storage-protocol/evidence/receipts.md
-.trellis/tasks/10-10-mb-02-identity-storage-protocol/evidence/session-preflight.md
-.trellis/tasks/10-10-mb-02-identity-storage-protocol/evidence/wire-source-corrupt.bin
-.trellis/tasks/10-10-mb-02-identity-storage-protocol/evidence/wire-source-failure.json
+.trellis/tasks/archive/2026-10/10-10-mb-02-identity-storage-protocol/design.md
+.trellis/tasks/archive/2026-10/10-10-mb-02-identity-storage-protocol/implement.md
+.trellis/tasks/archive/2026-10/10-10-mb-02-identity-storage-protocol/prd.md
+.trellis/tasks/archive/2026-10/10-10-mb-02-identity-storage-protocol/task.json
+.trellis/tasks/archive/2026-10/10-10-mb-02-identity-storage-protocol/evidence/check-gates.jsonl
+.trellis/tasks/archive/2026-10/10-10-mb-02-identity-storage-protocol/evidence/check-review.md
+.trellis/tasks/archive/2026-10/10-10-mb-02-identity-storage-protocol/evidence/check-source-manifest.jsonl
+.trellis/tasks/archive/2026-10/10-10-mb-02-identity-storage-protocol/evidence/closeout-check.json
+.trellis/tasks/archive/2026-10/10-10-mb-02-identity-storage-protocol/evidence/implementation-report.md
+.trellis/tasks/archive/2026-10/10-10-mb-02-identity-storage-protocol/evidence/receipts.md
+.trellis/tasks/archive/2026-10/10-10-mb-02-identity-storage-protocol/evidence/session-preflight.md
+.trellis/tasks/archive/2026-10/10-10-mb-02-identity-storage-protocol/evidence/wire-source-corrupt.bin
+.trellis/tasks/archive/2026-10/10-10-mb-02-identity-storage-protocol/evidence/wire-source-failure.json
 crates/core/src/storage/migrations/001_identity.sql
 crates/core/src/storage/migrations/002_history.sql
 crates/core/src/storage/mod.rs
@@ -44,69 +44,69 @@ tests/fixtures/protocol/ts-to-rust.json
 .trellis/tasks/10-10-markbridge-workspace/task-map.md [parent]
 .trellis/tasks/10-10-markbridge-workspace/task.json [parent]
 .trellis/tasks/10-10-markbridge-workspace/verification.md [parent]
-.trellis/tasks/10-10-mb-03-chrome-bridge/check.jsonl [03]
-.trellis/tasks/10-10-mb-03-chrome-bridge/design.md [03]
-.trellis/tasks/10-10-mb-03-chrome-bridge/implement.jsonl [03]
-.trellis/tasks/10-10-mb-03-chrome-bridge/implement.md [03]
-.trellis/tasks/10-10-mb-03-chrome-bridge/prd.md [03]
-.trellis/tasks/10-10-mb-03-chrome-bridge/task.json [03]
-.trellis/tasks/10-10-mb-03-chrome-bridge/evidence/backend-clippy-first.txt [03]
-.trellis/tasks/10-10-mb-03-chrome-bridge/evidence/backend-credential-probe.txt [03]
-.trellis/tasks/10-10-mb-03-chrome-bridge/evidence/backend-credential-reference-probe.txt [03]
-.trellis/tasks/10-10-mb-03-chrome-bridge/evidence/backend-delta-check.txt [03]
-.trellis/tasks/10-10-mb-03-chrome-bridge/evidence/backend-desktop-check.txt [03]
-.trellis/tasks/10-10-mb-03-chrome-bridge/evidence/backend-harness-build.txt [03]
-.trellis/tasks/10-10-mb-03-chrome-bridge/evidence/backend-harness-rebuild.txt [03]
-.trellis/tasks/10-10-mb-03-chrome-bridge/evidence/backend-rust-retest.txt [03]
-.trellis/tasks/10-10-mb-03-chrome-bridge/evidence/backend-rust-tests.txt [03]
-.trellis/tasks/10-10-mb-03-chrome-bridge/evidence/browser-diagnostics-mock-1100x760.png [03]
-.trellis/tasks/10-10-mb-03-chrome-bridge/evidence/browser-diagnostics-mock-640x480.png [03]
-.trellis/tasks/10-10-mb-03-chrome-bridge/evidence/browser-preview-1100x760.png [03]
-.trellis/tasks/10-10-mb-03-chrome-bridge/evidence/browser-preview-640x480.png [03]
-.trellis/tasks/10-10-mb-03-chrome-bridge/evidence/chrome-native-harness.mjs [03]
-.trellis/tasks/10-10-mb-03-chrome-bridge/evidence/frontend-vitest.json [03]
-.trellis/tasks/10-10-mb-03-chrome-bridge/evidence/implementation-extension.md [03]
-.trellis/tasks/10-10-mb-03-chrome-bridge/evidence/implementation-frontend.md [03]
-.trellis/tasks/10-10-mb-03-chrome-bridge/evidence/native-0dab3e15-f02c-4b13-bed6-ef8333ccc59a.json [03]
-.trellis/tasks/10-10-mb-03-chrome-bridge/evidence/native-4ede64a3-99c2-44d6-8756-a3c58f58c159.json [03]
-.trellis/tasks/10-10-mb-03-chrome-bridge/evidence/session-preflight.md [03]
-.trellis/tasks/10-10-mb-03-chrome-bridge/integration-contract.md [03]
-.trellis/tasks/10-10-mb-04-readonly-mirror/design.md [other-task]
-.trellis/tasks/10-10-mb-04-readonly-mirror/implement.md [other-task]
-.trellis/tasks/10-10-mb-04-readonly-mirror/prd.md [other-task]
-.trellis/tasks/10-10-mb-04-readonly-mirror/task.json [other-task]
-.trellis/tasks/10-10-mb-05-library-workspace/design.md [other-task]
-.trellis/tasks/10-10-mb-05-library-workspace/implement.md [other-task]
-.trellis/tasks/10-10-mb-05-library-workspace/prd.md [other-task]
-.trellis/tasks/10-10-mb-05-library-workspace/task.json [other-task]
-.trellis/tasks/10-10-mb-06-safe-editing/design.md [other-task]
-.trellis/tasks/10-10-mb-06-safe-editing/implement.md [other-task]
-.trellis/tasks/10-10-mb-06-safe-editing/prd.md [other-task]
-.trellis/tasks/10-10-mb-06-safe-editing/task.json [other-task]
-.trellis/tasks/10-10-mb-07-local-tags/design.md [other-task]
-.trellis/tasks/10-10-mb-07-local-tags/implement.md [other-task]
-.trellis/tasks/10-10-mb-07-local-tags/prd.md [other-task]
-.trellis/tasks/10-10-mb-07-local-tags/task.json [other-task]
-.trellis/tasks/10-10-mb-08-content-preview/design.md [other-task]
-.trellis/tasks/10-10-mb-08-content-preview/implement.md [other-task]
-.trellis/tasks/10-10-mb-08-content-preview/prd.md [other-task]
-.trellis/tasks/10-10-mb-08-content-preview/task.json [other-task]
-.trellis/tasks/10-10-mb-09-webpage-preview/design.md [other-task]
-.trellis/tasks/10-10-mb-09-webpage-preview/implement.md [other-task]
-.trellis/tasks/10-10-mb-09-webpage-preview/prd.md [other-task]
-.trellis/tasks/10-10-mb-09-webpage-preview/task.json [other-task]
-.trellis/tasks/10-10-mb-10-ai-assistance/design.md [other-task]
-.trellis/tasks/10-10-mb-10-ai-assistance/implement.md [other-task]
-.trellis/tasks/10-10-mb-10-ai-assistance/prd.md [other-task]
-.trellis/tasks/10-10-mb-10-ai-assistance/task.json [other-task]
-.trellis/tasks/10-10-mb-11-batch-organization/design.md [other-task]
-.trellis/tasks/10-10-mb-11-batch-organization/implement.md [other-task]
-.trellis/tasks/10-10-mb-11-batch-organization/prd.md [other-task]
-.trellis/tasks/10-10-mb-11-batch-organization/task.json [other-task]
-.trellis/tasks/10-10-mb-12-library-maintenance/design.md [other-task]
-.trellis/tasks/10-10-mb-12-library-maintenance/implement.md [other-task]
-.trellis/tasks/10-10-mb-12-library-maintenance/prd.md [other-task]
-.trellis/tasks/10-10-mb-12-library-maintenance/task.json [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-03-chrome-bridge/check.jsonl [03]
+.trellis/tasks/archive/2026-10/10-10-mb-03-chrome-bridge/design.md [03]
+.trellis/tasks/archive/2026-10/10-10-mb-03-chrome-bridge/implement.jsonl [03]
+.trellis/tasks/archive/2026-10/10-10-mb-03-chrome-bridge/implement.md [03]
+.trellis/tasks/archive/2026-10/10-10-mb-03-chrome-bridge/prd.md [03]
+.trellis/tasks/archive/2026-10/10-10-mb-03-chrome-bridge/task.json [03]
+.trellis/tasks/archive/2026-10/10-10-mb-03-chrome-bridge/evidence/backend-clippy-first.txt [03]
+.trellis/tasks/archive/2026-10/10-10-mb-03-chrome-bridge/evidence/backend-credential-probe.txt [03]
+.trellis/tasks/archive/2026-10/10-10-mb-03-chrome-bridge/evidence/backend-credential-reference-probe.txt [03]
+.trellis/tasks/archive/2026-10/10-10-mb-03-chrome-bridge/evidence/backend-delta-check.txt [03]
+.trellis/tasks/archive/2026-10/10-10-mb-03-chrome-bridge/evidence/backend-desktop-check.txt [03]
+.trellis/tasks/archive/2026-10/10-10-mb-03-chrome-bridge/evidence/backend-harness-build.txt [03]
+.trellis/tasks/archive/2026-10/10-10-mb-03-chrome-bridge/evidence/backend-harness-rebuild.txt [03]
+.trellis/tasks/archive/2026-10/10-10-mb-03-chrome-bridge/evidence/backend-rust-retest.txt [03]
+.trellis/tasks/archive/2026-10/10-10-mb-03-chrome-bridge/evidence/backend-rust-tests.txt [03]
+.trellis/tasks/archive/2026-10/10-10-mb-03-chrome-bridge/evidence/browser-diagnostics-mock-1100x760.png [03]
+.trellis/tasks/archive/2026-10/10-10-mb-03-chrome-bridge/evidence/browser-diagnostics-mock-640x480.png [03]
+.trellis/tasks/archive/2026-10/10-10-mb-03-chrome-bridge/evidence/browser-preview-1100x760.png [03]
+.trellis/tasks/archive/2026-10/10-10-mb-03-chrome-bridge/evidence/browser-preview-640x480.png [03]
+.trellis/tasks/archive/2026-10/10-10-mb-03-chrome-bridge/evidence/chrome-native-harness.mjs [03]
+.trellis/tasks/archive/2026-10/10-10-mb-03-chrome-bridge/evidence/frontend-vitest.json [03]
+.trellis/tasks/archive/2026-10/10-10-mb-03-chrome-bridge/evidence/implementation-extension.md [03]
+.trellis/tasks/archive/2026-10/10-10-mb-03-chrome-bridge/evidence/implementation-frontend.md [03]
+.trellis/tasks/archive/2026-10/10-10-mb-03-chrome-bridge/evidence/native-0dab3e15-f02c-4b13-bed6-ef8333ccc59a.json [03]
+.trellis/tasks/archive/2026-10/10-10-mb-03-chrome-bridge/evidence/native-4ede64a3-99c2-44d6-8756-a3c58f58c159.json [03]
+.trellis/tasks/archive/2026-10/10-10-mb-03-chrome-bridge/evidence/session-preflight.md [03]
+.trellis/tasks/archive/2026-10/10-10-mb-03-chrome-bridge/integration-contract.md [03]
+.trellis/tasks/archive/2026-10/10-10-mb-04-readonly-mirror/design.md [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-04-readonly-mirror/implement.md [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-04-readonly-mirror/prd.md [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-04-readonly-mirror/task.json [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-05-library-workspace/design.md [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-05-library-workspace/implement.md [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-05-library-workspace/prd.md [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-05-library-workspace/task.json [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-06-safe-editing/design.md [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-06-safe-editing/implement.md [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-06-safe-editing/prd.md [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-06-safe-editing/task.json [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-07-local-tags/design.md [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-07-local-tags/implement.md [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-07-local-tags/prd.md [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-07-local-tags/task.json [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-08-content-preview/design.md [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-08-content-preview/implement.md [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-08-content-preview/prd.md [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-08-content-preview/task.json [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-09-webpage-preview/design.md [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-09-webpage-preview/implement.md [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-09-webpage-preview/prd.md [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-09-webpage-preview/task.json [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-10-ai-assistance/design.md [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-10-ai-assistance/implement.md [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-10-ai-assistance/prd.md [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-10-ai-assistance/task.json [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-11-batch-organization/design.md [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-11-batch-organization/implement.md [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-11-batch-organization/prd.md [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-11-batch-organization/task.json [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-12-library-maintenance/design.md [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-12-library-maintenance/implement.md [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-12-library-maintenance/prd.md [other-task]
+.trellis/tasks/archive/2026-10/10-10-mb-12-library-maintenance/task.json [other-task]
 .trellis/tasks/10-10-mb-13-windows-acceptance/design.md [other-task]
 .trellis/tasks/10-10-mb-13-windows-acceptance/implement.md [other-task]
 .trellis/tasks/10-10-mb-13-windows-acceptance/prd.md [other-task]

@@ -47,15 +47,15 @@ V01 使用本任务上表。退出码不全是 0，判定 FAIL。
 |---|---|---|---|
 | V01 | FAIL | 上表 | lint、typecheck、protocol、cargo test、`pnpm build:native`、fmt、clippy 为 0。test、e2e、build 非 0 |
 | V02 | PASS | 03 收据中的 `cargo test --workspace --locked` 与 `pnpm test` 退出码 0；原生 JSON `42e65e09` 的进程退出码由 03 按脚本推断为 0 | 错误令牌、错误 Origin、两个临时 Profile 的缓存计数 11003 与 4。本任务未重跑该 harness |
-| V03 | PASS | 05 `node .trellis/tasks/10-10-mb-05-library-workspace/evidence/profile-live.mjs`，退出码 0 | 100 条：p50 62 ms，p95 245 ms，max 246 ms。运行 `cf9c03cf-e252-439c-b524-bdd281d42c52`。本任务未重跑 |
+| V03 | PASS | 05 `node .trellis/tasks/archive/2026-10/10-10-mb-05-library-workspace/evidence/profile-live.mjs`，退出码 0 | 100 条：p50 62 ms，p95 245 ms，max 246 ms。运行 `cf9c03cf-e252-439c-b524-bdd281d42c52`。本任务未重跑 |
 | V04 | UNVERIFIED | 03、04 收据写明没有导入命令，也没有休眠命令 | 本任务不挂起主机。不把 worker 重启或文件镜像测试写成整行 PASS |
 | V05 | PASS | 04 `cargo test --workspace --locked`，退出码 0 | 原子替换、半写 JSON、删除和目录改名后保留最后有效树。Chrome 书签文件的字节与 mtime 在该次测试中未变 |
 | V06 | PASS | 05 `measure.mjs` 与 `profile-search.mjs`，退出码都是 0 | 文件镜像冷启动 601 ms、650 ms、684 ms；暖态 p50 5.300000000745058 ms，p95 9.5 ms，max 9.5 ms。已加载资料冷启动 659 ms、646 ms、675 ms；暖态 p50 4.2000000001862645 ms，p95 5.2000000001862645 ms，max 5.7000000001862645 ms。150% DPI 在 05 收据中仍是 UNVERIFIED。本任务未重跑 |
-| V07 | PASS | 06 `node .trellis/tasks/10-10-mb-06-safe-editing/evidence/chrome-edit-harness.mjs`，退出码 0 | 运行 `1f4ba946-621b-47a1-b214-821a791037ce`。创建、更新、排序、移动、受保护节点和外部冲突为 PASS |
+| V07 | PASS | 06 `node .trellis/tasks/archive/2026-10/10-10-mb-06-safe-editing/evidence/chrome-edit-harness.mjs`，退出码 0 | 运行 `1f4ba946-621b-47a1-b214-821a791037ce`。创建、更新、排序、移动、受保护节点和外部冲突为 PASS |
 | V08 | PASS | 同上 06 harness，退出码 0 | `delete_recovery`、`concurrent_rollback`、`crash_after_apply`、`lost_ack` 在该次报告中为 PASS |
-| V09 | PASS | 07 `node .trellis/tasks/10-10-mb-07-local-tags/evidence/chrome-tag-harness.mjs`，退出码 0 | 运行 `7d423b1d-da25-4dbb-87dc-b2bff7181433` |
+| V09 | PASS | 07 `node .trellis/tasks/archive/2026-10/10-10-mb-07-local-tags/evidence/chrome-tag-harness.mjs`，退出码 0 | 运行 `7d423b1d-da25-4dbb-87dc-b2bff7181433` |
 | V10 | PASS | 08 `cargo test --workspace --locked`，退出码 0 | HTTP fixture 覆盖 20 次切换、10 秒超时、受禁目标和图片路径。本任务未重跑 |
-| V11 | PASS | 09 `node .trellis/tasks/10-10-mb-09-webpage-preview/evidence/native-preview.mjs`，退出码 0 | 独立预览窗口、资料隔离、37 条拒绝。本任务未重跑 |
+| V11 | PASS | 09 `node .trellis/tasks/archive/2026-10/10-10-mb-09-webpage-preview/evidence/native-preview.mjs`，退出码 0 | 独立预览窗口、资料隔离、37 条拒绝。本任务未重跑 |
 | V12 | PASS | 10 `cargo test -p markbridge-core --lib reqwest_ten_public_pages --locked --offline -- --ignored --nocapture --test-threads=1`，退出码 0 | 检查重跑 1 passed。夹具覆盖坏 schema、超长值、注入、取消和 429。本任务未重跑 |
 | V13 | PASS | 11 `cargo test -p markbridge-core --lib --locked disposable_chrome_b100 -- --ignored --nocapture --test-threads=1`，退出码 0 | 检查重跑 1 passed，3.39 秒。`b100-run.json` 为 100 条书签的合成树，不是 B10K。本任务未重跑 |
 | V14 | PASS | 12 库维护测试，`cargo test --workspace --locked` 退出码 0；检查过滤重跑退出码 0 | 404/410、403/429、超时，以及 query 或 fragment 不合并。12 的 `pnpm test` 退出码 1，失败点不在库维护入口。本任务的 `pnpm test` 同样退出码 1 |
@@ -756,7 +756,7 @@ AC13-2、AC13-4、V15 仍是 PASS。
 
 `apps/extension/public/manifest.json` 的 `permissions` 仍是 `bookmarks`、`storage`、`alarms`、`scripting`、`activeTab`。`scripts/foundation.test.mjs` 与 `scripts/check-artifacts.mjs` 断言同一五项。`tests/e2e/foundation.spec.ts` 仍期望「已连接 Chrome」和「无法读取启动状态」。没有改这三处，也没有改 manifest。manifest 没有 `host_permissions`、`content_scripts`、`externally_connectable`。
 
-没有重跑 `pnpm test:e2e`。该 spec 会把 PNG 写到 `.trellis/tasks/10-10-mb-03-chrome-bridge/evidence`，那些截图保持不动。
+没有重跑 `pnpm test:e2e`。该 spec 会把 PNG 写到 `.trellis/tasks/archive/2026-10/10-10-mb-03-chrome-bridge/evidence`，那些截图保持不动。
 
 `## 2026-10-11 trellis-check 重跑` 已记录 `pnpm test`、`pnpm build`、`pnpm test:e2e`，退出码都是 0。
 
@@ -783,15 +783,15 @@ AC13-2、AC13-4、V15 仍是 PASS。
 | AC13-5 | UNVERIFIED | 无。`## V01–V16` 的 V16 命令栏是「无」，没有退出码。没有 Floccus 环境 | `## AC13` 与 `## 2026-10-11 trellis-check` 都是 UNVERIFIED。之后各节只复述 V16，没有把 AC13-5 写成 PASS |
 | V01 | FAIL | 历史非 0：`## 本任务命令` 的 `pnpm test` 1、`pnpm test:e2e` 1、`pnpm build` 1。`## 2026-10-11 trellis-check`：`cargo fmt --all -- --check` 1；clippy 日志退出码 101。其后退出码 0：`## 2026-10-12 trellis-check fmt` 的 `cargo fmt --all -- --check` 与 `cargo clippy --workspace --all-targets -- -D warnings` 都是 0；`## 2026-10-11 trellis-check 重跑` 的 `pnpm lint`、`pnpm test`、`pnpm build`、`pnpm test:e2e` 都是 0。`pnpm --filter @markbridge/desktop tauri build` 的退出码栏是「无」，该命令行仍是 NOT_RUN | `## V01–V16` 判定 FAIL。`## 2026-10-11 trellis-check 重跑` 写明不把历史 V01 改成 PASS。`## 2026-10-12 trellis-check 权限断言` 仍写历史 V01 行是 FAIL。最新具名判定是 FAIL |
 | V02 | PASS | `## V01–V16`：03 收据中的 `cargo test --workspace --locked` 与 `pnpm test` 退出码 0。原生 JSON `42e65e09` 的进程退出码由 03 按脚本推断为 0 | 本文件之后没有改写 V02。该行写明本任务未重跑该 harness |
-| V03 | PASS | `## V01–V16`：05 `node .trellis/tasks/10-10-mb-05-library-workspace/evidence/profile-live.mjs` 退出码 0。`## 2026-10-11 trellis-check` 复述 PASS，没有重跑 | 同段写 03 的 V03 仍是 NOT_RUN。上表 V03 采用 05 的退出码 0。本任务未重跑 |
+| V03 | PASS | `## V01–V16`：05 `node .trellis/tasks/archive/2026-10/10-10-mb-05-library-workspace/evidence/profile-live.mjs` 退出码 0。`## 2026-10-11 trellis-check` 复述 PASS，没有重跑 | 同段写 03 的 V03 仍是 NOT_RUN。上表 V03 采用 05 的退出码 0。本任务未重跑 |
 | V04 | UNVERIFIED | 无导入命令，无休眠命令，无退出码。`## V01–V16` 与 `## 2026-10-12 trellis-check 权限断言` | 该行写明不把 worker 重启或文件镜像测试写成整行 PASS。不是 PASS，也不是明确 FAIL |
 | V05 | PASS | `## V01–V16`：04 `cargo test --workspace --locked` 退出码 0 | 本文件之后没有改写 V05 |
 | V06 | PASS | `## V01–V16`：05 `measure.mjs` 与 `profile-search.mjs` 退出码都是 0 | 该行写 150% DPI 在 05 收据中仍是 UNVERIFIED，整行判定仍是 PASS。本任务未重跑这两条。`b10k-measure.mjs` 退出码 0 记在 AC13-3，没有改写 V06 |
-| V07 | PASS | `## V01–V16`：06 `node .trellis/tasks/10-10-mb-06-safe-editing/evidence/chrome-edit-harness.mjs` 退出码 0 | 本文件之后没有改写 V07 |
+| V07 | PASS | `## V01–V16`：06 `node .trellis/tasks/archive/2026-10/10-10-mb-06-safe-editing/evidence/chrome-edit-harness.mjs` 退出码 0 | 本文件之后没有改写 V07 |
 | V08 | PASS | `## V01–V16`：同上 06 harness，退出码 0 | 本文件之后没有改写 V08。`## 2026-10-12 打开时冻结未回执创建` 另有 `cargo test -p markbridge-core --locked open_leaves_an_unacked_edit_create_uncertain_and_does_not_replay -- --test-threads=1` 退出码 0。该节写 V15 仍是 FAIL，没有改 V08 |
-| V09 | PASS | `## V01–V16`：07 `node .trellis/tasks/10-10-mb-07-local-tags/evidence/chrome-tag-harness.mjs` 退出码 0 | 本文件之后没有改写 V09 |
+| V09 | PASS | `## V01–V16`：07 `node .trellis/tasks/archive/2026-10/10-10-mb-07-local-tags/evidence/chrome-tag-harness.mjs` 退出码 0 | 本文件之后没有改写 V09 |
 | V10 | PASS | `## V01–V16`：08 `cargo test --workspace --locked` 退出码 0 | 本文件之后没有改写 V10 |
-| V11 | PASS | `## V01–V16`：09 `node .trellis/tasks/10-10-mb-09-webpage-preview/evidence/native-preview.mjs` 退出码 0 | 本文件之后没有改写 V11 |
+| V11 | PASS | `## V01–V16`：09 `node .trellis/tasks/archive/2026-10/10-10-mb-09-webpage-preview/evidence/native-preview.mjs` 退出码 0 | 本文件之后没有改写 V11 |
 | V12 | PASS | `## V01–V16`：10 `cargo test -p markbridge-core --lib reqwest_ten_public_pages --locked --offline -- --ignored --nocapture --test-threads=1` 退出码 0 | 本文件之后没有改写 V12。`where.exe ollama` 退出码 1 不改写这一行 |
 | V13 | PASS | `## V01–V16`：11 `cargo test -p markbridge-core --lib --locked disposable_chrome_b100 -- --ignored --nocapture --test-threads=1` 退出码 0 | 本文件之后没有改写 V13 |
 | V14 | PASS | `## V01–V16`：`cargo test --workspace --locked` 退出码 0；检查过滤重跑退出码 0 | 同节写 12 的 `pnpm test` 退出码 1，本任务当时的 `pnpm test` 也是 1。`## 2026-10-11 trellis-check 重跑` 的 `pnpm test` 退出码 0。V14 行没有改写，最新具名判定仍是 PASS |

@@ -1,0 +1,18 @@
+{
+  "startedAt": "2026-10-13T07:36:28.376Z",
+  "scope": "R01 native shell, synthetic cached read-only profile; no real Chrome",
+  "samples": [],
+  "assertions": [],
+  "errors": [],
+  "isolation": {
+    "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-r01-shell-rFGd2T",
+    "retainedForInspection": true
+  },
+  "executableSha256": "4118ba925e3748b69c67d598a243301ca607c650cd769650b319ece4f6fdc5e8",
+  "pid": 89492,
+  "webview": "Edg/154.0.4258.62",
+  "status": "FAIL",
+  "failure": "Error: Timed out waiting for isolated native app\n    at waitFor (file:///D:/Documents/Code/Tauri/Markbridge/.trellis/tasks/10-12-mb-r01-shell/evidence/native-shell.mjs:39:9)\n    at async file:///D:/Documents/Code/Tauri/Markbridge/.trellis/tasks/10-12-mb-r01-shell/evidence/native-shell.mjs:73:16",
+  "closedNormally": false,
+  "finishedAt": "2026-10-13T07:37:00.580Z"
+}

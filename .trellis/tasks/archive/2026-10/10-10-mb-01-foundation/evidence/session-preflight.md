@@ -7,8 +7,8 @@
 - 用户指令：请根据当前trellis任务规划开始实施trellis父任务以及对应的子任务。
 - 当前父子规划的实施批准已记录在父任务 task.json 的 meta.approval_evidence。一次仅实施一个子任务，前置验收通过后才能启动后续子任务。
 - bootstrap 的 task.json 为 completed；validation.md 记录规范检查通过。历史 notes 中“not archived”与当前 archive 路径不一致，采用当前文件位置；不改写历史记录。
-- `python .trellis/scripts/task.py validate .trellis/tasks/10-10-mb-01-foundation`：退出 0；implement.jsonl 和 check.jsonl 各 10 项，全部有效。
-- `python .trellis/scripts/task.py start .trellis/tasks/10-10-mb-01-foundation`：退出 0；planning → in_progress；会话指针已保存。
+- `python .trellis/scripts/task.py validate .trellis/tasks/archive/2026-10/10-10-mb-01-foundation`：退出 0；implement.jsonl 和 check.jsonl 各 10 项，全部有效。
+- `python .trellis/scripts/task.py start .trellis/tasks/archive/2026-10/10-10-mb-01-foundation`：退出 0；planning → in_progress；会话指针已保存。
 - 启动命令提示当前分支与 base_branch 均为 main。当前不创建 PR、不提交、不归档，不执行相关 Git 操作。
 
 ## 当前机器

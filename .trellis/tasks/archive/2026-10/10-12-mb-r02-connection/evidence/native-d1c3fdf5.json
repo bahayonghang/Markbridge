@@ -1,0 +1,27 @@
+{
+  "runId": "d1c3fdf5",
+  "startedAt": "2026-10-13T08:18:09.445Z",
+  "machine": {
+    "version": "Windows 11 Pro",
+    "release": "10.0.26300",
+    "arch": "x64"
+  },
+  "scope": "R02 actual Tauri + two temporary Chrome profiles; no daily profile or mock IPC",
+  "controls": [
+    {
+      "control": "port_conflict_recovery_through_ui",
+      "status": "PASS"
+    }
+  ],
+  "errors": [],
+  "realOsSleep": "DEFERRED_BY_USER_TO_R08",
+  "isolationRoot": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-r02-native-Ms7BIa",
+  "nativeHash": "70910f598dbcc6c2a0a5b6e51c1adbc7369b9a625d030c25e8358cca46885f93",
+  "extensionHash": "813f6266f083880a59b1542b7ea11e2657bcad45adf114874a33534f16117921",
+  "webview": "Edg/154.0.4258.62",
+  "status": "FAIL",
+  "failedStage": "two-profile-pairing",
+  "failureCode": "WRONG_TICKET_NOT_REJECTED",
+  "temporaryCredentialsRemoved": true,
+  "finishedAt": "2026-10-13T08:18:45.787Z"
+}

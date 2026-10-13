@@ -33,4 +33,4 @@ AC05-3 与 V03 仍是 PASS，依据是这次精确相等运行。150% DPI 仍是
 | `cargo test --workspace --locked` | 0 | PASS。43 项通过 |
 | `pnpm typecheck` | 0 | PASS |
 | `pnpm protocol:check` | 0 | PASS |
-| `node .trellis/tasks/10-10-mb-05-library-workspace/evidence/profile-live.mjs` | 0 | PASS。精确相等谓词，见上 |
+| `node .trellis/tasks/archive/2026-10/10-10-mb-05-library-workspace/evidence/profile-live.mjs` | 0 | PASS。精确相等谓词，见上 |

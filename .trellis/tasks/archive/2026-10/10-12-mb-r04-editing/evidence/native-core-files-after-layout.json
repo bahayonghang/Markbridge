@@ -1,0 +1,7 @@
+{
+  "verifiedAt": "2026-10-13T10:52:20.190366+00:00",
+  "baseline": "native-core-files-before-layout.json",
+  "files": 215,
+  "changed": [],
+  "status": "PASS"
+}

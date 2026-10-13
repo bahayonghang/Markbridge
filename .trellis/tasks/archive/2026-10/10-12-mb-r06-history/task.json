@@ -1,0 +1,51 @@
+{
+  "id": "mb-r06-history",
+  "name": "mb-r06-history",
+  "title": "操作历史、可靠导出与条件撤销",
+  "description": "提供独立历史和备份入口，完善导出结果与恢复体验",
+  "status": "completed",
+  "dev_type": "fullstack",
+  "scope": "workspace-redesign",
+  "package": null,
+  "priority": "P1",
+  "creator": "lyh",
+  "assignee": "lyh",
+  "createdAt": "2026-10-12",
+  "completedAt": "2026-10-13",
+  "branch": "main",
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": "0bd492bf28e888e17eee5b9247751d9b61d6fd1c",
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "10-12-mb-workspace-redesign",
+  "relatedFiles": [
+    "apps/desktop/src/features/library/EditDesk.tsx",
+    "apps/desktop/src/backend.ts",
+    "apps/desktop/src-tauri/src",
+    "apps/desktop/src-tauri/capabilities/main.json",
+    "crates/core/src/storage/operations.rs",
+    "crates/protocol",
+    "packages/protocol"
+  ],
+  "notes": "",
+  "meta": {
+    "implementation_approval": "granted",
+    "planning_status": "approved",
+    "depends_on": [
+      "10-12-mb-r04-editing",
+      "10-12-mb-r05-details"
+    ],
+    "requirements": [
+      "U07",
+      "U10"
+    ],
+    "legacy_gate": "原06恢复/备份；真实文件保存权限必须最小化，不能开放通用前端文件写入。",
+    "approval_evidence": "2026-10-13 user: 批准这个方案，开始按照顺序实施",
+    "verification": "PASS: check-report; native-history-61440e3d; native-export-951c480a; native-web-c3d68946",
+    "precommit_review": ".trellis/tasks/archive/2026-10/10-12-mb-r08-acceptance/evidence/precommit-closeout.md",
+    "closeout_code_commit": "0bd492bf28e888e17eee5b9247751d9b61d6fd1c",
+    "archive_branch_note": "Local main-branch work with no PR; user authorized local commit and archive. Used --skip-branch-validation rather than inventing a feature branch."
+  }
+}

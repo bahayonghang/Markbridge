@@ -12,7 +12,7 @@
 
 | 检查 | 退出码 | 状态 | 证据 |
 |---|---:|---|---|
-| `python .trellis/scripts/task.py validate .trellis/tasks/10-10-mb-01-foundation` | 0 | PASS | implement/check 清单引用有效；批准/start 由主会话记录 |
+| `python .trellis/scripts/task.py validate .trellis/tasks/archive/2026-10/10-10-mb-01-foundation` | 0 | PASS | implement/check 清单引用有效；批准/start 由主会话记录 |
 | `pnpm install` | 0 | PASS | 4 个 workspace、214 个包；生成 pnpm-lock.yaml |
 | `cargo generate-lockfile` | 0 | PASS | 408 个 Rust 包；保持 Tauri 2，未采用搜索结果中的 3.0 alpha |
 | `pnpm protocol:generate` | 0 | PASS | Rust serde/schemars 生成 draft 2020-12 schema，再生成 TS |

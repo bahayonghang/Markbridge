@@ -13,7 +13,7 @@ AC06-1 到 AC06-5 保持 PASS。对应测试调用 `runSteps`、`applyWrites` �
 | `cargo test --workspace --locked` | 0（55 passed，7 suites） |
 | `pnpm typecheck` | 1，修复后 0 |
 | `pnpm protocol:check` | 0 |
-| `node .trellis/tasks/10-10-mb-06-safe-editing/evidence/chrome-edit-harness.mjs` | 0 |
+| `node .trellis/tasks/archive/2026-10/10-10-mb-06-safe-editing/evidence/chrome-edit-harness.mjs` | 0 |
 
 修复前的同脚本运行退出码依次为 1：缺少 `edit_harness.exe`，随后是 `CREATE_NOT_APPLIED`、`uncertain` / `UNCERTAIN_WRITE`、`NOTE_NOT_MIGRATED`。最终记录的是退出码 0 的那次。
 
@@ -49,7 +49,7 @@ V08 为 PASS。删除恢复更换了 chrome id，并恢复顺序和备注。干�
 
 `evidence/v07-v08-report.json` 的 `status` 为 PASS，`exitCode` 为 0。`protected_managed` 为 PASS，`managedPresent` 为 true，`descendantChecked` 为 true。同一报告里 `crud_create`、`crud_update`、`same_parent_reorder`、`cross_parent_move`、`protected_root_folder_type`、`external_edit_conflict`、`delete_recovery`、`concurrent_rollback`、`crash_after_apply`、`lost_ack`、`final_tree` 都是 PASS。清理五个布尔值都是 true。
 
-`receipts.md` 的 V07 与 V08 行命令都是 `node .trellis/tasks/10-10-mb-06-safe-editing/evidence/chrome-edit-harness.mjs`，退出码 0，状态 PASS。这两行与报告控制一致。
+`receipts.md` 的 V07 与 V08 行命令都是 `node .trellis/tasks/archive/2026-10/10-10-mb-06-safe-editing/evidence/chrome-edit-harness.mjs`，退出码 0，状态 PASS。这两行与报告控制一致。
 
 `evidence/chrome-edit-harness.mjs` 没有 `Start-Process -Verb RunAs`。`protected_managed` 写成 PASS 之前要有 managed id，删除该节点和它的后代都得到 `BACKEND_PROTECTED_NODE`，两次比对的树摘要都不变，后代 id 仍在。
 

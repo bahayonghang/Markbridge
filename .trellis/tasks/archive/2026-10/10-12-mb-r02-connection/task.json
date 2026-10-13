@@ -1,0 +1,52 @@
+{
+  "id": "mb-r02-connection",
+  "name": "mb-r02-connection",
+  "title": "Chrome 接入引导与来源状态",
+  "description": "完善首次接入、Profile 切换、只读降级与连接诊断",
+  "status": "completed",
+  "dev_type": "fullstack",
+  "scope": "workspace-redesign",
+  "package": null,
+  "priority": "P1",
+  "creator": "lyh",
+  "assignee": "lyh",
+  "createdAt": "2026-10-12",
+  "completedAt": "2026-10-13",
+  "branch": "main",
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": "0bd492bf28e888e17eee5b9247751d9b61d6fd1c",
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "10-12-mb-workspace-redesign",
+  "relatedFiles": [
+    "apps/desktop/src/App.tsx",
+    "apps/desktop/src/useBridge.ts",
+    "apps/desktop/src/backend.ts",
+    "apps/extension/src/main.ts"
+  ],
+  "notes": "R02 completed: independent review, targeted regression and final actual Tauri/Chrome/file-source 11-control acceptance passed. No commit/archive. Real OS sleep remains UNVERIFIED until before R08 completion by user approval.",
+  "meta": {
+    "implementation_approval": "granted",
+    "planning_status": "approved",
+    "depends_on": [
+      "10-12-mb-r01-shell"
+    ],
+    "requirements": [
+      "U02",
+      "U10"
+    ],
+    "legacy_gate": "真实休眠移至 R08 完成前；其他接入门槛保留。",
+    "approval_evidence": "2026-10-13 user: 批准这个方案，开始按照顺序实施",
+    "prerequisite_status": "passed_with_explicit_sleep_deferral",
+    "sleep_gate_due": "before_r08_completion",
+    "sleep_gate_approval": "2026-10-13 user: 明确将真实休眠验收移到 R08 完成前，继续实施 R02",
+    "acceptance_status": "passed",
+    "review_report": "evidence/check-report.md",
+    "native_report": "evidence/native-70727125.json",
+    "archived": false,
+    "closeout_code_commit": "0bd492bf28e888e17eee5b9247751d9b61d6fd1c",
+    "archive_branch_note": "Local main-branch work with no PR; user authorized local commit and archive. Used --skip-branch-validation rather than inventing a feature branch."
+  }
+}

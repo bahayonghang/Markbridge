@@ -1,0 +1,450 @@
+{
+  "kind": "design-prototype-only",
+  "browser": "156.0.8078.4",
+  "layouts": [
+    {
+      "name": "workspace-1440x900",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "overflowX": false,
+      "overflowY": false,
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 216,
+        "height": 900
+      },
+      "main": {
+        "x": 216,
+        "y": 0,
+        "width": 1224,
+        "height": 900
+      },
+      "list": {
+        "x": 216,
+        "y": 286.59375,
+        "width": 912,
+        "height": 581.40625
+      },
+      "detail": {
+        "x": 1128,
+        "y": 120,
+        "width": 312,
+        "height": 748
+      },
+      "row": {
+        "x": 228,
+        "y": 286.59375,
+        "width": 888,
+        "height": 52
+      }
+    },
+    {
+      "name": "workspace-1100x760",
+      "viewport": {
+        "width": 1100,
+        "height": 760
+      },
+      "overflowX": false,
+      "overflowY": false,
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 216,
+        "height": 760
+      },
+      "main": {
+        "x": 216,
+        "y": 0,
+        "width": 884,
+        "height": 760
+      },
+      "list": {
+        "x": 216,
+        "y": 286.59375,
+        "width": 572,
+        "height": 441.40625
+      },
+      "detail": {
+        "x": 788,
+        "y": 120,
+        "width": 312,
+        "height": 608
+      },
+      "row": {
+        "x": 228,
+        "y": 286.59375,
+        "width": 548,
+        "height": 52
+      }
+    },
+    {
+      "name": "workspace-640x760",
+      "viewport": {
+        "width": 640,
+        "height": 760
+      },
+      "overflowX": false,
+      "overflowY": false,
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 64,
+        "height": 760
+      },
+      "main": {
+        "x": 64,
+        "y": 0,
+        "width": 576,
+        "height": 760
+      },
+      "list": {
+        "x": 64,
+        "y": 277.59375,
+        "width": 576,
+        "height": 450.40625
+      },
+      "detail": null,
+      "row": {
+        "x": 70,
+        "y": 277.59375,
+        "width": 564,
+        "height": 52
+      }
+    },
+    {
+      "name": "workspace-1100x480",
+      "viewport": {
+        "width": 1100,
+        "height": 480
+      },
+      "overflowX": false,
+      "overflowY": false,
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 216,
+        "height": 480
+      },
+      "main": {
+        "x": 216,
+        "y": 0,
+        "width": 884,
+        "height": 480
+      },
+      "list": {
+        "x": 216,
+        "y": 286.59375,
+        "width": 572,
+        "height": 161.40625
+      },
+      "detail": {
+        "x": 788,
+        "y": 120,
+        "width": 312,
+        "height": 328
+      },
+      "row": {
+        "x": 228,
+        "y": 286.59375,
+        "width": 548,
+        "height": 52
+      }
+    },
+    {
+      "name": "workspace-640x480",
+      "viewport": {
+        "width": 640,
+        "height": 480
+      },
+      "overflowX": false,
+      "overflowY": false,
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 64,
+        "height": 480
+      },
+      "main": {
+        "x": 64,
+        "y": 0,
+        "width": 576,
+        "height": 480
+      },
+      "list": {
+        "x": 64,
+        "y": 277.59375,
+        "width": 576,
+        "height": 170.40625
+      },
+      "detail": null,
+      "row": {
+        "x": 70,
+        "y": 277.59375,
+        "width": 564,
+        "height": 52
+      }
+    },
+    {
+      "name": "multi-selection",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "overflowX": false,
+      "overflowY": false,
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 216,
+        "height": 900
+      },
+      "main": {
+        "x": 216,
+        "y": 0,
+        "width": 1224,
+        "height": 900
+      },
+      "list": {
+        "x": 216,
+        "y": 286.59375,
+        "width": 1224,
+        "height": 581.40625
+      },
+      "detail": null,
+      "row": {
+        "x": 228,
+        "y": 286.59375,
+        "width": 1200,
+        "height": 52
+      }
+    },
+    {
+      "name": "settings",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "overflowX": false,
+      "overflowY": false,
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 216,
+        "height": 900
+      },
+      "main": {
+        "x": 216,
+        "y": 0,
+        "width": 1224,
+        "height": 900
+      },
+      "list": null,
+      "detail": null,
+      "row": null
+    },
+    {
+      "name": "compact-settings",
+      "viewport": {
+        "width": 640,
+        "height": 480
+      },
+      "overflowX": false,
+      "overflowY": false,
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 64,
+        "height": 480
+      },
+      "main": {
+        "x": 64,
+        "y": 0,
+        "width": 576,
+        "height": 480
+      },
+      "list": null,
+      "detail": null,
+      "row": null
+    },
+    {
+      "name": "history",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "overflowX": false,
+      "overflowY": false,
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 216,
+        "height": 900
+      },
+      "main": {
+        "x": 216,
+        "y": 0,
+        "width": 1224,
+        "height": 900
+      },
+      "list": null,
+      "detail": null,
+      "row": null
+    },
+    {
+      "name": "organize",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "overflowX": false,
+      "overflowY": false,
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 216,
+        "height": 900
+      },
+      "main": {
+        "x": 216,
+        "y": 0,
+        "width": 1224,
+        "height": 900
+      },
+      "list": null,
+      "detail": null,
+      "row": null
+    },
+    {
+      "name": "onboarding",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "overflowX": false,
+      "overflowY": false,
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 216,
+        "height": 900
+      },
+      "main": {
+        "x": 216,
+        "y": 0,
+        "width": 1224,
+        "height": 900
+      },
+      "list": null,
+      "detail": null,
+      "row": null
+    },
+    {
+      "name": "compact-onboarding",
+      "viewport": {
+        "width": 640,
+        "height": 480
+      },
+      "overflowX": false,
+      "overflowY": false,
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 64,
+        "height": 480
+      },
+      "main": {
+        "x": 64,
+        "y": 0,
+        "width": 576,
+        "height": 480
+      },
+      "list": null,
+      "detail": null,
+      "row": null
+    },
+    {
+      "name": "offline",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "overflowX": false,
+      "overflowY": false,
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 216,
+        "height": 900
+      },
+      "main": {
+        "x": 216,
+        "y": 0,
+        "width": 1224,
+        "height": 900
+      },
+      "list": {
+        "x": 216,
+        "y": 286.59375,
+        "width": 1224,
+        "height": 581.40625
+      },
+      "detail": null,
+      "row": {
+        "x": 228,
+        "y": 286.59375,
+        "width": 1200,
+        "height": 52
+      }
+    },
+    {
+      "name": "compact-detail",
+      "viewport": {
+        "width": 640,
+        "height": 480
+      },
+      "overflowX": false,
+      "overflowY": false,
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 64,
+        "height": 480
+      },
+      "main": {
+        "x": 64,
+        "y": 0,
+        "width": 576,
+        "height": 480
+      },
+      "list": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "detail": {
+        "x": 64,
+        "y": 120,
+        "width": 576,
+        "height": 328
+      },
+      "row": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      }
+    }
+  ],
+  "interactions": [
+    "Search narrows the sample list",
+    "Selection toolbar and move-review dialog; cancel writes nothing",
+    "Settings tabs and AI off state",
+    "Compact detail replaces content and returns to list"
+  ],
+  "errors": [],
+  "network": []
+}

@@ -1,0 +1,4 @@
+    Checking markbridge-protocol v0.1.0 (D:\Documents\Code\Tauri\Markbridge\crates\protocol)
+    Checking markbridge-core v0.1.0 (D:\Documents\Code\Tauri\Markbridge\crates\core)
+    Checking markbridge-desktop v0.1.0 (D:\Documents\Code\Tauri\Markbridge\apps\desktop\src-tauri)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.24s

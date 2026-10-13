@@ -1,0 +1,48 @@
+{
+  "id": "mb-r05-details",
+  "name": "mb-r05-details",
+  "title": "详情、标签、备注与双模式预览",
+  "description": "建立按需详情面板，串联本地元数据与安全预览",
+  "status": "completed",
+  "dev_type": "frontend",
+  "scope": "workspace-redesign",
+  "package": null,
+  "priority": "P1",
+  "creator": "lyh",
+  "assignee": "lyh",
+  "createdAt": "2026-10-12",
+  "completedAt": "2026-10-13",
+  "branch": "main",
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": "0bd492bf28e888e17eee5b9247751d9b61d6fd1c",
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "10-12-mb-workspace-redesign",
+  "relatedFiles": [
+    "apps/desktop/src/features/tags/TagDesk.tsx",
+    "apps/desktop/src/features/preview/ContentPreview.tsx",
+    "apps/desktop/src/features/preview/WebPreview.tsx",
+    "apps/desktop/src/features/library/LibraryWorkspace.tsx"
+  ],
+  "notes": "",
+  "meta": {
+    "implementation_approval": "granted",
+    "planning_status": "approved",
+    "depends_on": [
+      "10-12-mb-r03-browse",
+      "10-12-mb-r04-editing"
+    ],
+    "requirements": [
+      "U05",
+      "U06",
+      "U10"
+    ],
+    "legacy_gate": "复用原07/08/09；受限fetch与preview-*权限合同保持。",
+    "approval_evidence": "2026-10-13 user: 批准这个方案，开始按照顺序实施",
+    "verification": "PASS: check-report; native-details-e5e26b2a; native-web-2c95c715",
+    "closeout_code_commit": "0bd492bf28e888e17eee5b9247751d9b61d6fd1c",
+    "archive_branch_note": "Local main-branch work with no PR; user authorized local commit and archive. Used --skip-branch-validation rather than inventing a feature branch."
+  }
+}

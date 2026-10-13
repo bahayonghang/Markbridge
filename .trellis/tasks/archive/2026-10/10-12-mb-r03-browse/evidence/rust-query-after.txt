@@ -1,0 +1,33 @@
+   Compiling markbridge-core v0.1.0 (D:\Documents\Code\Tauri\Markbridge\crates\core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.08s
+     Running unittests src\lib.rs (target\debug\deps\markbridge_core-1d38520d03228fbd.exe)
+
+running 1 test
+SQLite 3.53.2; synthetic nodes=11004; no native acceptance claim
+PLAN combined count and page
+CO-ROUTINE totals
+MATERIALIZE matches
+MATERIALIZE tree
+SETUP
+SEARCH bookmarks_cache USING INDEX cache_parent (profile_id=? AND source_epoch=? AND parent_id=?)
+RECURSIVE STEP
+SEARCH c USING INDEX cache_parent (profile_id=? AND source_epoch=?)
+SCAN t
+SCAN c
+CORRELATED SCALAR SUBQUERY 5
+SCAN wanted VIRTUAL TABLE INDEX 1:
+CORRELATED SCALAR SUBQUERY 4
+SEARCH bt USING COVERING INDEX sqlite_autoindex_bookmark_tags_1 (bookmark_id=? AND tag_id=?)
+SEARCH t USING AUTOMATIC COVERING INDEX (bookmark_id=?)
+SEARCH m USING INDEX sqlite_autoindex_bookmark_metadata_1 (bookmark_id=?) LEFT-JOIN
+LIST SUBQUERY 3
+SCAN metadata_fts VIRTUAL TABLE INDEX 0:M4
+CREATE BLOOM FILTER
+SCAN matches
+MATERIALIZE page
+SCAN matches
+USE TEMP B-TREE FOR ORDER BY
+SCAN totals
+SCAN page LEFT-JOIN
+SEARCH c USING INDEX sqlite_autoindex_bookmarks_cache_1 (bookmark_id=?) LEFT-JOIN
+USE TEMP B-TREE FOR ORDER BY

@@ -5,7 +5,7 @@
 - [x] 用户已批准最新父规划和该任务范围。
 - [x] 前置任务验收已通过：06、07、08。
 - [x] 阅读当前 git status/diff、该任务三份规划文件及两个上下文清单。
-- [x] 运行 `python .trellis/scripts/task.py validate .trellis/tasks/10-10-mb-10-ai-assistance`；核对实际文件和工具版本。
+- [x] 运行 `python .trellis/scripts/task.py validate .trellis/tasks/archive/2026-10/10-10-mb-10-ai-assistance`；核对实际文件和工具版本。
 - [x] 对该子任务运行 task.py start 后才实施。父任务不代替子任务启动。
 
 ## 实施顺序

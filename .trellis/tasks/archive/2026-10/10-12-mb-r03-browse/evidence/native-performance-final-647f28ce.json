@@ -1,0 +1,79 @@
+{
+  "runId": "647f28ce",
+  "phase": "final",
+  "startedAt": "2026-10-13T09:35:14.170Z",
+  "scope": "R03 real native B10K cached profile; no daily Chrome and no mock IPC",
+  "seed": 20261010,
+  "coldDefinition": "process spawn to visible MB05BAR tree, cached profile source and enabled search",
+  "searchDefinition": "browser performance.now before input event to exact marker title rendered and next animation frame",
+  "percentile": "sorted[ceil(n * ratio)-1]; warm excludes first of 30 input samples",
+  "coldMs": [
+    647.832,
+    605.4637000000002,
+    605.9523000000004
+  ],
+  "searchMs": [
+    74.89999999850988,
+    85.89999999850988,
+    91.59999999776483,
+    84.89999999850988,
+    66.30000000074506,
+    64,
+    103.19999999925494,
+    85.60000000149012,
+    77.89999999850988,
+    115.5,
+    75.20000000298023,
+    80.5,
+    99.5,
+    75.19999999925494,
+    68.10000000149012,
+    86.90000000223517,
+    79,
+    80.5,
+    99.89999999850988,
+    77,
+    67.19999999925494,
+    72.69999999925494,
+    69.69999999925494,
+    88.5,
+    72.80000000074506,
+    74.59999999776483,
+    90.39999999850988,
+    80,
+    98.60000000149012,
+    83.89999999850988
+  ],
+  "errors": [],
+  "environment": {
+    "os": "Windows 11 Pro",
+    "release": "10.0.26300",
+    "cpu": "Intel(R) Core(TM) Ultra 9 275HX",
+    "logicalCpus": 24,
+    "memoryBytes": 68143853568,
+    "node": "v26.7.0",
+    "exeBytes": 23165952,
+    "exeSha256": "371afbe956efb6a59a73273f96e93790aca3de00bc6e1215ba1a151be566d2e6"
+  },
+  "fixture": {
+    "bookmarks": 10000,
+    "folders": 1000,
+    "maxDepth": 20,
+    "nodes": 11004
+  },
+  "isolationRoot": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-r03-native-fHo5qU",
+  "webview": "Edg/154.0.4258.62",
+  "devicePixelRatio": 1.25,
+  "cold": {
+    "p50": 605.9523000000004,
+    "p95": 647.832,
+    "max": 647.832
+  },
+  "warm": {
+    "p50": 80.5,
+    "p95": 103.19999999925494,
+    "max": 115.5
+  },
+  "status": "PASS",
+  "finishedAt": "2026-10-13T09:35:32.051Z"
+}

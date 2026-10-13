@@ -1,0 +1,374 @@
+{
+  "runId": "5758075c",
+  "mode": "baseline",
+  "startedAt": "2026-10-13T11:22:32.623Z",
+  "scope": "Actual isolated Tauri preview-* with synthetic profile IDs; trusted host calls are real IPC, remote probes run their own page scripts",
+  "controls": [
+    {
+      "control": "separate_window_and_main_storage_dom_isolation",
+      "status": "PASS",
+      "mainWindow": {
+        "hwnd": "28841896",
+        "foreground": true
+      },
+      "previewWindow": {
+        "hwnd": "24057592",
+        "foreground": false
+      }
+    },
+    {
+      "control": "all_registered_app_commands_denied_to_remote_page",
+      "status": "PASS",
+      "commands": [
+        {
+          "name": "get_startup_state",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "get_bridge_state",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "start_bridge",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "begin_pairing",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "confirm_pairing",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "cancel_pairing",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "revoke_pairing",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "reconnect_profile",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "enumerate_chrome_user_data",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "attach_file_mirror",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "rescan_file_mirrors",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "detach_file_mirror",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "associate_file_mirror",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "get_mirror_tree",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "cache_tree",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "cache_list",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "cache_search",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "cache_query",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "cache_get",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "cache_count",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "preview_batch_edit",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "apply_batch_edit",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "get_batch_edit",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "cancel_batch_edit",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "preview_edit",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "apply_edit",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "list_operations",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "review_operation",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "refresh_operations",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "export_html",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "export_sidecar",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "tag_state",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "tag_command",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "preview_title_encoding",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "apply_title_encoding",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "ai_settings",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "save_ai_config",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "set_ai_credential",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "clear_ai_credential",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "test_ai_connection",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "suggest_ai",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "cancel_ai",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "apply_ai",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "propose_organization",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "review_organization",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "assign_organization",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "edit_organization",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "apply_organization",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "pause_organization",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "cancel_organization",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "cleanup_organization",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "organization_plan",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "content_preview",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "cancel_content_preview",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "inspect_library",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "check_links",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "cancel_link_check",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "preview_cleanup",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "confirm_cleanup",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "search_library_text",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "open_http_url",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "open_web_preview",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "web_preview_action",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "clear_web_preview_session",
+          "outcome": "DENIED"
+        },
+        {
+          "name": "web_preview_state",
+          "outcome": "DENIED"
+        }
+      ]
+    },
+    {
+      "control": "actual_preview_history_back_forward_reload",
+      "status": "PASS"
+    },
+    {
+      "control": "navigation_guard_scheme",
+      "status": "PASS"
+    },
+    {
+      "control": "navigation_guard_file",
+      "status": "PASS"
+    },
+    {
+      "control": "navigation_guard_userinfo",
+      "status": "PASS"
+    },
+    {
+      "control": "navigation_guard_popup",
+      "status": "PASS"
+    }
+  ],
+  "errors": [
+    "PREVIEW_FOREGROUND_NOT_OBSERVED",
+    "NOTICE_DOWNLOAD_BLOCKED_MISSING"
+  ],
+  "environment": {
+    "os": "Windows 11 Pro",
+    "release": "10.0.26300",
+    "cpu": "Intel(R) Core(TM) Ultra 9 275HX",
+    "logicalCpus": 24,
+    "memoryBytes": 68143853568,
+    "node": "v26.7.0",
+    "exeBytes": 23766016,
+    "exeSha256": "9ac5157f3e53b960ef5e885ed6e9550b7012ebf433bafec95bd961921b3df780",
+    "extensionHash": "7deb42c27dc23bca5e9277734d5d41a9c49d0c18d89e4b2475a703e3147b2040"
+  },
+  "isolationRoot": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-r05-native-opG6xK",
+  "webview": "Edg/155.0.4283.45",
+  "viewport": {
+    "width": 1100,
+    "height": 760,
+    "scale": 1.25
+  },
+  "mainWindow": {
+    "hwnd": "28841896",
+    "foreground": true
+  },
+  "windows": {
+    "mainWindow": {
+      "hwnd": "28841896",
+      "foreground": true
+    },
+    "previewWindow": {
+      "hwnd": "24057592",
+      "foreground": false
+    }
+  },
+  "focusObserved": false,
+  "lastNavigationProbe": "download",
+  "lastNavigationNotice": null,
+  "status": "FAIL",
+  "failedStage": "navigation-guards",
+  "failureCode": "BLOCKED_PAGE_LOADED",
+  "temporaryCredentialsRemoved": true,
+  "probePaths": [
+    "/a",
+    "/favicon.ico",
+    "/a2",
+    "/favicon.ico",
+    "/a",
+    "/favicon.ico",
+    "/a2",
+    "/favicon.ico",
+    "/a2",
+    "/favicon.ico",
+    "/a",
+    "/favicon.ico",
+    "/a",
+    "/favicon.ico",
+    "/a",
+    "/favicon.ico",
+    "/userinfo",
+    "/a",
+    "/favicon.ico",
+    "/a",
+    "/favicon.ico",
+    "/download.bin"
+  ],
+  "finishedAt": "2026-10-13T11:22:47.306Z"
+}

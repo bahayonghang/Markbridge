@@ -1,0 +1,54 @@
+{
+  "runId": "b1f76136",
+  "startedAt": "2026-10-13T10:44:43.675Z",
+  "controls": [
+    {
+      "control": "empty_folder_blank_creation_separate_drafts_and_cancel_zero_write",
+      "status": "PASS"
+    },
+    {
+      "control": "native_ui_creates_bookmark_and_folder_in_empty_directory",
+      "status": "PASS"
+    },
+    {
+      "control": "native_batch_path_picker_review_apply_truthful_receipts_and_small_window",
+      "status": "PASS"
+    },
+    {
+      "control": "close_detail_and_select_other_node_then_recover_batch_from_history",
+      "status": "PASS"
+    }
+  ],
+  "errors": [],
+  "environment": {
+    "os": "Windows 11 Pro",
+    "release": "10.0.26300",
+    "cpu": "Intel(R) Core(TM) Ultra 9 275HX",
+    "logicalCpus": 24,
+    "memoryBytes": 68143853568,
+    "node": "v26.7.0",
+    "exeBytes": 23766016,
+    "exeSha256": "c24d9b136004da59e6c6f0b815828d6f9372e1b6347778b38c4a224c14ef7df7",
+    "extensionHash": "7deb42c27dc23bca5e9277734d5d41a9c49d0c18d89e4b2475a703e3147b2040"
+  },
+  "isolationRoot": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-r04-native-4jJgzv",
+  "webview": "Edg/155.0.4283.45",
+  "viewports": [
+    {
+      "width": 1100,
+      "height": 760,
+      "scale": 1.25
+    },
+    {
+      "width": 640,
+      "height": 480,
+      "scale": 1.25
+    }
+  ],
+  "chrome": "Chrome/155.0.8059.39",
+  "status": "FAIL",
+  "failedStage": "long-path",
+  "failureCode": "SELECTION_MOVED_ROW",
+  "temporaryCredentialsRemoved": true,
+  "finishedAt": "2026-10-13T10:44:53.048Z"
+}

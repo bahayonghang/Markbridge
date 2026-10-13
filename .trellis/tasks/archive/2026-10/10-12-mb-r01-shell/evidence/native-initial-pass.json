@@ -1,0 +1,137 @@
+{
+  "startedAt": "2026-10-13T07:43:43.603Z",
+  "scope": "R01 native shell, synthetic cached read-only profile; no real Chrome",
+  "samples": [
+    {
+      "requested": {
+        "width": 1440,
+        "height": 900
+      },
+      "physical": {
+        "process": 67152,
+        "clientWidth": 1800,
+        "clientHeight": 1125
+      },
+      "dimensions": {
+        "width": 1440,
+        "height": 900,
+        "scrollWidth": 1440,
+        "scrollHeight": 900,
+        "bodyWidth": 1440,
+        "bodyHeight": 900,
+        "dpr": 1.25
+      }
+    },
+    {
+      "requested": {
+        "width": 1100,
+        "height": 760
+      },
+      "physical": {
+        "process": 67152,
+        "clientWidth": 1375,
+        "clientHeight": 950
+      },
+      "dimensions": {
+        "width": 1100,
+        "height": 760,
+        "scrollWidth": 1100,
+        "scrollHeight": 760,
+        "bodyWidth": 1100,
+        "bodyHeight": 760,
+        "dpr": 1.25
+      }
+    },
+    {
+      "requested": {
+        "width": 640,
+        "height": 760
+      },
+      "physical": {
+        "process": 67152,
+        "clientWidth": 800,
+        "clientHeight": 950
+      },
+      "dimensions": {
+        "width": 640,
+        "height": 760,
+        "scrollWidth": 640,
+        "scrollHeight": 760,
+        "bodyWidth": 640,
+        "bodyHeight": 760,
+        "dpr": 1.25
+      }
+    },
+    {
+      "requested": {
+        "width": 1100,
+        "height": 480
+      },
+      "physical": {
+        "process": 67152,
+        "clientWidth": 1375,
+        "clientHeight": 600
+      },
+      "dimensions": {
+        "width": 1100,
+        "height": 480,
+        "scrollWidth": 1100,
+        "scrollHeight": 480,
+        "bodyWidth": 1100,
+        "bodyHeight": 480,
+        "dpr": 1.25
+      }
+    },
+    {
+      "requested": {
+        "width": 640,
+        "height": 480
+      },
+      "physical": {
+        "process": 67152,
+        "clientWidth": 800,
+        "clientHeight": 600
+      },
+      "dimensions": {
+        "width": 640,
+        "height": 480,
+        "scrollWidth": 640,
+        "scrollHeight": 480,
+        "bodyWidth": 640,
+        "bodyHeight": 480,
+        "dpr": 1.25
+      }
+    }
+  ],
+  "assertions": [
+    "seeded cached profile rendered; read-only status; native search; checkbox <= 24 px",
+    "actual native client resized to all five required viewports; no document overflow",
+    "compact detail return restores focus; navigation to organize/history/settings; AI defaults off; bookmark search and selection preserved"
+  ],
+  "errors": [],
+  "isolation": {
+    "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-r01-shell-l2OPE0",
+    "retainedForInspection": true
+  },
+  "executableSha256": "4118ba925e3748b69c67d598a243301ca607c650cd769650b319ece4f6fdc5e8",
+  "pid": 67152,
+  "webview": "Edg/154.0.4258.62",
+  "targets": [
+    {
+      "description": "",
+      "devtoolsFrontendUrl": "https://aka.ms/docs-landing-page/serve_rev/@49f7c5590dad654f33b924537ccc8be227c5a43a/inspector.html?ws=127.0.0.1:10157/devtools/page/D352EF0FC0E58F5CFF02FF0855776478",
+      "id": "D352EF0FC0E58F5CFF02FF0855776478",
+      "title": "about:blank",
+      "type": "page",
+      "url": "http://tauri.localhost/",
+      "webSocketDebuggerUrl": "ws://127.0.0.1:10157/devtools/page/D352EF0FC0E58F5CFF02FF0855776478"
+    }
+  ],
+  "playwrightPages": [
+    "about:blank"
+  ],
+  "initialText": "跳至内容\nMarkbridge\n书签\n文件夹\n未命名\n书签栏\n整理\n操作历史\n设置\n书签\n未连接 · 只读\n书签来源\nB10K\n搜索标题或网址\n详情\n\n扩展未连接。显示本机缓存，当前只读。\n\n搜索结果\n\n24 条匹配\n\n合成样本 · 中文长标题用于检查窄窗口中的省略与详情排版\nexample.invalid\n合成样本 2 · 日常书签\nexample.invalid\n合成样本 3 · 日常书签\nexample.invalid\n合成样本 4 · 日常书签\nexample.invalid\n合成样本 5 · 日常书签\nexample.invalid\n合成样本 6 · 日常书签\nexample.invalid\n合成样本 7 · 日常书签\nexample.invalid\n合成样本 8 · 日常书签\nexample.invalid\n合成样本 9 · 日常书签\nexample.invalid\n合成样本 10 · 日常书签\nexample.invalid\n合成样本 11 · 日常书签\nexample.invalid\n合成样本 12 · 日常书签\nexample.invalid\n合成样本 13 · 日常书签\nexample.invalid\n合成样本 14 · 日常书签\nexample.invalid\n合成样本 15 · 日常书签\nexample.invalid\n已选 1 项\n按 Chrome 顺序 · 方向键浏览，Enter 打开\n书签保留在 Chrome\n标签和备注保留在本机",
+  "status": "PASS",
+  "closedNormally": true,
+  "finishedAt": "2026-10-13T07:43:53.432Z"
+}

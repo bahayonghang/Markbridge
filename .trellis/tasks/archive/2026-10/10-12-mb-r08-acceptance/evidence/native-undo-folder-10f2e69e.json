@@ -1,0 +1,141 @@
+{
+  "runId": "10f2e69e",
+  "startedAt": "2026-10-13T15:14:14.109Z",
+  "scope": "Targeted folder-create conditional undo on a fresh isolated native app and actual temporary Chrome; no mocked IPC",
+  "controls": [
+    {
+      "control": "empty_created_folder_undo_keeps_single_node_subtree_guard_and_restores_tree",
+      "status": "PASS",
+      "originalOperationId": "op-0e55f35bd0583e13d1a0debd2a1388af",
+      "undoOperationId": "op-d58c51613b6e58b65ac1a6fc20484848",
+      "receipt": "rolled_back"
+    },
+    {
+      "control": "external_descendants_make_undo_preview_conflict_and_cancelling_changes_nothing",
+      "status": "PASS",
+      "originalOperationId": "op-7d531f9124f13a99a6df4d988fe7777c",
+      "external": {
+        "folderId": "8",
+        "bookmarkId": "9"
+      },
+      "steps": 0,
+      "affected": 0
+    },
+    {
+      "control": "confirmed_conflicting_undo_records_rollback_conflict_and_preserves_actual_entire_chrome_tree",
+      "status": "PASS",
+      "state": "rollback_conflict",
+      "errorCode": "CONFLICT",
+      "conflicts": [
+        {
+          "requestId": "req-a06a4db9414d7ada686b4750374c664e",
+          "chromeId": "7",
+          "field": "existence"
+        }
+      ],
+      "operationCountBefore": 3,
+      "operationCountAfter": 3,
+      "rawTreeUnchanged": true,
+      "semanticTreeUnchanged": true
+    }
+  ],
+  "errors": [],
+  "priorBuildSha256": "804d920746f677cb257d8efdf6589a77a70bbf346e162dd6f68803197db63910",
+  "reusedEvidence": "Performance, DPI, preview permissions and broader daily evidence belong to the earlier 804d build and unchanged layers; they were not rerun on this binary.",
+  "environment": {
+    "os": "Windows 11 Pro",
+    "release": "10.0.26300",
+    "cpu": "Intel(R) Core(TM) Ultra 9 275HX",
+    "logicalCpus": 24,
+    "memoryBytes": 68143853568,
+    "node": "v26.7.0",
+    "exeBytes": 24055808,
+    "exeSha256": "4a7f12fe8928caade0d154ec00f0557ea8f944d07f4ac7ad4e72bbdb9f5168aa",
+    "extensionHash": "365f16a030afb78d83cbe914bc42784b7f086bb846ab035ba2f4a8a30ed331a5"
+  },
+  "isolationRoot": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-r08-native-3OxSim",
+  "webview": "Edg/155.0.4283.45",
+  "chrome": "Chrome/155.0.8059.39",
+  "emptyPreview": {
+    "profileId": "p:3d42011d96ab47ffe05e80fbf14e33033d68080a0d2bc35c0931adca048a0f6f",
+    "sourceEpoch": 1,
+    "operationId": "op-0e55f35bd0583e13d1a0debd2a1388af",
+    "expectedRevision": 2,
+    "writable": true,
+    "affected": 1,
+    "errorCode": null,
+    "steps": [
+      {
+        "expectedSubtree": [
+          {
+            "chromeId": "6",
+            "parentId": "5",
+            "position": 0,
+            "kind": "folder",
+            "title": "R08 正常空文件夹",
+            "url": null,
+            "folderType": null,
+            "unmodifiable": null,
+            "dateAdded": null,
+            "dateLastUsed": null
+          }
+        ],
+        "requestId": "req-bebc38b75005d14781c4e0b481a00cff",
+        "target": "6",
+        "expectedBefore": {
+          "chromeId": "6",
+          "parentId": "5",
+          "position": 0,
+          "kind": "folder",
+          "title": "R08 正常空文件夹",
+          "url": null,
+          "folderType": null,
+          "unmodifiable": null,
+          "dateAdded": null,
+          "dateLastUsed": null
+        },
+        "expectedChildIds": null,
+        "payload": {
+          "kind": "delete"
+        }
+      }
+    ],
+    "conflicts": []
+  },
+  "conflictPreview": {
+    "profileId": "p:3d42011d96ab47ffe05e80fbf14e33033d68080a0d2bc35c0931adca048a0f6f",
+    "sourceEpoch": 1,
+    "operationId": "op-7d531f9124f13a99a6df4d988fe7777c",
+    "expectedRevision": 6,
+    "writable": true,
+    "affected": 0,
+    "errorCode": "CONFLICT",
+    "steps": [],
+    "conflicts": [
+      {
+        "requestId": "req-a06a4db9414d7ada686b4750374c664e",
+        "chromeId": "7",
+        "field": "existence"
+      }
+    ]
+  },
+  "conflictReceipt": {
+    "state": "rollback_conflict",
+    "errorCode": "CONFLICT",
+    "conflicts": [
+      {
+        "requestId": "req-a06a4db9414d7ada686b4750374c664e",
+        "chromeId": "7",
+        "field": "existence"
+      }
+    ],
+    "operationCountBefore": 3,
+    "operationCountAfter": 3,
+    "rawTreeUnchanged": true,
+    "semanticTreeUnchanged": true
+  },
+  "raceCoverage": "Post-planning child-insertion race is covered by the targeted extension executor regression, not injected in this native run.",
+  "status": "PASS",
+  "temporaryCredentialsRemoved": true,
+  "finishedAt": "2026-10-13T15:14:20.961Z"
+}

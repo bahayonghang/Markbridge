@@ -1,0 +1,78 @@
+{
+  "runId": "52c7576b",
+  "mode": "probe",
+  "startedAt": "2026-10-13T14:23:42.549Z",
+  "scope": "Own isolated window across actual monitors; genuine Kernel-Power sleep/resume events required for sleep acceptance",
+  "displays": [],
+  "errors": [],
+  "environment": {
+    "os": "Windows 11 Pro",
+    "release": "10.0.26300",
+    "cpu": "Intel(R) Core(TM) Ultra 9 275HX",
+    "logicalCpus": 24,
+    "memoryBytes": 68143853568,
+    "node": "v26.7.0",
+    "exeBytes": 24054272,
+    "exeSha256": "804d920746f677cb257d8efdf6589a77a70bbf346e162dd6f68803197db63910",
+    "extensionHash": "567f50146319a2b6f013f773308910f29bc56585a62075dbaf0f9b3cf1ff22c5"
+  },
+  "isolationRoot": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-r08-native-qM1gwN",
+  "webview": "Edg/155.0.4283.45",
+  "chrome": "Chrome/155.0.8059.39",
+  "initialCursor": [
+    1,
+    "e8b2daeb-2ae5-4f66-824b-feec458b79d3",
+    0,
+    1
+  ],
+  "nonliveControl": {
+    "previewWritable": false,
+    "applyError": "READ_ONLY",
+    "createDisabled": true,
+    "stateEventObserved": true,
+    "noOperationReplay": true
+  },
+  "powerInstrumentation": "READABLE",
+  "currentDisplay": {
+    "process": 84736,
+    "dpi": 120,
+    "device": "\\\\.\\DISPLAY2",
+    "window": {
+      "left": 192,
+      "width": 1393,
+      "top": 192,
+      "height": 997
+    },
+    "monitors": [
+      {
+        "device": "\\\\.\\DISPLAY1",
+        "left": -2560,
+        "width": 2560,
+        "top": -169,
+        "height": 1528,
+        "primary": false
+      },
+      {
+        "device": "\\\\.\\DISPLAY2",
+        "left": 0,
+        "width": 2560,
+        "top": 0,
+        "height": 1380,
+        "primary": true
+      },
+      {
+        "device": "\\\\.\\DISPLAY5",
+        "left": 2560,
+        "width": 1600,
+        "top": -1142,
+        "height": 2488,
+        "primary": false
+      }
+    ]
+  },
+  "stateListenerInstalled": true,
+  "status": "PROBE_PASS",
+  "sleepAcceptance": "NOT_RUN",
+  "temporaryCredentialsRemoved": true,
+  "finishedAt": "2026-10-13T14:23:49.197Z"
+}

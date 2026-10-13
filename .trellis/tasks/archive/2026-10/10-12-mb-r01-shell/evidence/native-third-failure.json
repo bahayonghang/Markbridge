@@ -1,0 +1,32 @@
+{
+  "startedAt": "2026-10-13T07:41:37.555Z",
+  "scope": "R01 native shell, synthetic cached read-only profile; no real Chrome",
+  "samples": [],
+  "assertions": [],
+  "errors": [],
+  "isolation": {
+    "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-r01-shell-unZ7zt",
+    "retainedForInspection": true
+  },
+  "executableSha256": "4118ba925e3748b69c67d598a243301ca607c650cd769650b319ece4f6fdc5e8",
+  "pid": 84380,
+  "webview": "Edg/154.0.4258.62",
+  "targets": [
+    {
+      "description": "",
+      "devtoolsFrontendUrl": "https://aka.ms/docs-landing-page/serve_rev/@49f7c5590dad654f33b924537ccc8be227c5a43a/inspector.html?ws=127.0.0.1:7567/devtools/page/D881B674417C4BF31E470F4B0696F086",
+      "id": "D881B674417C4BF31E470F4B0696F086",
+      "title": "about:blank",
+      "type": "page",
+      "url": "about:blank",
+      "webSocketDebuggerUrl": "ws://127.0.0.1:7567/devtools/page/D881B674417C4BF31E470F4B0696F086"
+    }
+  ],
+  "playwrightPages": [
+    "about:blank"
+  ],
+  "status": "FAIL",
+  "failure": "Error: expect(locator).toHaveValue(expected) failed\n\nLocator: getByLabel('书签来源', { exact: true })\nExpected: \"profile:pb10k\"\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toHaveValue\" getByLabel('书签来源', { exact: true }) with timeout 5000ms\n  - waiting for getByLabel('书签来源', { exact: true })\n\n    at captureRawStack (D:\\Documents\\Code\\Tauri\\Markbridge\\node_modules\\.pnpm\\playwright-core@1.64.0\\node_modules\\playwright-core\\lib\\coreBundle.js:9282:17)\n    at callMatcherAsStep (D:\\Documents\\Code\\Tauri\\Markbridge\\node_modules\\.pnpm\\playwright@1.64.0\\node_modules\\playwright\\lib\\matchers\\expect.js:13316:57)\n    at Object.toHaveValue (D:\\Documents\\Code\\Tauri\\Markbridge\\node_modules\\.pnpm\\playwright@1.64.0\\node_modules\\playwright\\lib\\matchers\\expect.js:13308:23)\n    at D:\\Documents\\Code\\Tauri\\Markbridge\\.trellis\\tasks\\10-12-mb-r01-shell\\evidence\\native-shell.mjs:82:58",
+  "closedNormally": true,
+  "finishedAt": "2026-10-13T07:41:44.615Z"
+}

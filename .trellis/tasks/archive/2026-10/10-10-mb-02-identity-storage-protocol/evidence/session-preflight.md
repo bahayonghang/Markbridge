@@ -6,9 +6,9 @@
 
 原生 UI 重试：`sky.list_windows()` 仍返回 `Computer Use native pipe is unavailable: failed to connect native pipe: The system cannot find the file specified. (os error 2)`。底层原因未查明。没有新增原生渲染或正常关闭证据。
 
-`python .trellis/scripts/task.py validate .trellis/tasks/10-10-mb-02-identity-storage-protocol` 退出 0，implement/check 清单各 9 项通过。
+`python .trellis/scripts/task.py validate .trellis/tasks/archive/2026-10/10-10-mb-02-identity-storage-protocol` 退出 0，implement/check 清单各 9 项通过。
 
-`python .trellis/scripts/task.py start .trellis/tasks/10-10-mb-02-identity-storage-protocol` 退出 0，planning → in_progress。脚本提示当前 main 与 base_branch 相同；没有执行分支、PR 或归档动作。
+`python .trellis/scripts/task.py start .trellis/tasks/archive/2026-10/10-10-mb-02-identity-storage-protocol` 退出 0，planning → in_progress。脚本提示当前 main 与 base_branch 相同；没有执行分支、PR 或归档动作。
 
 实施范围：共享版本化 DTO、生成与边界校验、单工作线程 SQLite、身份隔离、原子缓存与游标、迁移及失败恢复。测试仅使用合成树与临时数据库。Chrome 配对和传输仍属 03，浏览器写入仍属 06。
 

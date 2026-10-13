@@ -1,0 +1,48 @@
+{
+  "id": "mb-r01-shell",
+  "name": "mb-r01-shell",
+  "title": "工作台布局与蓝色设计系统",
+  "description": "建立书签优先的窗口布局、导航、设置容器与统一交互组件",
+  "status": "completed",
+  "dev_type": "frontend",
+  "scope": "workspace-redesign",
+  "package": null,
+  "priority": "P1",
+  "creator": "lyh",
+  "assignee": "lyh",
+  "createdAt": "2026-10-12",
+  "completedAt": "2026-10-13",
+  "branch": "main",
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": "0bd492bf28e888e17eee5b9247751d9b61d6fd1c",
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "10-12-mb-workspace-redesign",
+  "relatedFiles": [
+    "apps/desktop/src/App.tsx",
+    "apps/desktop/src/styles.css",
+    "apps/desktop/src/features/library/LibraryWorkspace.tsx",
+    "apps/desktop/src/App.test.tsx"
+  ],
+  "notes": "R01 completed with independent review and final isolated native five-viewport evidence. No commit/archive. R02 not started: legacy V04 real OS sleep remains UNVERIFIED.",
+  "meta": {
+    "implementation_approval": "granted",
+    "planning_status": "approved",
+    "depends_on": [],
+    "requirements": [
+      "U01",
+      "U09"
+    ],
+    "legacy_gate": "无真实 Chrome 前置；仅壳层与合成数据，不宣称旧同步通过。",
+    "approval_evidence": "2026-10-13 user: 批准这个方案，开始按照顺序实施",
+    "acceptance_status": "passed",
+    "review_report": "evidence/check-report.md",
+    "native_report": "evidence/native-report.json",
+    "archived": false,
+    "integration_follow_up": "R08: Windows display-setting 150% and cross-monitor DPI remain UNVERIFIED; process 150% is supplemental only.",
+    "closeout_code_commit": "0bd492bf28e888e17eee5b9247751d9b61d6fd1c",
+    "archive_branch_note": "Local main-branch work with no PR; user authorized local commit and archive. Used --skip-branch-validation rather than inventing a feature branch."
+  }
+}

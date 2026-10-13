@@ -1,0 +1,42 @@
+   Compiling markbridge-core v0.1.0 (D:\Documents\Code\Tauri\Markbridge\crates\core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.62s
+     Running unittests src\lib.rs (target\debug\deps\markbridge_core-1d38520d03228fbd.exe)
+
+running 1 test
+SQLite 3.53.2; synthetic nodes=11004; no native acceptance claim
+PLAN combined count and page
+CO-ROUTINE totals
+MATERIALIZE matches
+MATERIALIZE tree
+SETUP
+SEARCH bookmarks_cache USING INDEX cache_parent (profile_id=? AND source_epoch=? AND parent_id=?)
+RECURSIVE STEP
+SCAN t
+SEARCH c USING INDEX cache_parent (profile_id=? AND source_epoch=? AND parent_id=?)
+SCAN t
+SEARCH c USING INDEX sqlite_autoindex_bookmarks_cache_1 (bookmark_id=?)
+CORRELATED SCALAR SUBQUERY 5
+SCAN wanted VIRTUAL TABLE INDEX 1:
+CORRELATED SCALAR SUBQUERY 4
+SEARCH bt USING COVERING INDEX sqlite_autoindex_bookmark_tags_1 (bookmark_id=? AND tag_id=?)
+SEARCH m USING INDEX sqlite_autoindex_bookmark_metadata_1 (bookmark_id=?) LEFT-JOIN
+LIST SUBQUERY 3
+SCAN metadata_fts VIRTUAL TABLE INDEX 0:M4
+CREATE BLOOM FILTER
+SCAN matches
+MATERIALIZE page
+SCAN matches
+USE TEMP B-TREE FOR ORDER BY
+SCAN totals
+SCAN page LEFT-JOIN
+SEARCH c USING INDEX sqlite_autoindex_bookmarks_cache_1 (bookmark_id=?) LEFT-JOIN
+USE TEMP B-TREE FOR ORDER BY
+marker samples_ms=[137.9885, 145.9609, 138.0698, 134.9869, 149.79139999999998, 135.2465, 118.4297, 140.8073, 143.95069999999998, 131.2701, 140.9619, 157.643, 132.8751, 125.23500000000001, 121.6241, 119.1672, 114.0726, 109.4006, 115.6164, 111.7465, 127.89829999999999, 112.1305, 126.4209, 141.7053, 140.4862, 158.2948, 158.8709, 132.6318, 118.4346, 132.3194]
+marker median_ms=132.632 p95_ms=158.295 max_ms=158.871
+children samples_ms=[0.862, 0.8713, 0.7958999999999999, 0.8019000000000001, 0.7877, 0.5569000000000001, 0.5667, 0.5458999999999999, 0.6589, 0.7577, 0.752, 0.6774, 0.7156, 0.5926, 0.5820000000000001, 0.6365999999999999, 0.5534, 0.5452, 0.5301, 0.524, 0.5241, 0.5081, 0.51, 0.5738, 0.6393, 0.6454, 0.6102, 0.5504, 0.5495, 0.5715]
+children median_ms=0.582 p95_ms=0.862 max_ms=0.871
+all samples_ms=[135.4624, 150.9354, 147.44750000000002, 122.4199, 146.4471, 135.0673, 133.57240000000002, 137.22029999999998, 130.26309999999998, 117.2945, 120.2074, 121.4504, 144.4957, 167.01940000000002, 157.4211, 137.3495, 142.8012, 118.8303, 118.15559999999999, 144.623, 157.309, 170.2009, 143.93529999999998, 131.81490000000002, 147.0832, 228.39100000000002, 216.4357, 193.46859999999998, 203.8991, 206.94109999999998]
+all median_ms=143.935 p95_ms=216.436 max_ms=228.391
+test storage::library::tests::library_query_b10k_diagnostic ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 95 filtered out; finished in 9.04s

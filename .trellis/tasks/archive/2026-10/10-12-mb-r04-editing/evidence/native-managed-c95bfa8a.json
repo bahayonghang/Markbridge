@@ -1,0 +1,62 @@
+{
+  "runId": "c95bfa8a",
+  "startedAt": "2026-10-13T10:37:27.413Z",
+  "scope": "Actual Tauri + stock temporary Chromium with profile-local test policy; no host policy writes",
+  "controls": [
+    {
+      "control": "mixed_batch_rejects_managed_delete",
+      "status": "PASS"
+    },
+    {
+      "control": "mixed_batch_rejects_managed_move",
+      "status": "PASS"
+    },
+    {
+      "control": "mixed_batch_rejects_descendant_folder_delete",
+      "status": "PASS"
+    },
+    {
+      "control": "mixed_batch_rejects_descendant_folder_move",
+      "status": "PASS"
+    },
+    {
+      "control": "mixed_batch_rejects_descendant_bookmark_delete",
+      "status": "PASS"
+    },
+    {
+      "control": "mixed_batch_rejects_descendant_bookmark_move",
+      "status": "PASS"
+    },
+    {
+      "control": "managed_destinations_rejected_and_entire_tree_unchanged",
+      "status": "PASS"
+    },
+    {
+      "control": "native_destination_picker_disables_managed_ancestors_and_descendants",
+      "status": "PASS"
+    }
+  ],
+  "environment": {
+    "os": "Windows 11 Pro",
+    "release": "10.0.26300",
+    "cpu": "Intel(R) Core(TM) Ultra 9 275HX",
+    "logicalCpus": 24,
+    "memoryBytes": 68143853568,
+    "node": "v26.7.0",
+    "exeBytes": 23766016,
+    "exeSha256": "f0de19a1e33cbec0e2a8ad3fc96c8092de47b737a6bc00248bb14c66e85c323a",
+    "extensionHash": "7deb42c27dc23bca5e9277734d5d41a9c49d0c18d89e4b2475a703e3147b2040"
+  },
+  "isolationRoot": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-r04-native-mJGifP",
+  "chromiumExeSha256": "6b92945a2d3da600a99a0d14c0fb2ff32538037d4ca8933c839313497be4c234",
+  "webview": "Edg/155.0.4283.45",
+  "chrome": "Chrome/157.0.8100.0",
+  "lastRejection": {
+    "label": "descendant_bookmark",
+    "action": "move",
+    "errorCode": "PROTECTED_NODE"
+  },
+  "status": "PASS",
+  "temporaryCredentialsRemoved": true,
+  "finishedAt": "2026-10-13T10:37:31.085Z"
+}

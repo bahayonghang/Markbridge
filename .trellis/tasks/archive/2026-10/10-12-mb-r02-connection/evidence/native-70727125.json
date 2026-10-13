@@ -1,0 +1,109 @@
+{
+  "runId": "70727125",
+  "startedAt": "2026-10-13T08:31:18.107Z",
+  "machine": {
+    "version": "Windows 11 Pro",
+    "release": "10.0.26300",
+    "arch": "x64"
+  },
+  "scope": "R02 actual Tauri + two temporary Chrome profiles; no daily profile or mock IPC",
+  "controls": [
+    {
+      "control": "port_conflict_recovery_through_ui",
+      "status": "PASS"
+    },
+    {
+      "control": "invalid_extension_ticket_creates_no_profile",
+      "status": "PASS"
+    },
+    {
+      "control": "explicit_two_end_pairing",
+      "status": "PASS",
+      "profileId": "p:898155adf684dd6647582f7ac2d063dfcfcec5a3d6870c24b784b1cb4efd3ac7",
+      "nodeCount": 4
+    },
+    {
+      "control": "explicit_two_end_pairing",
+      "status": "PASS",
+      "profileId": "p:474f2d8f5878a7b5a22904cc8580a3488573909cd3bcb556b56486dcca3d9cad",
+      "nodeCount": 4
+    },
+    {
+      "control": "equal_chrome_id_distinct_profile_ui",
+      "status": "PASS",
+      "sharedChromeId": "5"
+    },
+    {
+      "control": "selected_source_is_readonly_while_peer_remains_live",
+      "status": "PASS"
+    },
+    {
+      "control": "temporary_chrome_restart_reconciles_cache",
+      "status": "PASS"
+    },
+    {
+      "control": "revoke_requires_explicit_confirmation",
+      "status": "PASS"
+    },
+    {
+      "control": "extension_forget_confirmation_and_visible_focus",
+      "status": "PASS"
+    },
+    {
+      "control": "file_source_ui_attach_browse_and_readonly",
+      "status": "PASS"
+    },
+    {
+      "control": "invalid_file_retains_cache_and_readonly",
+      "status": "PASS"
+    }
+  ],
+  "screenshots": [
+    {
+      "name": "onboarding",
+      "width": 1100,
+      "height": 760,
+      "scale": 1.25
+    },
+    {
+      "name": "onboarding-640x480",
+      "width": 640,
+      "height": 480,
+      "scale": 1.25
+    },
+    {
+      "name": "live-source-a",
+      "width": 1100,
+      "height": 760,
+      "scale": 1.25
+    },
+    {
+      "name": "selected-source-offline",
+      "width": 1100,
+      "height": 760,
+      "scale": 1.25
+    },
+    {
+      "name": "revoke-640x480",
+      "width": 640,
+      "height": 480,
+      "scale": 1.25
+    },
+    {
+      "name": "stale-file-cache",
+      "width": 1100,
+      "height": 760,
+      "scale": 1.25
+    }
+  ],
+  "errors": [],
+  "realOsSleep": "DEFERRED_BY_USER_TO_R08",
+  "isolationRoot": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-r02-native-HiAwX6",
+  "nativeHash": "4ccba488f378b7d2f03165b601d8ac3ecc85c80ebda7792a42d21462b19719fd",
+  "extensionHash": "f6f61b34dde3d905302d11eb6d86ec04eea24045ad928503060d5c51bff35f4b",
+  "webview": "Edg/154.0.4258.62",
+  "chrome": "Chrome/155.0.8059.39",
+  "status": "PASS",
+  "temporaryCredentialsRemoved": true,
+  "finishedAt": "2026-10-13T08:31:32.679Z"
+}

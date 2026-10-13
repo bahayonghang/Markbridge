@@ -1,0 +1,52 @@
+{
+  "id": "mb-r03-browse",
+  "name": "mb-r03-browse",
+  "title": "文件夹浏览、完整列表与统一搜索",
+  "description": "修复列表截断和筛选割裂，完善选择、键盘与大库浏览",
+  "status": "completed",
+  "dev_type": "fullstack",
+  "scope": "workspace-redesign",
+  "package": null,
+  "priority": "P1",
+  "creator": "lyh",
+  "assignee": "lyh",
+  "createdAt": "2026-10-12",
+  "completedAt": "2026-10-13",
+  "branch": "main",
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": "0bd492bf28e888e17eee5b9247751d9b61d6fd1c",
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "10-12-mb-workspace-redesign",
+  "relatedFiles": [
+    "apps/desktop/src/features/library/LibraryWorkspace.tsx",
+    "apps/desktop/src/features/library/VirtualRows.tsx",
+    "apps/desktop/src/features/library/model.ts",
+    "apps/desktop/src/backend.ts",
+    "crates/core/src/storage",
+    "crates/protocol",
+    "packages/protocol"
+  ],
+  "notes": "All five AC passed; final native d23bba4d/f1e15a18/647f28ce on exe371afbe9. Uncommitted and unarchived. OS sleep remains due before R08 completion.",
+  "meta": {
+    "implementation_approval": "granted",
+    "planning_status": "approved",
+    "depends_on": [
+      "10-12-mb-r01-shell",
+      "10-12-mb-r02-connection"
+    ],
+    "requirements": [
+      "U03",
+      "U05",
+      "U09"
+    ],
+    "legacy_gate": "复用原05；原03/04除真实休眠外的门槛在R02复核，真实休眠按2026-10-13用户授权移至R08完成前；不提高Chrome树硬上限。",
+    "approval_evidence": "2026-10-13 user: 批准这个方案，开始按照顺序实施",
+    "prerequisite_status": "passed_with_explicit_sleep_deferral",
+    "sleep_gate_due": "before_r08_completion",
+    "closeout_code_commit": "0bd492bf28e888e17eee5b9247751d9b61d6fd1c",
+    "archive_branch_note": "Local main-branch work with no PR; user authorized local commit and archive. Used --skip-branch-validation rather than inventing a feature branch."
+  }
+}

@@ -10,7 +10,7 @@ B10K 使用固定 seed `20261010`。文件镜像测量和已加载资料搜索�
 
 ## 第一次测量（修复前）
 
-`node .trellis/tasks/10-10-mb-05-library-workspace/evidence/measure.mjs`，退出码 0。冷启动 622 ms、852 ms、701 ms。搜索 `MB05MARK` 30 次，第一次 249.6 ms，后 29 次暖态 p50 248.2 ms，p95 250 ms，max 250.4 ms。计时从输入开始，包含 200 ms 去抖。暖态 p95 未达到 200 ms。该次 V06 / AC05-4 为 FAIL。
+`node .trellis/tasks/archive/2026-10/10-10-mb-05-library-workspace/evidence/measure.mjs`，退出码 0。冷启动 622 ms、852 ms、701 ms。搜索 `MB05MARK` 30 次，第一次 249.6 ms，后 29 次暖态 p50 248.2 ms，p95 250 ms，max 250.4 ms。计时从输入开始，包含 200 ms 去抖。暖态 p95 未达到 200 ms。该次 V06 / AC05-4 为 FAIL。
 
 ## AC05-1
 
@@ -33,7 +33,7 @@ B10K 使用固定 seed `20261010`。文件镜像测量和已加载资料搜索�
 
 状态：PASS
 
-- `node .trellis/tasks/10-10-mb-05-library-workspace/evidence/profile-live.mjs`，进程退出码 0，报告 `status` 为 PASS。100 条样本：25 创建、25 修改、25 移动、25 删除。p50 62 ms，p95 245 ms，max 246 ms。每条都 ≤ 3 s，`timedOut` 都是 false。
+- `node .trellis/tasks/archive/2026-10/10-10-mb-05-library-workspace/evidence/profile-live.mjs`，进程退出码 0，报告 `status` 为 PASS。100 条样本：25 创建、25 修改、25 移动、25 删除。p50 62 ms，p95 245 ms，max 246 ms。每条都 ≤ 3 s，`timedOut` 都是 false。
 - 可见行按 `.library-title` 或 `.library-url` 的全文相等判断。`https://example.com/item/6` 不会把 `https://example.com/item/61` 当成命中。当前 B10K 没有 `item/60` 这个网址，索引 60 用的是重复网址。
 - 分类：创建 p50 218 ms，p95 246 ms，max 246 ms。修改 p50 243 ms，p95 245 ms，max 245 ms。移动 p50 31 ms，p95 60 ms，max 61 ms。删除 p50 30 ms，p95 62 ms，max 62 ms。
 - 结束后 `cache_tree` 深度 0 与 `chrome.bookmarks.getTree()` 相等。两边都是 11004 个节点，`mismatchCount` 为 0。
@@ -47,11 +47,11 @@ B10K 使用固定 seed `20261010`。文件镜像测量和已加载资料搜索�
 - 已加载资料在输入当次过滤内存中的节点。Rust `cache_search` 仍在 200 ms 后刷新这些行。可见行不再等这次去抖。计时仍从输入开始。父级 200 ms 门槛没有改。
 - 组件测试 `shows a loaded profile title on the input turn before cache search`：已加载标题在推进 200 ms 之前可见，此时尚未调用 `cache_search`。`rtk proxy pnpm exec vitest run apps/desktop/src/features/library/library.test.tsx apps/desktop/src/App.test.tsx apps/desktop/src/backend.test.tsx`，退出码 0，29 项通过。这不是原生 p95。
 - 第二次文件镜像测量（资料路径仍会等去抖）：冷启动 713 ms、766 ms、668 ms。暖态 p50 5.5 ms，p95 8.800000000745058 ms，max 10.699999999254942 ms。该数字只属于文件镜像。
-- 第三次测量前执行 `pnpm --dir apps/desktop exec tauri build --no-bundle -- --locked`，退出码 0。然后 `node .trellis/tasks/10-10-mb-05-library-workspace/evidence/measure.mjs`，退出码 0。脚本仍接入一次性 B10K 文件镜像，不是已配对资料。
+- 第三次测量前执行 `pnpm --dir apps/desktop exec tauri build --no-bundle -- --locked`，退出码 0。然后 `node .trellis/tasks/archive/2026-10/10-10-mb-05-library-workspace/evidence/measure.mjs`，退出码 0。脚本仍接入一次性 B10K 文件镜像，不是已配对资料。
 - 第三次冷启动：601 ms、650 ms、684 ms。p50 650 ms，p95 684 ms，max 684 ms。三次都小于 3 s。
 - 第三次搜索 `MB05MARK` 30 次。第一次 8.399999998509884 ms。后 29 次暖态 p50 5.300000000745058 ms，p95 9.5 ms，max 9.5 ms。这是文件镜像数字。暖态 p95 ≤ 200 ms。
 - 键盘：ArrowDown 前 `library-row-folder:0`。ArrowDown 后 `library-row-folder:1`，`moved` 为 true。ArrowRight 后 `aria-expanded` 为 `true`，`className` 为 `library-row is-active`。
-- 已加载资料：`node .trellis/tasks/10-10-mb-05-library-workspace/evidence/profile-search.mjs`，退出码 0。缓存 11004 个节点。冷启动 659 ms、646 ms、675 ms，都小于 3 s。搜索 `MB05MARK` 30 次。第一次 10.899999999906868 ms。后 29 次暖态 p50 4.2000000001862645 ms，p95 5.2000000001862645 ms，max 5.7000000001862645 ms。计时从输入开始，直到 `[role=option]` 出现 `MB05MARK`。命中来自已同步缓存，包含当前文件夹页以外的节点。Rust `cache_search` 仍在 200 ms 后刷新。父级 200 ms 门槛没有改。`AppliedDPI` 前后都是 120。`devicePixelRatio` 1.25。`Markbridge.Pairing` 前后都是 0 条。
+- 已加载资料：`node .trellis/tasks/archive/2026-10/10-10-mb-05-library-workspace/evidence/profile-search.mjs`，退出码 0。缓存 11004 个节点。冷启动 659 ms、646 ms、675 ms，都小于 3 s。搜索 `MB05MARK` 30 次。第一次 10.899999999906868 ms。后 29 次暖态 p50 4.2000000001862645 ms，p95 5.2000000001862645 ms，max 5.7000000001862645 ms。计时从输入开始，直到 `[role=option]` 出现 `MB05MARK`。命中来自已同步缓存，包含当前文件夹页以外的节点。Rust `cache_search` 仍在 200 ms 后刷新。父级 200 ms 门槛没有改。`AppliedDPI` 前后都是 120。`devicePixelRatio` 1.25。`Markbridge.Pairing` 前后都是 0 条。
 
 ## V03
 
@@ -85,16 +85,16 @@ B10K 使用固定 seed `20261010`。文件镜像测量和已加载资料搜索�
 | `pnpm exec eslint apps/desktop/src/features/library/LibraryWorkspace.tsx apps/desktop/src/features/library/library.test.tsx --max-warnings 0` | 0 | PASS |
 | `pnpm --filter @markbridge/desktop typecheck` | 0 | PASS |
 | 第三次 `pnpm --dir apps/desktop exec tauri build --no-bundle -- --locked` | 0 | PASS |
-| 第三次 `node .trellis/tasks/10-10-mb-05-library-workspace/evidence/measure.mjs` | 0 | 文件镜像 PASS。不是资料路径 |
+| 第三次 `node .trellis/tasks/archive/2026-10/10-10-mb-05-library-workspace/evidence/measure.mjs` | 0 | 文件镜像 PASS。不是资料路径 |
 | `pnpm --dir apps/desktop exec tauri build --no-bundle -- --locked` | 0 | PASS。vite 提示桌面主包超过 500 kB，命令仍退出 0 |
-| `node .trellis/tasks/10-10-mb-05-library-workspace/evidence/measure.mjs` | 0 | PASS。见 AC05-4 |
+| `node .trellis/tasks/archive/2026-10/10-10-mb-05-library-workspace/evidence/measure.mjs` | 0 | PASS。见 AC05-4 |
 | `pnpm lint` | 未在本次检查运行 | NOT_RUN。此前一次退出码 1，仅 gitignore 中的 `.omp/extensions/trellis/index.ts`。该文件未改 |
 | `pnpm test` | 未在本次检查运行 | NOT_RUN |
 | `pnpm test:e2e` | 未在本次检查运行 | NOT_RUN |
 | `pnpm build` | 未在本次检查运行 | NOT_RUN。桌面 `pnpm build` 已作为 tauri `beforeBuildCommand` 运行 |
 | `pnpm build:native` | 未运行 | NOT_RUN |
 | `pnpm --filter @markbridge/desktop tauri dev` | 未运行 | NOT_RUN |
-| `python ./.trellis/scripts/task.py validate .trellis/tasks/10-10-mb-05-library-workspace` | 未在本次检查运行 | NOT_RUN |
+| `python ./.trellis/scripts/task.py validate .trellis/tasks/archive/2026-10/10-10-mb-05-library-workspace` | 未在本次检查运行 | NOT_RUN |
 | `pnpm --dir apps/desktop exec tauri build --no-bundle -- --locked` | 0 | PASS。去掉移动/删除冲突诊断输出后重编，28.00 s。vite 仍提示桌面主包超过 500 kB |
-| `node .trellis/tasks/10-10-mb-05-library-workspace/evidence/profile-search.mjs` | 0 | PASS。已加载资料，见 AC05-4 / V06 |
-| `node .trellis/tasks/10-10-mb-05-library-workspace/evidence/profile-live.mjs` | 0 | 精确相等谓词复跑 PASS。运行 `cf9c03cf-e252-439c-b524-bdd281d42c52`。见 AC05-3 / V03 |
+| `node .trellis/tasks/archive/2026-10/10-10-mb-05-library-workspace/evidence/profile-search.mjs` | 0 | PASS。已加载资料，见 AC05-4 / V06 |
+| `node .trellis/tasks/archive/2026-10/10-10-mb-05-library-workspace/evidence/profile-live.mjs` | 0 | 精确相等谓词复跑 PASS。运行 `cf9c03cf-e252-439c-b524-bdd281d42c52`。见 AC05-3 / V03 |

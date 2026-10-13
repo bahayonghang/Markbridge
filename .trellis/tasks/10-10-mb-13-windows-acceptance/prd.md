@@ -8,7 +8,7 @@
 
 父任务：[Markbridge 工作台](../10-10-markbridge-workspace/prd.md)。需求：R01,R14。里程碑：M4。状态：planning，未开始产品实现。
 
-前置：[09](../10-10-mb-09-webpage-preview/prd.md)、[12](../10-10-mb-12-library-maintenance/prd.md)。依赖代表前置验收通过，不能仅凭目录存在或任务已创建启动。该任务属于 Windows 首版。
+前置：[09](../archive/2026-10/10-10-mb-09-webpage-preview/prd.md)、[12](../archive/2026-10/10-10-mb-12-library-maintenance/prd.md)。依赖代表前置验收通过，不能仅凭目录存在或任务已创建启动。该任务属于 Windows 首版。
 
 ## 范围
 

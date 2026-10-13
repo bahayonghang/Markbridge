@@ -1,0 +1,33 @@
+{
+  "runId": "bc69ed7e",
+  "startedAt": "2026-10-13T13:58:25.819Z",
+  "seed": 20261010,
+  "scope": "B10K real Chrome create/update/move/delete 25 each; event listener Date.now to matching DOM plus animation frame on the same host clock",
+  "latency": [],
+  "errors": [],
+  "environment": {
+    "os": "Windows 11 Pro",
+    "release": "10.0.26300",
+    "cpu": "Intel(R) Core(TM) Ultra 9 275HX",
+    "logicalCpus": 24,
+    "memoryBytes": 68143853568,
+    "node": "v26.7.0",
+    "exeBytes": 24054272,
+    "exeSha256": "804d920746f677cb257d8efdf6589a77a70bbf346e162dd6f68803197db63910",
+    "extensionHash": "567f50146319a2b6f013f773308910f29bc56585a62075dbaf0f9b3cf1ff22c5"
+  },
+  "isolationRoot": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-r08-native-olfm26",
+  "webview": "Edg/155.0.4283.45",
+  "chrome": "Chrome/155.0.8059.39",
+  "fixture": {
+    "bookmarks": 10000,
+    "folders": 1000,
+    "maxDepth": 20
+  },
+  "status": "FAIL",
+  "failedStage": "live-events",
+  "failureCode": "NATIVE_ASSERTION_OR_ACTION_FAILED",
+  "assertion": "locator.selectOption: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#library-scope')\u001b[22m\n\u001b[2m    - locator resolved to <select id=\"library-scope\">…</select>\u001b[22m\n\u001b[2m  - attempting select option action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible and enabled\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying select option action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible and enabled\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying select option action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    59 × waiting for element to be visible and enabled\u001b[22m\n\u001b[2m       - element is not visible\u001b[22m\n\u001b[2m     - retrying select option action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n",
+  "temporaryCredentialsRemoved": true,
+  "finishedAt": "2026-10-13T13:59:05.113Z"
+}

@@ -3,7 +3,7 @@
   "name": "markbridge-workspace",
   "title": "Markbridge 本地书签工作台完整规划",
   "description": "Chrome 实时本地同步、编辑标签、双模式预览、AI 辅助与可恢复批量优化的父任务",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": "docs",
   "scope": "markbridge",
   "package": null,
@@ -43,7 +43,7 @@
     ".trellis/tasks/10-10-markbridge-workspace/task-map.md",
     ".trellis/tasks/10-10-markbridge-workspace/verification.md"
   ],
-  "notes": "Implementation authorized for the current plan. Parent coordinates requirements and integration; activate one child after its prerequisite acceptance passes. Commits, archives, publication, system installation and daily Chrome changes remain separately authorized.",
+  "notes": "Implementation remains approved. Original children 01-12 are completed; 03/04 closeout applies the explicit user waiver to actual OS sleep only, preserving NOT_RUN/UNVERIFIED raw evidence. Redesign R01-R08 and parent are completed. Remaining children are 13,14,15. This parent coordinates integration and must not be started as an implementation task. Current turn authorizes local commits and archival of completed tasks; no push/publication/daily installation.",
   "meta": {
     "implementation_approval": "granted",
     "planning_status": "approved",
@@ -72,10 +72,13 @@
       "platform": "windows_first_macos_linux_follow_up"
     },
     "approval_evidence": "2026-10-10 user request: 请根据当前trellis任务规划开始实施trellis父任务以及对应的子任务",
-    "execution_status": "child_03_implementation_in_progress",
-    "active_child": "10-10-mb-03-chrome-bridge",
-    "next_child": "10-10-mb-04-readonly-mirror",
+    "execution_status": "children_01_12_complete_13_14_15_remaining",
+    "active_child": null,
+    "next_child": "10-10-mb-13-windows-acceptance",
     "execution_evidence": "execution-status.md",
-    "dependency_exception": "2026-10-10 user explicitly approved starting02 with01 native acceptance UNVERIFIED; complete01 native acceptance before Windows delivery. Other prerequisite gates unchanged."
+    "dependency_exception": "2026-10-10 user explicitly approved starting02 with01 native acceptance UNVERIFIED; complete01 native acceptance before Windows delivery. Other prerequisite gates unchanged.",
+    "latest_audit": "docs/implementation-status-2026-10-13.md",
+    "sleep_gate_status": "waived_by_user",
+    "sleep_gate_execution": "NOT_RUN"
   }
 }

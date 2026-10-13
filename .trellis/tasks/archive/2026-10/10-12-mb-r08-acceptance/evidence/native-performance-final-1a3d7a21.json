@@ -1,0 +1,81 @@
+{
+  "runId": "1a3d7a21",
+  "phase": "final",
+  "startedAt": "2026-10-13T13:55:43.601Z",
+  "scope": "R08 real native B10K cached profile; no daily Chrome and no mock IPC",
+  "seed": 20261010,
+  "coldDefinition": "process spawn to visible MB05BAR tree, cached profile source and enabled search",
+  "searchDefinition": "browser performance.now before input event to exact marker title rendered and next animation frame",
+  "percentile": "sorted[ceil(n * ratio)-1]; one explicit warmup then 30 measured input samples",
+  "coldMs": [
+    732.3387,
+    700.8286999999996,
+    705.6480000000001
+  ],
+  "searchMs": [
+    105.29999999701977,
+    81.10000000149012,
+    99.39999999850988,
+    89,
+    81.39999999850988,
+    83.90000000596046,
+    95.30000000447035,
+    115.80000000447035,
+    158.29999999701977,
+    120.79999999701977,
+    129.10000000149012,
+    117,
+    81.60000000149012,
+    80.20000000298023,
+    89.39999999850988,
+    101.40000000596046,
+    93.79999999701977,
+    102.30000000447035,
+    129.19999999552965,
+    91.60000000149012,
+    77.79999999701977,
+    82.60000000149012,
+    72.30000000447035,
+    73,
+    74.19999999552965,
+    77.69999999552965,
+    84.60000000149012,
+    79.80000000447035,
+    73.70000000298023,
+    72.5
+  ],
+  "errors": [],
+  "environment": {
+    "os": "Windows 11 Pro",
+    "release": "10.0.26300",
+    "cpu": "Intel(R) Core(TM) Ultra 9 275HX",
+    "logicalCpus": 24,
+    "memoryBytes": 68143853568,
+    "node": "v26.7.0",
+    "exeBytes": 24054272,
+    "exeSha256": "804d920746f677cb257d8efdf6589a77a70bbf346e162dd6f68803197db63910",
+    "extensionHash": "567f50146319a2b6f013f773308910f29bc56585a62075dbaf0f9b3cf1ff22c5"
+  },
+  "fixture": {
+    "bookmarks": 10000,
+    "folders": 1000,
+    "maxDepth": 20,
+    "nodes": 11004
+  },
+  "isolationRoot": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-r08-native-8PsXI9",
+  "webview": "Edg/155.0.4283.45",
+  "devicePixelRatio": 1.25,
+  "warmupMs": 92.79999999701977,
+  "cold": {
+    "p50": 705.6480000000001,
+    "p95": 732.3387,
+    "max": 732.3387
+  },
+  "warm": {
+    "p50": 84.60000000149012,
+    "p95": 129.19999999552965,
+    "max": 158.29999999701977
+  },
+  "status": "PASS",
+  "finishedAt": "2026-10-13T13:56:03.613Z"
+}

@@ -1,0 +1,26 @@
+{
+  "runId": "6938ea00",
+  "startedAt": "2026-10-13T13:32:49.404Z",
+  "modelEvidence": "Synthetic HTTP fixture, real Rust transport; real-model quality NOT_RUN",
+  "controls": [],
+  "errors": [],
+  "environment": {
+    "os": "Windows 11 Pro",
+    "release": "10.0.26300",
+    "cpu": "Intel(R) Core(TM) Ultra 9 275HX",
+    "logicalCpus": 24,
+    "memoryBytes": 68143853568,
+    "node": "v26.7.0",
+    "exeBytes": 24054272,
+    "exeSha256": "ceeb13e821ceb4dbced06f7c23669672010233f4d047af497cbd23bb01a514fe",
+    "extensionHash": "567f50146319a2b6f013f773308910f29bc56585a62075dbaf0f9b3cf1ff22c5"
+  },
+  "isolationRoot": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-r07-native-ewEQEo",
+  "status": "FAIL",
+  "failedStage": "prepare",
+  "failureCode": "NATIVE_PAGE_TIMEOUT",
+  "modelCalls": [],
+  "modelFixtureErrors": [],
+  "publicLoopbackRequests": 0,
+  "finishedAt": "2026-10-13T13:33:21.313Z"
+}
