@@ -118,3 +118,26 @@ it('does not fetch a non-http bookmark url', async () => {
   expect(screen.getByText('仅预览 http 或 https 页面')).toBeVisible();
   expect(vi.mocked(invoke).mock.calls.some(([command]) => command === 'content_preview')).toBe(false);
 });
+
+it('R05 cancels on unmount and cancels a request before the debounce has fired', async () => {
+  vi.mocked(invoke).mockImplementation(async () => null);
+  const first = render(<ContentPreviewPanel profileId="profile-a" chromeId="10" url="https://allowed.test/a" />);
+  fireEvent.click(screen.getByRole('button', { name: '取消' }));
+  await act(async () => { await vi.advanceTimersByTimeAsync(250); });
+  expect(invoke).not.toHaveBeenCalledWith('content_preview', expect.anything());
+  first.unmount();
+  const second = render(<ContentPreviewPanel profileId="profile-a" chromeId="10" url="https://allowed.test/a" />);
+  await act(async () => { await vi.advanceTimersByTimeAsync(250); });
+  second.unmount();
+  expect(invoke).toHaveBeenCalledWith('cancel_content_preview', expect.objectContaining({ requestId: expect.stringMatching(/^pv\d+$/) }));
+});
+
+it('R05 renders cached untrusted text without injecting markup', async () => {
+  const payload = '<img src=x onerror="alert(1)"><script>bad()</script>';
+  vi.mocked(invoke).mockImplementation(async (command, raw) => command === 'content_preview' ? preview({ requestId: (raw as { requestId: string }).requestId, chromeId: '10', status: 'cached', title: '缓存页面', summary: payload, fetchedAt: 1791800000000 }) : null);
+  render(<ContentPreviewPanel profileId="profile-a" chromeId="10" url="https://allowed.test/a" />);
+  await act(async () => { await vi.advanceTimersByTimeAsync(250); });
+  expect(screen.getByText(payload)).toBeVisible();
+  expect(screen.getByText(/离线缓存/)).toHaveTextContent('2026');
+  expect(document.querySelector('.content-preview script, .content-preview img')).toBeNull();
+});

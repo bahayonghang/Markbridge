@@ -1,6 +1,13 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
+mod library;
+pub use library::*;
+mod batch_edit;
+pub use batch_edit::*;
+mod history;
+pub use history::*;
+
 pub const PROTOCOL_VERSION: u8 = 1;
 
 /// Foundation IPC state. Task 02 owns the paired transport protocol.

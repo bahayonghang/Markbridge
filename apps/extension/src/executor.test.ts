@@ -75,7 +75,13 @@ function port(roots: ChromeNode[]) {
       children.forEach((item, index) => { item.index = index; });
       return structuredClone(moved);
     },
-    async remove(id) { calls.remove += 1; detach(id); },
+    async remove(id) {
+      calls.remove += 1;
+      const found = find(id);
+      if (!found) throw new Error('missing');
+      if ((found.node.children?.length ?? 0) > 0) throw new Error('nonempty folder');
+      detach(id);
+    },
     async removeTree(id) { calls.removeTree += 1; detach(id); },
   };
   return { bookmarks, calls, find };
@@ -240,4 +246,59 @@ describe('extension write executor', () => {
     expect(sent).toEqual(['create:uncertain:UNCERTAIN_WRITE']);
     expect(restarted.calls.create).toBe(0);
   });
+});
+
+it.each(['changed', 'added', 'removed', 'managed'])('rejects a %s descendant after batch review before any Chrome write', async (change) => {
+  const roots = tree(); const bar = roots[0]!.children![0]!;
+  const branch = node('f', '1', 2, 'Folder', { children: [node('leaf', 'f', 0, 'Leaf', { url: 'https://leaf.test/' })] }); bar.children!.push(branch);
+  const expected: [BookmarkNode, ...BookmarkNode[]] = [flat('f', '1', 2, 'Folder'), flat('leaf', 'f', 0, 'Leaf', 'https://leaf.test/')];
+  if (change === 'changed') branch.children![0]!.title = 'External';
+  if (change === 'added') branch.children!.push(node('extra', 'f', 1, 'Extra', { url: 'https://extra.test/' }));
+  if (change === 'removed') branch.children = [];
+  if (change === 'managed') branch.children![0]!.unmodifiable = 'managed';
+  const fixture = port(roots);
+  for (const payload of [{ kind: 'delete' as const }, { kind: 'move' as const, parentId: '1', position: 0 }]) {
+    const sent = await run(fixture.bookmarks, emptyStore(), [{ requestId: 'guard', target: 'f', expectedBefore: expected[0]!, expectedSubtree: expected, payload }]);
+    expect(sent[0]).toMatch(/failed:(CONFLICT|PROTECTED_NODE)$/);
+  }
+  expect(Object.values(fixture.calls).reduce((a, b) => a + b, 0)).toBe(0);
+});
+
+it('preserves a child added after an empty created folder was reviewed for undo', async () => {
+  const roots = tree();
+  const branch = node('created', '1', 2, 'Created', { children: [] });
+  roots[0]!.children![0]!.children!.push(branch);
+  const expected = flat('created', '1', 2, 'Created');
+  const undo: OperationStep = { requestId: 'undo-create', target: 'created', expectedBefore: expected, expectedSubtree: [expected], payload: { kind: 'delete' } };
+  branch.children!.push(node('external', 'created', 0, 'External work', { url: 'https://external.test/' }));
+  const fixture = port(roots);
+
+  expect(await run(fixture.bookmarks, emptyStore(), [undo])).toEqual(['undo-create:failed:CONFLICT']);
+  expect(fixture.find('external')?.node.url).toBe('https://external.test/');
+  expect(Object.values(fixture.calls).reduce((sum, calls) => sum + calls, 0)).toBe(0);
+
+  branch.children = [];
+  expect(await run(fixture.bookmarks, emptyStore(), [{ ...undo, requestId: 'undo-empty' }])).toEqual(['undo-empty:applied:']);
+  expect(fixture.calls.remove).toBe(1);
+  expect(fixture.calls.removeTree).toBe(0);
+  expect(fixture.find('created')).toBeNull();
+});
+
+it('uses nonrecursive removal when a reviewed empty folder gains a child after getTree', async () => {
+  const roots = tree();
+  const branch = node('created', '1', 2, 'Created', { children: [] });
+  roots[0]!.children![0]!.children!.push(branch);
+  const fixture = port(roots);
+  const readTree = fixture.bookmarks.getTree;
+  fixture.bookmarks.getTree = async () => {
+    const snapshot = await readTree();
+    branch.children!.push(node('external', 'created', 0, 'External work', { url: 'https://external.test/' }));
+    return snapshot;
+  };
+  const expected = flat('created', '1', 2, 'Created');
+  const sent = await run(fixture.bookmarks, emptyStore(), [{ requestId: 'undo-create', target: 'created', expectedBefore: expected, expectedSubtree: [expected], payload: { kind: 'delete' } }]);
+  expect(sent).toEqual(['undo-create:uncertain:UNCERTAIN_WRITE']);
+  expect(fixture.calls.remove).toBe(1);
+  expect(fixture.calls.removeTree).toBe(0);
+  expect(fixture.find('external')?.node.url).toBe('https://external.test/');
 });

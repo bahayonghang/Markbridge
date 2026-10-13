@@ -24,6 +24,11 @@
         <p>断线后桌面保留只读缓存。连接恢复后重新核对完整树。</p>
         <button id="reconnect" type="button">重新连接</button>
         <button id="forget" type="button">清除本机配对</button>
+        <div id="forget-confirm" hidden>
+          <p>清除后，此扩展将无法继续同步。Chrome 书签保持不变，桌面缓存与本地标签仍保留。恢复连接需要重新配对。</p>
+          <button id="forget-cancel" type="button">保留配对</button>
+          <button id="forget-accept" type="button">确认清除本机配对</button>
+        </div>
         <p>清除后还需在桌面吊销对应资料。书签内容保持不变。</p>
       </section>
       <p id="error" role="alert"></p>

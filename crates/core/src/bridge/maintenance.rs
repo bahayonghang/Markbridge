@@ -379,6 +379,7 @@ impl Bridge {
             self,
             inner,
             PlannedCommit {
+                batch: None,
                 profile_id,
                 epoch,
                 revision: revision_counter,

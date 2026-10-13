@@ -13,3 +13,5 @@ export * from './bridge';
 export * from './ai';
 export * from './organization';
 export * from './maintenance';
+export * from './batch-edit';
+export * from './history';

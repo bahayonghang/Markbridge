@@ -1,6 +1,6 @@
 # Frontend Guidelines
 
-Read [Project baseline](../project-baseline.md) first. Child 01 provides the React empty state, extension popup, and validated startup DTO. Other UI features remain planned.
+Read [Project baseline](../project-baseline.md) first. The React workspace includes source selection, queries, editing, local details, history/export and organization; connection and AI configuration live in settings. R01–R07 child acceptance and R08 final integration evidence are tracked under the approved redesign tasks.
 
 | Guide | Scope |
 |---|---|

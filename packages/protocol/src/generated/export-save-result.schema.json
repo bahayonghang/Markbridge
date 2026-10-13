@@ -1,0 +1,216 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ExportSaveResult",
+  "type": "object",
+  "properties": {
+    "errorCode": {
+      "$ref": "#/$defs/RequiredNullable4"
+    },
+    "metadata": {
+      "$ref": "#/$defs/RequiredNullable"
+    },
+    "status": {
+      "$ref": "#/$defs/ExportSaveStatus"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "status",
+    "metadata",
+    "errorCode"
+  ],
+  "$defs": {
+    "Counter": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 9007199254740991,
+      "minimum": 0
+    },
+    "DisplayName": {
+      "type": "string",
+      "maxLength": 128,
+      "minLength": 1
+    },
+    "EditDocumentKind": {
+      "type": "string",
+      "enum": [
+        "html",
+        "sidecar"
+      ]
+    },
+    "ErrorCode": {
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "INVALID_MESSAGE",
+            "UNSUPPORTED_VERSION",
+            "FRAME_TOO_LARGE",
+            "LIMIT_EXCEEDED",
+            "INVALID_TREE",
+            "UNPAIRED",
+            "READ_ONLY",
+            "WRONG_PROFILE",
+            "STALE_PROPOSAL",
+            "PROTECTED_NODE",
+            "UNCERTAIN_WRITE",
+            "FETCH_DENIED",
+            "INVALID_AI_OUTPUT",
+            "STORAGE_ERROR",
+            "STORAGE_NEWER_SCHEMA",
+            "MIGRATION_FAILED",
+            "CONFLICT",
+            "CANCELLED"
+          ]
+        },
+        {
+          "description": "The selected Chrome directory is missing, unreadable, or not a User Data directory.",
+          "type": "string",
+          "const": "PATH_UNAVAILABLE"
+        }
+      ]
+    },
+    "ExportMetadata": {
+      "type": "object",
+      "properties": {
+        "cachedAt": {
+          "$ref": "#/$defs/RequiredNullable3"
+        },
+        "displayName": {
+          "$ref": "#/$defs/DisplayName"
+        },
+        "exportedAt": {
+          "$ref": "#/$defs/Counter"
+        },
+        "format": {
+          "$ref": "#/$defs/EditDocumentKind"
+        },
+        "nodeCount": {
+          "$ref": "#/$defs/Counter"
+        },
+        "revision": {
+          "$ref": "#/$defs/Counter"
+        },
+        "source": {
+          "$ref": "#/$defs/ExportSource"
+        },
+        "sourceEpoch": {
+          "$ref": "#/$defs/RequiredNullable2"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "displayName",
+        "format",
+        "sourceEpoch",
+        "revision",
+        "cachedAt",
+        "exportedAt",
+        "nodeCount"
+      ]
+    },
+    "ExportSaveStatus": {
+      "type": "string",
+      "enum": [
+        "saved",
+        "cancelled",
+        "failed"
+      ]
+    },
+    "ExportSource": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/Id"
+            },
+            "kind": {
+              "type": "string",
+              "const": "profile"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "id"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/Id"
+            },
+            "kind": {
+              "type": "string",
+              "const": "mirror"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "id"
+          ]
+        }
+      ]
+    },
+    "Id": {
+      "type": "string",
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*(?![\\s\\S])"
+    },
+    "RequiredNullable": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ExportMetadata"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "RequiredNullable2": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SourceEpoch"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "RequiredNullable3": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Counter"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "RequiredNullable4": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ErrorCode"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "SourceEpoch": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 9007199254740991,
+      "minimum": 1
+    }
+  }
+}

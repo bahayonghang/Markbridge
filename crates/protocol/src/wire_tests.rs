@@ -211,3 +211,33 @@ fn mutation_variants_reject_extra_fields_and_accept_json_integer_notation() {
         assert!(parse_frame(frame.as_bytes()).is_ok());
     }
 }
+
+#[test]
+fn reviewed_subtrees_validate_before_state_shape_and_size_with_legacy_compatibility() {
+    let root = json!({"chromeId":"folder","parentId":"bar","position":0,"kind":"folder","title":"F","url":null});
+    let child = json!({"chromeId":"leaf","parentId":"folder","position":0,"kind":"bookmark","title":"L","url":"https://example.com/"});
+    let value = json!({"protocolVersion":1,"type":"apply_operation","profileId":"p","sessionId":"s","requestId":"r","seq":null,"payload":{"operationId":"op","sourceEpoch":1,"expectedRevision":1,"steps":[{"requestId":"step","target":"folder","expectedBefore":root,"expectedChildIds":null,"expectedSubtree":[root,child],"payload":{"kind":"delete"}}]}});
+    assert!(parse(&value).is_ok());
+    let mut changed = root.clone();
+    changed["title"] = json!("Changed");
+    let mut outside = child.clone();
+    outside["parentId"] = json!("outside");
+    for subtree in [
+        json!([]),
+        json!([child]),
+        json!([root, outside]),
+        json!([changed, child]),
+        json!([root, child, child]),
+        json!(vec![root.clone(); 100001]),
+    ] {
+        let mut invalid = value.clone();
+        invalid["payload"]["steps"][0]["expectedSubtree"] = subtree;
+        assert!(parse(&invalid).is_err());
+    }
+    let mut legacy = value;
+    legacy["payload"]["steps"][0]
+        .as_object_mut()
+        .unwrap()
+        .remove("expectedSubtree");
+    assert!(parse(&legacy).is_ok());
+}

@@ -84,6 +84,450 @@ fn metadata() -> Metadata {
 }
 
 #[tokio::test]
+async fn pending_restore_map_cannot_copy_metadata_into_a_new_source_epoch() {
+    let directory = tempfile::tempdir().unwrap();
+    let storage = Storage::open(directory.path().join("restore.sqlite"))
+        .await
+        .unwrap();
+    storage.create_profile(profile("profile-a")).await.unwrap();
+    storage
+        .replace_tree(id("profile-a"), id("session-a"), tree(1))
+        .await
+        .unwrap();
+    let old = storage
+        .bookmarks(id("profile-a"), epoch(1))
+        .await
+        .unwrap()
+        .into_iter()
+        .find(|row| row.node.chrome_id.as_str() == "42")
+        .unwrap();
+    storage
+        .set_metadata(old.bookmark_id.clone(), metadata())
+        .await
+        .unwrap();
+    storage
+        .mutate_tags(
+            id("profile-a"),
+            markbridge_protocol::TagCommand::Add {
+                chrome_ids: vec![id("42")],
+                name: "Old identity".into(),
+            },
+        )
+        .await
+        .unwrap();
+    storage
+        .call(move |conn| {
+            let after = AfterBody {
+                maps: vec![IdMapBody {
+                    request_id: id("restore-request"),
+                    old_chrome_id: id("42"),
+                    new_chrome_id: id("43"),
+                    old_bookmark_id: old.bookmark_id,
+                }],
+                ..AfterBody::default()
+            };
+            conn.execute(
+                "INSERT INTO operations(operation_id,profile_id,source_epoch,state,before_json,after_json,created_at) VALUES('old-restore','profile-a',1,'applied','{}',?1,1)",
+                [serde_json::to_string(&after).unwrap()],
+            )
+            .unwrap();
+            Ok(())
+        })
+        .await
+        .unwrap();
+    storage
+        .reset_source_epoch(id("profile-a"), epoch(2))
+        .await
+        .unwrap();
+    let mut next = tree(1);
+    next.source_epoch = epoch(2);
+    storage
+        .replace_tree(id("profile-a"), id("session-b"), next)
+        .await
+        .unwrap();
+    let target = storage
+        .bookmarks(id("profile-a"), epoch(2))
+        .await
+        .unwrap()
+        .into_iter()
+        .find(|row| row.node.chrome_id.as_str() == "43")
+        .unwrap();
+    let mut current = metadata();
+    current.note = "new source note".into();
+    storage
+        .set_metadata(target.bookmark_id.clone(), current.clone())
+        .await
+        .unwrap();
+    storage
+        .copy_mapped_metadata(id("profile-a"), epoch(2), 456)
+        .await
+        .unwrap();
+    assert_eq!(
+        storage.metadata(target.bookmark_id.clone()).await.unwrap(),
+        Some(current)
+    );
+    let target_id = target.bookmark_id.as_str().to_owned();
+    storage
+        .call(move |conn| {
+            let tag_count: i64 = conn
+                .query_row(
+                    "SELECT COUNT(*) FROM bookmark_tags WHERE bookmark_id=?1",
+                    [&target_id],
+                    |row| row.get(0),
+                )
+                .unwrap();
+            assert_eq!(tag_count, 0);
+            let pending: String = conn
+                .query_row(
+                    "SELECT after_json FROM operations WHERE operation_id='old-restore'",
+                    [],
+                    |row| row.get(0),
+                )
+                .unwrap();
+            assert_eq!(
+                serde_json::from_str::<AfterBody>(&pending)
+                    .unwrap()
+                    .maps
+                    .len(),
+                1
+            );
+            Ok(())
+        })
+        .await
+        .unwrap();
+    storage.close().await.unwrap();
+}
+
+fn library_query(folder: Option<&str>, text: &str) -> markbridge_protocol::LibraryQuery {
+    use markbridge_protocol::{FolderScope, LibraryQuery, RequiredNullable};
+    LibraryQuery {
+        folder_id: RequiredNullable(folder.map(id)),
+        folder_scope: if folder.is_some() {
+            FolderScope::Children
+        } else {
+            FolderScope::All
+        },
+        query: Title::new(text).unwrap(),
+        tag_ids: vec![],
+        include_summary: false,
+        include_note: false,
+        offset: count(0),
+        limit: count(200),
+        expected_revision: RequiredNullable(None),
+        expected_source_epoch: RequiredNullable(None),
+    }
+}
+
+#[tokio::test]
+async fn library_pages_reach_10001_and_reject_revision_and_epoch_changes() {
+    use markbridge_protocol::RequiredNullable;
+    let directory = tempfile::tempdir().unwrap();
+    let storage = Storage::open(directory.path().join("query.sqlite"))
+        .await
+        .unwrap();
+    storage.create_profile(profile("profile-a")).await.unwrap();
+    let mut nodes = vec![node("0", None, 0, None)];
+    nodes.extend((0..10001).map(|index| {
+        node(
+            &format!("match-{index}"),
+            Some("0"),
+            index,
+            Some("https://example.invalid"),
+        )
+    }));
+    let snapshot = TreeSnapshot {
+        source_epoch: epoch(1),
+        revision: count(1),
+        barrier_seq: count(1),
+        nodes,
+    };
+    storage
+        .replace_tree(id("profile-a"), id("session-a"), snapshot.clone())
+        .await
+        .unwrap();
+    for query in [library_query(Some("0"), ""), library_query(None, "match-")] {
+        let mut request = query;
+        let mut ids = Vec::new();
+        loop {
+            let page = storage
+                .query_library(id("profile-a"), request.clone())
+                .await
+                .unwrap();
+            assert_eq!(page.total.get(), 10001);
+            assert!(page.items.len() <= 200);
+            ids.extend(page.items.iter().map(|node| node.chrome_id.clone()));
+            let Some(next) = page.next_offset.0 else {
+                break;
+            };
+            request.offset = next;
+            request.expected_revision = RequiredNullable(Some(page.revision));
+            request.expected_source_epoch = RequiredNullable(Some(page.source_epoch));
+        }
+        assert_eq!(ids.len(), 10001);
+        assert_eq!(
+            ids.iter().collect::<std::collections::HashSet<_>>().len(),
+            10001
+        );
+        assert_eq!(ids.last(), Some(&id("match-10000")));
+    }
+    let mut stale = library_query(Some("0"), "");
+    stale.offset = count(200);
+    stale.expected_revision = RequiredNullable(Some(count(1)));
+    stale.expected_source_epoch = RequiredNullable(Some(epoch(1)));
+    let mut changed = snapshot;
+    changed.revision = count(2);
+    changed.barrier_seq = count(2);
+    storage
+        .replace_tree(id("profile-a"), id("session-a"), changed)
+        .await
+        .unwrap();
+    assert_eq!(
+        storage
+            .query_library(id("profile-a"), stale.clone())
+            .await
+            .unwrap_err(),
+        ErrorCode::Conflict
+    );
+    storage
+        .reset_source_epoch(id("profile-a"), epoch(2))
+        .await
+        .unwrap();
+    stale.expected_revision = RequiredNullable(Some(count(0)));
+    assert_eq!(
+        storage
+            .query_library(id("profile-a"), stale)
+            .await
+            .unwrap_err(),
+        ErrorCode::Conflict
+    );
+    storage.close().await.unwrap();
+}
+
+#[tokio::test]
+async fn library_query_intersects_folder_text_tags_and_optional_sidecar_without_profile_leaks() {
+    use markbridge_protocol::FolderScope;
+    let directory = tempfile::tempdir().unwrap();
+    let storage = Storage::open(directory.path().join("query.sqlite"))
+        .await
+        .unwrap();
+    for name in ["profile-a", "profile-b"] {
+        storage.create_profile(profile(name)).await.unwrap();
+        storage
+            .replace_tree(id(name), id("session-a"), tree(1))
+            .await
+            .unwrap();
+    }
+    let bookmark = storage
+        .bookmarks(id("profile-a"), epoch(1))
+        .await
+        .unwrap()
+        .into_iter()
+        .find(|row| row.node.chrome_id == id("42"))
+        .unwrap()
+        .bookmark_id;
+    storage
+        .set_metadata(
+            bookmark.clone(),
+            Metadata {
+                display_title: None,
+                summary: Some("摘要needle".into()),
+                note: "中文备注 ' OR 1=1 --".into(),
+                updated_at: count(1),
+            },
+        )
+        .await
+        .unwrap();
+    storage
+        .call(move |conn| {
+            conn.execute("INSERT INTO tags VALUES('tag-a','测试','测试')", [])
+                .map_err(storage_error)?;
+            conn.execute("INSERT INTO tags VALUES('tag-b','其他','其他')", [])
+                .map_err(storage_error)?;
+            conn.execute(
+                "INSERT INTO bookmark_tags VALUES(?1,'tag-a')",
+                [bookmark.as_str()],
+            )
+            .map_err(storage_error)?;
+            Ok(())
+        })
+        .await
+        .unwrap();
+    let mut query = library_query(Some("1"), "合成");
+    query.folder_scope = FolderScope::Subtree;
+    query.tag_ids = vec![id("tag-a")];
+    assert_eq!(
+        storage
+            .query_library(id("profile-a"), query.clone())
+            .await
+            .unwrap()
+            .items[0]
+            .chrome_id,
+        id("42")
+    );
+    assert!(
+        storage
+            .query_library(id("profile-b"), query.clone())
+            .await
+            .unwrap()
+            .items
+            .is_empty()
+    );
+    query.tag_ids.push(id("tag-b"));
+    assert!(
+        storage
+            .query_library(id("profile-a"), query.clone())
+            .await
+            .unwrap()
+            .items
+            .is_empty()
+    );
+    query.tag_ids.pop();
+    query.query = Title::new("摘要needle").unwrap();
+    assert!(
+        storage
+            .query_library(id("profile-a"), query.clone())
+            .await
+            .unwrap()
+            .items
+            .is_empty()
+    );
+    query.include_summary = true;
+    assert_eq!(
+        storage
+            .query_library(id("profile-a"), query.clone())
+            .await
+            .unwrap()
+            .total
+            .get(),
+        1
+    );
+    query.query = Title::new("中文").unwrap();
+    query.include_note = true;
+    assert_eq!(
+        storage
+            .query_library(id("profile-a"), query.clone())
+            .await
+            .unwrap()
+            .total
+            .get(),
+        1
+    );
+    query.query = Title::new("' OR 1=1 --").unwrap();
+    assert_eq!(
+        storage
+            .query_library(id("profile-a"), query.clone())
+            .await
+            .unwrap()
+            .total
+            .get(),
+        1
+    );
+    query.folder_id.0 = Some(id("2"));
+    assert!(
+        storage
+            .query_library(id("profile-a"), query)
+            .await
+            .unwrap()
+            .items
+            .is_empty()
+    );
+    storage.close().await.unwrap();
+}
+
+#[tokio::test]
+async fn library_query_preserves_tree_order_and_total_on_empty_or_past_end_pages() {
+    use markbridge_protocol::{FolderScope, RequiredNullable};
+    let directory = tempfile::tempdir().unwrap();
+    let storage = Storage::open(directory.path().join("query.sqlite"))
+        .await
+        .unwrap();
+    storage.create_profile(profile("profile-a")).await.unwrap();
+    storage
+        .replace_tree(id("profile-a"), id("session-a"), tree(1))
+        .await
+        .unwrap();
+    for (folder, scope, expected) in [
+        (
+            None,
+            FolderScope::All,
+            vec!["0", "1", "42", "43", "2", "managed", "managed-child"],
+        ),
+        (Some("0"), FolderScope::Children, vec!["1", "2", "managed"]),
+        (Some("1"), FolderScope::Subtree, vec!["42", "43"]),
+        (Some("2"), FolderScope::Children, vec![]),
+    ] {
+        // Text matches both folders and bookmarks; pagination must keep preorder
+        // while counting all matches even when an offset produces an empty page.
+        let mut query = library_query(folder, "合成");
+        query.folder_scope = scope;
+        query.limit = count(2);
+        query.expected_revision = RequiredNullable(Some(count(1)));
+        query.expected_source_epoch = RequiredNullable(Some(epoch(1)));
+        for offset in 0..=expected.len() + 1 {
+            query.offset = count(offset as u64);
+            let page = storage
+                .query_library(id("profile-a"), query.clone())
+                .await
+                .unwrap();
+            assert_eq!(page.total.get(), expected.len() as u64);
+            assert_eq!(page.offset, query.offset);
+            assert_eq!(page.revision, count(1));
+            assert_eq!(page.source_epoch, epoch(1));
+            let ids: Vec<_> = page
+                .items
+                .iter()
+                .map(|item| item.chrome_id.as_str())
+                .collect();
+            assert_eq!(
+                ids,
+                expected
+                    .iter()
+                    .skip(offset)
+                    .take(2)
+                    .copied()
+                    .collect::<Vec<_>>()
+            );
+            assert_eq!(
+                page.next_offset.0.map(|value| value.get()),
+                (offset + 2 < expected.len()).then_some((offset + 2) as u64)
+            );
+        }
+    }
+    let empty = storage
+        .query_library(id("profile-a"), library_query(None, "absent"))
+        .await
+        .unwrap();
+    assert_eq!(empty.total.get(), 0);
+    assert!(empty.items.is_empty());
+    assert!(empty.next_offset.0.is_none());
+
+    // A removed folder and its children remain tombstoned in the cache but must
+    // never re-enter the traversal or total after a new revision.
+    let mut changed = tree(2);
+    changed
+        .nodes
+        .retain(|node| !["1", "42", "43"].contains(&node.chrome_id.as_str()));
+    storage
+        .replace_tree(id("profile-a"), id("session-a"), changed)
+        .await
+        .unwrap();
+    let current = storage
+        .query_library(id("profile-a"), library_query(None, ""))
+        .await
+        .unwrap();
+    assert_eq!(current.total.get(), 4);
+    assert_eq!(
+        current
+            .items
+            .iter()
+            .map(|node| node.chrome_id.as_str())
+            .collect::<Vec<_>>(),
+        ["0", "2", "managed", "managed-child"]
+    );
+    storage.close().await.unwrap();
+}
+
+#[tokio::test]
 async fn empty_database_enables_wal_foreign_keys_and_numbered_schema() {
     let directory = tempfile::tempdir().unwrap();
     let storage = Storage::open(directory.path().join("app.sqlite"))

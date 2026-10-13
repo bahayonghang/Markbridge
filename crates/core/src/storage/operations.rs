@@ -28,6 +28,7 @@ pub struct StepRecord {
 #[derive(Clone, Debug)]
 pub struct OperationRecord {
     pub operation_id: Id,
+    pub created_at: u64,
     pub profile_id: Id,
     pub source_epoch: SourceEpoch,
     pub state: OperationState,
@@ -49,6 +50,8 @@ pub struct EncodingBody {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BeforeBody {
+    #[serde(default)]
+    pub batch: Option<markbridge_protocol::BatchEditPreview>,
     pub nodes: Vec<BookmarkNode>,
     pub orders: Vec<OrderBody>,
     pub restores: Vec<RestoreBody>,
@@ -76,10 +79,21 @@ pub struct RestoreBody {
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct AfterBody {
+    #[serde(default)]
+    pub batch: Option<BatchProgress>,
     pub maps: Vec<IdMapBody>,
     pub reviewed: bool,
     #[serde(default)]
     pub conflicts: Vec<markbridge_protocol::OperationConflict>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BatchProgress {
+    pub dispatched: usize,
+    pub dispatched_at: u64,
+    pub stopped: bool,
+    pub error: Option<ErrorCode>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -92,6 +106,28 @@ pub struct IdMapBody {
 }
 
 impl Storage {
+    pub async fn export_sidecar_entries(
+        &self,
+        profile_id: Id,
+        epoch: SourceEpoch,
+    ) -> Result<serde_json::Value> {
+        self.call(move |conn| {
+            let mut statement = conn.prepare("SELECT c.bookmark_id,c.chrome_id,m.display_title,m.summary,COALESCE(m.note,''),m.raw_title,m.last_encoded_title FROM bookmarks_cache c LEFT JOIN bookmark_metadata m ON m.bookmark_id=c.bookmark_id WHERE c.profile_id=?1 AND c.source_epoch=?2 AND c.deleted_at IS NULL ORDER BY c.chrome_id").map_err(storage_error)?;
+            let mut tags = conn.prepare("SELECT t.id,t.name FROM bookmark_tags b JOIN tags t ON t.id=b.tag_id WHERE b.bookmark_id=?1 ORDER BY t.normalized_name,t.id").map_err(storage_error)?;
+            let rows = statement.query_map(params![profile_id.as_str(), epoch.get() as i64], |row| {
+                Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?, row.get::<_, Option<String>>(2)?, row.get::<_, Option<String>>(3)?, row.get::<_, String>(4)?, row.get::<_, Option<String>>(5)?, row.get::<_, Option<String>>(6)?))
+            }).map_err(storage_error)?;
+            let mut entries = Vec::new();
+            for row in rows {
+                let (bookmark, chrome, display, summary, note, raw_title, encoded_title) = row.map_err(storage_error)?;
+                let labels = tags.query_map([&bookmark], |row| Ok(serde_json::json!({"tagId": row.get::<_, String>(0)?, "name": row.get::<_, String>(1)?})))
+                    .map_err(storage_error)?.collect::<std::result::Result<Vec<_>, _>>().map_err(storage_error)?;
+                entries.push(serde_json::json!({"bookmarkId": bookmark, "chromeId": chrome, "displayTitle": display, "summary": summary, "note": note, "rawTitle": raw_title, "lastEncodedTitle": encoded_title, "tags": labels}));
+            }
+            Ok(serde_json::Value::Array(entries))
+        }).await
+    }
+
     pub async fn sidecar_rows(
         &self,
         profile_id: Id,
@@ -257,8 +293,8 @@ impl Storage {
         now: u64,
     ) -> Result<()> {
         self.call(move |conn| {
-            let mut statement = conn.prepare("SELECT operation_id,after_json FROM operations WHERE profile_id=?1 AND after_json IS NOT NULL").map_err(storage_error)?;
-            let rows = statement.query_map([profile_id.as_str()], |row| Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?))).map_err(storage_error)?;
+            let mut statement = conn.prepare("SELECT operation_id,after_json FROM operations WHERE profile_id=?1 AND source_epoch=?2 AND after_json IS NOT NULL").map_err(storage_error)?;
+            let rows = statement.query_map(params![profile_id.as_str(), epoch.get() as i64], |row| Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?))).map_err(storage_error)?;
             let pending: Vec<(String, AfterBody)> = rows.filter_map(|row| {
                 let (id, json) = row.ok()?;
                 let body: AfterBody = serde_json::from_str(&json).ok()?;
@@ -299,10 +335,10 @@ fn reviewed(after_json: Option<&str>) -> bool {
 }
 
 fn load_operation(conn: &rusqlite::Connection, operation_id: &str) -> Result<OperationRecord> {
-    let (profile, epoch, state, before_json, after_json) = conn.query_row(
-        "SELECT profile_id,source_epoch,state,before_json,after_json FROM operations WHERE operation_id=?1",
+    let (profile, epoch, state, before_json, after_json, created_at) = conn.query_row(
+        "SELECT profile_id,source_epoch,state,before_json,after_json,created_at FROM operations WHERE operation_id=?1",
         [operation_id],
-        |row| Ok((row.get::<_, String>(0)?, row.get::<_, i64>(1)?, row.get::<_, String>(2)?, row.get::<_, String>(3)?, row.get::<_, Option<String>>(4)?)),
+        |row| Ok((row.get::<_, String>(0)?, row.get::<_, i64>(1)?, row.get::<_, String>(2)?, row.get::<_, String>(3)?, row.get::<_, Option<String>>(4)?, row.get::<_, i64>(5)?)),
     ).map_err(|_| ErrorCode::InvalidMessage)?;
     let mut statement = conn.prepare("SELECT ordinal,request_id,target,payload,expected_before,expected_child_ids,receipt FROM operation_steps WHERE operation_id=?1 ORDER BY ordinal").map_err(storage_error)?;
     let rows = statement
@@ -343,6 +379,7 @@ fn load_operation(conn: &rusqlite::Connection, operation_id: &str) -> Result<Ope
     }
     Ok(OperationRecord {
         operation_id: Id::new(operation_id)?,
+        created_at: created_at as u64,
         profile_id: Id::new(profile)?,
         source_epoch: SourceEpoch::new(epoch as u64)?,
         state: parse_state(&state)?,

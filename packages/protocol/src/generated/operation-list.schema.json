@@ -65,6 +65,18 @@
         }
       ]
     },
+    "HistoryKind": {
+      "type": "string",
+      "enum": [
+        "create",
+        "update",
+        "move",
+        "delete",
+        "reorder",
+        "mixed",
+        "undo"
+      ]
+    },
     "Id": {
       "type": "string",
       "maxLength": 128,
@@ -118,11 +130,41 @@
           },
           "maxItems": 50
         },
+        "createdAt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Counter"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "errorCode": {
           "$ref": "#/$defs/RequiredNullable"
         },
+        "isBatch": {
+          "type": "boolean",
+          "default": false
+        },
+        "kind": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HistoryKind"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "operationId": {
           "$ref": "#/$defs/Id"
+        },
+        "reviewed": {
+          "type": "boolean",
+          "default": false
         },
         "state": {
           "$ref": "#/$defs/OperationState"

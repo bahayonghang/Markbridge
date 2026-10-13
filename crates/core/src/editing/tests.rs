@@ -815,3 +815,195 @@ fn undo_of_create_then_move_restores_the_folder_index_before_delete() {
     );
     assert!(!conflict.conflicts.is_empty());
 }
+
+#[test]
+fn sparse_delete_undo_restores_order_and_sidecar_identity_and_rejects_external_change() {
+    let snapshot = vec![
+        node("0", None, 0, "", None),
+        node("bar", Some("0"), 0, "Bar", None),
+        node("a", Some("bar"), 0, "A", Some("https://a.test")),
+        node("b", Some("bar"), 1, "B", Some("https://b.test")),
+        node("c", Some("bar"), 2, "C", Some("https://c.test")),
+        node("d", Some("bar"), 3, "D", Some("https://d.test")),
+    ];
+    let mut current = snapshot.clone();
+    let mut steps = vec![];
+    for key in ["a", "c"] {
+        let planned = plan_delete(&current, &id(key)).unwrap();
+        let step = &planned.steps[0];
+        steps.push(StoredStep {
+            request_id: step.request_id.clone(),
+            payload: step.payload.clone(),
+            before: step.expected_before.clone(),
+            after: None,
+            before_child_ids: None,
+            after_child_ids: None,
+            applied: true,
+        });
+        preview_steps(&mut current, &planned.steps).unwrap();
+    }
+    let stored = StoredEdit {
+        operation_id: id("sparse"),
+        state: OperationState::Applied,
+        snapshot,
+        steps,
+        orders: vec![ChildOrder {
+            parent_id: id("bar"),
+            child_ids: ["a", "b", "c", "d"].map(id).to_vec(),
+        }],
+    };
+    let locals: Vec<_> = ["a", "c"]
+        .iter()
+        .map(|key| LocalRef {
+            bookmark_id: id(&format!("local-{key}")),
+            chrome_id: id(key),
+            note: format!("note-{key}"),
+            summary: None,
+            display_title: None,
+        })
+        .collect();
+    let undone = plan_undo(&current, &stored, &locals).unwrap();
+    assert!(undone.conflicts.is_empty());
+    assert_eq!(undone.steps.len(), 2);
+    preview_steps(&mut current, &undone.steps).unwrap();
+    let index = index(&current).unwrap();
+    assert_eq!(
+        index.children["bar"]
+            .iter()
+            .map(|n| n.title.as_str())
+            .collect::<Vec<_>>(),
+        ["A", "B", "C", "D"]
+    );
+    assert_eq!(
+        undone
+            .restores
+            .iter()
+            .map(|hint| hint.old_bookmark_id.as_str())
+            .collect::<Vec<_>>(),
+        ["local-c", "local-a"]
+    );
+    let mut external: Vec<_> = current
+        .into_iter()
+        .filter(|n| {
+            n.chrome_id.as_str() == "0"
+                || n.chrome_id.as_str() == "bar"
+                || n.chrome_id.as_str() == "b"
+                || n.chrome_id.as_str() == "d"
+        })
+        .collect();
+    external
+        .iter_mut()
+        .find(|n| n.chrome_id == id("d"))
+        .unwrap()
+        .position = Position::new(0).unwrap();
+    let conflict = plan_undo(&external, &stored, &locals).unwrap();
+    assert!(conflict.steps.is_empty());
+    assert!(!conflict.conflicts.is_empty());
+}
+
+#[test]
+fn single_delete_rejects_an_unrestorable_subtree_before_confirmation() {
+    let mut nodes = vec![
+        node("0", None, 0, "", None),
+        node("bar", Some("0"), 0, "Bar", None),
+        node("f", Some("bar"), 0, "F", None),
+    ];
+    for i in 0..1000 {
+        nodes.push(node(
+            &format!("n-{i}"),
+            Some("f"),
+            i,
+            "N",
+            Some("https://example.com/"),
+        ));
+    }
+    assert_eq!(
+        plan_delete(&nodes, &id("f")).unwrap_err(),
+        ErrorCode::LimitExceeded
+    );
+    nodes.pop();
+    assert_eq!(plan_delete(&nodes, &id("f")).unwrap().affected, 1000);
+}
+
+#[test]
+fn single_folder_move_and_delete_bind_the_complete_reviewed_subtree() {
+    let nodes = sample();
+    for action in [
+        EditAction::Delete {
+            chrome_id: id("folder"),
+        },
+        EditAction::Move {
+            chrome_id: id("folder"),
+            parent_id: id("other"),
+            position: Position::new(0).unwrap(),
+        },
+    ] {
+        let planned = plan(&nodes, &action, &[], None).unwrap();
+        let subtree = planned.steps[0].expected_subtree.as_ref().unwrap();
+        assert_eq!(
+            subtree
+                .iter()
+                .map(|node| node.chrome_id.as_str())
+                .collect::<Vec<_>>(),
+            ["folder", "child"]
+        );
+        assert_eq!(Some(&subtree[0]), planned.steps[0].expected_before.as_ref());
+    }
+}
+
+#[test]
+fn undo_created_folder_preserves_external_children_and_binds_empty_subtree() {
+    let snapshot = vec![
+        node("0", None, 0, "", None),
+        node("bar", Some("0"), 0, "Bar", None),
+    ];
+    let created = node("created", Some("bar"), 0, "Created", None);
+    let stored = StoredEdit {
+        operation_id: id("create-folder"),
+        state: OperationState::Applied,
+        steps: vec![StoredStep {
+            request_id: id("create-request"),
+            payload: Mutation::Create {
+                parent_id: id("bar"),
+                position: Position::new(0).unwrap(),
+                title: created.title.clone(),
+                url: None,
+            },
+            before: None,
+            after: Some(created.clone()),
+            before_child_ids: None,
+            after_child_ids: None,
+            applied: true,
+        }],
+        orders: vec![],
+        snapshot: snapshot.clone(),
+    };
+    let mut current = snapshot;
+    current.push(created.clone());
+    current.push(node(
+        "external",
+        Some("created"),
+        0,
+        "External work",
+        Some("https://external.test/"),
+    ));
+    let conflict = plan_undo(&current, &stored, &[]).unwrap();
+    assert!(conflict.steps.is_empty());
+    assert_eq!(conflict.conflicts.len(), 1);
+    assert_eq!(conflict.conflicts[0].chrome_id.0, Some(id("created")));
+    assert_eq!(conflict.conflicts[0].field, EditField::Existence);
+
+    current.last_mut().unwrap().url = None;
+    current.last_mut().unwrap().kind = NodeKind::Folder;
+    current.push(node("nested", Some("external"), 0, "Nested", None));
+    let conflict = plan_undo(&current, &stored, &[]).unwrap();
+    assert!(conflict.steps.is_empty());
+    assert_eq!(conflict.conflicts.len(), 1);
+
+    current.truncate(3);
+    let empty = plan_undo(&current, &stored, &[]).unwrap();
+    assert!(empty.conflicts.is_empty());
+    assert_eq!(empty.steps.len(), 1);
+    assert!(matches!(empty.steps[0].payload, Mutation::Delete {}));
+    assert_eq!(empty.steps[0].expected_subtree, Some(vec![created]));
+}

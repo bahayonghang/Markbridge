@@ -116,6 +116,10 @@ function rememberCreate(createdByRequest: Map<string, string>, step: OperationSt
 async function executeStep(port: BookmarkPort, operationId: string, step: OperationStep, createdByRequest: Map<string, string>): Promise<Receipt> {
   const nodes = flatten(await port.getTree());
   const byId = new Map(nodes.map((node) => [node.chromeId, node]));
+  if (step.expectedSubtree) {
+    const subtree = nodes.filter((node) => step.target && contains(byId, step.target, node.chromeId));
+    if (subtree.length !== step.expectedSubtree.length || step.expectedSubtree.some((expected) => !same(byId.get(expected.chromeId), expected))) return receipt(operationId, step.requestId, 'failed', { errorCode: 'CONFLICT' });
+  }
   if (step.payload.kind === 'create') {
     let parentId = step.payload.parentId;
     if (!byId.has(parentId)) {
@@ -163,7 +167,8 @@ async function executeStep(port: BookmarkPort, operationId: string, step: Operat
     return receipt(operationId, step.requestId, applied ? 'applied' : 'failed', { before: parent, after: parent, beforeChildIds: current, afterChildIds: afterIds, errorCode: applied ? null : 'CONFLICT' });
   }
   if (!canMove(target, byId)) return receipt(operationId, step.requestId, 'failed', { errorCode: 'PROTECTED_NODE', before: target });
-  if (target.kind === 'folder') await port.removeTree(target.chromeId);
+  // Chrome rejects a nonempty folder here even if a child appeared after getTree.
+  if (target.kind === 'folder' && step.expectedSubtree?.length !== 1) await port.removeTree(target.chromeId);
   else await port.remove(target.chromeId);
   return receipt(operationId, step.requestId, 'applied', { before: target, after: null });
 }
@@ -217,11 +222,11 @@ function underManaged(node: BookmarkNode, byId: Map<string, BookmarkNode>): bool
 }
 
 function canMove(node: BookmarkNode, byId: Map<string, BookmarkNode>): boolean {
-  return !fixed(node) && !underManaged(node, byId);
+  return !fixed(node) && !underManaged(node, byId) && ![...byId.values()].some((child) => fixed(child) && contains(byId, node.chromeId, child.chromeId));
 }
 
 function canCreate(parent: BookmarkNode, byId: Map<string, BookmarkNode>): boolean {
-  return parent.kind === 'folder' && parent.folderType !== 'managed' && parent.unmodifiable == null && !underManaged(parent, byId);
+  return parent.kind === 'folder' && parent.parentId != null && parent.folderType !== 'managed' && parent.unmodifiable == null && !underManaged(parent, byId);
 }
 
 function contains(byId: Map<string, BookmarkNode>, ancestor: string, node: string): boolean {

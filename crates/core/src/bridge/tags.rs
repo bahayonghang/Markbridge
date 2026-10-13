@@ -22,9 +22,24 @@ impl Bridge {
         chrome_ids: Vec<Id>,
         filter_tag_id: Option<Id>,
     ) -> Result<TagCatalog> {
+        self.tag_catalog_at_epoch(profile_id, chrome_ids, filter_tag_id, None)
+            .await
+    }
+
+    pub async fn tag_catalog_at_epoch(
+        &self,
+        profile_id: Id,
+        chrome_ids: Vec<Id>,
+        filter_tag_id: Option<Id>,
+        expected_source_epoch: Option<SourceEpoch>,
+    ) -> Result<TagCatalog> {
         let inner = self.inner.lock().await;
-        if !inner.profiles.contains_key(profile_id.as_str()) {
-            return Err(ErrorCode::WrongProfile);
+        let profile = inner
+            .profiles
+            .get(profile_id.as_str())
+            .ok_or(ErrorCode::WrongProfile)?;
+        if expected_source_epoch.is_some_and(|epoch| epoch != profile.identity.source_epoch) {
+            return Err(ErrorCode::Conflict);
         }
         inner
             .storage()?
@@ -33,9 +48,22 @@ impl Bridge {
     }
 
     pub async fn mutate_tags(&self, profile_id: Id, command: TagCommand) -> Result<TagCatalog> {
+        self.mutate_tags_at_epoch(profile_id, command, None).await
+    }
+
+    pub async fn mutate_tags_at_epoch(
+        &self,
+        profile_id: Id,
+        command: TagCommand,
+        expected_source_epoch: Option<SourceEpoch>,
+    ) -> Result<TagCatalog> {
         let inner = self.inner.lock().await;
-        if !inner.profiles.contains_key(profile_id.as_str()) {
-            return Err(ErrorCode::WrongProfile);
+        let profile = inner
+            .profiles
+            .get(profile_id.as_str())
+            .ok_or(ErrorCode::WrongProfile)?;
+        if expected_source_epoch.is_some_and(|epoch| epoch != profile.identity.source_epoch) {
+            return Err(ErrorCode::Conflict);
         }
         inner.storage()?.mutate_tags(profile_id, command).await
     }
@@ -47,9 +75,34 @@ impl Bridge {
         chrome_ids: Vec<Id>,
         restore: bool,
     ) -> Result<TitleEncodingPreview> {
+        self.preview_title_encoding_at_epoch(
+            profile_id,
+            expected_revision,
+            chrome_ids,
+            restore,
+            None,
+        )
+        .await
+    }
+
+    pub async fn preview_title_encoding_at_epoch(
+        &self,
+        profile_id: Id,
+        expected_revision: u64,
+        chrome_ids: Vec<Id>,
+        restore: bool,
+        expected_source_epoch: Option<SourceEpoch>,
+    ) -> Result<TitleEncodingPreview> {
         let inner = self.inner.lock().await;
-        let prepared =
-            prepare(&inner, &profile_id, expected_revision, &chrome_ids, restore).await?;
+        let prepared = prepare(
+            &inner,
+            &profile_id,
+            expected_revision,
+            &chrome_ids,
+            restore,
+            expected_source_epoch,
+        )
+        .await?;
         Ok(to_preview(&profile_id, restore, &prepared))
     }
 
@@ -60,9 +113,28 @@ impl Bridge {
         chrome_ids: Vec<Id>,
         restore: bool,
     ) -> Result<ApplyResult> {
+        self.apply_title_encoding_at_epoch(profile_id, expected_revision, chrome_ids, restore, None)
+            .await
+    }
+
+    pub async fn apply_title_encoding_at_epoch(
+        &self,
+        profile_id: Id,
+        expected_revision: u64,
+        chrome_ids: Vec<Id>,
+        restore: bool,
+        expected_source_epoch: Option<SourceEpoch>,
+    ) -> Result<ApplyResult> {
         let mut inner = self.inner.lock().await;
-        let prepared =
-            prepare(&inner, &profile_id, expected_revision, &chrome_ids, restore).await?;
+        let prepared = prepare(
+            &inner,
+            &profile_id,
+            expected_revision,
+            &chrome_ids,
+            restore,
+            expected_source_epoch,
+        )
+        .await?;
         if let Some(error) = prepared.fatal {
             return Err(error);
         }
@@ -92,6 +164,7 @@ impl Bridge {
             self,
             &mut inner,
             PlannedCommit {
+                batch: None,
                 profile_id: &profile_id,
                 epoch,
                 revision: prepared.revision,
@@ -122,6 +195,7 @@ async fn prepare(
     expected_revision: u64,
     chrome_ids: &[Id],
     restore: bool,
+    expected_source_epoch: Option<SourceEpoch>,
 ) -> Result<Prepared> {
     if chrome_ids.is_empty() {
         return Err(ErrorCode::InvalidMessage);
@@ -133,6 +207,9 @@ async fn prepare(
         .profiles
         .get(profile_id.as_str())
         .ok_or(ErrorCode::WrongProfile)?;
+    if expected_source_epoch.is_some_and(|epoch| epoch != profile.identity.source_epoch) {
+        return Err(ErrorCode::Conflict);
+    }
     if expected_revision != profile.view.revision.get() {
         return Err(ErrorCode::StaleProposal);
     }

@@ -1,17 +1,23 @@
-:root { font-family: "Segoe UI", "Microsoft YaHei UI", sans-serif; color: #242c29; background: #f1f3f0; line-height: 1.75; }
+:root { font-family: "Segoe UI", "Microsoft YaHei UI", sans-serif; color: #202733; background: #f3f5f8; line-height: 1.75; }
 body { margin: 0; min-width: 280px; }
 main { padding: 20px; }
-main.options { max-width: 640px; margin: 32px auto; padding: 28px; background: #fff; border: 1px solid #d8ddd8; border-radius: 8px; }
+main.options { max-width: 640px; margin: 32px auto; padding: 28px; background: #fff; border: 1px solid #dee3eb; border-radius: 8px; }
 h1 { font-size: 18px; margin: 0 0 16px; }
 h2 { font-size: 15px; margin: 0 0 8px; }
 p { margin: 8px 0; font-size: 13px; }
-[role="status"] { color: #47554c; font-weight: 600; }
+[role="status"] { color: #606b7c; font-weight: 600; }
 section { margin-top: 24px; }
 label { display: block; margin: 12px 0 6px; font-size: 13px; font-weight: 600; }
-textarea { box-sizing: border-box; width: 100%; resize: vertical; padding: 10px; border: 1px solid #a7b3a9; border-radius: 4px; font: inherit; font-size: 13px; }
-button { margin: 12px 8px 0 0; padding: 7px 12px; border: 1px solid #9aa99d; border-radius: 4px; background: #f1f5ef; color: #243329; font: inherit; font-size: 13px; cursor: pointer; }
-button:active { background: #dce6d9; }
+textarea { box-sizing: border-box; width: 100%; resize: vertical; padding: 10px; border: 1px solid #a6b0bf; border-radius: 7px; font: inherit; font-size: 13px; }
+button { margin: 12px 8px 0 0; padding: 7px 12px; border: 1px solid #a6b0bf; border-radius: 7px; background: #ffffff; color: #202733; font: inherit; font-size: 13px; cursor: pointer; }
+button:active { background: #e8f0fe; }
 button:disabled { opacity: 0.55; cursor: default; }
-:focus-visible { outline: 2px solid #346447; outline-offset: 3px; }
-[role="alert"] { color: #923c30; }
+:focus-visible { outline: 2px solid #1767d2; outline-offset: 3px; }
+[role="alert"] { color: #b43438; }
 @media (max-width: 680px) { main.options { margin: 0; border: 0; border-radius: 0; padding: 20px; } }
+
+#details { white-space: pre-line; overflow-wrap: anywhere; }
+button { min-height: 40px; }
+button[type="submit"] { color: white; border-color: #1767d2; background: #1767d2; }
+button:active:enabled:not(:focus-visible) { transform: scale(.98); }
+@media (prefers-reduced-motion: reduce) { button:active:enabled:not(:focus-visible) { transform: none; } }

@@ -265,6 +265,14 @@ pub struct ApplyResult {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct OperationSummary {
     pub operation_id: Id,
+    #[serde(default)]
+    pub created_at: Option<Counter>,
+    #[serde(default)]
+    pub kind: Option<crate::HistoryKind>,
+    #[serde(default)]
+    pub reviewed: bool,
+    #[serde(default)]
+    pub is_batch: bool,
     pub state: OperationState,
     pub affected: Counter,
     pub error_code: RequiredNullable<ErrorCode>,

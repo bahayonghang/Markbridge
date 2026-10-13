@@ -33,12 +33,17 @@ export function WebPreviewPanel({ profileId, profileName, chromeId, url, native 
     setConfirmClear(false);
     setLocal(null);
   }
+  useEffect(() => {
+    generation.current += 1;
+    setBusy(false);
+    setLocal(null);
+    return () => { generation.current += 1; };
+  }, [profileId, chromeId, url]);
 
   useEffect(() => {
     if (!native) return undefined;
     let alive = true;
     let stop = () => {};
-    void webPreviewState().then((state) => { if (alive) setView(state); }, () => {});
     const pending = subscribeWebPreview((state) => {
       events.current += 1;
       if (alive) setView(state);
@@ -46,7 +51,12 @@ export function WebPreviewPanel({ profileId, profileName, chromeId, url, native 
     void pending.then((unlisten) => {
       if (typeof unlisten !== 'function') return;
       if (!alive) unlisten();
-      else stop = unlisten;
+      else {
+        stop = unlisten;
+        const seen = events.current;
+        const initialGeneration = generation.current;
+        void webPreviewState().then((state) => { if (alive && events.current === seen && generation.current === initialGeneration) setView(state); }, () => {});
+      }
     });
     return () => {
       alive = false;
@@ -81,14 +91,13 @@ export function WebPreviewPanel({ profileId, profileName, chromeId, url, native 
   return (
     <section className="web-preview" aria-label="应用内网页">
       <h4>应用内网页</h4>
-      <p>当前资料：{profileName}</p>
-      <p className="library-detail-url">选中网址：{url ?? '无'}</p>
-      <p>应用内网页会打开所选网址，并运行该站点自己的脚本。这里的登录只保存在当前资料的预览会话里，不读取 Chrome 的登录状态。不是每个网站都能在这里打开。</p>
-      <p>关闭预览窗口后，当前资料的预览会话会保留。清除后，该资料的预览 Cookie 和本地存储会被删除。主窗口和其他资料使用各自的存储。</p>
+      <p className="secondary">当前资料：{profileName}</p>
+      <p className="library-detail-url" tabIndex={0}>选中网址：{url ?? '无'}</p>
+      <p className="secondary">在独立窗口浏览完整网页，不读取 Chrome 的登录状态。</p>
       {view.phase === 'closed' && <p role="status">尚未打开应用内网页。</p>}
       {view.phase === 'loading' && sameProfile && <p role="status">正在打开应用内网页</p>}
       {view.phase === 'ready' && sameProfile && <p role="status">应用内网页已打开</p>}
-      {windowOpen && <p className="library-detail-url">预览窗口网址：{view.currentUrl ?? view.url ?? '尚未载入'}</p>}
+      {windowOpen && <p className="library-detail-url" tabIndex={0}>预览窗口网址：{view.currentUrl ?? view.url ?? '尚未载入'}</p>}
       {windowOpen && !sameProfile && <p role="status">预览窗口当前属于另一个资料。</p>}
       {failed && <p role="status">此网站没有在应用内网页中打开。可以转到 Chrome。应用不保证该网站或 Chrome 登录状态可用。</p>}
       {view.noticeMessage && <p role="status">{view.noticeMessage}</p>}
@@ -101,10 +110,22 @@ export function WebPreviewPanel({ profileId, profileName, chromeId, url, native 
           nextRequest += 1;
           void run(() => openWebPreview(profileId, chromeId, requestId, url), '应用内网页没有打开。可以改用 Chrome。');
         }}>打开应用内网页</button>
+        <button type="button" disabled={!native || !http} onClick={() => {
+          if (!url) return;
+          const current = generation.current;
+          void openHttpUrl(url).catch(() => { if (generation.current === current) setLocal('没有转到 Chrome。'); });
+        }}>在 Chrome 中打开</button>
+      </div>
+      {windowOpen && <div className="edit-actions" aria-label="预览窗口导航">
         <button type="button" disabled={!controls || !view.canGoBack} onClick={() => { void run(() => webPreviewAction('back'), '应用内网页没有后退。'); }}>后退</button>
         <button type="button" disabled={!controls || !view.canGoForward} onClick={() => { void run(() => webPreviewAction('forward'), '应用内网页没有前进。'); }}>前进</button>
         <button type="button" disabled={!controls} onClick={() => { void run(() => webPreviewAction('reload'), '应用内网页没有刷新。'); }}>刷新</button>
         <button type="button" disabled={!native || !windowOpen} onClick={() => { void run(() => webPreviewAction('close'), '预览窗口没有关闭。'); }}>关闭预览</button>
+      </div>}
+      <details className="detail-disclosure"><summary>网页会话与隐私</summary>
+        <p>网页会运行站点自己的脚本。这里的登录只保存在当前资料的预览会话里。不是每个网站都能在这里打开。</p>
+        <p>关闭预览窗口后，当前资料的预览会话会保留。清除后，该资料的预览 Cookie 和本地存储会被删除。主窗口和其他资料使用各自的存储。</p>
+        <div className="edit-actions">
         <button type="button" disabled={!native || busy} onClick={() => { setConfirmClear(true); }}>清除此资料的预览会话</button>
         {confirmClear && <button type="button" disabled={!native || busy} onClick={() => {
           const requestId = `wp${nextRequest}`;
@@ -116,11 +137,8 @@ export function WebPreviewPanel({ profileId, profileName, chromeId, url, native 
             }
           });
         }}>确认清除预览会话</button>}
-        <button type="button" disabled={!native || !http} onClick={() => {
-          if (!url) return;
-          void openHttpUrl(url).catch(() => { setLocal('没有转到 Chrome。'); });
-        }}>在 Chrome 中打开</button>
       </div>
+      </details>
     </section>
   );
 }

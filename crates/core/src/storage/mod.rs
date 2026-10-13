@@ -10,13 +10,14 @@ use std::{
 use tokio::sync::{mpsc, oneshot};
 
 pub(crate) mod ai;
+mod library;
 pub(crate) mod maintenance;
 mod operations;
 pub(crate) mod preview;
 mod tags;
 pub(crate) use operations::{
-    AfterBody, BeforeBody, EncodingBody, IdMapBody, OperationRecord, OrderBody, RestoreBody,
-    SidecarRow, StepRecord,
+    AfterBody, BatchProgress, BeforeBody, EncodingBody, IdMapBody, OperationRecord, OrderBody,
+    RestoreBody, SidecarRow, StepRecord,
 };
 
 const MIGRATIONS: &[&str] = &[

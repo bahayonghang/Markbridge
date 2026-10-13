@@ -7,6 +7,28 @@ import validateLibraryPage from './generated/library-page.validator.js';
 import validateLibrarySearch from './generated/library-search.validator.js';
 import validateLibraryDetail from './generated/library-detail.validator.js';
 import validateLibraryCount from './generated/library-count.validator.js';
+import validateLibraryQuery from './generated/library-query.validator.js';
+import validateLibraryQueryPage from './generated/library-query-page.validator.js';
+import type { LibraryQuery } from './generated/library-query';
+import type { LibraryQueryPage } from './generated/library-query-page';
+export type { LibraryQuery, FolderScope } from './generated/library-query';
+export type { LibraryQueryPage } from './generated/library-query-page';
+
+export function parseLibraryQuery(value: unknown): LibraryQuery {
+  if (!validateLibraryQuery(value) || value.limit < 1 || value.limit > 200 || value.offset > 100000
+    || new Set(value.tagIds).size !== value.tagIds.length
+    || (value.folderScope !== 'all' && value.folderId == null)
+    || (value.offset > 0 && (value.expectedRevision == null || value.expectedSourceEpoch == null))) throw new Error('INVALID_LIBRARY_QUERY');
+  return value;
+}
+
+export function parseLibraryQueryPage(value: unknown): LibraryQueryPage {
+  if (!validateLibraryQueryPage(value) || (value.items.length > 0 && value.offset + value.items.length > value.total)
+    || (value.nextOffset != null && (value.items.length === 0 || value.nextOffset !== value.offset + value.items.length || value.nextOffset >= value.total))
+    || (value.nextOffset == null && value.offset + value.items.length < value.total)
+    || new Set(value.items.map((node) => node.chromeId)).size !== value.items.length) throw new Error('INVALID_LIBRARY_QUERY_PAGE');
+  return value;
+}
 import validateEditPreview from './generated/edit-preview.validator.js';
 import validateApplyResult from './generated/apply-result.validator.js';
 import validateOperationList from './generated/operation-list.validator.js';

@@ -20,6 +20,7 @@ markbridge-protocol.workspace = true
 [target.'cfg(windows)'.dependencies]
 webview2-com = "0.39"
 windows-core = "0.62"
+windows-sys = { version = "0.61.2", features = ["Win32_UI_Controls_Dialogs", "Win32_Storage_FileSystem"] }
 
 [dev-dependencies]
 tempfile = "3"

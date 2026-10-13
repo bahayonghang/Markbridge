@@ -1,5 +1,6 @@
 import type { PreviewImage } from '@markbridge/protocol';
 import { useContentPreview } from './useContentPreview';
+import { cacheTime } from '../settings/source-status';
 
 const mediaTypes = new Set(['image/png', 'image/jpeg', 'image/gif', 'image/webp']);
 
@@ -21,11 +22,12 @@ export function ContentPreviewPanel({ profileId, chromeId, url }: { profileId: s
       {preview?.status === 'failed' && <p>{preview.failureMessage ?? '页面响应无效'}</p>}
       {preview && preview.status !== 'failed' && <>
         <p className="library-detail-title">{preview.title ?? '没有标题'}</p>
-        <p>{preview.summary ?? '没有可显示的摘要'}</p>
+        <p className="preview-summary" tabIndex={0} aria-label="缓存正文">{preview.summary ?? '没有可显示的摘要'}</p>
+        <p className="secondary">{preview.status === 'cached' ? '离线缓存' : '内容缓存'} · {cacheTime(preview.fetchedAt)}</p>
         {preview.cacheLabel && <p className="secondary">{preview.cacheLabel}</p>}
         {src ? <img src={src} alt={preview.image?.sourceLabel ? `来源图片 ${preview.image.sourceLabel}` : '来源图片'} /> : preview.imageFailureMessage ? <p>{preview.imageFailureMessage}</p> : <p className="secondary">没有来源图片</p>}
       </>}
-      {http && <p className="secondary">登录或动态页面需要你在 Chrome 里点击扩展图标后再采集。桌面不能授予扩展当前页权限。</p>}
+      {http && <details className="detail-disclosure"><summary>登录或动态页面如何采集</summary><p className="secondary">在 Chrome 里点击扩展图标后采集。桌面不能授予扩展当前页权限。</p></details>}
       <div className="edit-actions">
         <button type="button" onClick={refresh}>重新读取</button>
         <button type="button" className="secondary-button" onClick={cancel}>取消</button>

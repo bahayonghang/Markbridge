@@ -117,3 +117,7 @@ Use actual Rust serialization and TypeScript serialization for both fixture dire
 Incorrect: cast JSON.parse output to WireMessage. Correct: use parseWireFrame, then enforce authenticated Profile/session binding in the caller.
 
 Incorrect: infer authorization from a parsed apply_operation. Correct: require the later explicit user confirmation, live state and operation engine checks before any Chrome write.
+
+## R06 local history and export DTOs
+
+Rust `history.rs` defines OperationDetail, UndoPreview and ExportSaveResult; generated schema, TypeScript and standalone Ajv validators are updated together. `packages/protocol/src/history.ts` validates every backend response. Undo affected count must equal the complete steps array length. A saved export requires metadata and no error; cancelled cannot carry an error; failed requires a stable error code. No output path or file body is allowed in the save result. A generated type alone does not validate a response or authorize undo.

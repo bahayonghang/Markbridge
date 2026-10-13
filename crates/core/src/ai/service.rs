@@ -65,6 +65,24 @@ pub(crate) struct Gate {
 }
 
 impl Gate {
+    pub(crate) async fn begin_unique(&self, request_id: &Id) -> Result<CancelFlag, ErrorCode> {
+        let mut requests = self.inner.lock().await;
+        if requests.contains_key(request_id.as_str()) {
+            return Err(ErrorCode::Conflict);
+        }
+        let flag = CancelFlag::new();
+        requests.insert(request_id.as_str().to_owned(), flag.clone());
+        Ok(flag)
+    }
+    pub(crate) async fn finish(&self, request_id: &Id, flag: &CancelFlag) {
+        let mut requests = self.inner.lock().await;
+        if requests
+            .get(request_id.as_str())
+            .is_some_and(|current| current.same_request(flag))
+        {
+            requests.remove(request_id.as_str());
+        }
+    }
     pub(crate) async fn begin(&self, request_id: &Id) -> CancelFlag {
         let flag = CancelFlag::new();
         self.inner

@@ -52,3 +52,9 @@ Good: a binary with only virtual source prefixes passes. Base: CI builds and sca
 ### 7. Incorrect and correct usage
 
 Incorrect: use Web asset scanning or a debug executable to approve the native release asset. Correct: build the release executable with path remapping, then scan that exact artifact. Native rendering and normal-close evidence remain a separate gate.
+
+R05 native acceptance uses MARKBRIDGE_APP_DATA to isolate both SQLite/preview sessions and the trusted main WebView. Before Tauri builds windows, configure only label main to use <override>/main-webview. Validate that the override is absolute; without it, retain normal default paths. Do not set WEBVIEW2_USER_DATA_FOLDER for multi-Profile preview tests: that global override defeats each preview's data_directory and produces false session-sharing results. Check actual remote-page loads and denied IPC separately from HTTP resource hits. PowerShell 5.1 defaults to a legacy code page; pass Unicode window titles as arguments rather than placing them in UTF-8-without-BOM script literals.
+
+## Conditional undo of created folders
+
+When undoing creation, check the current tree after simulating earlier inverse steps: a folder must be empty before planning its removal. External descendants produce an existence conflict, not a recursive delete. Bind the empty folder as the complete single-node `expectedSubtree` so the extension rechecks it and uses non-recursive removal at the actual effect. Keep valid create-then-move inverse ordering. Regressions: `crates/core/src/editing/tests.rs` and `apps/extension/src/executor.test.ts`.

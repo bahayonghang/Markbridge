@@ -1,6 +1,6 @@
 # Backend Guidelines
 
-Read [Project baseline](../project-baseline.md) first. Child 01 provides the Rust workspace and startup IPC. Child 02 adds shared protocol and the SQLite storage worker. Child 03 adds the authenticated read-only Bridge and synchronization. Browser mutations remain child 06 contracts. Runtime acceptance results belong in child evidence.
+Read [Project baseline](../project-baseline.md) first. Rust owns SQLite writes and the authenticated Bridge, query/edit/backup/history services, restricted content retrieval and optional AI requests. The extension executes confirmed browser mutations under the child 06 contract. Redesign R01–R07 acceptance and completed R08 integration (with the explicitly recorded sleep-test waiver) are recorded separately from the legacy implementation evidence.
 
 | Guide | Scope |
 |---|---|

@@ -33,6 +33,7 @@ export type ErrorCode =
       | 'CANCELLED'
     )
   | 'PATH_UNAVAILABLE';
+export type HistoryKind = 'create' | 'update' | 'move' | 'delete' | 'reorder' | 'mixed' | 'undo';
 export type OperationState =
   | 'planned'
   | 'applying'
@@ -56,8 +57,12 @@ export interface OperationSummary {
    * @maxItems 50
    */
   conflicts: OperationConflict[];
+  createdAt?: Counter | null;
   errorCode: RequiredNullable;
+  isBatch?: boolean;
+  kind?: HistoryKind | null;
   operationId: Id;
+  reviewed?: boolean;
   state: OperationState;
 }
 export interface OperationConflict {

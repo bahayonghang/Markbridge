@@ -175,3 +175,15 @@ describe('versioned wire contract', () => {
     }
   });
 });
+
+it('validates reviewed subtrees and retains legacy move payload compatibility', () => {
+  const before: BookmarkNode = { chromeId: 'folder', parentId: 'bar', position: 0, kind: 'folder', title: 'F', url: null };
+  const child: BookmarkNode = { chromeId: 'leaf', parentId: 'folder', position: 0, kind: 'bookmark', title: 'L', url: 'https://example.com/' };
+  const value = { protocolVersion: 1, type: 'apply_operation', profileId: 'p', sessionId: 's', requestId: 'r', seq: null, payload: { operationId: 'op', sourceEpoch: 1, expectedRevision: 1, steps: [{ requestId: 'step', target: 'folder', expectedBefore: before, expectedChildIds: null, expectedSubtree: [before, child], payload: { kind: 'delete' } }] } };
+  expect(parseWireMessage(value)).toEqual(value);
+  for (const subtree of [[], [child], [before, { ...child, parentId: 'outside' }], [{ ...before, title: 'Changed' }, child], [before, child, child], Array.from({ length: 100001 }, () => before)]) {
+    expect(() => parseWireMessage({ ...value, payload: { ...value.payload, steps: [{ ...value.payload.steps[0], expectedSubtree: subtree }] } })).toThrow();
+  }
+  const legacy = structuredClone(value); delete (legacy.payload.steps[0] as { expectedSubtree?: unknown }).expectedSubtree;
+  expect(parseWireMessage(legacy)).toEqual(legacy);
+});

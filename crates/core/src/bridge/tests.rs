@@ -119,6 +119,138 @@ async fn full(bridge: &Bridge, profile: &Id, session: &str, seq: u64) {
 }
 
 #[tokio::test]
+async fn local_metadata_and_title_drafts_reject_reused_chrome_ids_after_epoch_reset() {
+    let (bridge, _directory, _) = fixture().await;
+    let (profile, secret) = paired(&bridge, "instance").await;
+    bridge
+        .authenticate(&origin(), &hello(&profile, "instance", "s", &secret))
+        .await
+        .unwrap();
+    full(&bridge, &profile, "s", 0).await;
+    let ids = vec![Id::new("42").unwrap()];
+    let old_epoch = SourceEpoch::new(1).unwrap();
+    let new_epoch = SourceEpoch::new(2).unwrap();
+    let original = bridge
+        .mutate_tags_at_epoch(
+            profile.clone(),
+            TagCommand::SetNote {
+                chrome_ids: ids.clone(),
+                note: "old identity note".into(),
+            },
+            Some(old_epoch),
+        )
+        .await
+        .unwrap();
+    let old_bookmark = original.entries[0].bookmark_id.clone();
+
+    // A new source reuses Chrome's node ID and revision; its local identity must differ.
+    {
+        let mut inner = bridge.inner.lock().await;
+        let storage = inner.storage().unwrap();
+        storage
+            .reset_source_epoch(profile.clone(), new_epoch)
+            .await
+            .unwrap();
+        storage
+            .replace_tree(
+                profile.clone(),
+                Id::new("s2").unwrap(),
+                TreeSnapshot {
+                    source_epoch: new_epoch,
+                    revision: Counter::new(0).unwrap(),
+                    barrier_seq: Counter::new(0).unwrap(),
+                    nodes: nodes(),
+                },
+            )
+            .await
+            .unwrap();
+        inner
+            .profiles
+            .get_mut(profile.as_str())
+            .unwrap()
+            .identity
+            .source_epoch = new_epoch;
+    }
+    bridge
+        .disconnected(&profile, &Id::new("s").unwrap(), None)
+        .await;
+    assert_eq!(
+        bridge
+            .tag_catalog_at_epoch(profile.clone(), ids.clone(), None, Some(old_epoch))
+            .await
+            .unwrap_err(),
+        ErrorCode::Conflict
+    );
+    assert_eq!(
+        bridge
+            .mutate_tags_at_epoch(
+                profile.clone(),
+                TagCommand::SetNote {
+                    chrome_ids: ids.clone(),
+                    note: "stale draft".into(),
+                },
+                Some(old_epoch)
+            )
+            .await
+            .unwrap_err(),
+        ErrorCode::Conflict
+    );
+    assert_eq!(
+        bridge
+            .preview_title_encoding_at_epoch(
+                profile.clone(),
+                0,
+                ids.clone(),
+                false,
+                Some(old_epoch)
+            )
+            .await
+            .unwrap_err(),
+        ErrorCode::Conflict
+    );
+    assert_eq!(
+        bridge
+            .apply_title_encoding_at_epoch(profile.clone(), 0, ids.clone(), false, Some(old_epoch))
+            .await
+            .unwrap_err(),
+        ErrorCode::Conflict
+    );
+
+    let fresh = bridge
+        .tag_catalog_at_epoch(profile.clone(), ids.clone(), None, Some(new_epoch))
+        .await
+        .unwrap();
+    assert_ne!(fresh.entries[0].bookmark_id, old_bookmark);
+    assert_eq!(fresh.entries[0].note, "");
+    let saved = bridge
+        .mutate_tags_at_epoch(
+            profile.clone(),
+            TagCommand::SetNote {
+                chrome_ids: ids,
+                note: "new offline identity note".into(),
+            },
+            Some(new_epoch),
+        )
+        .await
+        .unwrap();
+    assert_eq!(saved.entries[0].note, "new offline identity note");
+    let inner = bridge.inner.lock().await;
+    assert_eq!(
+        inner
+            .storage()
+            .unwrap()
+            .metadata(old_bookmark)
+            .await
+            .unwrap()
+            .unwrap()
+            .note,
+        "old identity note"
+    );
+    drop(inner);
+    bridge.shutdown().await.unwrap();
+}
+
+#[tokio::test]
 async fn pairing_requires_confirmation_and_binds_origin_instance_and_expiry() {
     let (bridge, _dir, credentials) = fixture().await;
     let offer = bridge.begin_pairing("Desktop name".into()).await.unwrap();
@@ -2391,6 +2523,143 @@ async fn apply_organization_returns_before_edit_when_the_cached_revision_changes
 }
 
 #[tokio::test]
+async fn organization_request_can_cancel_before_job_response_and_rejects_late_model_output() {
+    struct LateFolders {
+        started: Arc<tokio::sync::Notify>,
+        calls: Arc<AtomicUsize>,
+    }
+    impl crate::ai::ModelTransport for LateFolders {
+        fn post<'a>(
+            &'a self,
+            request: &'a crate::ai::ModelRequest,
+        ) -> std::pin::Pin<
+            Box<
+                dyn std::future::Future<
+                        Output = std::result::Result<
+                            crate::ai::ModelResponse,
+                            crate::ai::ModelError,
+                        >,
+                    > + Send
+                    + 'a,
+            >,
+        > {
+            Box::pin(async move {
+                self.calls.fetch_add(1, Ordering::SeqCst);
+                self.started.notify_one();
+                request.cancel.cancelled().await;
+                // A transport can finish with valid data after cancellation was requested.
+                Ok(crate::ai::ModelResponse {
+                    status: 200,
+                    body: serde_json::json!({"message":{"content":"{\"folders\":[{\"name\":\"Reading\",\"parent\":null}]}"}}).to_string(),
+                    retry_after: None,
+                })
+            })
+        }
+    }
+    let (mut bridge, _directory, _, profile, _) = live_org().await;
+    let mut outbound = bind_session(&bridge, &profile, "s").await;
+    let started = Arc::new(tokio::sync::Notify::new());
+    let calls = Arc::new(AtomicUsize::new(0));
+    bridge.model_transport = Arc::new(LateFolders {
+        started: started.clone(),
+        calls: calls.clone(),
+    });
+    bridge
+        .save_ai_config(
+            true,
+            "ollama".into(),
+            "http://127.0.0.1:9".into(),
+            "fixture".into(),
+        )
+        .await
+        .unwrap();
+    let request_id = Id::new("organization-cancel-before-response").unwrap();
+    let pending = {
+        let bridge = bridge.clone();
+        let profile = profile.clone();
+        let request_id = request_id.clone();
+        tokio::spawn(async move {
+            bridge
+                .propose_organization_with_request(
+                    profile,
+                    vec![Id::new("10").unwrap()],
+                    Some(request_id),
+                )
+                .await
+        })
+    };
+    tokio::time::timeout(Duration::from_secs(5), started.notified())
+        .await
+        .unwrap();
+    assert!(
+        bridge
+            .propose_organization_with_request(
+                profile.clone(),
+                vec![Id::new("10").unwrap()],
+                Some(request_id.clone()),
+            )
+            .await
+            .is_err()
+    );
+    bridge.cancel_ai(request_id.clone()).await.unwrap();
+    let result = tokio::time::timeout(Duration::from_secs(5), pending)
+        .await
+        .unwrap()
+        .unwrap()
+        .unwrap();
+    assert_eq!(result.job_id, request_id);
+    assert_eq!(result.phase, OrganizationPhase::Cancelled);
+    assert_eq!(result.failure.0, Some(ErrorCode::Cancelled));
+    assert!(result.folders.is_empty());
+    assert!(result.operation_id.0.is_none());
+    assert_eq!(calls.load(Ordering::SeqCst), 1);
+    assert_eq!(
+        bridge.organization_plan(request_id).await.unwrap().phase,
+        OrganizationPhase::Cancelled
+    );
+    assert!(
+        bridge
+            .list_operations(profile)
+            .await
+            .unwrap()
+            .operations
+            .is_empty()
+    );
+    assert!(outbound.try_recv().is_err());
+    bridge.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn organization_request_releases_gate_after_preparation_failure_and_completion() {
+    let (bridge, _directory, _, profile, _) = live_org().await;
+    let request = Id::new("organization-retry-preparation").unwrap();
+    assert_eq!(
+        bridge
+            .propose_organization_with_request(
+                Id::new("missing-profile").unwrap(),
+                vec![Id::new("10").unwrap()],
+                Some(request.clone()),
+            )
+            .await
+            .unwrap_err(),
+        ErrorCode::WrongProfile
+    );
+    let result = bridge
+        .propose_organization_with_request(
+            profile,
+            vec![Id::new("10").unwrap()],
+            Some(request.clone()),
+        )
+        .await
+        .unwrap();
+    assert_eq!(result.job_id, request);
+    // AI remains disabled; completing a failed plan still releases the registration.
+    assert_eq!(result.phase, OrganizationPhase::Failed);
+    assert!(bridge.ai_gate.begin_unique(&request).await.is_ok());
+    bridge.shutdown().await.unwrap();
+}
+
+#[tokio::test]
 async fn cleanup_organization_without_confirm_does_not_delete() {
     let (bridge, _directory, _credentials, profile, _secret) = live_org().await;
     let mut outbound = bind_session(&bridge, &profile, "s").await;
@@ -2515,7 +2784,7 @@ async fn open_leaves_an_unacked_edit_create_uncertain_and_does_not_replay() {
         .authenticate(&origin(), &hello(&profile, "instance", "s", &secret))
         .await
         .unwrap();
-    accept_tree(&bridge, &profile, "s", 0, nodes()).await;
+    accept_tree(&bridge, &profile, "s", 0, org_nodes()).await;
     let revision = bridge
         .state()
         .await
@@ -2531,7 +2800,7 @@ async fn open_leaves_an_unacked_edit_create_uncertain_and_does_not_replay() {
             profile.clone(),
             revision,
             EditAction::Create {
-                parent_id: Id::new("0").unwrap(),
+                parent_id: Id::new("1").unwrap(),
                 position: Position::new(1).unwrap(),
                 title: Title::new("added").unwrap(),
                 url: Some(Url::new("https://example.com/added").unwrap()),
@@ -2559,7 +2828,7 @@ async fn open_leaves_an_unacked_edit_create_uncertain_and_does_not_replay() {
         .await
         .unwrap();
     let mut restarted = bind_session(&bridge, &profile, "s2").await;
-    accept_tree(&bridge, &profile, "s2", 0, nodes()).await;
+    accept_tree(&bridge, &profile, "s2", 0, org_nodes()).await;
     let mut queried = false;
     while let Ok(message) = restarted.try_recv() {
         assert!(
@@ -3228,7 +3497,8 @@ async fn cleanup_preview_confirm_receipt_and_undo() {
         "s",
         0,
         vec![
-            fixture_node("0", None, 0, true, "root", None),
+            fixture_node("root", None, 0, true, "root", None),
+            fixture_node("0", Some("root"), 0, true, "bar", None),
             fixture_node("10", Some("0"), 0, false, "keeper", Some(same)),
             fixture_node("11", Some("0"), 1, false, "gone-a", Some(same)),
             fixture_node("21", Some("0"), 2, false, "gone-b", Some(same)),
@@ -3770,4 +4040,1064 @@ async fn text_search_is_profile_scoped() {
         .unwrap();
     assert!(again.hits.iter().any(|hit| hit.bookmark_id == id_a));
     bridge.shutdown().await.unwrap();
+}
+
+async fn daily_batch_fixture(
+    count: usize,
+) -> (
+    Bridge,
+    tempfile::TempDir,
+    Id,
+    mpsc::UnboundedReceiver<WireMessage>,
+) {
+    let (bridge, directory, _) = fixture().await;
+    let (profile, secret) = paired(&bridge, "batch-instance").await;
+    bridge
+        .authenticate(
+            &origin(),
+            &hello(&profile, "batch-instance", "batch-session", &secret),
+        )
+        .await
+        .unwrap();
+    let mut tree: Vec<BookmarkNode> = serde_json::from_value(serde_json::json!([
+        {"chromeId":"0","parentId":null,"position":0,"kind":"folder","title":"root","url":null},
+        {"chromeId":"bar","parentId":"0","position":0,"kind":"folder","title":"Bar","url":null,"folderType":"bookmarks-bar"},
+        {"chromeId":"dest","parentId":"bar","position":0,"kind":"folder","title":"Target","url":null},
+        {"chromeId":"folder","parentId":"bar","position":1,"kind":"folder","title":"Folder","url":null},
+        {"chromeId":"child","parentId":"folder","position":0,"kind":"bookmark","title":"Child","url":"https://example.com/child"}
+    ])).unwrap();
+    for index in 0..count {
+        tree.push(serde_json::from_value(serde_json::json!({"chromeId":format!("item-{index}"),"parentId":"bar","position":index+2,"kind":"bookmark","title":format!("Item {index}"),"url":"https://example.com/"})).unwrap());
+    }
+    accept_tree(&bridge, &profile, "batch-session", 0, tree).await;
+    let (tx, rx) = mpsc::unbounded_channel();
+    bridge
+        .bind_outbound(&profile, &Id::new("batch-session").unwrap(), tx)
+        .await;
+    (bridge, directory, profile, rx)
+}
+fn batch_ids(count: usize) -> Vec<Id> {
+    (0..count)
+        .map(|index| Id::new(format!("item-{index}")).unwrap())
+        .collect()
+}
+async fn batch_preview(bridge: &Bridge, profile: &Id, count: usize) -> BatchEditPreview {
+    let revision = bridge.state().await.profiles[0].revision.get();
+    bridge
+        .preview_batch_edit(
+            profile.clone(),
+            revision,
+            batch_ids(count),
+            BatchEditAction::Move {
+                parent_id: Id::new("dest").unwrap(),
+            },
+        )
+        .await
+        .unwrap()
+}
+async fn batch_ack(bridge: &Bridge, profile: &Id, message: WireMessage, state: OperationState) {
+    let WireMessage::ApplyOperation { payload, .. } = message else {
+        panic!("apply expected")
+    };
+    assert_eq!(payload.steps.len(), 1);
+    let step = &payload.steps[0];
+    assert!(step.expected_subtree.is_some());
+    let mut after = step.expected_before.clone();
+    if let Mutation::Move {
+        parent_id,
+        position,
+    } = &step.payload
+    {
+        let node = after.as_mut().unwrap();
+        node.parent_id = Some(parent_id.clone());
+        node.position = *position;
+    } else if matches!(step.payload, Mutation::Delete {}) {
+        after = None;
+    }
+    if state == OperationState::Applied {
+        let before = step.expected_before.as_ref().unwrap();
+        let seq = bridge
+            .inner
+            .lock()
+            .await
+            .profiles
+            .get(profile.as_str())
+            .unwrap()
+            .seq
+            + 1;
+        let event = match &step.payload {
+            Mutation::Move {
+                parent_id,
+                position,
+            } => BookmarkEvent::Moved {
+                chrome_id: before.chrome_id.clone(),
+                old_parent_id: before.parent_id.clone().unwrap(),
+                old_position: before.position,
+                parent_id: parent_id.clone(),
+                position: *position,
+            },
+            Mutation::Delete {} => BookmarkEvent::Removed {
+                chrome_id: before.chrome_id.clone(),
+                parent_id: before.parent_id.clone().unwrap(),
+                position: before.position,
+                subtree: step.expected_subtree.clone().unwrap(),
+            },
+            _ => unreachable!(),
+        };
+        let event: WireMessage = serde_json::from_value(serde_json::json!({"protocolVersion":1,"type":"event","profileId":profile,"sessionId":"batch-session","requestId":null,"seq":seq,"payload":{"sourceEpoch":1,"event":event}})).unwrap();
+        bridge.receive(event).await.unwrap();
+    }
+    let message = envelope(
+        "operation_receipt",
+        profile,
+        &Id::new("batch-session").unwrap(),
+        Some(step.request_id.clone()),
+        serde_json::to_value(Receipt {
+            operation_id: payload.operation_id.clone(),
+            request_id: step.request_id.clone(),
+            state: state.clone(),
+            before: step.expected_before.clone(),
+            after,
+            before_child_ids: None,
+            after_child_ids: None,
+            error_code: if state == OperationState::Applied {
+                None
+            } else {
+                Some(ErrorCode::Conflict)
+            },
+        })
+        .unwrap(),
+    )
+    .unwrap();
+    bridge.receive(message).await.unwrap();
+}
+#[tokio::test]
+async fn daily_batch_review_binds_identity_revision_hash_and_deduplicates_subtrees() {
+    let (bridge, _dir, profile, mut rx) = daily_batch_fixture(3).await;
+    let rev = bridge.state().await.profiles[0].revision.get();
+    let preview = bridge
+        .preview_batch_edit(
+            profile.clone(),
+            rev,
+            vec![Id::new("folder").unwrap(), Id::new("child").unwrap()],
+            BatchEditAction::Delete {},
+        )
+        .await
+        .unwrap();
+    assert_eq!(preview.items.len(), 1);
+    assert_eq!(preview.affected.get(), 2);
+    assert_eq!(preview.selected_count.get(), 2);
+    assert!(rx.try_recv().is_err());
+    assert_eq!(
+        bridge
+            .apply_batch_edit(
+                Id::new("wrong").unwrap(),
+                preview.plan_id.clone(),
+                preview.plan_hash.clone(),
+                false
+            )
+            .await
+            .unwrap_err(),
+        ErrorCode::StaleProposal
+    );
+    assert_eq!(
+        bridge
+            .apply_batch_edit(
+                profile.clone(),
+                preview.plan_id.clone(),
+                Id::new("wrong").unwrap(),
+                false
+            )
+            .await
+            .unwrap_err(),
+        ErrorCode::StaleProposal
+    );
+    for target in ["0", "folder", "child"] {
+        assert!(
+            bridge
+                .preview_batch_edit(
+                    profile.clone(),
+                    rev,
+                    vec![Id::new("folder").unwrap()],
+                    BatchEditAction::Move {
+                        parent_id: Id::new(target).unwrap()
+                    }
+                )
+                .await
+                .is_err()
+        );
+    }
+    let next = batch_preview(&bridge, &profile, 3).await;
+    assert_eq!(
+        bridge
+            .apply_batch_edit(profile.clone(), preview.plan_id, preview.plan_hash, false)
+            .await
+            .unwrap_err(),
+        ErrorCode::StaleProposal
+    );
+    bridge
+        .inner
+        .lock()
+        .await
+        .profiles
+        .get_mut(profile.as_str())
+        .unwrap()
+        .view
+        .revision = Counter::new(rev + 1).unwrap();
+    assert_eq!(
+        bridge
+            .apply_batch_edit(profile.clone(), next.plan_id, next.plan_hash, false)
+            .await
+            .unwrap_err(),
+        ErrorCode::StaleProposal
+    );
+    assert!(rx.try_recv().is_err());
+    bridge.shutdown().await.unwrap();
+}
+#[tokio::test]
+async fn daily_batch_serializes_sixty_steps_and_stops_at_fortieth_conflict() {
+    let (bridge, dir, profile, mut rx) = daily_batch_fixture(60).await;
+    let preview = batch_preview(&bridge, &profile, 60).await;
+    let result = bridge
+        .apply_batch_edit(
+            profile.clone(),
+            preview.plan_id.clone(),
+            preview.plan_hash.clone(),
+            false,
+        )
+        .await
+        .unwrap();
+    assert_eq!(result.items[0].state, BatchItemState::InFlight);
+    assert_eq!(result.items[59].state, BatchItemState::NotExecuted);
+    assert!(
+        bridge
+            .apply_batch_edit(profile.clone(), preview.plan_id, preview.plan_hash, false)
+            .await
+            .is_err()
+    );
+    let backup_files: Vec<_> = std::fs::read_dir(dir.path().join("backups"))
+        .unwrap()
+        .collect();
+    assert_eq!(backup_files.len(), 2);
+    for index in 0..40 {
+        let message = rx.try_recv().unwrap();
+        assert!(rx.try_recv().is_err());
+        batch_ack(
+            &bridge,
+            &profile,
+            message,
+            if index == 39 {
+                OperationState::Failed
+            } else {
+                OperationState::Applied
+            },
+        )
+        .await;
+    }
+    assert!(rx.try_recv().is_err());
+    let status = bridge
+        .get_batch_edit(profile.clone(), result.operation_id)
+        .await
+        .unwrap();
+    assert!(status.stopped);
+    assert_eq!(
+        status
+            .items
+            .iter()
+            .filter(|i| i.state == BatchItemState::Applied)
+            .count(),
+        39
+    );
+    assert_eq!(status.items[39].state, BatchItemState::Conflict);
+    assert_eq!(status.items[40].state, BatchItemState::NotExecuted);
+    bridge.shutdown().await.unwrap();
+}
+#[tokio::test]
+async fn daily_batch_cancel_and_lost_ack_keep_unsent_items_distinct_and_never_resume() {
+    for cancel in [true, false] {
+        let (bridge, _dir, profile, mut rx) = daily_batch_fixture(3).await;
+        let preview = batch_preview(&bridge, &profile, 3).await;
+        let result = bridge
+            .apply_batch_edit(profile.clone(), preview.plan_id, preview.plan_hash, false)
+            .await
+            .unwrap();
+        let sent = rx.try_recv().unwrap();
+        if cancel {
+            bridge
+                .cancel_batch_edit(profile.clone(), result.operation_id.clone())
+                .await
+                .unwrap();
+        } else {
+            let inner = bridge.inner.lock().await;
+            let record = inner
+                .storage()
+                .unwrap()
+                .operation(result.operation_id.clone())
+                .await
+                .unwrap();
+            let mut after: crate::storage::AfterBody =
+                serde_json::from_str(record.after_json.as_deref().unwrap()).unwrap();
+            after.batch.as_mut().unwrap().dispatched_at = 0;
+            inner
+                .storage()
+                .unwrap()
+                .set_operation_state(
+                    result.operation_id.clone(),
+                    OperationState::Applying,
+                    Some(serde_json::to_string(&after).unwrap()),
+                )
+                .await
+                .unwrap();
+        }
+        let status = bridge
+            .get_batch_edit(profile.clone(), result.operation_id.clone())
+            .await
+            .unwrap();
+        assert!(status.stopped);
+        assert_eq!(status.items[0].state, BatchItemState::Uncertain);
+        assert_eq!(status.items[1].state, BatchItemState::NotExecuted);
+        batch_ack(&bridge, &profile, sent, OperationState::Applied).await;
+        assert!(rx.try_recv().is_err());
+        let status = bridge
+            .get_batch_edit(profile.clone(), result.operation_id)
+            .await
+            .unwrap();
+        assert!(status.stopped);
+        assert_eq!(status.items[0].state, BatchItemState::Applied);
+        assert_eq!(status.items[1].state, BatchItemState::NotExecuted);
+        bridge.shutdown().await.unwrap();
+    }
+}
+#[tokio::test]
+async fn daily_batch_backup_and_snapshot_failure_send_nothing() {
+    for failure in ["directory", "snapshot"] {
+        let (bridge, dir, profile, mut rx) = daily_batch_fixture(3).await;
+        let preview = batch_preview(&bridge, &profile, 3).await;
+        if failure == "snapshot" {
+            let db = rusqlite::Connection::open(dir.path().join("cache.sqlite")).unwrap();
+            db.execute_batch("CREATE TRIGGER fail_snapshot BEFORE INSERT ON snapshots BEGIN SELECT RAISE(FAIL, 'test snapshot failure'); END;").unwrap();
+        } else {
+            let blocker = dir.path().join(failure);
+            std::fs::write(&blocker, "blocker").unwrap();
+            bridge.inner.lock().await.backup_dir = blocker.join("backups");
+        }
+        assert_eq!(
+            bridge
+                .apply_batch_edit(profile.clone(), preview.plan_id, preview.plan_hash, false)
+                .await
+                .unwrap_err(),
+            ErrorCode::StorageError
+        );
+        assert!(rx.try_recv().is_err());
+        assert!(
+            bridge
+                .list_operations(profile)
+                .await
+                .unwrap()
+                .operations
+                .is_empty()
+        );
+        bridge.shutdown().await.unwrap();
+    }
+}
+
+#[tokio::test]
+async fn daily_batch_each_backup_file_failure_precedes_dispatch() {
+    for extension in ["html", "json"] {
+        let (bridge, dir, profile, mut rx) = daily_batch_fixture(1).await;
+        let preview = batch_preview(&bridge, &profile, 1).await;
+        std::fs::create_dir_all(dir.path().join("backups")).unwrap();
+        std::fs::create_dir(
+            dir.path()
+                .join("backups")
+                .join(format!("backup-test.{extension}")),
+        )
+        .unwrap();
+        let mut inner = bridge.inner.lock().await;
+        let source = inner.profiles.get(profile.as_str()).unwrap();
+        let nodes = source.nodes.clone();
+        let sender = source.outbound.clone().unwrap();
+        let session = source.session.clone().unwrap();
+        let plan = crate::editing::plan(
+            &nodes,
+            &EditAction::Move {
+                chrome_id: Id::new("item-0").unwrap(),
+                parent_id: Id::new("dest").unwrap(),
+                position: Position::new(0).unwrap(),
+            },
+            &[],
+            None,
+        )
+        .unwrap();
+        let result = edit::commit_planned(
+            &bridge,
+            &mut inner,
+            edit::PlannedCommit {
+                batch: Some(preview),
+                profile_id: &profile,
+                epoch: SourceEpoch::new(1).unwrap(),
+                revision: Counter::new(1).unwrap(),
+                nodes: &nodes,
+                session: &session,
+                sender,
+                plan,
+                encodings: vec![],
+                send_limit: Some(1),
+                operation_id: Some(Id::new("backup-test").unwrap()),
+            },
+        )
+        .await;
+        assert_eq!(result.unwrap_err(), ErrorCode::Conflict);
+        assert!(rx.try_recv().is_err());
+        assert!(
+            inner
+                .storage()
+                .unwrap()
+                .operations_for(profile.clone())
+                .await
+                .unwrap()
+                .is_empty()
+        );
+        drop(inner);
+        bridge.shutdown().await.unwrap();
+    }
+}
+
+#[tokio::test]
+async fn daily_batch_oversized_later_subtree_rejects_all_before_backup_or_send() {
+    let (bridge, dir, profile, mut rx) = daily_batch_fixture(1).await;
+    {
+        let mut inner = bridge.inner.lock().await;
+        let nodes = &mut inner.profiles.get_mut(profile.as_str()).unwrap().nodes;
+        nodes
+            .iter_mut()
+            .find(|n| n.chrome_id.as_str() == "folder")
+            .unwrap()
+            .position = Position::new(2).unwrap();
+        nodes
+            .iter_mut()
+            .find(|n| n.chrome_id.as_str() == "item-0")
+            .unwrap()
+            .position = Position::new(1).unwrap();
+        for i in 1..901 {
+            nodes.push(serde_json::from_value(serde_json::json!({"chromeId":format!("large-{i}"),"parentId":"folder","position":i,"kind":"bookmark","title":"x".repeat(4096),"url":format!("https://example.com/{}", "x".repeat(16000))})).unwrap());
+        }
+    }
+    let revision = revision_of(&bridge, &profile).await;
+    let preview = bridge
+        .preview_batch_edit(
+            profile.clone(),
+            revision,
+            vec![Id::new("item-0").unwrap(), Id::new("folder").unwrap()],
+            BatchEditAction::Move {
+                parent_id: Id::new("dest").unwrap(),
+            },
+        )
+        .await
+        .unwrap();
+    assert_eq!(preview.items[0].chrome_id.as_str(), "item-0");
+    assert_eq!(
+        bridge
+            .apply_batch_edit(profile.clone(), preview.plan_id, preview.plan_hash, false)
+            .await
+            .unwrap_err(),
+        ErrorCode::FrameTooLarge
+    );
+    assert!(rx.try_recv().is_err());
+    assert!(!dir.path().join("backups").exists());
+    assert!(
+        bridge
+            .list_operations(profile)
+            .await
+            .unwrap()
+            .operations
+            .is_empty()
+    );
+    bridge.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn daily_batch_delete_bounds_complete_subtrees_and_move_preserves_current_tree_order() {
+    let (bridge, _dir, profile, mut rx) = daily_batch_fixture(3).await;
+    let mut tree = cached_tree(&bridge, &profile).await;
+    for i in 0..599 {
+        tree.push(serde_json::from_value(serde_json::json!({"chromeId":format!("a-{i}"),"parentId":"dest","position":i,"kind":"bookmark","title":"a","url":"https://example.com/"})).unwrap());
+        if i < 598 {
+            tree.push(serde_json::from_value(serde_json::json!({"chromeId":format!("b-{i}"),"parentId":"folder","position":i+1,"kind":"bookmark","title":"b","url":"https://example.com/"})).unwrap());
+        }
+    }
+    bridge
+        .inner
+        .lock()
+        .await
+        .profiles
+        .get_mut(profile.as_str())
+        .unwrap()
+        .nodes = tree.clone();
+    let rev = revision_of(&bridge, &profile).await;
+    let ids = vec![Id::new("dest").unwrap(), Id::new("folder").unwrap()];
+    assert_eq!(
+        bridge
+            .preview_batch_edit(
+                profile.clone(),
+                rev,
+                ids.clone(),
+                BatchEditAction::Delete {}
+            )
+            .await
+            .unwrap_err(),
+        ErrorCode::LimitExceeded
+    );
+    tree.retain(|n| !n.chrome_id.as_str().starts_with("b-") || n.position.get() < 399);
+    bridge
+        .inner
+        .lock()
+        .await
+        .profiles
+        .get_mut(profile.as_str())
+        .unwrap()
+        .nodes = tree;
+    let boundary = bridge
+        .preview_batch_edit(profile.clone(), rev, ids, BatchEditAction::Delete {})
+        .await
+        .unwrap();
+    assert_eq!(boundary.affected.get(), 1000);
+    assert!(boundary.requires_second_confirm);
+    assert!(rx.try_recv().is_err());
+    // A received move appends C to the snapshot vector even though Chrome positions put C first.
+    let moved = serde_json::from_value(serde_json::json!({"protocolVersion":1,"type":"event","profileId":profile,"sessionId":"batch-session","requestId":null,"seq":1,"payload":{"sourceEpoch":1,"event":{"kind":"moved","chromeId":"item-2","oldParentId":"bar","oldPosition":4,"parentId":"bar","position":2}}})).unwrap();
+    bridge.receive(moved).await.unwrap();
+    let preview = bridge
+        .preview_batch_edit(
+            profile.clone(),
+            revision_of(&bridge, &profile).await,
+            vec![Id::new("item-0").unwrap(), Id::new("item-2").unwrap()],
+            BatchEditAction::Move {
+                parent_id: Id::new("dest").unwrap(),
+            },
+        )
+        .await
+        .unwrap();
+    assert_eq!(
+        preview
+            .items
+            .iter()
+            .map(|n| n.chrome_id.as_str())
+            .collect::<Vec<_>>(),
+        ["item-2", "item-0"]
+    );
+    bridge.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn daily_batch_move_and_sparse_delete_undo_restore_tree_order_and_local_notes() {
+    for delete in [false, true] {
+        let (bridge, _dir, profile, mut rx) = daily_batch_fixture(4).await;
+        bridge
+            .mutate_tags(
+                profile.clone(),
+                TagCommand::SetNote {
+                    chrome_ids: vec![Id::new("item-2").unwrap()],
+                    note: "retained local note".into(),
+                },
+            )
+            .await
+            .unwrap();
+        let original = cached_tree(&bridge, &profile).await;
+        let preview = bridge
+            .preview_batch_edit(
+                profile.clone(),
+                revision_of(&bridge, &profile).await,
+                vec![Id::new("item-0").unwrap(), Id::new("item-2").unwrap()],
+                if delete {
+                    BatchEditAction::Delete {}
+                } else {
+                    BatchEditAction::Move {
+                        parent_id: Id::new("dest").unwrap(),
+                    }
+                },
+            )
+            .await
+            .unwrap();
+        let applied = bridge
+            .apply_batch_edit(profile.clone(), preview.plan_id, preview.plan_hash, false)
+            .await
+            .unwrap();
+        for _ in 0..2 {
+            batch_ack(
+                &bridge,
+                &profile,
+                rx.try_recv().unwrap(),
+                OperationState::Applied,
+            )
+            .await;
+        }
+        let undo = bridge
+            .apply_edit(
+                profile.clone(),
+                revision_of(&bridge, &profile).await,
+                EditAction::Undo {
+                    operation_id: applied.operation_id,
+                },
+                false,
+            )
+            .await
+            .unwrap();
+        assert_eq!(undo.state, OperationState::RollingBack);
+        let WireMessage::ApplyOperation { payload, .. } = rx.try_recv().unwrap() else {
+            panic!("missing undo");
+        };
+        for (i, step) in payload.steps.iter().enumerate() {
+            let (event, after) = match &step.payload {
+                Mutation::Create {
+                    parent_id,
+                    position,
+                    title,
+                    url,
+                } => {
+                    let node = BookmarkNode {
+                        chrome_id: Id::new(format!("restored-{i}")).unwrap(),
+                        parent_id: Some(parent_id.clone()),
+                        position: *position,
+                        kind: NodeKind::Bookmark,
+                        title: title.clone(),
+                        url: url.clone(),
+                        folder_type: None,
+                        unmodifiable: None,
+                        date_added: None,
+                        date_last_used: None,
+                    };
+                    (BookmarkEvent::Created { node: node.clone() }, node)
+                }
+                Mutation::Move {
+                    parent_id,
+                    position,
+                } => {
+                    let before = step.expected_before.clone().unwrap();
+                    let mut after = before.clone();
+                    after.parent_id = Some(parent_id.clone());
+                    after.position = *position;
+                    (
+                        BookmarkEvent::Moved {
+                            chrome_id: before.chrome_id,
+                            old_parent_id: before.parent_id.unwrap(),
+                            old_position: before.position,
+                            parent_id: parent_id.clone(),
+                            position: *position,
+                        },
+                        after,
+                    )
+                }
+                _ => panic!("unexpected inverse"),
+            };
+            let seq = bridge
+                .inner
+                .lock()
+                .await
+                .profiles
+                .get(profile.as_str())
+                .unwrap()
+                .seq
+                + 1;
+            // Chrome events may arrive before the create receipt and identity map.
+            bridge.receive(serde_json::from_value(serde_json::json!({"protocolVersion":1,"type":"event","profileId":profile,"sessionId":"batch-session","requestId":null,"seq":seq,"payload":{"sourceEpoch":1,"event":event}})).unwrap()).await.unwrap();
+            bridge.receive(envelope("operation_receipt", &profile, &Id::new("batch-session").unwrap(), Some(step.request_id.clone()), serde_json::json!({"operationId":payload.operation_id,"requestId":step.request_id,"state":"applied","before":step.expected_before,"after":after,"beforeChildIds":null,"afterChildIds":null,"errorCode":null})).unwrap()).await.unwrap();
+        }
+        let actual = cached_tree(&bridge, &profile).await;
+        let semantics = |nodes: &[BookmarkNode]| {
+            let mut values: Vec<_> = nodes
+                .iter()
+                .map(|n| {
+                    (
+                        n.title.as_str().to_owned(),
+                        n.parent_id
+                            .as_ref()
+                            .and_then(|id| nodes.iter().find(|p| &p.chrome_id == id))
+                            .map(|p| p.title.as_str().to_owned()),
+                        n.position.get(),
+                        n.url.as_ref().map(|u| u.as_str().to_owned()),
+                    )
+                })
+                .collect();
+            values.sort();
+            values
+        };
+        assert_eq!(semantics(&actual), semantics(&original));
+        let history = bridge
+            .operation_detail(profile.clone(), undo.operation_id)
+            .await
+            .unwrap();
+        assert_eq!(history.summary.state, OperationState::RolledBack);
+        assert_eq!(history.summary.kind, Some(HistoryKind::Undo));
+        assert!(history.undo_of.0.is_some());
+        assert_eq!(history.restored.len(), if delete { 2 } else { 0 });
+        assert!(
+            history
+                .restored
+                .iter()
+                .all(|entry| entry.old_chrome_id != entry.new_chrome_id)
+        );
+        let leaf = actual
+            .iter()
+            .find(|n| n.title.as_str() == "Item 2")
+            .unwrap();
+        let rows = bridge
+            .inner
+            .lock()
+            .await
+            .storage()
+            .unwrap()
+            .sidecar_rows(profile.clone(), SourceEpoch::new(1).unwrap())
+            .await
+            .unwrap();
+        assert_eq!(
+            rows.iter()
+                .find(|row| row.chrome_id == leaf.chrome_id)
+                .unwrap()
+                .note,
+            "retained local note"
+        );
+        assert!(rx.try_recv().is_err());
+        bridge.shutdown().await.unwrap();
+    }
+}
+
+#[tokio::test]
+async fn history_exports_one_offline_snapshot_with_tags_notes_and_source_metadata() {
+    let (bridge, _dir, profile, _rx) = daily_batch_fixture(2).await;
+    let ids = vec![Id::new("item-0").unwrap()];
+    bridge
+        .mutate_tags(
+            profile.clone(),
+            TagCommand::SetNote {
+                chrome_ids: ids.clone(),
+                note: "snapshot note".into(),
+            },
+        )
+        .await
+        .unwrap();
+    bridge
+        .mutate_tags(
+            profile.clone(),
+            TagCommand::Add {
+                chrome_ids: ids.clone(),
+                name: "阅读".into(),
+            },
+        )
+        .await
+        .unwrap();
+    let revision = revision_of(&bridge, &profile).await;
+    bridge
+        .inner
+        .lock()
+        .await
+        .profiles
+        .get_mut(profile.as_str())
+        .unwrap()
+        .view
+        .connection = BridgeConnection::CachedReadOnly;
+    let source = ExportSource::Profile {
+        id: profile.clone(),
+    };
+    let snapshot = bridge
+        .export_snapshot(source.clone(), EditDocumentKind::Sidecar)
+        .await
+        .unwrap();
+    assert_eq!(snapshot.metadata.revision.get(), revision);
+    assert_eq!(snapshot.metadata.source_epoch.0.unwrap().get(), 1);
+    assert!(snapshot.metadata.cached_at.0.is_some());
+    bridge
+        .mutate_tags(
+            profile.clone(),
+            TagCommand::SetNote {
+                chrome_ids: ids,
+                note: "changed after capture".into(),
+            },
+        )
+        .await
+        .unwrap();
+    let file: serde_json::Value = serde_json::from_str(&snapshot.body).unwrap();
+    assert_eq!(
+        file["metadata"]["source"],
+        serde_json::to_value(&source).unwrap()
+    );
+    let entry = file["entries"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|entry| entry["chromeId"] == "item-0")
+        .unwrap();
+    assert_eq!(entry["note"], "snapshot note");
+    assert_eq!(entry["tags"][0]["name"], "阅读");
+    let html = bridge
+        .export_snapshot(source, EditDocumentKind::Html)
+        .await
+        .unwrap();
+    assert!(html.body.starts_with("<!DOCTYPE NETSCAPE-Bookmark-file-1>"));
+    assert!(html.body.contains("Markbridge export"));
+    assert!(html.body.contains("https://example.com/"));
+    bridge.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn history_full_undo_preview_is_readonly_and_rejects_a_reused_id_in_a_new_epoch() {
+    let (bridge, _dir, profile, mut rx) = daily_batch_fixture(61).await;
+    let plan = batch_preview(&bridge, &profile, 61).await;
+    let operation = bridge
+        .apply_batch_edit(profile.clone(), plan.plan_id, plan.plan_hash, false)
+        .await
+        .unwrap();
+    for _ in 0..61 {
+        batch_ack(
+            &bridge,
+            &profile,
+            rx.try_recv().unwrap(),
+            OperationState::Applied,
+        )
+        .await;
+    }
+    let revision = revision_of(&bridge, &profile).await;
+    let undo = bridge
+        .preview_undo(profile.clone(), operation.operation_id.clone(), revision)
+        .await
+        .unwrap();
+    assert_eq!(undo.steps.len(), 61);
+    assert_eq!(undo.affected.get(), 61);
+    assert_eq!(undo.steps[0].target.as_ref().unwrap().as_str(), "item-60");
+    assert!(rx.try_recv().is_err());
+    let detail = bridge
+        .operation_detail(profile.clone(), operation.operation_id.clone())
+        .await
+        .unwrap();
+    assert_eq!(detail.summary.kind, Some(HistoryKind::Move));
+    assert!(detail.summary.created_at.unwrap().get() > 0);
+    assert_eq!(detail.steps.len(), 61);
+    assert!(detail.steps.iter().all(|step| {
+        step.receipt
+            .0
+            .as_ref()
+            .is_some_and(|receipt| receipt.state == OperationState::Applied)
+    }));
+    assert_eq!(
+        bridge
+            .operation_detail(
+                Id::new("wrong-profile").unwrap(),
+                operation.operation_id.clone()
+            )
+            .await
+            .unwrap_err(),
+        ErrorCode::WrongProfile
+    );
+    bridge
+        .inner
+        .lock()
+        .await
+        .profiles
+        .get_mut(profile.as_str())
+        .unwrap()
+        .view
+        .connection = BridgeConnection::CachedReadOnly;
+    assert!(
+        !bridge
+            .preview_undo(profile.clone(), operation.operation_id.clone(), revision)
+            .await
+            .unwrap()
+            .writable
+    );
+    {
+        let mut inner = bridge.inner.lock().await;
+        let active = inner.profiles.get_mut(profile.as_str()).unwrap();
+        active.identity.source_epoch = SourceEpoch::new(2).unwrap();
+        active.view.connection = BridgeConnection::Live;
+    }
+    assert_eq!(
+        bridge
+            .preview_undo(profile.clone(), operation.operation_id.clone(), revision)
+            .await
+            .unwrap_err(),
+        ErrorCode::Conflict
+    );
+    assert_eq!(
+        bridge
+            .apply_edit(
+                profile.clone(),
+                revision,
+                EditAction::Undo {
+                    operation_id: operation.operation_id
+                },
+                false
+            )
+            .await
+            .unwrap_err(),
+        ErrorCode::Conflict
+    );
+    assert!(rx.try_recv().is_err());
+    bridge.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn history_single_folder_delete_reads_full_snapshot_after_nested_children_are_gone() {
+    let (bridge, _dir, profile, mut rx) = daily_batch_fixture(0).await;
+    let mut tree = cached_tree(&bridge, &profile).await;
+    tree.iter_mut()
+        .find(|node| node.chrome_id.as_str() == "child")
+        .unwrap()
+        .parent_id = Some(Id::new("nested").unwrap());
+    tree.push(fixture_node(
+        "nested",
+        Some("folder"),
+        0,
+        true,
+        "Nested",
+        None,
+    ));
+    accept_tree(&bridge, &profile, "batch-session", 0, tree).await;
+    let operation = bridge
+        .apply_edit(
+            profile.clone(),
+            revision_of(&bridge, &profile).await,
+            EditAction::Delete {
+                chrome_id: Id::new("folder").unwrap(),
+            },
+            false,
+        )
+        .await
+        .unwrap();
+    batch_ack(
+        &bridge,
+        &profile,
+        rx.try_recv().unwrap(),
+        OperationState::Applied,
+    )
+    .await;
+    let detail = bridge
+        .operation_detail(profile.clone(), operation.operation_id)
+        .await
+        .unwrap();
+    assert_eq!(detail.summary.affected.get(), 3);
+    assert_eq!(detail.steps.len(), 1);
+    assert_eq!(detail.steps[0].deleted_descendants.len(), 2);
+    assert!(
+        detail.steps[0]
+            .deleted_descendants
+            .iter()
+            .any(|node| node.chrome_id.as_str() == "child")
+    );
+    let list = bridge.list_operations(profile.clone()).await.unwrap();
+    assert_eq!(list.operations[0].affected.get(), 3);
+    let undo = bridge
+        .preview_undo(
+            profile.clone(),
+            detail.summary.operation_id,
+            revision_of(&bridge, &profile).await,
+        )
+        .await
+        .unwrap();
+    assert_eq!(undo.steps.len(), 3);
+    bridge.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn daily_batch_large_recovery_frame_rejects_before_any_backup_operation_or_send() {
+    for mode in ["batch-delete", "single-delete", "batch-move"] {
+        let delete = mode != "batch-move";
+        let (bridge, dir, profile, mut rx) = daily_batch_fixture(0).await;
+        let mut ids = vec![];
+        {
+            let mut inner = bridge.inner.lock().await;
+            let tree = &mut inner.profiles.get_mut(profile.as_str()).unwrap().nodes;
+            tree.retain(|n| n.chrome_id.as_str() != "child");
+            for i in 0..840 {
+                let (parent, position) = if delete {
+                    (
+                        if mode == "single-delete" || i >= 420 {
+                            "folder"
+                        } else {
+                            "dest"
+                        },
+                        if mode == "single-delete" { i } else { i % 420 },
+                    )
+                } else {
+                    ("bar", i + 2)
+                };
+                let node: BookmarkNode = serde_json::from_value(serde_json::json!({"chromeId":format!("long-{i}"),"parentId":parent,"position":position,"kind":"bookmark","title":"x".repeat(4096),"url":format!("https://example.com/{}", "x".repeat(16000))})).unwrap();
+                if !delete {
+                    ids.push(node.chrome_id.clone());
+                }
+                tree.push(node);
+            }
+        }
+        if delete {
+            ids = vec![Id::new("dest").unwrap(), Id::new("folder").unwrap()];
+        }
+        if mode == "batch-delete" {
+            let nodes = cached_tree(&bridge, &profile).await;
+            let mut steps = vec![];
+            for id in &ids {
+                steps.extend(
+                    crate::editing::plan(
+                        &nodes,
+                        &EditAction::Delete {
+                            chrome_id: id.clone(),
+                        },
+                        &[],
+                        None,
+                    )
+                    .unwrap()
+                    .steps,
+                );
+            }
+            let mut recovery =
+                crate::editing::recovery_steps_for_frame_check(&nodes, &steps).unwrap();
+            recovery.truncate(800);
+            let within_limit = envelope("apply_operation", &profile, &Id::new("batch-session").unwrap(), Some(Id::new("within-limit").unwrap()), serde_json::json!({"operationId":"recovery-check","sourceEpoch":1,"expectedRevision":1,"steps":recovery})).unwrap();
+            assert!(encode_frame(&within_limit).unwrap().len() < MAX_FRAME_BYTES);
+        }
+        let revision = revision_of(&bridge, &profile).await;
+        let error = if mode == "single-delete" {
+            bridge
+                .apply_edit(
+                    profile.clone(),
+                    revision,
+                    EditAction::Delete {
+                        chrome_id: Id::new("folder").unwrap(),
+                    },
+                    true,
+                )
+                .await
+                .unwrap_err()
+        } else {
+            let preview = bridge
+                .preview_batch_edit(
+                    profile.clone(),
+                    revision,
+                    ids,
+                    if delete {
+                        BatchEditAction::Delete {}
+                    } else {
+                        BatchEditAction::Move {
+                            parent_id: Id::new("dest").unwrap(),
+                        }
+                    },
+                )
+                .await
+                .unwrap();
+            bridge
+                .apply_batch_edit(profile.clone(), preview.plan_id, preview.plan_hash, delete)
+                .await
+                .unwrap_err()
+        };
+        assert_eq!(error, ErrorCode::FrameTooLarge);
+        assert!(rx.try_recv().is_err());
+        assert!(!dir.path().join("backups").exists());
+        assert!(
+            bridge
+                .list_operations(profile)
+                .await
+                .unwrap()
+                .operations
+                .is_empty()
+        );
+        bridge.shutdown().await.unwrap();
+    }
 }

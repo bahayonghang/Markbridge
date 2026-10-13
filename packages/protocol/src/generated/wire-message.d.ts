@@ -311,6 +311,13 @@ export interface OperationStep {
    * @maxItems 100000
    */
   expectedChildIds?: Id[] | null;
+  /**
+   * Optional reviewed subtree for daily grouped move/delete operations.
+   *
+   * @minItems 1
+   * @maxItems 100000
+   */
+  expectedSubtree?: [BookmarkNode, ...BookmarkNode[]] | null;
   payload: Mutation;
   requestId: Id;
   target?: Id | null;

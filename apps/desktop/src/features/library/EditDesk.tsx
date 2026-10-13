@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react';
-import type { BookmarkNode, EditPreview, OperationList } from '@markbridge/protocol';
+import { useEffect, useRef, useState } from 'react';
+import type { BookmarkNode, EditPreview } from '@markbridge/protocol';
 import {
-  applyEdit, exportHtml, exportSidecar, listOperations, previewEdit, refreshOperations, reviewOperation,
+  applyEdit, listOperations, previewEdit,
   type EditAction,
 } from '../../backend';
+
+import { FolderPicker, writableFolder } from './FolderPicker';
 
 type Request = { id: number; action: EditAction };
 
@@ -29,7 +31,7 @@ function noticeFor(state: string, errorCode: string | null): string {
   return '已发送，等待回执。发送成功还不是 Chrome 中的结果。';
 }
 
-export function EditDesk({ profileId, revision, node, siblingIds, folderId, insertParentId, insertPosition, request }: {
+export function EditDesk({ profileId, revision, node, siblingIds, folderId, insertParentId, insertPosition, request, nodes = [], creating = false, profileName, mode = 'edit', live = true }: {
   profileId: string;
   revision: number;
   node: BookmarkNode | null;
@@ -38,36 +40,51 @@ export function EditDesk({ profileId, revision, node, siblingIds, folderId, inse
   insertParentId: string | null;
   insertPosition: number;
   request: Request | null;
+  nodes?: BookmarkNode[];
+  creating?: boolean;
+  profileName?: string;
+  mode?: 'edit';
+  live?: boolean;
 }) {
-  const [title, setTitle] = useState(node?.title ?? '');
-  const [url, setUrl] = useState(node?.url ?? '');
-  const [seen, setSeen] = useState(node?.chromeId ?? '');
-  const [phase, setPhase] = useState<'idle' | 'ready' | 'second' | 'blocked' | 'error'>('idle');
+  const [drafts, setDrafts] = useState<Record<string, { title: string; url: string }>>({});
+  const [createKind, setCreateKind] = useState<'bookmark' | 'folder'>('bookmark');
+  const [createDrafts, setCreateDrafts] = useState({ bookmark: { title: '', url: '' }, folder: { title: '', url: '' } });
+  const [target, setTarget] = useState<string | null>(insertParentId);
+  const [moving, setMoving] = useState(false);
+  const create = creating || !node;
+  const draftKey = `${profileId}:${node?.chromeId ?? ''}`;
+  const draft = create ? createDrafts[createKind] : drafts[draftKey] ?? { title: node?.title ?? '', url: node?.url ?? '' };
+  const { title, url } = draft;
+  const [phase, setPhase] = useState<'idle' | 'loading' | 'ready' | 'second' | 'blocked' | 'error'>('idle');
   const [preview, setPreview] = useState<EditPreview | null>(null);
   const [action, setAction] = useState<EditAction | null>(null);
   const [notice, setNotice] = useState('');
   const [watchId, setWatchId] = useState<string | null>(null);
-  const [history, setHistory] = useState<OperationList['operations']>([]);
-  const [historyError, setHistoryError] = useState(false);
-  if ((node?.chromeId ?? '') !== seen) {
-    setSeen(node?.chromeId ?? '');
-    setTitle(node?.title ?? '');
-    setUrl(node?.url ?? '');
-    setPhase('idle');
-    setPreview(null);
-    setAction(null);
+  const [applying, setApplying] = useState(false);
+  const applyLock = useRef(false);
+  const generation = useRef(0);
+  const draftGeneration = useRef(0);
+  const identity = useRef('');
+  const identityGeneration = useRef(0);
+  const identityKey = `${profileId}:${node?.chromeId ?? ''}:${creating}`;
+  if (identity.current !== identityKey) { identity.current = identityKey; identityGeneration.current += 1; }
+  const context = `${profileId}:${node?.chromeId ?? ''}:${revision}:${creating}`;
+  const current = useRef(context);
+  if (current.current !== context) {
+    current.current = context;
+    generation.current += 1;
+    setPreview(null); setAction(null); setPhase('idle');
+    if (preview || phase === 'loading') setNotice('资料或选择已改变。草稿已保留，请重新预览。');
   }
-
-  useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      try {
-        const list = await listOperations(profileId);
-        if (!cancelled) { setHistory(list.operations); setHistoryError(false); }
-      } catch { if (!cancelled) setHistoryError(true); }
-    })();
-    return () => { cancelled = true; };
-  }, [profileId, revision, notice]);
+  useEffect(() => () => { generation.current += 1; }, []);
+  useEffect(() => { setTarget(insertParentId); }, [insertParentId]);
+  function cancelPreview() { if (applyLock.current) return; generation.current += 1; setPhase('idle'); setPreview(null); setAction(null); }
+  function changeDraft(field: 'title' | 'url', value: string) {
+    draftGeneration.current += 1;
+    cancelPreview();
+    if (create) setCreateDrafts((all) => ({ ...all, [createKind]: { ...all[createKind], [field]: value } }));
+    else setDrafts((all) => ({ ...all, [draftKey]: { ...draft, [field]: value } }));
+  }
 
   useEffect(() => {
     if (!watchId) return undefined;
@@ -91,110 +108,80 @@ export function EditDesk({ profileId, revision, node, siblingIds, folderId, inse
 
   useEffect(() => {
     if (!request) return;
-    let cancelled = false;
-    setWatchId(null);
-    void previewEdit(profileId, revision, request.action).then(
-      (next) => {
-        if (cancelled) return;
-        setAction(request.action);
-        setPreview(next);
-        setPhase(next.writable ? 'ready' : 'blocked');
-        setNotice('');
-      },
-      () => { if (!cancelled) setPhase('error'); },
-    );
-    return () => { cancelled = true; };
-  }, [request, profileId, revision]);
+    void requestPreview(request.action);
+    // A gesture creates one review. Revision changes invalidate it instead of silently re-reviewing.
+  }, [request]);
 
   async function requestPreview(next: EditAction) {
-    setWatchId(null);
-    setNotice('');
+    const expected = current.current;
+    const gen = ++generation.current;
+    setWatchId(null); setNotice(''); setPreview(null); setAction(null); setPhase('loading');
     try {
       const value = await previewEdit(profileId, revision, next);
-      setAction(next);
-      setPreview(value);
-      setPhase(value.writable ? 'ready' : 'blocked');
-    } catch { setPhase('error'); }
+      if (current.current !== expected || generation.current !== gen || value.profileId !== profileId || value.expectedRevision !== revision) return;
+      setAction(next); setPreview(value); setPhase(value.writable ? 'ready' : 'blocked');
+    } catch { if (current.current === expected && generation.current === gen) setPhase('error'); }
   }
 
   async function confirm(second: boolean) {
-    if (!preview?.writable || !action) return;
+    if (applyLock.current || !live || !preview?.writable || !action || preview.expectedRevision !== revision) return;
     if (preview.requiresSecondConfirm && !second) { setPhase('second'); return; }
+    applyLock.current = true; setApplying(true);
+    const expected = identityGeneration.current;
+    const gen = draftGeneration.current;
     try {
       const result = await applyEdit(profileId, preview.expectedRevision, action, preview.requiresSecondConfirm);
-      setPhase('idle');
-      setPreview(null);
-      setAction(null);
+      if (identityGeneration.current !== expected || draftGeneration.current !== gen) return;
+      setPhase('idle'); setPreview(null); setAction(null);
       setNotice(noticeFor(result.state, result.errorCode));
       setWatchId(result.state === 'applying' || result.state === 'rolling_back' ? result.operationId : null);
-    } catch { setPhase('error'); }
+    } catch (error) { if (identityGeneration.current === expected && draftGeneration.current === gen) { setPhase('error'); setPreview(null); setAction(null); setNotice(error === 'FRAME_TOO_LARGE' || error === 'LIMIT_EXCEEDED' ? '范围过大，无法保存完整撤销信息，请缩小选择范围。没有开始浏览器写入。' : '变更未获确认。草稿已保留，请重新预览。'); } }
+    finally { applyLock.current = false; setApplying(false); }
   }
 
-  async function saveExport(kind: 'html' | 'sidecar') {
-    try {
-      const exported = kind === 'html' ? await exportHtml(profileId) : await exportSidecar(profileId);
-      const blob = new Blob([exported.body], { type: 'text/plain;charset=utf-8' });
-      const link = window.document.createElement('a');
-      const objectUrl = URL.createObjectURL(blob);
-      link.href = objectUrl;
-      link.download = kind === 'html' ? 'bookmarks.html' : 'bookmarks-sidecar.json';
-      link.click();
-      URL.revokeObjectURL(objectUrl);
-      setNotice(kind === 'html' ? '已导出 HTML。' : '已导出侧车 JSON。');
-    } catch { setNotice('导出失败。'); }
-  }
-
-  const moveTarget = folderId && node && folderId !== node.chromeId && node.parentId !== folderId;
+  const chosenTarget = target ?? folderId;
+  const targetWritable = nodes.length > 0 ? writableFolder(nodes, chosenTarget) : !!chosenTarget;
+  const position = nodes.length > 0 ? nodes.filter((item) => item.parentId === chosenTarget).length : insertPosition;
   return (
-    <div className="edit-desk">
-      <h3>修改</h3>
-      <p className="secondary">预览和草稿不会修改 Chrome。确认后才会写入。</p>
-      {node && <>
-        <label htmlFor="edit-title">新标题
-          <input id="edit-title" value={title} maxLength={4096} onChange={(event) => setTitle(event.target.value)} />
-        </label>
-        <label htmlFor="edit-url">新网址
-          <input id="edit-url" value={url} maxLength={16384} onChange={(event) => setUrl(event.target.value)} />
-        </label>
-        <div className="edit-actions">
-          <button type="button" onClick={() => void requestPreview({ kind: 'update', chromeId: node.chromeId, title, ...(node.kind === 'bookmark' ? { url } : {}) })}>预览修改</button>
-          <button type="button" disabled={!insertParentId || !title.trim() || !url.trim()} onClick={() => { if (insertParentId) void requestPreview({ kind: 'create', parentId: insertParentId, position: insertPosition, title, url }); }}>预览新书签</button>
-          <button type="button" disabled={!insertParentId || !title.trim()} onClick={() => { if (insertParentId) void requestPreview({ kind: 'create', parentId: insertParentId, position: insertPosition, title }); }}>预览新文件夹</button>
-          <button type="button" onClick={() => void requestPreview({ kind: 'delete', chromeId: node.chromeId })}>预览删除</button>
-          <button type="button" disabled={!shifted(node, siblingIds, -1)} onClick={() => { const next = shifted(node, siblingIds, -1); if (next) void requestPreview(next); }}>上移</button>
-          <button type="button" disabled={!shifted(node, siblingIds, 1)} onClick={() => { const next = shifted(node, siblingIds, 1); if (next) void requestPreview(next); }}>下移</button>
-          {moveTarget && <button type="button" onClick={() => void requestPreview({ kind: 'move', chromeId: node.chromeId, parentId: folderId, position: 0 })}>移到此文件夹</button>}
-        </div>
+    <div className="edit-desk" onKeyDown={(event) => { if (event.key === 'Escape' && phase !== 'idle') { event.stopPropagation(); cancelPreview(); } }}>
+      {mode === 'edit' && <>
+        <h3>{create ? '新建' : '修改'}</h3><p className="secondary">预览和草稿不会修改 Chrome。确认后才会写入。</p>
+        {create && <div className="edit-actions" aria-label="新建类型">
+          <button type="button" aria-pressed={createKind === 'bookmark'} onClick={() => { cancelPreview(); setCreateKind('bookmark'); }}>书签</button>
+          <button type="button" aria-pressed={createKind === 'folder'} onClick={() => { cancelPreview(); setCreateKind('folder'); }}>文件夹</button>
+        </div>}
+        {(node || insertParentId || nodes.length > 0) && <>
+          <label htmlFor="edit-title">{create ? '名称' : '新标题'}<input id="edit-title" value={title} maxLength={4096} onChange={(event) => changeDraft('title', event.target.value)} /></label>
+          {(create ? createKind === 'bookmark' : node?.kind === 'bookmark') && <label htmlFor="edit-url">{create ? '网址' : '新网址'}<input id="edit-url" value={url} maxLength={16384} onChange={(event) => changeDraft('url', event.target.value)} /></label>}
+          {(create || moving) && <FolderPicker nodes={nodes} value={chosenTarget} excluded={create || !node ? [] : [node.chromeId]} onChange={(id) => { cancelPreview(); setTarget(id); }} />}
+          {create && !targetWritable && <p role="status">请选择可写的目标文件夹。</p>}
+          <div className="edit-actions">
+            {create ? <button type="button" disabled={!live || !targetWritable || !title.trim() || (createKind === 'bookmark' && !url.trim()) || applying} onClick={() => { if (chosenTarget) void requestPreview({ kind: 'create', parentId: chosenTarget, position, title, ...(createKind === 'bookmark' ? { url } : {}) }); }}>{createKind === 'bookmark' ? '预览新书签' : '预览新文件夹'}</button> : node && <>
+              <button type="button" disabled={!live || applying} onClick={() => void requestPreview({ kind: 'update', chromeId: node.chromeId, title, ...(node.kind === 'bookmark' ? { url } : {}) })}>预览修改</button>
+              <button type="button" disabled={!live || applying} onClick={() => { cancelPreview(); setMoving((value) => !value); }}>移动</button>
+              {moving && <button type="button" disabled={!live || !targetWritable || chosenTarget === node.parentId || applying} onClick={() => { if (chosenTarget) void requestPreview({ kind: 'move', chromeId: node.chromeId, parentId: chosenTarget, position }); }}>预览移动</button>}
+              <button type="button" disabled={!live || applying} onClick={() => void requestPreview({ kind: 'delete', chromeId: node.chromeId })}>预览删除</button>
+              <button type="button" disabled={!live || applying || !shifted(node, siblingIds, -1)} onClick={() => { const next = shifted(node, siblingIds, -1); if (next) void requestPreview(next); }}>上移</button>
+              <button type="button" disabled={!live || applying || !shifted(node, siblingIds, 1)} onClick={() => { const next = shifted(node, siblingIds, 1); if (next) void requestPreview(next); }}>下移</button>
+            </>}
+          </div>
+        </>}
       </>}
       {phase !== 'idle' && <div className="edit-dialog" role="dialog" aria-label="确认变更">
+        <p>资料：{profileName ?? profileId} · 影响 {preview?.affected ?? 0} 项</p>
+        {phase === 'loading' && <p role="status">正在读取预览。</p>}
         <h4>{phase === 'second' ? '再次确认' : '变更差异'}</h4>
         {phase === 'error' && <p role="alert">无法读取预览。</p>}
-        {preview?.errorCode && <p role="status">{preview.errorCode === 'PROTECTED_NODE' ? '该节点受保护。' : preview.errorCode === 'CONFLICT' ? '与当前书签冲突。确认后仍保留外部值。' : preview.errorCode}</p>}
+        {preview?.errorCode && <p role="status">{preview.errorCode === 'LIMIT_EXCEEDED' ? '单次删除最多 1000 项，包含子文件夹的全部条目，请缩小选择范围。' : preview.errorCode === 'FRAME_TOO_LARGE' ? '范围过大，无法保存完整撤销信息，请缩小选择范围。' : preview.errorCode === 'PROTECTED_NODE' ? '该节点受保护。' : preview.errorCode === 'CONFLICT' ? '与当前书签冲突。确认后仍保留外部值。' : preview.errorCode}</p>}
         {preview?.changes.map((change, index) => <p className="edit-change" key={`${change.field}-${index}`}>{fields[change.field] ?? change.field}：{change.before ?? '无'} → {change.after ?? '无'}</p>)}
         {phase === 'second' && <p>这次变更影响 {preview?.affected ?? 0} 项。需要再次确认才会修改 Chrome。</p>}
         <div className="edit-actions">
-          {phase === 'ready' && <button type="button" onClick={() => void confirm(false)}>{preview?.requiresSecondConfirm ? '继续确认' : '确认变更'}</button>}
-          {phase === 'second' && <button type="button" onClick={() => void confirm(true)}>确认删除</button>}
-          <button type="button" onClick={() => { setPhase('idle'); setPreview(null); setAction(null); }}>取消</button>
+          {phase === 'ready' && <button disabled={!live || applying} type="button" onClick={() => void confirm(false)}>{preview?.requiresSecondConfirm ? '继续确认' : '确认变更'}</button>}
+          {phase === 'second' && <button disabled={!live || applying} type="button" onClick={() => void confirm(true)}>确认删除</button>}
+          <button type="button" disabled={applying} onClick={cancelPreview}>取消</button>
         </div>
       </div>}
       {notice && <p role="status">{notice}</p>}
-      <div className="edit-actions">
-        <button type="button" onClick={() => void saveExport('html')}>导出 HTML</button>
-        <button type="button" onClick={() => void saveExport('sidecar')}>导出侧车 JSON</button>
-        <button type="button" onClick={() => void refreshOperations(profileId).then((list) => setHistory(list.operations), () => setHistoryError(true))}>重新查询回执</button>
-      </div>
-      <div className="edit-history">
-        <h4>操作记录</h4>
-        {historyError && <p role="alert">无法读取操作记录。</p>}
-        {history.length === 0 ? <p className="secondary">还没有操作记录。</p> : <ul>{history.map((item) => <li key={item.operationId}>
-          <span>{item.operationId}</span>
-          <span> {item.state}</span>
-          {item.conflicts.length > 0 && <span> 冲突 {item.conflicts.length} 项</span>}
-          <button type="button" onClick={() => void requestPreview({ kind: 'undo', operationId: item.operationId })}>撤销此记录</button>
-          {(item.state === 'uncertain' || item.state === 'partial' || item.state === 'rollback_conflict') && <button type="button" onClick={() => void reviewOperation(profileId, item.operationId).then((list) => setHistory(list.operations), () => setHistoryError(true))}>标记已核对</button>}
-        </li>)}</ul>}
-      </div>
     </div>
   );
 }

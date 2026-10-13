@@ -22,7 +22,7 @@ export function useContentPreview(profileId: string, chromeId: string, url: stri
     const current = ++generation.current;
     const previous = requestRef.current;
     requestRef.current = null;
-    if (previous) void cancelContentPreview(previous);
+    if (previous) void cancelContentPreview(previous).catch(() => {});
     if (!http) {
       setView({ phase: 'message', message: url ? '仅预览 http 或 https 页面' : '此条目没有可预览的网页地址' });
       return;
@@ -30,12 +30,14 @@ export function useContentPreview(profileId: string, chromeId: string, url: stri
     const requestId = `pv${nextRequest}`;
     nextRequest += 1;
     let alive = true;
+    setView({ phase: 'loading' });
     const timer = window.setTimeout(() => {
+      if (!alive || generation.current !== current) return;
       requestRef.current = requestId;
       setView({ phase: 'loading' });
       void readContentPreview(profileId, chromeId, requestId).then(
         (preview) => {
-          if (!alive || generation.current !== current || preview.requestId !== requestId) return;
+          if (!alive || generation.current !== current || preview.requestId !== requestId || preview.profileId !== profileId || preview.chromeId !== chromeId) return;
           if (preview.status === 'cancelled') {
             setView({ phase: 'message', message: '已取消' });
             return;
@@ -51,6 +53,10 @@ export function useContentPreview(profileId: string, chromeId: string, url: stri
     return () => {
       alive = false;
       window.clearTimeout(timer);
+      if (requestRef.current === requestId) {
+        requestRef.current = null;
+        void cancelContentPreview(requestId).catch(() => {});
+      }
     };
   }, [profileId, chromeId, url, http, nonce]);
 
@@ -62,7 +68,7 @@ export function useContentPreview(profileId: string, chromeId: string, url: stri
     generation.current += 1;
     const requestId = requestRef.current;
     requestRef.current = null;
-    if (requestId) void cancelContentPreview(requestId);
+    if (requestId) void cancelContentPreview(requestId).catch(() => {});
     setView({ phase: 'message', message: '已取消' });
   }
 

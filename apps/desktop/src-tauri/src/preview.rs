@@ -167,28 +167,8 @@ impl PreviewHost {
             self.destroy_preview(app).await?;
         }
         let cleared = remove_session_dir(&self.root, &dir).await;
-        let notice = if cleared {
-            WebPreviewNotice::SessionCleared
-        } else {
-            WebPreviewNotice::SessionBusy
-        };
-        {
-            let mut inner = self.lock();
-            let same = inner
-                .current
-                .as_ref()
-                .is_some_and(|current| current.profile_id == profile_id);
-            if same && let Some(current) = inner.current.as_mut() {
-                current.request_id = request_id;
-                current.notice = Some(notice);
-                if cleared {
-                    current.open = false;
-                    current.phase = WebPreviewPhase::Closed;
-                    current.can_go_back = false;
-                    current.can_go_forward = false;
-                }
-            }
-        }
+        self.lock()
+            .finish_session_clear(&profile_id, request_id, cleared)?;
         Ok(self.publish(app))
     }
 
@@ -436,6 +416,36 @@ impl PreviewHost {
 }
 
 impl Inner {
+    fn finish_session_clear(
+        &mut self,
+        profile_id: &Id,
+        request_id: Id,
+        cleared: bool,
+    ) -> Result<(), ErrorCode> {
+        let current = self
+            .current
+            .as_mut()
+            .filter(|current| current.profile_id == *profile_id);
+        if let Some(current) = current {
+            current.request_id = request_id;
+            current.notice = Some(if cleared {
+                WebPreviewNotice::SessionCleared
+            } else {
+                WebPreviewNotice::SessionBusy
+            });
+            if cleared {
+                current.open = false;
+                current.phase = WebPreviewPhase::Closed;
+                current.can_go_back = false;
+                current.can_go_forward = false;
+            }
+        } else if !cleared {
+            // Another profile's window cannot carry this clear operation's notice.
+            return Err(ErrorCode::StorageError);
+        }
+        Ok(())
+    }
+
     fn snapshot(&self) -> WebPreviewState {
         let Some(current) = &self.current else {
             return empty_state();
@@ -940,6 +950,56 @@ mod tests {
         assert!(session_directory(&root, "a\\b").is_err());
         assert_eq!(remove_session_dir_once(&root, &root), Remove::Refuse);
         let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn clearing_another_profile_cannot_report_success_after_directory_failure() {
+        use super::{Current, Inner};
+        use markbridge_protocol::{Id, WebPreviewPhase};
+
+        let id = |value| Id::new(value).unwrap();
+        let mut inner = Inner {
+            generation: 1,
+            current: Some(Current {
+                generation: 1,
+                profile_id: id("profile-b"),
+                chrome_id: id("node-b"),
+                request_id: id("request-b"),
+                selected_url: "https://example.com/b".into(),
+                current_url: Some("https://example.com/b".into()),
+                phase: WebPreviewPhase::Ready,
+                can_go_back: true,
+                can_go_forward: false,
+                notice: None,
+                open: true,
+                recent_deny: None,
+            }),
+        };
+        let before = inner.snapshot();
+        assert_eq!(
+            inner.finish_session_clear(&id("profile-a"), id("clear-a"), false),
+            Err(ErrorCode::StorageError)
+        );
+        assert_eq!(inner.snapshot(), before);
+        assert_eq!(
+            inner.finish_session_clear(&id("profile-a"), id("clear-a"), true),
+            Ok(())
+        );
+        assert_eq!(inner.snapshot(), before);
+        assert_eq!(
+            inner.finish_session_clear(&id("profile-b"), id("clear-b"), false),
+            Ok(())
+        );
+        assert_eq!(
+            inner.snapshot().notice.0,
+            Some(WebPreviewNotice::SessionBusy)
+        );
+        assert_eq!(inner.snapshot().phase, WebPreviewPhase::Ready);
+        inner.current = None;
+        assert_eq!(
+            inner.finish_session_clear(&id("profile-a"), id("clear-a"), false),
+            Err(ErrorCode::StorageError)
+        );
     }
 
     #[test]

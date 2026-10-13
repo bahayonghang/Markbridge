@@ -1,8 +1,29 @@
 import type { BookmarkNode } from '@markbridge/protocol';
 
-export const LIST_LIMIT = 10_000;
-export const SEARCH_LIMIT = 200;
-export const SEARCH_DEBOUNCE_MS = 200;
+export const PAGE_SIZE = 200;
+
+export function folderPath(index: TreeIndex, chromeId: string | null): BookmarkNode[] {
+  const path: BookmarkNode[] = [];
+  const seen = new Set<string>();
+  let node = chromeId ? index.nodes.get(chromeId) : undefined;
+  while (node && !seen.has(node.chromeId)) {
+    seen.add(node.chromeId);
+    path.push(node);
+    node = node.parentId ? index.nodes.get(node.parentId) : undefined;
+  }
+  return path.reverse();
+}
+
+export function querySnapshot(index: TreeIndex, folderId: string | null, scope: 'all' | 'subtree' | 'children', query: string): BookmarkNode[] {
+  const found: BookmarkNode[] = [];
+  const visit = (node: BookmarkNode) => {
+    if (!query || node.title.includes(query) || node.url?.includes(query)) found.push(node);
+    if (scope !== 'children') for (const child of directChildren(index, node.chromeId)) visit(child);
+  };
+  const roots = scope === 'all' ? [...index.nodes.values()].filter((node) => !node.parentId || !index.nodes.has(node.parentId)).sort(byPosition) : folderId ? directChildren(index, folderId) : looseBookmarks([...index.nodes.values()]);
+  for (const node of roots) visit(node);
+  return found;
+}
 
 export type TreeIndex = {
   nodes: Map<string, BookmarkNode>;
@@ -13,6 +34,8 @@ export type TreeIndex = {
 export type FolderRow = {
   chromeId: string;
   depth: number;
+  positionInSet: number;
+  setSize: number;
   title: string;
   expandable: boolean;
   expanded: boolean;
@@ -51,23 +74,6 @@ function byPosition(left: BookmarkNode, right: BookmarkNode): number {
   return left.position - right.position || left.chromeId.localeCompare(right.chromeId);
 }
 
-export function mergeBranch(index: TreeIndex, nodes: BookmarkNode[]): TreeIndex {
-  const next: TreeIndex = {
-    nodes: new Map(index.nodes),
-    children: new Map(index.children),
-    fetched: new Set(index.fetched),
-  };
-  const ids = new Set(nodes.map((node) => node.chromeId));
-  for (const node of nodes) next.nodes.set(node.chromeId, node);
-  const roots = nodes.filter((node) => node.parentId == null || !ids.has(node.parentId));
-  for (const root of roots) {
-    const childIds = nodes.filter((node) => node.parentId === root.chromeId).sort(byPosition).map((node) => node.chromeId);
-    next.children.set(root.chromeId, childIds);
-    next.fetched.add(root.chromeId);
-  }
-  return next;
-}
-
 export function indexFlat(nodes: BookmarkNode[]): TreeIndex {
   const index = emptyIndex();
   for (const node of nodes) index.nodes.set(node.chromeId, node);
@@ -100,22 +106,25 @@ export function rootFolders(index: TreeIndex): BookmarkNode[] {
 
 export function folderRows(index: TreeIndex, expanded: ReadonlySet<string>): FolderRow[] {
   const rows: FolderRow[] = [];
-  const walk = (id: string, depth: number) => {
+  const walk = (id: string, depth: number, positionInSet: number, setSize: number) => {
     const node = index.nodes.get(id);
     if (!node || node.kind !== 'folder') return;
     const childFolders = (index.children.get(id) ?? []).filter((child) => index.nodes.get(child)?.kind === 'folder');
     rows.push({
       chromeId: id,
       depth,
+      positionInSet,
+      setSize,
       title: displayTitle(node.title),
       expandable: !index.fetched.has(id) || childFolders.length > 0,
       expanded: expanded.has(id),
     });
     if (expanded.has(id)) {
-      for (const child of childFolders) walk(child, depth + 1);
+      childFolders.forEach((child, index) => walk(child, depth + 1, index + 1, childFolders.length));
     }
   };
-  for (const root of rootFolders(index)) walk(root.chromeId, 0);
+  const roots = rootFolders(index);
+  roots.forEach((root, index) => walk(root.chromeId, 0, index + 1, roots.length));
   return rows;
 }
 
@@ -144,28 +153,6 @@ export function ancestorTitles(index: TreeIndex, chromeId: string): string[] {
   }
   names.reverse();
   return names;
-}
-
-export function countSnapshot(index: TreeIndex, folderId: string | null): { folders: number; bookmarks: number } {
-  const tally = { folders: 0, bookmarks: 0 };
-  const add = (node: BookmarkNode) => {
-    if (node.kind === 'folder') tally.folders += 1;
-    else tally.bookmarks += 1;
-  };
-  if (folderId == null) {
-    for (const node of index.nodes.values()) add(node);
-    return tally;
-  }
-  const walk = (id: string) => {
-    for (const child of index.children.get(id) ?? []) {
-      const node = index.nodes.get(child);
-      if (!node) continue;
-      add(node);
-      walk(child);
-    }
-  };
-  walk(folderId);
-  return tally;
 }
 
 // File mirrors have no search method. Filter the getMirrorTree snapshot with the cache rule:

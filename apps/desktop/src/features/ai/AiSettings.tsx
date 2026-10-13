@@ -71,6 +71,7 @@ export function AiSettings({ native }: { native: boolean }) {
       setMessage('请输入密钥。密钥不会写入页面状态。');
       return;
     }
+    if (input) input.value = '';
     void run(async () => {
       const next = await setAiCredential(secret);
       if (input) input.value = '';
@@ -97,8 +98,8 @@ export function AiSettings({ native }: { native: boolean }) {
     <section className="connection-panel ai-desk" aria-labelledby="ai-settings-title">
       <div className="panel-heading"><h2 id="ai-settings-title">AI 建议</h2><span className="secondary">{settings.enabled ? '已启用' : '默认关闭'}</span></div>
       <p className="secondary">模型只生成可编辑建议。确认前不写书签。密钥只进入系统凭据存储。</p>
-      <form className="inline-form" onSubmit={save} noValidate>
-        <label htmlFor="ai-enabled"><input id="ai-enabled" type="checkbox" checked={enabled} onChange={(event) => setEnabled(event.target.checked)} disabled={!native || busy} />启用 AI</label>
+      <form className="ai-config-form" onSubmit={save} noValidate>
+        <label className="ai-enabled-control" htmlFor="ai-enabled"><input id="ai-enabled" type="checkbox" checked={enabled} onChange={(event) => setEnabled(event.target.checked)} disabled={!native || busy} />启用 AI</label>
         <label htmlFor="ai-provider">提供者
           <select id="ai-provider" value={provider} onChange={(event) => setProvider(event.target.value)} disabled={!native || busy}>
             <option value="">未选择</option>
@@ -106,12 +107,13 @@ export function AiSettings({ native }: { native: boolean }) {
             <option value="compatible">兼容端点</option>
           </select>
         </label>
-        <label htmlFor="ai-endpoint">端点<input id="ai-endpoint" value={baseUrl} onChange={(event) => setBaseUrl(event.target.value)} disabled={!native || busy} spellCheck={false} autoCapitalize="off" /></label>
+        <label className="ai-endpoint-control" htmlFor="ai-endpoint">端点<input id="ai-endpoint" value={baseUrl} onChange={(event) => setBaseUrl(event.target.value)} disabled={!native || busy} spellCheck={false} autoCapitalize="off" /></label>
         <label htmlFor="ai-model">模型<input id="ai-model" value={model} onChange={(event) => setModel(event.target.value)} disabled={!native || busy} spellCheck={false} autoCapitalize="off" /></label>
         <button type="submit" disabled={!native || busy}>保存配置</button>
       </form>
       <p className="secondary">{settings.credentialConfigured ? '已保存密钥' : '未保存密钥'} · {schema}</p>
-      <div className="edit-actions">
+      <p className="secondary">保存配置不会连接模型。测试连接仅发送测试提示；书签内容只在整理页主动生成时发送。</p>
+      <div className="edit-actions ai-credentials">
         <label htmlFor="ai-secret">模型密钥<input id="ai-secret" ref={secretRef} type="password" autoComplete="new-password" spellCheck={false} disabled={!native || busy} /></label>
         <button type="button" disabled={!native || busy} onClick={storeSecret}>保存密钥</button>
         <button type="button" className="secondary-button" disabled={!native || busy} onClick={clearSecret}>清除凭据</button>

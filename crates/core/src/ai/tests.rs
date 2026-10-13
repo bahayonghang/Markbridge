@@ -876,3 +876,27 @@ async fn missing_model_is_explicit_and_a_scripted_cache_does_not_use_public_fetc
     assert_eq!(count(&lab.path, "SELECT COUNT(*) FROM ai_jobs"), 0);
     assert_private(&audit.lines());
 }
+#[test]
+fn cancellation_before_a_transport_subscribes_is_retained() {
+    let flag = super::CancelFlag::new();
+    flag.cancel();
+    assert!(flag.is_cancelled());
+}
+
+#[tokio::test]
+async fn unique_gate_cleanup_preserves_a_newer_request() {
+    let gate = Gate::default();
+    let id = Id::new("unique-request").unwrap();
+    let original = gate.begin_unique(&id).await.unwrap();
+    assert!(matches!(
+        gate.begin_unique(&id).await,
+        Err(ErrorCode::Conflict)
+    ));
+    let replacement = gate.begin(&id).await;
+    gate.finish(&id, &original).await;
+    gate.cancel(&id).await;
+    assert!(replacement.is_cancelled());
+    assert!(!original.is_cancelled());
+    gate.finish(&id, &replacement).await;
+    assert!(gate.begin_unique(&id).await.is_ok());
+}

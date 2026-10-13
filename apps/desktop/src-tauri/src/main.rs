@@ -6,12 +6,13 @@ use markbridge_protocol::{
     BridgeState, ChromeProfileList, ContentPreview, Counter, EditAction, EditDocument, EditPreview,
     ErrorCode, Id, LibraryCount, LibraryDetail, LibraryNodes, LibraryPage, LibrarySearch,
     MaintenanceReport, MirrorTree, OperationList, OrganizationFolder, OrganizationPlan,
-    PairingOffer, TagCatalog, TagCommand, TextSearchPage, TitleEncodingPreview,
+    PairingOffer, SourceEpoch, TagCatalog, TagCommand, TextSearchPage, TitleEncodingPreview,
 };
 use std::path::PathBuf;
 use std::sync::Arc;
 use tauri::{Emitter, Manager};
 
+mod export;
 mod preview;
 use preview::{clear_web_preview_session, open_web_preview, web_preview_action, web_preview_state};
 
@@ -303,6 +304,17 @@ async fn cache_search(
 }
 
 #[tauri::command]
+async fn cache_query(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    profile_id: Id,
+    request: markbridge_protocol::LibraryQuery,
+) -> Result<markbridge_protocol::LibraryQueryPage, ErrorCode> {
+    trusted(&window)?;
+    bridge.query_library(profile_id, request).await
+}
+
+#[tauri::command]
 async fn cache_get(
     window: tauri::WebviewWindow,
     bridge: tauri::State<'_, Bridge>,
@@ -326,6 +338,55 @@ async fn cache_count(
 ) -> Result<LibraryCount, ErrorCode> {
     trusted(&window)?;
     library_count(bridge.count(profile_id, folder_id).await?)
+}
+
+#[tauri::command]
+async fn preview_batch_edit(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    profile_id: Id,
+    expected_revision: u64,
+    chrome_ids: Vec<Id>,
+    action: markbridge_protocol::BatchEditAction,
+) -> Result<markbridge_protocol::BatchEditPreview, ErrorCode> {
+    trusted(&window)?;
+    bridge
+        .preview_batch_edit(profile_id, expected_revision, chrome_ids, action)
+        .await
+}
+#[tauri::command]
+async fn apply_batch_edit(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    profile_id: Id,
+    plan_id: Id,
+    plan_hash: Id,
+    second_confirm: bool,
+) -> Result<markbridge_protocol::BatchEditStatus, ErrorCode> {
+    trusted(&window)?;
+    bridge
+        .apply_batch_edit(profile_id, plan_id, plan_hash, second_confirm)
+        .await
+}
+#[tauri::command]
+async fn get_batch_edit(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    profile_id: Id,
+    operation_id: Id,
+) -> Result<markbridge_protocol::BatchEditStatus, ErrorCode> {
+    trusted(&window)?;
+    bridge.get_batch_edit(profile_id, operation_id).await
+}
+#[tauri::command]
+async fn cancel_batch_edit(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    profile_id: Id,
+    operation_id: Id,
+) -> Result<markbridge_protocol::BatchEditStatus, ErrorCode> {
+    trusted(&window)?;
+    bridge.cancel_batch_edit(profile_id, operation_id).await
 }
 
 #[tauri::command]
@@ -365,6 +426,50 @@ async fn list_operations(
 ) -> Result<OperationList, ErrorCode> {
     trusted(&window)?;
     bridge.list_operations(profile_id).await
+}
+
+#[tauri::command]
+async fn operation_detail(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    profile_id: Id,
+    operation_id: Id,
+) -> Result<markbridge_protocol::OperationDetail, ErrorCode> {
+    trusted(&window)?;
+    bridge.operation_detail(profile_id, operation_id).await
+}
+
+#[tauri::command]
+async fn preview_undo(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    profile_id: Id,
+    operation_id: Id,
+    expected_revision: u64,
+) -> Result<markbridge_protocol::UndoPreview, ErrorCode> {
+    trusted(&window)?;
+    bridge
+        .preview_undo(profile_id, operation_id, expected_revision)
+        .await
+}
+
+#[tauri::command]
+async fn save_export(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    source: markbridge_protocol::ExportSource,
+    format: markbridge_protocol::EditDocumentKind,
+) -> Result<markbridge_protocol::ExportSaveResult, ErrorCode> {
+    trusted(&window)?;
+    let _guard = export::SaveGuard::acquire()?;
+    match bridge.export_snapshot(source, format).await {
+        Ok(snapshot) => Ok(export::save(&window, snapshot).await),
+        Err(error) => Ok(markbridge_protocol::ExportSaveResult {
+            status: markbridge_protocol::ExportSaveStatus::Failed,
+            metadata: markbridge_protocol::RequiredNullable(None),
+            error_code: markbridge_protocol::RequiredNullable(Some(error)),
+        }),
+    }
 }
 
 #[tauri::command]
@@ -415,10 +520,11 @@ async fn tag_state(
     profile_id: Id,
     chrome_ids: Vec<Id>,
     filter_tag_id: Option<Id>,
+    expected_source_epoch: Option<SourceEpoch>,
 ) -> Result<TagCatalog, ErrorCode> {
     trusted(&window)?;
     bridge
-        .tag_catalog(profile_id, chrome_ids, filter_tag_id)
+        .tag_catalog_at_epoch(profile_id, chrome_ids, filter_tag_id, expected_source_epoch)
         .await
 }
 
@@ -428,9 +534,12 @@ async fn tag_command(
     bridge: tauri::State<'_, Bridge>,
     profile_id: Id,
     command: TagCommand,
+    expected_source_epoch: Option<SourceEpoch>,
 ) -> Result<TagCatalog, ErrorCode> {
     trusted(&window)?;
-    bridge.mutate_tags(profile_id, command).await
+    bridge
+        .mutate_tags_at_epoch(profile_id, command, expected_source_epoch)
+        .await
 }
 
 #[tauri::command]
@@ -441,10 +550,17 @@ async fn preview_title_encoding(
     expected_revision: u64,
     chrome_ids: Vec<Id>,
     restore: bool,
+    expected_source_epoch: Option<SourceEpoch>,
 ) -> Result<TitleEncodingPreview, ErrorCode> {
     trusted(&window)?;
     bridge
-        .preview_title_encoding(profile_id, expected_revision, chrome_ids, restore)
+        .preview_title_encoding_at_epoch(
+            profile_id,
+            expected_revision,
+            chrome_ids,
+            restore,
+            expected_source_epoch,
+        )
         .await
 }
 
@@ -456,10 +572,17 @@ async fn apply_title_encoding(
     expected_revision: u64,
     chrome_ids: Vec<Id>,
     restore: bool,
+    expected_source_epoch: Option<SourceEpoch>,
 ) -> Result<ApplyResult, ErrorCode> {
     trusted(&window)?;
     bridge
-        .apply_title_encoding(profile_id, expected_revision, chrome_ids, restore)
+        .apply_title_encoding_at_epoch(
+            profile_id,
+            expected_revision,
+            chrome_ids,
+            restore,
+            expected_source_epoch,
+        )
         .await
 }
 
@@ -543,9 +666,12 @@ async fn propose_organization(
     bridge: tauri::State<'_, Bridge>,
     profile_id: Id,
     chrome_ids: Vec<Id>,
+    request_id: Option<Id>,
 ) -> Result<OrganizationPlan, ErrorCode> {
     trusted(&window)?;
-    bridge.propose_organization(profile_id, chrome_ids).await
+    bridge
+        .propose_organization_with_request(profile_id, chrome_ids, request_id)
+        .await
 }
 
 #[tauri::command]
@@ -823,15 +949,30 @@ fn credential_namespace() -> Result<String, Box<dyn std::error::Error>> {
     }
 }
 
-fn database_directory(app: &tauri::App) -> Result<std::path::PathBuf, Box<dyn std::error::Error>> {
-    let directory = match std::env::var_os("MARKBRIDGE_APP_DATA") {
-        Some(value) => {
-            let directory = std::path::PathBuf::from(value);
-            if !directory.is_absolute() {
-                return Err("invalid acceptance data directory".into());
-            }
-            directory
+fn configure_data_directory(
+    config: &mut tauri::Config,
+    directory: Option<PathBuf>,
+) -> Result<Option<PathBuf>, &'static str> {
+    if let Some(directory) = &directory {
+        if !directory.is_absolute() {
+            return Err("invalid acceptance data directory");
         }
+        // A global WebView2 data-folder override would also merge preview sessions.
+        for window in &mut config.app.windows {
+            if window.label == "main" {
+                window.data_directory = Some(directory.join("main-webview"));
+            }
+        }
+    }
+    Ok(directory)
+}
+
+fn database_directory(
+    app: &tauri::App,
+    override_directory: Option<PathBuf>,
+) -> Result<PathBuf, Box<dyn std::error::Error>> {
+    let directory = match override_directory {
+        Some(directory) => directory,
         None => app.path().app_data_dir()?,
     };
     std::fs::create_dir_all(&directory)?;
@@ -856,9 +997,17 @@ fn on_run_event(event: &tauri::RunEvent, bridge: Option<&Bridge>) {
 }
 
 fn main() {
+    let mut context = tauri::generate_context!();
+    let Ok(override_directory) = configure_data_directory(
+        context.config_mut(),
+        std::env::var_os("MARKBRIDGE_APP_DATA").map(PathBuf::from),
+    ) else {
+        eprintln!("STARTUP_FAILED: Unable to start Markbridge.");
+        std::process::exit(1);
+    };
     let app = tauri::Builder::default()
-        .setup(|app| {
-            let directory = database_directory(app)?;
+        .setup(move |app| {
+            let directory = database_directory(app, override_directory)?;
             app.manage(preview::PreviewHost::new(directory.clone())?);
             let namespace = credential_namespace()?;
             // A failed open must leave the window up. Do not forward the cause.
@@ -904,11 +1053,19 @@ fn main() {
             cache_tree,
             cache_list,
             cache_search,
+            cache_query,
             cache_get,
             cache_count,
+            preview_batch_edit,
+            apply_batch_edit,
+            get_batch_edit,
+            cancel_batch_edit,
             preview_edit,
             apply_edit,
             list_operations,
+            operation_detail,
+            preview_undo,
+            save_export,
             review_operation,
             refresh_operations,
             export_html,
@@ -948,7 +1105,7 @@ fn main() {
             clear_web_preview_session,
             web_preview_state
         ])
-        .build(tauri::generate_context!());
+        .build(context);
     let Ok(app) = app else {
         eprintln!("STARTUP_FAILED: Unable to start Markbridge.");
         std::process::exit(1);
@@ -965,6 +1122,37 @@ mod tests {
         CREATE_NO_WINDOW, CREATE_SUSPENDED, absolute_pidfile, credential_namespace, flatten_cache,
         open_http_creation_flags, startup_response, suspend_requested, validate_http_url,
     };
+
+    #[test]
+    fn acceptance_data_directory_isolates_only_the_main_webview() {
+        let mut config = tauri::Config::default();
+        let preview_dir = std::env::temp_dir().join("mb-preview-config-test");
+        config.app.windows = vec![
+            tauri::utils::config::WindowConfig {
+                label: "preview-active".into(),
+                data_directory: Some(preview_dir.clone()),
+                ..Default::default()
+            },
+            tauri::utils::config::WindowConfig {
+                label: "main".into(),
+                ..Default::default()
+            },
+        ];
+        assert_eq!(super::configure_data_directory(&mut config, None), Ok(None));
+        assert!(config.app.windows[1].data_directory.is_none());
+        assert!(super::configure_data_directory(&mut config, Some("relative".into())).is_err());
+        assert!(config.app.windows[1].data_directory.is_none());
+        let isolated = std::env::temp_dir().join("mb-main-config-test");
+        assert_eq!(
+            super::configure_data_directory(&mut config, Some(isolated.clone())),
+            Ok(Some(isolated.clone()))
+        );
+        assert_eq!(config.app.windows[0].data_directory, Some(preview_dir));
+        assert_eq!(
+            config.app.windows[1].data_directory,
+            Some(isolated.join("main-webview"))
+        );
+    }
 
     #[test]
     fn storage_open_failure_does_not_return_the_open_error() {

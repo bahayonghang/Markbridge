@@ -101,6 +101,7 @@ impl Bridge {
             self,
             &mut inner,
             PlannedCommit {
+                batch: None,
                 profile_id: &profile_id,
                 epoch,
                 revision,
@@ -123,7 +124,7 @@ impl Bridge {
         }
         let records = inner.storage()?.operations_for(profile_id).await?;
         Ok(OperationList {
-            operations: summarize(records)?,
+            operations: summarize(inner.storage()?, records).await?,
         })
     }
 
@@ -161,7 +162,7 @@ impl Bridge {
         let records = inner.storage()?.operations_for(profile_id).await?;
         self.publish(&mut inner);
         Ok(OperationList {
-            operations: summarize(records)?,
+            operations: summarize(inner.storage()?, records).await?,
         })
     }
 
@@ -173,7 +174,7 @@ impl Bridge {
         queue_status(&mut inner, &profile_id).await;
         let records = inner.storage()?.operations_for(profile_id).await?;
         Ok(OperationList {
-            operations: summarize(records)?,
+            operations: summarize(inner.storage()?, records).await?,
         })
     }
 
@@ -419,7 +420,7 @@ pub(super) async fn queue_status(inner: &mut Inner, profile_id: &Id) {
     }
 }
 
-async fn stored_for(
+pub(super) async fn stored_for(
     inner: &Inner,
     profile_id: &Id,
     action: &EditAction,
@@ -430,6 +431,16 @@ async fn stored_for(
     let record = inner.storage()?.operation(operation_id.clone()).await?;
     if record.profile_id != *profile_id {
         return Err(ErrorCode::WrongProfile);
+    }
+    if inner
+        .profiles
+        .get(profile_id.as_str())
+        .ok_or(ErrorCode::WrongProfile)?
+        .identity
+        .source_epoch
+        != record.source_epoch
+    {
+        return Err(ErrorCode::Conflict);
     }
     let epoch = record.source_epoch;
     let snapshot = inner.storage()?.snapshot_tree(operation_id.clone()).await?;
@@ -487,6 +498,7 @@ fn to_stored(
     snapshot: Vec<markbridge_protocol::BookmarkNode>,
 ) -> Result<StoredEdit> {
     let before: BeforeBody = serde_json::from_str(&record.before_json).unwrap_or(BeforeBody {
+        batch: None,
         nodes: vec![],
         orders: vec![],
         restores: vec![],
@@ -552,6 +564,7 @@ fn to_locals(rows: Vec<crate::storage::SidecarRow>) -> Vec<LocalRef> {
 }
 
 pub(super) struct PlannedCommit<'a> {
+    pub batch: Option<BatchEditPreview>,
     pub profile_id: &'a Id,
     pub epoch: SourceEpoch,
     pub revision: Counter,
@@ -570,6 +583,7 @@ pub(super) async fn commit_planned(
     commit: PlannedCommit<'_>,
 ) -> Result<ApplyResult> {
     let PlannedCommit {
+        batch,
         profile_id,
         epoch,
         revision,
@@ -594,6 +608,26 @@ pub(super) async fn commit_planned(
     if limit == 0 {
         return Err(ErrorCode::InvalidMessage);
     }
+    if batch.is_some() {
+        // A later oversized subtree must reject the entire group before the first effect.
+        for step in &plan.steps {
+            one_step(profile_id, session, &operation, epoch, revision, step)?;
+        }
+    }
+    if batch.is_some()
+        || (plan.steps.len() == 1 && matches!(plan.steps[0].payload, Mutation::Delete {}))
+    {
+        let recovery = editing::recovery_steps_for_frame_check(nodes, &plan.steps)?;
+        let recovery_id = editing::operation_id()?;
+        apply_message(
+            profile_id,
+            session,
+            &recovery_id,
+            epoch,
+            revision,
+            &recovery,
+        )?;
+    }
     let message = apply_message(
         profile_id,
         session,
@@ -613,16 +647,33 @@ pub(super) async fn commit_planned(
     let (html_path, sidecar_path) =
         editing::write_backup_pair(&backup_dir, &operation, &html, &sidecar)?;
     let created = now()?;
-    let before = before_body(&plan, nodes, encodings);
+    let mut before = before_body(&plan, nodes, encodings);
+    before.batch = batch;
     let before_json = serde_json::to_string(&before).map_err(|_| ErrorCode::StorageError)?;
     let tree_before = serde_json::to_string(nodes).map_err(|_| ErrorCode::StorageError)?;
     let record = OperationRecord {
         operation_id: operation.clone(),
+        created_at: created,
         profile_id: profile_id.clone(),
         source_epoch: epoch,
         state: OperationState::Applying,
         before_json,
-        after_json: None,
+        after_json: before
+            .batch
+            .as_ref()
+            .map(|_| {
+                serde_json::to_string(&AfterBody {
+                    batch: Some(crate::storage::BatchProgress {
+                        dispatched: 1,
+                        dispatched_at: created,
+                        stopped: false,
+                        error: None,
+                    }),
+                    ..AfterBody::default()
+                })
+            })
+            .transpose()
+            .map_err(|_| ErrorCode::StorageError)?,
         steps: plan
             .steps
             .iter()
@@ -707,6 +758,7 @@ fn before_body(plan: &Plan, nodes: &[BookmarkNode], encodings: Vec<EncodingBody>
         .collect::<Vec<_>>();
     let _ = nodes;
     BeforeBody {
+        batch: None,
         nodes: if touched.is_empty() {
             nodes.to_vec()
         } else {
@@ -781,7 +833,7 @@ fn apply_message(
     steps: &[OperationStep],
 ) -> Result<WireMessage> {
     let request = random_id("apply")?;
-    envelope(
+    let message = envelope(
         "apply_operation",
         profile,
         session,
@@ -792,10 +844,16 @@ fn apply_message(
             "expectedRevision": revision.get(),
             "steps": steps,
         }),
-    )
+    )?;
+    // Check the complete reviewed payload before backup/operation insertion and before any send.
+    encode_frame(&message)?;
+    Ok(message)
 }
 
-fn summarize(records: Vec<OperationRecord>) -> Result<Vec<OperationSummary>> {
+pub(super) async fn summarize(
+    storage: &crate::storage::Storage,
+    records: Vec<OperationRecord>,
+) -> Result<Vec<OperationSummary>> {
     let mut records = records;
     records.sort_by_key(|record| {
         !matches!(
@@ -810,6 +868,54 @@ fn summarize(records: Vec<OperationRecord>) -> Result<Vec<OperationSummary>> {
     let mut summaries = Vec::new();
     for record in records.into_iter().take(200) {
         let before = serde_json::from_str::<BeforeBody>(&record.before_json).ok();
+        let is_batch = before.as_ref().is_some_and(|body| body.batch.is_some());
+        let snapshot = if record
+            .steps
+            .iter()
+            .any(|step| matches!(step.payload, Mutation::Delete {}))
+        {
+            storage.snapshot_tree(record.operation_id.clone()).await?
+        } else {
+            vec![]
+        };
+        let affected = before
+            .as_ref()
+            .and_then(|body| body.batch.as_ref())
+            .map_or_else(
+                || {
+                    let mut ids = std::collections::HashSet::new();
+                    for step in &record.steps {
+                        if matches!(step.payload, Mutation::Delete {}) {
+                            if let Some(target) = &step.target {
+                                ids.insert(target.clone());
+                                ids.extend(
+                                    super::history::descendants(&snapshot, target)
+                                        .into_iter()
+                                        .map(|node| node.chrome_id),
+                                );
+                            }
+                        } else {
+                            ids.insert(step.request_id.clone());
+                        }
+                    }
+                    ids.len() as u64
+                },
+                |batch| batch.affected.get(),
+            );
+        let kind = if before.as_ref().is_some_and(|body| body.undo_of.is_some()) {
+            HistoryKind::Undo
+        } else {
+            let mut kinds = record
+                .steps
+                .iter()
+                .map(|step| super::history::mutation_kind(&step.payload));
+            let first = kinds.next().unwrap_or(HistoryKind::Mixed);
+            if kinds.all(|kind| kind == first) {
+                first
+            } else {
+                HistoryKind::Mixed
+            }
+        };
         let after = record
             .after_json
             .as_deref()
@@ -822,7 +928,11 @@ fn summarize(records: Vec<OperationRecord>) -> Result<Vec<OperationSummary>> {
             .unwrap_or_default();
         summaries.push(OperationSummary {
             operation_id: record.operation_id,
-            affected: Counter::new(record.steps.len() as u64)?,
+            created_at: Some(Counter::new(record.created_at)?),
+            kind: Some(kind),
+            reviewed: after.as_ref().is_some_and(|body| body.reviewed),
+            is_batch,
+            affected: Counter::new(affected)?,
             error_code: RequiredNullable(match record.state {
                 OperationState::Uncertain => Some(ErrorCode::UncertainWrite),
                 OperationState::Failed => record

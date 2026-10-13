@@ -1063,6 +1063,18 @@
           },
           "maxItems": 100000
         },
+        "expectedSubtree": {
+          "description": "Optional reviewed subtree for daily grouped move/delete operations.",
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/BookmarkNode"
+          },
+          "maxItems": 100000,
+          "minItems": 1
+        },
         "payload": {
           "$ref": "#/$defs/Mutation"
         },

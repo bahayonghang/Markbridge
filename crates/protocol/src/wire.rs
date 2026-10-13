@@ -385,6 +385,10 @@ pub enum OperationState {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct OperationStep {
+    /// Optional reviewed subtree for daily grouped move/delete operations.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(length(min = 1, max = 100000))]
+    pub expected_subtree: Option<Vec<BookmarkNode>>,
     pub request_id: Id,
     pub target: Option<Id>,
     pub expected_before: Option<BookmarkNode>,
@@ -553,6 +557,31 @@ impl WireMessage {
                     }
                     if let Some(before) = &step.expected_before {
                         before.validate()?;
+                    }
+                    if let Some(subtree) = &step.expected_subtree {
+                        if subtree.is_empty()
+                            || subtree.len() > MAX_NODES
+                            || !matches!(step.payload, Mutation::Move { .. } | Mutation::Delete {})
+                        {
+                            return Err(ErrorCode::InvalidMessage);
+                        }
+                        let mut tree = subtree.clone();
+                        let root = tree
+                            .iter_mut()
+                            .find(|node| Some(&node.chrome_id) == step.target.as_ref())
+                            .ok_or(ErrorCode::InvalidMessage)?;
+                        if Some(&*root) != step.expected_before.as_ref() {
+                            return Err(ErrorCode::InvalidMessage);
+                        }
+                        root.parent_id = None;
+                        root.position = Position::new(0)?;
+                        TreeSnapshot {
+                            source_epoch: payload.source_epoch,
+                            revision: payload.expected_revision,
+                            barrier_seq: Counter::new(0)?,
+                            nodes: tree,
+                        }
+                        .validate()?;
                     }
                     if matches!(step.payload, Mutation::Create { .. }) {
                         if step.target.is_some() || step.expected_before.is_some() {

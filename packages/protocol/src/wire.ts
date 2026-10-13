@@ -92,6 +92,12 @@ export function parseWireMessage(value: unknown): WireMessage {
       if (requests.has(step.requestId)) invalid();
       requests.add(step.requestId);
       if (step.expectedBefore) validateNode(step.expectedBefore);
+      if (step.expectedSubtree) {
+        if (!['move', 'delete'].includes(step.payload.kind)) invalid();
+        const root = step.expectedSubtree.find((node) => node.chromeId === step.target);
+        if (!root || !step.expectedBefore || Object.keys(root).some((key) => JSON.stringify(root[key as keyof typeof root]) !== JSON.stringify(step.expectedBefore?.[key as keyof typeof root]))) invalid();
+        validateTree({ sourceEpoch: value.payload.sourceEpoch, revision: value.payload.expectedRevision, barrierSeq: 0, nodes: step.expectedSubtree.map((node) => node.chromeId === step.target ? { ...node, parentId: null, position: 0 } : node) });
+      }
       if (step.payload.kind === 'create') {
         if (step.target != null || step.expectedBefore != null) invalid();
       } else if (step.target == null || step.expectedBefore?.chromeId !== step.target) invalid();

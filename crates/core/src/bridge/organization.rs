@@ -18,103 +18,121 @@ impl Bridge {
         profile_id: Id,
         chrome_ids: Vec<Id>,
     ) -> Result<OrganizationPlan> {
-        let (storage, mut record, sample, reserved, revision) = {
-            let inner = self.inner.lock().await;
-            let profile = inner
-                .profiles
-                .get(profile_id.as_str())
-                .ok_or(ErrorCode::WrongProfile)?;
-            let cached = inner
-                .storage()?
-                .bookmarks(profile_id.clone(), profile.identity.source_epoch)
-                .await?;
-            let bookmarks = bookmark_ids(&cached);
-            let nodes = profile.nodes.clone();
-            let rows = scope_rows(&nodes, &chrome_ids, &bookmarks)?;
-            let parents = rows
-                .iter()
-                .map(|row| Id::new(&row.parent_id))
-                .collect::<Result<Vec<_>>>()?;
-            let anchor = editing::choose_anchor(&nodes, &parents)?;
-            let mut reserved = org::reserved_ids(&rows, anchor.as_str());
-            for node in &nodes {
-                reserved.insert(node.chrome_id.as_str().to_owned());
-            }
-            let sample = org::sample_rows(&rows);
-            let mut record = Record {
-                profile_id: profile_id.as_str().to_owned(),
-                source_epoch: profile.identity.source_epoch.get(),
-                source_revision: profile.view.revision.get(),
-                fingerprint: org::input_fingerprint(
-                    profile_id.as_str(),
-                    profile.identity.source_epoch.get(),
-                    profile.view.revision.get(),
-                    &rows,
-                ),
-                anchor_id: anchor.as_str().to_owned(),
-                scope: rows,
-                sampled: sample.len() as u64,
-                folders: Vec::new(),
-                assignments: Vec::new(),
-                phase: "folders".to_owned(),
-                plan_hash: String::new(),
-                operation_id: None,
-                dispatched: Vec::new(),
-                backup_verified: false,
-                failure: None,
-                failure_message: None,
-            };
-            org::rehash(&mut record);
-            let revision = profile.view.revision.get();
-            (inner.storage()?.share(), record, sample, reserved, revision)
+        self.propose_organization_with_request(profile_id, chrome_ids, None)
+            .await
+    }
+
+    pub async fn propose_organization_with_request(
+        &self,
+        profile_id: Id,
+        chrome_ids: Vec<Id>,
+        request_id: Option<Id>,
+    ) -> Result<OrganizationPlan> {
+        let id = match request_id {
+            Some(id) => id,
+            None => org::job_id()?,
         };
-        let id = org::job_id()?;
-        save_new(&storage, &id, &record).await?;
-        let flag = self.ai_gate.begin(&id).await;
-        let secrets = self.secrets();
-        let states = self.state.clone();
-        let watched = profile_id.as_str().to_owned();
-        let outcome = org::propose_folders(
-            org::ModelEnv {
-                storage: &storage,
-                secrets: &secrets,
-                transport: self.model_transport.as_ref(),
-                flag: &flag,
-            },
-            &sample,
-            &reserved,
-            move || current_revision(&states, &watched) == Some(revision),
-        )
-        .await;
-        let inner = self.inner.lock().await;
-        record = reload(&inner, &id).await?.1;
-        match outcome {
-            Ok(folders) if same_basis(&inner, &record)? => {
-                record.folders = folders;
-                record.phase = "folders".to_owned();
-                record.failure = None;
-                record.failure_message = None;
-                org::rehash(&mut record);
-            }
-            Ok(_) => org::fail(
-                &mut record,
-                "invalid",
-                ErrorCode::StaleProposal,
-                org::MSG_STALE,
-            ),
-            Err(error) => {
-                let phase = if error.code == ErrorCode::StaleProposal {
-                    "invalid"
-                } else if error.code == ErrorCode::Cancelled {
-                    "cancelled"
-                } else {
-                    "failed"
+        let flag = self.ai_gate.begin_unique(&id).await?;
+        let result = async {
+            let (storage, mut record, sample, reserved, revision) = {
+                let inner = self.inner.lock().await;
+                let profile = inner
+                    .profiles
+                    .get(profile_id.as_str())
+                    .ok_or(ErrorCode::WrongProfile)?;
+                let cached = inner
+                    .storage()?
+                    .bookmarks(profile_id.clone(), profile.identity.source_epoch)
+                    .await?;
+                let bookmarks = bookmark_ids(&cached);
+                let nodes = profile.nodes.clone();
+                let rows = scope_rows(&nodes, &chrome_ids, &bookmarks)?;
+                let parents = rows
+                    .iter()
+                    .map(|row| Id::new(&row.parent_id))
+                    .collect::<Result<Vec<_>>>()?;
+                let anchor = editing::choose_anchor(&nodes, &parents)?;
+                let mut reserved = org::reserved_ids(&rows, anchor.as_str());
+                for node in &nodes {
+                    reserved.insert(node.chrome_id.as_str().to_owned());
+                }
+                let sample = org::sample_rows(&rows);
+                let mut record = Record {
+                    profile_id: profile_id.as_str().to_owned(),
+                    source_epoch: profile.identity.source_epoch.get(),
+                    source_revision: profile.view.revision.get(),
+                    fingerprint: org::input_fingerprint(
+                        profile_id.as_str(),
+                        profile.identity.source_epoch.get(),
+                        profile.view.revision.get(),
+                        &rows,
+                    ),
+                    anchor_id: anchor.as_str().to_owned(),
+                    scope: rows,
+                    sampled: sample.len() as u64,
+                    folders: Vec::new(),
+                    assignments: Vec::new(),
+                    phase: "folders".to_owned(),
+                    plan_hash: String::new(),
+                    operation_id: None,
+                    dispatched: Vec::new(),
+                    backup_verified: false,
+                    failure: None,
+                    failure_message: None,
                 };
-                org::fail(&mut record, phase, error.code, &error.message);
+                org::rehash(&mut record);
+                let revision = profile.view.revision.get();
+                (inner.storage()?.share(), record, sample, reserved, revision)
+            };
+            save_new(&storage, &id, &record).await?;
+            let secrets = self.secrets();
+            let states = self.state.clone();
+            let watched = profile_id.as_str().to_owned();
+            let outcome = org::propose_folders(
+                org::ModelEnv {
+                    storage: &storage,
+                    secrets: &secrets,
+                    transport: self.model_transport.as_ref(),
+                    flag: &flag,
+                },
+                &sample,
+                &reserved,
+                move || current_revision(&states, &watched) == Some(revision),
+            )
+            .await;
+            let inner = self.inner.lock().await;
+            record = reload(&inner, &id).await?.1;
+            match outcome {
+                Ok(folders) if same_basis(&inner, &record)? => {
+                    record.folders = folders;
+                    record.phase = "folders".to_owned();
+                    record.failure = None;
+                    record.failure_message = None;
+                    org::rehash(&mut record);
+                }
+                Ok(_) => org::fail(
+                    &mut record,
+                    "invalid",
+                    ErrorCode::StaleProposal,
+                    org::MSG_STALE,
+                ),
+                Err(error) => {
+                    let phase = if error.code == ErrorCode::StaleProposal {
+                        "invalid"
+                    } else if error.code == ErrorCode::Cancelled {
+                        "cancelled"
+                    } else {
+                        "failed"
+                    };
+                    org::fail(&mut record, phase, error.code, &error.message);
+                }
             }
+            store(&inner, &id, &record).await?;
+            present(&inner, &id, &record).await
         }
-        store(&inner, &id, &record).await?;
-        present(&inner, &id, &record).await
+        .await;
+        self.ai_gate.finish(&id, &flag).await;
+        result
     }
 
     pub async fn review_organization(
@@ -653,6 +671,7 @@ fn substitute(
     nodes: &[markbridge_protocol::BookmarkNode],
 ) -> markbridge_protocol::OperationStep {
     let mut step = markbridge_protocol::OperationStep {
+        expected_subtree: None,
         request_id: stored.request_id.clone(),
         target: stored.target.clone(),
         expected_before: stored.expected_before.clone(),
@@ -757,6 +776,7 @@ async fn edit_commit(
         bridge,
         inner,
         super::edit::PlannedCommit {
+            batch: None,
             profile_id: commit.profile_id,
             epoch: commit.epoch,
             revision: commit.revision,

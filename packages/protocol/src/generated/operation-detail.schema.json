@@ -1,0 +1,651 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OperationDetail",
+  "type": "object",
+  "properties": {
+    "profileId": {
+      "$ref": "#/$defs/Id"
+    },
+    "restored": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/RestoredIdentity"
+      },
+      "maxItems": 1000
+    },
+    "sourceEpoch": {
+      "$ref": "#/$defs/SourceEpoch"
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/HistoryStep"
+      },
+      "maxItems": 1000
+    },
+    "summary": {
+      "$ref": "#/$defs/OperationSummary"
+    },
+    "undoOf": {
+      "$ref": "#/$defs/RequiredNullable2"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "profileId",
+    "sourceEpoch",
+    "summary",
+    "undoOf",
+    "steps",
+    "restored"
+  ],
+  "$defs": {
+    "BookmarkNode": {
+      "type": "object",
+      "properties": {
+        "chromeId": {
+          "$ref": "#/$defs/Id"
+        },
+        "dateAdded": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourceTime"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dateLastUsed": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourceTime"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "folderType": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FolderType"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "kind": {
+          "$ref": "#/$defs/NodeKind"
+        },
+        "parentId": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "position": {
+          "$ref": "#/$defs/Position"
+        },
+        "title": {
+          "$ref": "#/$defs/Title"
+        },
+        "unmodifiable": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Unmodifiable"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "url": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Url"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "chromeId",
+        "position",
+        "kind",
+        "title"
+      ]
+    },
+    "Counter": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 9007199254740991,
+      "minimum": 0
+    },
+    "EditField": {
+      "type": "string",
+      "enum": [
+        "title",
+        "url",
+        "parent",
+        "position",
+        "order",
+        "existence"
+      ]
+    },
+    "ErrorCode": {
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "INVALID_MESSAGE",
+            "UNSUPPORTED_VERSION",
+            "FRAME_TOO_LARGE",
+            "LIMIT_EXCEEDED",
+            "INVALID_TREE",
+            "UNPAIRED",
+            "READ_ONLY",
+            "WRONG_PROFILE",
+            "STALE_PROPOSAL",
+            "PROTECTED_NODE",
+            "UNCERTAIN_WRITE",
+            "FETCH_DENIED",
+            "INVALID_AI_OUTPUT",
+            "STORAGE_ERROR",
+            "STORAGE_NEWER_SCHEMA",
+            "MIGRATION_FAILED",
+            "CONFLICT",
+            "CANCELLED"
+          ]
+        },
+        {
+          "description": "The selected Chrome directory is missing, unreadable, or not a User Data directory.",
+          "type": "string",
+          "const": "PATH_UNAVAILABLE"
+        }
+      ]
+    },
+    "FolderType": {
+      "type": "string",
+      "enum": [
+        "bookmarks-bar",
+        "other",
+        "mobile",
+        "managed"
+      ]
+    },
+    "HistoryKind": {
+      "type": "string",
+      "enum": [
+        "create",
+        "update",
+        "move",
+        "delete",
+        "reorder",
+        "mixed",
+        "undo"
+      ]
+    },
+    "HistoryStep": {
+      "type": "object",
+      "properties": {
+        "before": {
+          "$ref": "#/$defs/RequiredNullable3"
+        },
+        "deletedDescendants": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/BookmarkNode"
+          },
+          "maxItems": 100000
+        },
+        "mutation": {
+          "$ref": "#/$defs/Mutation"
+        },
+        "receipt": {
+          "$ref": "#/$defs/RequiredNullable4"
+        },
+        "requestId": {
+          "$ref": "#/$defs/Id"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "requestId",
+        "mutation",
+        "before",
+        "receipt"
+      ]
+    },
+    "Id": {
+      "type": "string",
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*(?![\\s\\S])"
+    },
+    "Mutation": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "create"
+            },
+            "parentId": {
+              "$ref": "#/$defs/Id"
+            },
+            "position": {
+              "$ref": "#/$defs/Position"
+            },
+            "title": {
+              "$ref": "#/$defs/Title"
+            },
+            "url": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Url"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "parentId",
+            "position",
+            "title"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "update"
+            },
+            "title": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Title"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "url": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Url"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "move"
+            },
+            "parentId": {
+              "$ref": "#/$defs/Id"
+            },
+            "position": {
+              "$ref": "#/$defs/Position"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "parentId",
+            "position"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "childIds": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Id"
+              },
+              "maxItems": 100000
+            },
+            "kind": {
+              "type": "string",
+              "const": "reorder"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "childIds"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "delete"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ]
+        }
+      ]
+    },
+    "NodeKind": {
+      "type": "string",
+      "enum": [
+        "folder",
+        "bookmark"
+      ]
+    },
+    "OperationConflict": {
+      "type": "object",
+      "properties": {
+        "chromeId": {
+          "$ref": "#/$defs/RequiredNullable2"
+        },
+        "field": {
+          "$ref": "#/$defs/EditField"
+        },
+        "requestId": {
+          "$ref": "#/$defs/Id"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "requestId",
+        "chromeId",
+        "field"
+      ]
+    },
+    "OperationState": {
+      "type": "string",
+      "enum": [
+        "planned",
+        "applying",
+        "applied",
+        "uncertain",
+        "partial",
+        "failed",
+        "rolling_back",
+        "rolled_back",
+        "rollback_conflict"
+      ]
+    },
+    "OperationSummary": {
+      "type": "object",
+      "properties": {
+        "affected": {
+          "$ref": "#/$defs/Counter"
+        },
+        "conflicts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/OperationConflict"
+          },
+          "maxItems": 50
+        },
+        "createdAt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Counter"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "errorCode": {
+          "$ref": "#/$defs/RequiredNullable"
+        },
+        "isBatch": {
+          "type": "boolean",
+          "default": false
+        },
+        "kind": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HistoryKind"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "operationId": {
+          "$ref": "#/$defs/Id"
+        },
+        "reviewed": {
+          "type": "boolean",
+          "default": false
+        },
+        "state": {
+          "$ref": "#/$defs/OperationState"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "operationId",
+        "state",
+        "affected",
+        "errorCode",
+        "conflicts"
+      ]
+    },
+    "Position": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 100000,
+      "minimum": 0
+    },
+    "Receipt": {
+      "type": "object",
+      "properties": {
+        "after": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BookmarkNode"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "afterChildIds": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/Id"
+          },
+          "maxItems": 100000
+        },
+        "before": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BookmarkNode"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "beforeChildIds": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/Id"
+          },
+          "maxItems": 100000
+        },
+        "errorCode": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ErrorCode"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "operationId": {
+          "$ref": "#/$defs/Id"
+        },
+        "requestId": {
+          "$ref": "#/$defs/Id"
+        },
+        "state": {
+          "$ref": "#/$defs/OperationState"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "operationId",
+        "requestId",
+        "state"
+      ]
+    },
+    "RequiredNullable": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ErrorCode"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "RequiredNullable2": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Id"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "RequiredNullable3": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/BookmarkNode"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "RequiredNullable4": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Receipt"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "RestoredIdentity": {
+      "type": "object",
+      "properties": {
+        "bookmarkId": {
+          "$ref": "#/$defs/Id"
+        },
+        "newChromeId": {
+          "$ref": "#/$defs/Id"
+        },
+        "oldChromeId": {
+          "$ref": "#/$defs/Id"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "oldChromeId",
+        "newChromeId",
+        "bookmarkId"
+      ]
+    },
+    "SourceEpoch": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 9007199254740991,
+      "minimum": 1
+    },
+    "SourceTime": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "$ref": "#/$defs/TimeSource"
+        },
+        "unixMillis": {
+          "$ref": "#/$defs/Counter"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "unixMillis"
+      ]
+    },
+    "TimeSource": {
+      "type": "string",
+      "enum": [
+        "chrome_api",
+        "chrome_file"
+      ]
+    },
+    "Title": {
+      "type": "string",
+      "maxLength": 4096,
+      "minLength": 0
+    },
+    "Unmodifiable": {
+      "type": "string",
+      "enum": [
+        "managed"
+      ]
+    },
+    "Url": {
+      "type": "string",
+      "maxLength": 16384,
+      "minLength": 1
+    }
+  }
+}

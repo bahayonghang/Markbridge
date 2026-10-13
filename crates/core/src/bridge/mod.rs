@@ -1,7 +1,10 @@
 //! Authenticated loopback bridge. Browser mutations are sent to the extension; this process does not call Chrome.
 mod ai;
+mod batch_edit;
 pub mod credentials;
 mod edit;
+mod history;
+pub use history::ExportSnapshot;
 mod file_mirror;
 mod maintenance;
 mod organization;
@@ -77,6 +80,7 @@ impl Drop for NewCredential {
     }
 }
 struct Inner {
+    edit_previews: HashMap<String, batch_edit::Prepared>,
     storage: Option<Storage>,
     profiles: BTreeMap<String, ActiveProfile>,
     pending: BTreeMap<String, Pending>,
@@ -195,6 +199,7 @@ impl Bridge {
         }
         let mirrors = file_mirror::load_mirrors(&storage).await?;
         let inner = Inner {
+            edit_previews: HashMap::new(),
             storage: Some(storage),
             profiles,
             pending: BTreeMap::new(),
@@ -473,6 +478,19 @@ impl Bridge {
             limit,
         )
     }
+    pub async fn query_library(
+        &self,
+        profile_id: Id,
+        query: LibraryQuery,
+    ) -> Result<LibraryQueryPage> {
+        query.validate()?;
+        let storage = {
+            let inner = self.inner.lock().await;
+            profile_nodes(&inner, &profile_id)?;
+            inner.storage()?.share()
+        };
+        storage.query_library(profile_id, query).await
+    }
     pub async fn search(
         &self,
         profile_id: Id,
@@ -670,6 +688,7 @@ impl Bridge {
             let receipt = payload.as_ref().clone();
             edit::accept_receipt(&mut inner, profile_id, &receipt).await?;
             organization::on_receipt(self, &mut inner, profile_id, &receipt.operation_id).await?;
+            batch_edit::on_receipt(self, &mut inner, profile_id, &receipt.operation_id).await?;
             self.publish(&mut inner);
             return Ok(false);
         }

@@ -508,7 +508,7 @@ fn plan_move(
     if position > max || (same && node.position.get() == position) {
         return Err(ErrorCode::InvalidMessage);
     }
-    let step = step(
+    let mut step = step(
         Some(chrome_id.clone()),
         Some(node.clone()),
         None,
@@ -517,6 +517,7 @@ fn plan_move(
             position: markbridge_protocol::Position::new(position)?,
         },
     )?;
+    step.expected_subtree = Some(preorder(nodes, chrome_id)?);
     let changes = vec![
         change(
             EditField::Parent,
@@ -588,16 +589,20 @@ fn plan_delete(nodes: &[BookmarkNode], chrome_id: &Id) -> Result<Plan, ErrorCode
     let mut seen = HashSet::new();
     let affected = subtree_len(&index, chrome_id.as_str(), &mut seen)?;
     let parent = node.parent_id.clone().ok_or(ErrorCode::ProtectedNode)?;
+    if affected > 1000 {
+        return Err(ErrorCode::LimitExceeded);
+    }
     let order = ChildOrder {
         parent_id: parent,
         child_ids: child_ids_of(&index, node.parent_id.as_ref().unwrap().as_str()),
     };
-    let step = step(
+    let mut step = step(
         Some(chrome_id.clone()),
         Some(node.clone()),
         None,
         Mutation::Delete {},
     )?;
+    step.expected_subtree = Some(preorder(nodes, chrome_id)?);
     Ok(Plan {
         steps: vec![step],
         affected,
@@ -923,6 +928,68 @@ fn order_folders(folders: &[ReclassFolder]) -> Result<Vec<&ReclassFolder>, Error
     }
 }
 
+/// Check the eventual single-envelope recovery size before daily move/delete effects.
+/// These steps are only encoded, never stored or dispatched as authorization.
+pub fn recovery_steps_for_frame_check(
+    nodes: &[BookmarkNode],
+    planned: &[OperationStep],
+) -> Result<Vec<OperationStep>, ErrorCode> {
+    let mut inverse = Vec::new();
+    for original in planned.iter().rev() {
+        let before = original
+            .expected_before
+            .as_ref()
+            .ok_or(ErrorCode::InvalidMessage)?;
+        match &original.payload {
+            Mutation::Move {
+                parent_id,
+                position,
+            } => {
+                let mut after = before.clone();
+                after.parent_id = Some(parent_id.clone());
+                after.position = *position;
+                inverse.push(step(
+                    Some(before.chrome_id.clone()),
+                    Some(after),
+                    None,
+                    Mutation::Move {
+                        parent_id: before.parent_id.clone().ok_or(ErrorCode::ProtectedNode)?,
+                        position: before.position,
+                    },
+                )?);
+            }
+            Mutation::Delete {} => {
+                let mut requests = HashMap::new();
+                for node in preorder(nodes, &before.chrome_id)? {
+                    let parent = node.parent_id.clone().ok_or(ErrorCode::ProtectedNode)?;
+                    let restored = step(
+                        None,
+                        None,
+                        None,
+                        Mutation::Create {
+                            parent_id: requests.get(&parent).cloned().unwrap_or(parent),
+                            position: if node.chrome_id == before.chrome_id {
+                                before.position
+                            } else {
+                                node.position
+                            },
+                            title: node.title.clone(),
+                            url: node.url.clone(),
+                        },
+                    )?;
+                    requests.insert(node.chrome_id, restored.request_id.clone());
+                    inverse.push(restored);
+                }
+            }
+            _ => return Err(ErrorCode::InvalidMessage),
+        }
+        if inverse.len() > 1000 {
+            return Err(ErrorCode::LimitExceeded);
+        }
+    }
+    Ok(inverse)
+}
+
 fn plan_undo(
     nodes: &[BookmarkNode],
     stored: &StoredEdit,
@@ -935,6 +1002,7 @@ fn plan_undo(
         return Err(ErrorCode::UncertainWrite);
     }
     let mut working = nodes.to_vec();
+    let mut orders = stored.orders.clone();
     let mut steps = Vec::new();
     let mut changes = Vec::new();
     let mut restores = Vec::new();
@@ -958,7 +1026,7 @@ fn plan_undo(
             restore_deleted(
                 &index,
                 original,
-                &stored.orders,
+                &orders,
                 locals,
                 &stored.snapshot,
                 &removed,
@@ -969,8 +1037,16 @@ fn plan_undo(
         match outcome {
             Ok(inverse) => {
                 let mut preview = working.clone();
-                if preview_steps(&mut preview, &inverse.steps).is_ok() {
-                    working = preview;
+                preview_steps(&mut preview, &inverse.steps)?;
+                working = preview;
+                for restored in &inverse.restores {
+                    for order in &mut orders {
+                        for child in &mut order.child_ids {
+                            if *child == restored.old_chrome_id {
+                                *child = restored.request_id.clone();
+                            }
+                        }
+                    }
                 }
                 changes.extend(inverse.changes);
                 restores.extend(inverse.restores);
@@ -1027,20 +1103,29 @@ fn inverse(index: &Index, original: &StoredStep) -> Result<Inverse, OperationCon
                     EditField::Existence,
                 ));
             }
-            if !can_remove_or_move(index, &after) {
+            if !can_remove_or_move(index, &after)
+                || index
+                    .children
+                    .get(after.chrome_id.as_str())
+                    .is_some_and(|children| !children.is_empty())
+            {
                 return Err(conflict(
                     request,
                     Some(&after.chrome_id),
                     EditField::Existence,
                 ));
             }
-            let step = step(
+            let mut step = step(
                 Some(after.chrome_id.clone()),
                 Some(after.clone()),
                 None,
                 Mutation::Delete {},
             )
             .map_err(|_| conflict(request, Some(&after.chrome_id), EditField::Existence))?;
+            if after.kind == NodeKind::Folder {
+                // The inverse may delete only the empty folder created by this operation.
+                step.expected_subtree = Some(vec![after.clone()]);
+            }
             Ok(Inverse {
                 changes: vec![
                     change(EditField::Existence, Some(after.title.as_str()), None).map_err(
@@ -1267,7 +1352,11 @@ fn restore_deleted(
             None,
             Mutation::Create {
                 parent_id: create_parent,
-                position: node.position,
+                position: if node.chrome_id == before.chrome_id {
+                    before.position
+                } else {
+                    node.position
+                },
                 title: node.title.clone(),
                 url: node.url.clone(),
             },
@@ -1337,6 +1426,7 @@ fn step(
     payload: Mutation,
 ) -> Result<OperationStep, ErrorCode> {
     Ok(OperationStep {
+        expected_subtree: None,
         request_id: next_id("req")?,
         target,
         expected_before: before,
@@ -1417,7 +1507,39 @@ fn preview_steps(nodes: &mut Vec<BookmarkNode>, steps: &[OperationStep]) -> Resu
                     node.position = markbridge_protocol::Position::new(index as u64)?;
                 }
             }
-            Mutation::Create { .. } => {}
+            Mutation::Create {
+                parent_id,
+                position,
+                title,
+                url,
+            } => {
+                if !nodes.iter().any(|node| &node.chrome_id == parent_id) {
+                    return Err(ErrorCode::InvalidTree);
+                }
+                for sibling in nodes.iter_mut().filter(|node| {
+                    node.parent_id.as_ref() == Some(parent_id)
+                        && node.position.get() >= position.get()
+                }) {
+                    sibling.position =
+                        markbridge_protocol::Position::new(sibling.position.get() + 1)?;
+                }
+                nodes.push(BookmarkNode {
+                    chrome_id: step.request_id.clone(),
+                    parent_id: Some(parent_id.clone()),
+                    position: *position,
+                    kind: if url.is_some() {
+                        NodeKind::Bookmark
+                    } else {
+                        NodeKind::Folder
+                    },
+                    title: title.clone(),
+                    url: url.clone(),
+                    folder_type: None,
+                    unmodifiable: None,
+                    date_added: None,
+                    date_last_used: None,
+                });
+            }
         }
     }
     Ok(())
@@ -1546,11 +1668,17 @@ fn under_managed(index: &Index, node: &BookmarkNode) -> bool {
 }
 
 fn can_remove_or_move(index: &Index, node: &BookmarkNode) -> bool {
-    !permanently_fixed(node) && !under_managed(index, node)
+    !permanently_fixed(node)
+        && !under_managed(index, node)
+        && !index.by_id.values().any(|child| {
+            permanently_fixed(child)
+                && contains(index, node.chrome_id.as_str(), child.chrome_id.as_str())
+        })
 }
 
 fn can_create_under(index: &Index, parent: &BookmarkNode) -> bool {
     parent.kind == NodeKind::Folder
+        && parent.parent_id.is_some()
         && parent.folder_type != Some(FolderType::Managed)
         && parent.unmodifiable.is_none()
         && !under_managed(index, parent)

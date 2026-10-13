@@ -1,8 +1,11 @@
 import { invoke, isTauri } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import {
+  parseOperationDetail, parseUndoPreview, parseExportSaveResult, type OperationDetail, type UndoPreview, type ExportSaveResult, type ExportSource,
+  parseBatchEditPreview, parseBatchEditStatus, type BatchEditPreview, type BatchEditStatus,
   parseApplyResult, parseBridgeState, parseChromeProfileList, parseEditDocument, parseEditPreview,
   parseLibraryCount, parseLibraryDetail, parseLibraryNodes, parseLibraryPage, parseLibrarySearch,
+  parseLibraryQuery, parseLibraryQueryPage, type LibraryQuery, type LibraryQueryPage,
   parseAiApply, parseAiConnection, parseAiSettings, parseAiSuggestion, parseContentPreview, parseMaintenanceReport, parseMirrorTree, parseOperationList, parseOrganizationPlan, parsePairingOffer, parseStartupState, parseTagCatalog, parseTextSearch, parseTitleEncoding, parseWebPreview,
   type AiApplyResult, type AiConnection, type AiSettings, type AiSuggestion, type ApplyResult, type BridgeState, type ChromeProfileList, type ContentPreview, type EditDocument, type EditPreview,
   type LibraryCount, type LibraryDetail, type LibraryNodes, type LibraryPage, type LibrarySearch,
@@ -16,6 +19,24 @@ export type EditAction =
   | { kind: 'reorder'; parentId: string; childIds: string[] }
   | { kind: 'delete'; chromeId: string }
   | { kind: 'undo'; operationId: string };
+
+export type BatchEditAction = { kind: 'move'; parentId: string } | { kind: 'delete' };
+export async function previewBatchEdit(profileId: string, expectedRevision: number, chromeIds: string[], action: BatchEditAction): Promise<BatchEditPreview> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseBatchEditPreview(await invoke<unknown>('preview_batch_edit', { profileId, expectedRevision, chromeIds, action }));
+}
+export async function applyBatchEdit(profileId: string, planId: string, planHash: string, secondConfirm: boolean): Promise<BatchEditStatus> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseBatchEditStatus(await invoke<unknown>('apply_batch_edit', { profileId, planId, planHash, secondConfirm }));
+}
+export async function getBatchEdit(profileId: string, operationId: string): Promise<BatchEditStatus> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseBatchEditStatus(await invoke<unknown>('get_batch_edit', { profileId, operationId }));
+}
+export async function cancelBatchEdit(profileId: string, operationId: string): Promise<BatchEditStatus> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseBatchEditStatus(await invoke<unknown>('cancel_batch_edit', { profileId, operationId }));
+}
 
 export function hasNativeBridge(): boolean { return isTauri(); }
 
@@ -109,6 +130,11 @@ export async function readCacheList(profileId: string, folderId: string, offset:
   return parseLibraryPage(await invoke<unknown>('cache_list', { profileId, folderId, offset, limit }));
 }
 
+export async function readCacheQuery(profileId: string, request: LibraryQuery): Promise<LibraryQueryPage> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseLibraryQueryPage(await invoke<unknown>('cache_query', { profileId, request: parseLibraryQuery(request) }));
+}
+
 export async function readCacheSearch(profileId: string, query: string, folderId: string | null, limit: number): Promise<LibrarySearch> {
   if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
   return parseLibrarySearch(await invoke<unknown>('cache_search', { profileId, query, folderId, limit }));
@@ -144,6 +170,16 @@ export async function listOperations(profileId: string): Promise<OperationList> 
   return parseOperationList(await invoke<unknown>('list_operations', { profileId }));
 }
 
+export async function operationDetail(profileId: string, operationId: string): Promise<OperationDetail> {
+  return parseOperationDetail(await invoke<unknown>('operation_detail', { profileId, operationId }));
+}
+export async function previewUndo(profileId: string, operationId: string, expectedRevision: number): Promise<UndoPreview> {
+  return parseUndoPreview(await invoke<unknown>('preview_undo', { profileId, operationId, expectedRevision }));
+}
+export async function saveExport(source: ExportSource, format: 'html' | 'sidecar'): Promise<ExportSaveResult> {
+  return parseExportSaveResult(await invoke<unknown>('save_export', { source, format }));
+}
+
 export async function reviewOperation(profileId: string, operationId: string): Promise<OperationList> {
   if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
   return parseOperationList(await invoke<unknown>('review_operation', { profileId, operationId }));
@@ -174,19 +210,19 @@ export type TagCommand =
   | { kind: 'undo'; journalId: string }
   | { kind: 'set_encoding'; enabled: boolean };
 
-export async function readTagState(profileId: string, chromeIds: string[], filterTagId: string | null): Promise<TagCatalog> {
+export async function readTagState(profileId: string, chromeIds: string[], filterTagId: string | null, expectedSourceEpoch?: number): Promise<TagCatalog> {
   if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
-  return parseTagCatalog(await invoke<unknown>('tag_state', { profileId, chromeIds, filterTagId }));
+  return parseTagCatalog(await invoke<unknown>('tag_state', { profileId, chromeIds, filterTagId, ...(expectedSourceEpoch === undefined ? {} : { expectedSourceEpoch }) }));
 }
 
-export async function tagCommand(profileId: string, command: TagCommand): Promise<TagCatalog> {
+export async function tagCommand(profileId: string, command: TagCommand, expectedSourceEpoch?: number): Promise<TagCatalog> {
   if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
-  return parseTagCatalog(await invoke<unknown>('tag_command', { profileId, command }));
+  return parseTagCatalog(await invoke<unknown>('tag_command', { profileId, command, ...(expectedSourceEpoch === undefined ? {} : { expectedSourceEpoch }) }));
 }
 
-export async function previewTitleEncoding(profileId: string, expectedRevision: number, chromeIds: string[], restore: boolean): Promise<TitleEncodingPreview> {
+export async function previewTitleEncoding(profileId: string, expectedRevision: number, chromeIds: string[], restore: boolean, expectedSourceEpoch?: number): Promise<TitleEncodingPreview> {
   if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
-  return parseTitleEncoding(await invoke<unknown>('preview_title_encoding', { profileId, expectedRevision, chromeIds, restore }));
+  return parseTitleEncoding(await invoke<unknown>('preview_title_encoding', { profileId, expectedRevision, chromeIds, restore, ...(expectedSourceEpoch === undefined ? {} : { expectedSourceEpoch }) }));
 }
 
 export async function readContentPreview(profileId: string, chromeId: string, requestId: string): Promise<ContentPreview> {
@@ -242,9 +278,9 @@ export async function cancelAi(requestId: string): Promise<void> {
   await invoke('cancel_ai', { requestId });
 }
 
-export async function proposeOrganization(profileId: string, chromeIds: string[]): Promise<OrganizationPlan> {
+export async function proposeOrganization(profileId: string, chromeIds: string[], requestId?: string): Promise<OrganizationPlan> {
   if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
-  return parseOrganizationPlan(await invoke<unknown>('propose_organization', { profileId, chromeIds }));
+  return parseOrganizationPlan(await invoke<unknown>('propose_organization', { profileId, chromeIds, ...(requestId ? { requestId } : {}) }));
 }
 
 export async function reviewOrganization(jobId: string, folders: OrganizationFolder[]): Promise<OrganizationPlan> {
@@ -327,9 +363,9 @@ export async function cancelContentPreview(requestId: string): Promise<void> {
   await invoke('cancel_content_preview', { requestId });
 }
 
-export async function applyTitleEncoding(profileId: string, expectedRevision: number, chromeIds: string[], restore: boolean): Promise<ApplyResult> {
+export async function applyTitleEncoding(profileId: string, expectedRevision: number, chromeIds: string[], restore: boolean, expectedSourceEpoch?: number): Promise<ApplyResult> {
   if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
-  return parseApplyResult(await invoke<unknown>('apply_title_encoding', { profileId, expectedRevision, chromeIds, restore }));
+  return parseApplyResult(await invoke<unknown>('apply_title_encoding', { profileId, expectedRevision, chromeIds, restore, ...(expectedSourceEpoch === undefined ? {} : { expectedSourceEpoch }) }));
 }
 
 export async function webPreviewState(): Promise<WebPreviewState> {

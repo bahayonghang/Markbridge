@@ -1303,6 +1303,7 @@ mod tests {
                 )
                 .unwrap();
                 let after = AfterBody {
+                    batch: None,
                     maps: vec![IdMapBody {
                         request_id: pid("req-copy"),
                         old_chrome_id: pid("42"),

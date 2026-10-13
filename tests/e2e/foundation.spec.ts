@@ -1,111 +1,24 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
-const evidence = '.trellis/tasks/10-10-mb-03-chrome-bridge/evidence';
+import { mockBridge } from './mock-bridge';
 
-// The mock module exists only in this test route. Production browser previews stay unpaired.
-async function mockBridge(page: Page, scenario: 'connected' | 'startup-error' | 'port-conflict' = 'connected') {
-  await page.route('**/src/backend.ts*', (route) => route.fulfill({
-    contentType: 'application/javascript',
-    body: `
-      const initial = { protocolVersion: 1, revision: 1, port: null, errorCode: null, profiles: [], pending: [], mirrors: [] };
-      let receive;
-      let state = initial;
-      let starts = 0;
-      const profile = { profileId: 'profile-test', instanceId: 'instance-test', displayName: '测试研究资料', connection: 'live', nodeCount: 27, revision: 8, lastSyncedAt: null, errorCode: null };
-      export const hasNativeBridge = () => true;
-      export async function subscribeBridgeState(next) { receive = next; return () => { if (receive === next) receive = undefined; }; }
-      export async function getStartupState() { ${scenario === 'startup-error' ? "throw new Error('sensitive-raw-error');" : "return { protocolVersion: 1, state: 'unpaired' };"} }
-      export async function getBridgeState() {
-        ${scenario === 'connected' ? "state = { ...initial, revision: 3, port: 49153, profiles: [profile] }; receive?.(state);" : ''}
-        return state;
-      }
-      export async function startBridge(port) {
-        starts += 1;
-        ${scenario === 'port-conflict' ? "if (starts === 1) throw 'CONFLICT';" : ''}
-        state = { ...state, revision: state.revision + 1, port };
-        return state;
-      }
-      export async function beginPairing() { throw new Error('mock-offer-unavailable'); }
-      export async function confirmPairing() { throw new Error('mock-confirm-unavailable'); }
-      export async function cancelPairing() { return state; }
-      export async function reconnectProfile() {
-        state = { ...state, revision: state.revision + 1, profiles: [{ ...profile, connection: 'reconciling' }] };
-        receive?.(state);
-        return initial;
-      }
-      export async function revokePairing() {
-        state = { ...state, revision: state.revision + 1, profiles: [{ ...profile, connection: 'unpaired' }] };
-        return state;
-      }
-      export async function enumerateChromeUserData() { return { profiles: [] }; }
-      export async function attachFileMirror() { return state; }
-      export async function rescanFileMirrors() { return state; }
-      export async function detachFileMirror() { return state; }
-      export async function associateFileMirror() { return state; }
-      export async function getMirrorTree() { return { mirrorSourceId: 'mirror-a', displayName: 'Personal', fileStatus: 'current', association: 'independent', revision: 1, lastSyncedAt: null, errorCode: null, canWriteBrowser: false, nodes: [] }; }
-      export async function readCacheTree() { return { nodes: [] }; }
-      export async function readCacheList() { return { items: [], total: 0 }; }
-      export async function readCacheSearch() { return { items: [] }; }
-      export async function readCacheNode() { throw new Error('missing'); }
-      export async function readCacheCount() { return { folders: 0, bookmarks: 0 }; }
-      export async function openHttpUrl() {}
-      export async function aiSettings() { return { enabled: false, provider: null, endpointLabel: null, model: null, credentialConfigured: false, schemaSupported: null }; }
-      export async function saveAiConfig() { return aiSettings(); }
-      export async function setAiCredential() { return aiSettings(); }
-      export async function clearAiCredential() { return aiSettings(); }
-      export async function testAiConnection() { return { ok: false, failureMessage: null, settings: await aiSettings() }; }
-      export async function listOperations() { return { operations: [] }; }
-      export async function refreshOperations() { return { operations: [] }; }
-      export async function reviewOperation() { return { operations: [] }; }
-      export async function previewEdit() { throw new Error('mock'); }
-      export async function applyEdit() { throw new Error('mock'); }
-      export async function exportHtml() { throw new Error('mock'); }
-      export async function exportSidecar() { throw new Error('mock'); }
-      export async function readTagState() { return { affected: 0, encodingEnabled: false, entries: [], filterTagId: null, journalId: null, matches: [], mergeRequired: false, profileId: 'profile-test', sourceTagId: null, tags: [], targetTagId: null }; }
-      export async function tagCommand() { throw new Error('mock'); }
-      export async function previewTitleEncoding() { throw new Error('mock'); }
-      export async function applyTitleEncoding() { throw new Error('mock'); }
-      export async function applyAi() { throw new Error('mock'); }
-      export async function cancelAi() {}
-      export async function suggestAi() { throw new Error('mock'); }
-      export async function inspectLibrary() { throw new Error('mock'); }
-      export async function checkLinks() { throw new Error('mock'); }
-      export async function cancelLinkCheck() {}
-      export async function previewCleanup() { throw new Error('mock'); }
-      export async function confirmCleanup() { throw new Error('mock'); }
-      export async function searchLibraryText() { return { hits: [] }; }
-      export async function proposeOrganization() { throw new Error('mock'); }
-      export async function reviewOrganization() { throw new Error('mock'); }
-      export async function assignOrganization() { throw new Error('mock'); }
-      export async function editOrganization() { throw new Error('mock'); }
-      export async function applyOrganization() { throw new Error('mock'); }
-      export async function pauseOrganization() { throw new Error('mock'); }
-      export async function cancelOrganization() { throw new Error('mock'); }
-      export async function cleanupOrganization() { throw new Error('mock'); }
-      export async function organizationPlan() { throw new Error('mock'); }
-      export async function readContentPreview() { throw new Error('mock'); }
-      export async function cancelContentPreview() {}
-      export async function webPreviewState() { return { requestId: null, profileId: null, chromeId: null, url: null, currentUrl: null, phase: 'closed', canGoBack: false, canGoForward: false, notice: null, noticeMessage: null }; }
-      export async function openWebPreview() { throw new Error('mock'); }
-      export async function webPreviewAction() { throw new Error('mock'); }
-      export async function clearWebPreviewSession() { throw new Error('mock'); }
-      export async function subscribeWebPreview() { return () => {}; }
-    `,
-  }));
-}
+const evidence = process.env.MARKBRIDGE_EVIDENCE_DIR ?? 'test-results/screenshots';
+
 
 for (const size of [{ width: 1100, height: 760 }, { width: 640, height: 480 }]) {
   test(`browser preview ${size.width}x${size.height}`, async ({ page }) => {
     await page.setViewportSize(size);
     await page.goto('/');
     await expect(page.getByRole('status').filter({ hasText: '未连接 · 只读' })).toHaveText('未连接 · 只读');
-    await expect(page.getByText(/浏览器预览/)).toBeVisible();
+    await page.keyboard.press('Tab');
+    await expect(page.getByRole('link', { name: '跳至内容' })).toBeFocused();
+    await expect(page.getByText(/浏览器预览 · 仅显示界面/)).toBeVisible();
+    await page.getByRole('button', { name: '设置', exact: true }).click();
     await expect(page.getByRole('button', { name: '启动连接' })).toBeDisabled();
     await expect(page.getByRole('button', { name: '生成配对串' })).toBeDisabled();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.screenshot({ path: `${evidence}/browser-preview-${size.width}x${size.height}.png`, fullPage: true });
-    await page.keyboard.press('Tab');
-    await expect(page.getByRole('link', { name: '跳至内容' })).toBeFocused();
+
   });
 
   test(`connection diagnostics mock ${size.width}x${size.height}`, async ({ page }) => {
@@ -113,13 +26,15 @@ for (const size of [{ width: 1100, height: 760 }, { width: 640, height: 480 }]) 
     await page.setViewportSize(size);
     await page.goto('/?harness=bridge');
     await expect(page.getByRole('status').filter({ hasText: '已连接 Chrome' })).toHaveText('已连接 Chrome');
+    await page.getByRole('button', { name: '设置', exact: true }).click();
     await expect(page.getByText('27', { exact: true })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.screenshot({ path: `${evidence}/browser-diagnostics-mock-${size.width}x${size.height}.png`, fullPage: true });
     await page.getByRole('button', { name: '重新连接' }).click();
-    await expect(page.getByText('核对中 · 只读')).toBeVisible();
+    await expect(page.locator('.workspace-heading .connection')).toHaveText('核对中 · 只读');
     await page.getByRole('button', { name: '吊销配对' }).click();
-    await expect(page.getByText('未配对 · 只读')).toBeVisible();
+    await page.getByRole('button', { name: '确认吊销配对', exact: true }).click();
+    await expect(page.locator('.workspace-heading .connection')).toHaveText('未配对 · 只读');
     await expect(page.getByText('27', { exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: '吊销配对' })).toBeDisabled();
   });
@@ -135,7 +50,9 @@ test('startup failure hides raw backend details', async ({ page }) => {
 test('port conflict allows an edited retry without exposing rejection details', async ({ page }) => {
   await mockBridge(page, 'port-conflict');
   await page.goto('/?harness=bridge');
+  await page.getByRole('button', { name: '设置', exact: true }).click();
   await expect(page.getByRole('button', { name: '启动连接' })).toBeEnabled();
+  await page.getByText('高级：连接端口', { exact: true }).click();
   await page.getByLabel('端口').fill('70000');
   await page.getByRole('button', { name: '启动连接' }).click();
   await expect(page.getByRole('alert')).toContainText('1024–65535');

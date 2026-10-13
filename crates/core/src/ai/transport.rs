@@ -21,7 +21,10 @@ impl CancelFlag {
         Self(Arc::new(watch::channel(false).0))
     }
     pub(crate) fn cancel(&self) {
-        let _ = self.0.send(true);
+        self.0.send_replace(true);
+    }
+    pub(crate) fn same_request(&self, other: &Self) -> bool {
+        Arc::ptr_eq(&self.0, &other.0)
     }
     pub(crate) fn is_cancelled(&self) -> bool {
         *self.0.borrow()

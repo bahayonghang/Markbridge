@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "BatchEditPreview",
+  "type": "object",
+  "properties": {
+    "affected": {
+      "$ref": "#/$defs/Counter"
+    },
+    "destinationPath": {
+      "$ref": "#/$defs/RequiredNullable"
+    },
+    "expectedRevision": {
+      "$ref": "#/$defs/Counter"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/BatchEditItem"
+      },
+      "maxItems": 1000,
+      "minItems": 1
+    },
+    "planHash": {
+      "$ref": "#/$defs/Id"
+    },
+    "planId": {
+      "$ref": "#/$defs/Id"
+    },
+    "profileId": {
+      "$ref": "#/$defs/Id"
+    },
+    "requiresSecondConfirm": {
+      "type": "boolean"
+    },
+    "selectedCount": {
+      "$ref": "#/$defs/Counter"
+    },
+    "sourceEpoch": {
+      "$ref": "#/$defs/SourceEpoch"
+    },
+    "writable": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "planId",
+    "planHash",
+    "profileId",
+    "sourceEpoch",
+    "expectedRevision",
+    "selectedCount",
+    "affected",
+    "requiresSecondConfirm",
+    "destinationPath",
+    "writable",
+    "items"
+  ],
+  "$defs": {
+    "BatchEditItem": {
+      "type": "object",
+      "properties": {
+        "affected": {
+          "$ref": "#/$defs/Counter"
+        },
+        "changes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EditFieldChange"
+          },
+          "maxItems": 50
+        },
+        "chromeId": {
+          "$ref": "#/$defs/Id"
+        },
+        "path": {
+          "type": "string"
+        },
+        "title": {
+          "$ref": "#/$defs/Title"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "chromeId",
+        "title",
+        "path",
+        "affected",
+        "changes"
+      ]
+    },
+    "Counter": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 9007199254740991,
+      "minimum": 0
+    },
+    "EditField": {
+      "type": "string",
+      "enum": [
+        "title",
+        "url",
+        "parent",
+        "position",
+        "order",
+        "existence"
+      ]
+    },
+    "EditFieldChange": {
+      "type": "object",
+      "properties": {
+        "after": {
+          "$ref": "#/$defs/RequiredNullable"
+        },
+        "before": {
+          "$ref": "#/$defs/RequiredNullable"
+        },
+        "field": {
+          "$ref": "#/$defs/EditField"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "field",
+        "before",
+        "after"
+      ]
+    },
+    "Id": {
+      "type": "string",
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*(?![\\s\\S])"
+    },
+    "RequiredNullable": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "SourceEpoch": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 9007199254740991,
+      "minimum": 1
+    },
+    "Title": {
+      "type": "string",
+      "maxLength": 4096,
+      "minLength": 0
+    }
+  }
+}

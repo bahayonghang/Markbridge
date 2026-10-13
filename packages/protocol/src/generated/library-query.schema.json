@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LibraryQuery",
+  "type": "object",
+  "properties": {
+    "expectedRevision": {
+      "$ref": "#/$defs/RequiredNullable2"
+    },
+    "expectedSourceEpoch": {
+      "$ref": "#/$defs/RequiredNullable3"
+    },
+    "folderId": {
+      "$ref": "#/$defs/RequiredNullable"
+    },
+    "folderScope": {
+      "$ref": "#/$defs/FolderScope"
+    },
+    "includeNote": {
+      "type": "boolean"
+    },
+    "includeSummary": {
+      "type": "boolean"
+    },
+    "limit": {
+      "$ref": "#/$defs/Counter"
+    },
+    "offset": {
+      "$ref": "#/$defs/Counter"
+    },
+    "query": {
+      "$ref": "#/$defs/Title"
+    },
+    "tagIds": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Id"
+      },
+      "maxItems": 64
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "folderId",
+    "folderScope",
+    "query",
+    "tagIds",
+    "includeSummary",
+    "includeNote",
+    "offset",
+    "limit",
+    "expectedRevision",
+    "expectedSourceEpoch"
+  ],
+  "$defs": {
+    "Counter": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 9007199254740991,
+      "minimum": 0
+    },
+    "FolderScope": {
+      "type": "string",
+      "enum": [
+        "children",
+        "subtree",
+        "all"
+      ]
+    },
+    "Id": {
+      "type": "string",
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*(?![\\s\\S])"
+    },
+    "RequiredNullable": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Id"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "RequiredNullable2": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Counter"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "RequiredNullable3": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SourceEpoch"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "SourceEpoch": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 9007199254740991,
+      "minimum": 1
+    },
+    "Title": {
+      "type": "string",
+      "maxLength": 4096,
+      "minLength": 0
+    }
+  }
+}

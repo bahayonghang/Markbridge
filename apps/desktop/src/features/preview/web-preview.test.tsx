@@ -33,10 +33,11 @@ it('names the profile and selected url before opening the page', async () => {
   expect(await screen.findByText('当前资料：资料 A')).toBeVisible();
   expect(screen.getByText('选中网址：https://example.com/a')).toBeVisible();
   expect(screen.getByText(/不读取 Chrome 的登录状态/)).toBeVisible();
+  fireEvent.click(screen.getByText('网页会话与隐私'));
   expect(screen.getByText(/关闭预览窗口后，当前资料的预览会话会保留/)).toBeVisible();
-  expect(screen.getByRole('button', { name: '后退' })).toBeDisabled();
-  expect(screen.getByRole('button', { name: '前进' })).toBeDisabled();
-  expect(screen.getByRole('button', { name: '刷新' })).toBeDisabled();
+  expect(screen.queryByRole('button', { name: '后退' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: '前进' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: '刷新' })).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: '打开应用内网页' }));
   expect(invoke).toHaveBeenCalledWith('open_web_preview', expect.objectContaining({
     profileId: 'profile-a', chromeId: '10', url: 'https://example.com/a', requestId: expect.stringMatching(/^wp\d+$/),
@@ -102,6 +103,7 @@ it('clears the profile session only after confirmation', async () => {
     return state();
   });
   panel();
+  fireEvent.click(screen.getByText('网页会话与隐私'));
   fireEvent.click(await screen.findByRole('button', { name: '清除此资料的预览会话' }));
   expect(invoke).not.toHaveBeenCalledWith('clear_web_preview_session', expect.anything());
   fireEvent.click(screen.getByRole('button', { name: '确认清除预览会话' }));

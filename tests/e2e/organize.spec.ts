@@ -1,0 +1,105 @@
+import { expect, test } from '@playwright/test';
+import { mkdir } from 'node:fs/promises';
+import { join } from 'node:path';
+import { mockBridge } from './mock-bridge';
+
+const evidence = process.env.MARKBRIDGE_EVIDENCE_DIR ?? 'test-results/screenshots';
+type Fixture = Window & typeof globalThis & { __r01calls: string[]; __r07settings: unknown; __r07holdLinks: boolean; __r07finishLinks: () => void; __r07patch: (patch: unknown) => void };
+
+for (const [width, height] of [[1440, 900], [1100, 760], [640, 760], [1100, 480], [640, 480]]) {
+  test(`R07 scope and wide reviews remain reachable ${width}x${height}`, async ({ page }) => {
+    await page.setViewportSize({ width, height }); await mockBridge(page, 'library'); await page.goto('/');
+    await page.getByRole('option', { name: /选择 Human Interface Guidelines/ }).first().click();
+    await page.getByRole('button', { name: '整理', exact: true }).click();
+    await expect(page.getByRole('region', { name: '整理中心', exact: true })).toBeVisible();
+    const scrollPage = page.locator('.workspace-page').filter({ has: page.getByRole('region', { name: '整理中心', exact: true }) });
+    await scrollPage.evaluate((element) => { element.scrollTop = 0; });
+    const headingBox = await page.getByRole('heading', { name: '整理书签', exact: true }).boundingBox();
+    const pageBox = await scrollPage.boundingBox();
+    expect(headingBox!.y).toBeGreaterThanOrEqual(pageBox!.y);
+    await mkdir(evidence, { recursive: true });
+    await page.screenshot({ path: join(evidence, `r07-overview-${width}x${height}.png`) });
+    expect(await page.evaluate(() => (window as Fixture).__r01calls.filter((call) => ['organize', 'suggest_ai', 'check_links', 'inspect', 'apply', 'apply_ai'].includes(call)))).toEqual([]);
+    await page.getByRole('tab', { name: 'AI 文件夹', exact: true }).click();
+    await expect(page.getByRole('button', { name: '提出文件夹' })).toBeDisabled();
+    await page.getByRole('radio', { name: '指定目录', exact: true }).check();
+    await page.getByLabel('整理目录', { exact: true }).selectOption('1');
+    await page.getByRole('button', { name: '使用此目录', exact: true }).click();
+    await expect(page.getByText(/本次范围：书签栏（含子目录） · 24 个书签/)).toBeVisible();
+    await page.getByRole('tab', { name: '重复与链接', exact: true }).click();
+    await page.getByRole('button', { name: '检查重复', exact: true }).click();
+    await page.getByRole('radio', { name: 'Human Interface Guidelines', exact: true }).check();
+    await page.getByRole('button', { name: '预览清理', exact: true }).click();
+    await expect(page.getByRole('region', { name: '整理中心' }).getByText(/保留项备注保持不变/)).toBeVisible();
+    await page.getByRole('button', { name: '确认清理', exact: true }).scrollIntoViewIfNeeded();
+    const cleanupBox = await page.getByRole('button', { name: '确认清理', exact: true }).boundingBox();
+    expect(cleanupBox!.y).toBeGreaterThanOrEqual(pageBox!.y - 1);
+    expect(cleanupBox!.y + cleanupBox!.height).toBeLessThanOrEqual(pageBox!.y + pageBox!.height + 1);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await mkdir(evidence, { recursive: true }); await page.screenshot({ path: join(evidence, `r07-duplicates-${width}x${height}.png`) });
+    await page.getByRole('button', { name: '书签', exact: true }).click();
+    await page.evaluate(() => { (window as Fixture).__r07settings = { enabled: true, provider: 'ollama', endpointLabel: 'http://127.0.0.1:11434/api/chat', model: 'fixture', credentialConfigured: false, schemaSupported: true }; });
+    await page.getByRole('button', { name: '整理', exact: true }).click();
+    await expect(page.getByText(/保留项备注保持不变/)).toBeVisible();
+    await page.getByRole('tab', { name: 'AI 文件夹', exact: true }).click();
+    await expect(page.getByRole('region', { name: '批量整理', exact: true }).getByText('http://127.0.0.1:11434/api/chat', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: '提出文件夹', exact: true }).click();
+    await page.getByRole('button', { name: '确认目录', exact: true }).click();
+    await page.getByRole('button', { name: '生成分配', exact: true }).click();
+    await expect(page.getByRole('combobox', { name: '目标 Human Interface Guidelines', exact: true })).toBeVisible();
+    await page.getByRole('combobox', { name: '目标 Human Interface Guidelines', exact: true }).scrollIntoViewIfNeeded();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: join(evidence, `r07-assignments-${width}x${height}.png`) });
+    await page.getByRole('button', { name: '应用', exact: true }).scrollIntoViewIfNeeded();
+    const applyBox = await page.getByRole('button', { name: '应用', exact: true }).boundingBox();
+    expect(applyBox!.y).toBeGreaterThanOrEqual(pageBox!.y - 1);
+    expect(applyBox!.y + applyBox!.height).toBeLessThanOrEqual(pageBox!.y + pageBox!.height + 1);
+    await page.getByRole('tab', { name: '单条建议', exact: true }).click();
+    await page.getByRole('button', { name: '生成建议', exact: true }).click();
+    await expect(page.getByLabel('建议标题', { exact: true })).toHaveValue('可编辑的简洁标题');
+    await page.getByLabel('建议标题', { exact: true }).scrollIntoViewIfNeeded();
+    const inputBox = await page.getByLabel('建议标题', { exact: true }).boundingBox();
+    expect(inputBox!.y).toBeGreaterThanOrEqual(pageBox!.y - 1);
+    expect(inputBox!.y + inputBox!.height).toBeLessThanOrEqual(pageBox!.y + pageBox!.height + 1);
+    await page.screenshot({ path: join(evidence, `r07-suggestion-${width}x${height}.png`) });
+    await page.getByRole('button', { name: '确认这条建议', exact: true }).scrollIntoViewIfNeeded();
+    const confirmBox = await page.getByRole('button', { name: '确认这条建议', exact: true }).boundingBox();
+    expect(confirmBox!.y).toBeGreaterThanOrEqual(pageBox!.y - 1);
+    expect(confirmBox!.y + confirmBox!.height).toBeLessThanOrEqual(pageBox!.y + pageBox!.height + 1);
+    await page.screenshot({ path: join(evidence, `r07-suggestion-actions-${width}x${height}.png`) });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    expect(await page.evaluate(() => (window as Fixture).__r01calls.filter((call) => ['confirm_cleanup', 'apply', 'apply_ai'].includes(call)))).toEqual([]);
+  });
+}
+
+test('R07 a running link check survives navigation, cancels and ignores late results', async ({ page }) => {
+  await mockBridge(page, 'library'); await page.goto('/');
+  await page.getByRole('option', { name: /选择 Human Interface Guidelines/ }).first().click();
+  await page.getByRole('button', { name: '整理', exact: true }).click();
+  await page.evaluate(() => { (window as Fixture).__r07holdLinks = true; });
+  await page.getByRole('button', { name: '检查链接', exact: true }).click();
+  await page.getByRole('button', { name: '书签', exact: true }).click();
+  await page.getByRole('button', { name: '整理', exact: true }).click();
+  await expect(page.getByText(/正在检查 1 个网址/)).toBeVisible();
+  await page.getByRole('button', { name: '取消检查', exact: true }).click();
+  await page.evaluate(() => { (window as Fixture).__r07finishLinks(); });
+  await expect(page.getByRole('list', { name: '链接检查结果' })).toHaveCount(0);
+  await expect(page.getByText(/检查已取消/)).toBeVisible();
+  expect(await page.evaluate(() => (window as Fixture).__r01calls.filter((call) => call === 'check_links'))).toHaveLength(1);
+});
+
+test('R07 a stale folder plan is disabled and results stay visible offline', async ({ page }) => {
+  await mockBridge(page, 'library'); await page.goto('/');
+  await page.getByRole('option', { name: /选择 Human Interface Guidelines/ }).first().click();
+  await page.evaluate(() => { (window as Fixture).__r07settings = { enabled: true, provider: 'ollama', endpointLabel: 'http://127.0.0.1:11434', model: 'fixture', credentialConfigured: false, schemaSupported: true }; });
+  await page.getByRole('button', { name: '整理', exact: true }).click();
+  await page.getByRole('tab', { name: 'AI 文件夹', exact: true }).click();
+  await page.getByRole('button', { name: '提出文件夹' }).click();
+  await page.getByRole('button', { name: '确认目录' }).click();
+  await page.getByRole('button', { name: '生成分配' }).click();
+  await expect(page.getByRole('button', { name: '应用', exact: true })).toBeEnabled();
+  await page.evaluate(() => { (window as Fixture).__r07patch({ revision: 9, connection: 'cached_read_only' }); });
+  await expect(page.getByText('资料已变化。旧方案不能应用。')).toBeVisible();
+  await expect(page.getByRole('button', { name: '应用', exact: true })).toBeDisabled();
+  await expect(page.getByRole('combobox', { name: '目标 Human Interface Guidelines', exact: true })).toBeVisible();
+});
