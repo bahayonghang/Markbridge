@@ -112,3 +112,324 @@
 ### Next Steps
 
 - V04 的导入核对与主机休眠恢复仍挡住 03、04、13 归档。
+
+
+## Session 4: R01 blue bookmark workspace completed
+<!-- trellis-session: v=2 fp=e8fd627c5996b3e9 -->
+
+**Date**: 2026-10-13
+**Task**: R01 blue bookmark workspace completed
+**Branch**: `main`
+
+### Summary
+
+Implemented approved R01; independent review and isolated native five-viewport checks passed. Changes remain uncommitted and unarchived by user instruction. R02 waits for legacy V04 real OS sleep evidence.
+
+### Main Changes
+
+- Bookmark-first shell, settings separation, narrow-view focus and checkbox fixes; frontend specs updated.
+
+### Git Commits
+
+(No commits - planning session)
+
+### Testing
+
+- [OK] Full suite 104 Vitest + 6 Node before review; final affected components and shell passed; final native build and five sizes at system125/process150 passed.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- Resolve legacy V04 real OS sleep gate before starting R02; Windows system150/cross-monitor verification remains R08.
+
+
+## Session 5: R02 接入与来源状态完成
+<!-- trellis-session: v=2 fp=adac2a0c6de26ea9 -->
+
+**Date**: 2026-10-13
+**Task**: R02 接入与来源状态完成
+**Branch**: `main`
+
+### Summary
+
+R02 四项AC通过，独立检查与最终实际原生11项通过；真实休眠按用户授权移至R08完成前。
+
+### Main Changes
+
+- 首次引导、来源状态、切源保护、到期恢复和吊销确认
+- 修复A-B-A迟到结果及扩展焦点，稳定规范已同步
+
+### Git Commits
+
+(No commits - planning session)
+
+### Testing
+
+- [OK] 111+6/25实施检查；审查后47/7聚焦回归；最终生产扫描和原生11项PASS
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- 按批准顺序实施R03完整分页搜索选择与原生性能
+
+
+## Session 6: R03 complete browsing and unified search
+<!-- trellis-session: v=2 fp=fa42529dcde529c0 -->
+
+**Date**: 2026-10-13
+**Task**: R03 complete browsing and unified search
+**Branch**: `main`
+
+### Summary
+
+R03 five AC passed after native performance optimization; continue approved R04
+
+### Main Changes
+
+- Paged query, intersected search, loaded-scope selection, deep paths and mirror recovery; final independent review fixes retained
+
+### Git Commits
+
+(No commits - planning session)
+
+### Testing
+
+- [OK] Final native d23bba4d 11 PASS; f1e15a18 live PASS; B10K647f28ce p95 103.2ms and cold under648ms; failure207.9ms preserved
+- [OK] Independent lint/typecheck, affected39 and Rustquery3 PASS; browser32 earlier reviewed revision, targeted regressions cover final changes
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- R04 editing/bulk; R05 AI busy lifecycle handoff; real OS sleep remains due before R08 completion
+
+
+## Session 7: R04 日常编辑和安全多选完成
+<!-- trellis-session: v=2 fp=78fa1c6b3e9f12be -->
+
+**Date**: 2026-10-13
+**Task**: R04 日常编辑和安全多选完成
+**Branch**: `main`
+
+### Summary
+
+完成创建/路径选择/后端串行批次/回执恢复，核心故障和最终Windows UI验证通过，未提交归档。
+
+### Main Changes
+
+- 预检完整正反向帧，保护审查子树，修复稀疏删除撤销与原生滚动条位移
+
+### Git Commits
+
+(No commits - planning session)
+
+### Testing
+
+- [OK] 141 Vitest + 6脚本；133 Rust；39 E2E；normal 7/四故障各4/managed 8/最终UI 5 PASS
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- R05 详情标签备注双模式预览；真实OS休眠仍须R08完成前验证
+
+
+## Session 8: R05 detail metadata and native preview completed
+<!-- trellis-session: v=2 fp=79e54a4b5c2ff78a -->
+
+**Date**: 2026-10-13
+**Task**: R05 detail metadata and native preview completed
+**Branch**: `main`
+
+### Summary
+
+Completed R05 with independent and real Windows temporary-profile acceptance; no commit or archive.
+
+### Main Changes
+
+- Detail tabs, offline metadata drafts, sourceEpoch guards and isolated native preview feedback
+
+### Git Commits
+
+(No commits - planning session)
+
+### Testing
+
+- [OK] 156 Vitest +6 scripts;136 Rust PASS/3ignored;45 E2E;native e5e26b2a 6PASS and 2c95c715 11PASS
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- Start approved R06 history/export/conditional undo; real OS sleep remains due before R08 completion
+
+
+## Session 9: R06 history and native export complete
+<!-- trellis-session: v=2 fp=1203770f4d08ba17 -->
+
+**Date**: 2026-10-13
+**Task**: R06 history and native export complete
+**Branch**: `main`
+
+### Summary
+
+R06 AC and independent review PASS. Final native history 6, export 6, web 11 with 68 commands denied. Automated 167+6, Rust142, E2E51. No commit/archive; actual sleep due before R08 completion.
+
+### Git Commits
+
+(No commits - planning session)
+
+### Status
+
+[OK] **Completed**
+
+
+## Session 10: R07 整理中心完成
+<!-- trellis-session: v=2 fp=915f5b9267d3ed7a -->
+
+**Date**: 2026-10-13
+**Task**: R07 整理中心完成
+**Branch**: `main`
+
+### Summary
+
+R07全部AC与独立原生门槛通过，顺序进入R08；无提交归档。
+
+### Main Changes
+
+- 显式整理范围、AI审查与真实取消、历史追溯；修复取消注册竞态和链接误报。
+
+### Git Commits
+
+(No commits - planning session)
+
+### Testing
+
+- [OK] 178+6前端、146Rust、58e2e；native10+11PASS，68IPC拒绝。
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- R08完整闭环、B10K、真实OS睡眠和系统DPI验收。
+
+
+## Session 11: R08 integration evidence; real sleep pending
+<!-- trellis-session: v=2 fp=a6db4094cf261c69 -->
+
+**Date**: 2026-10-13
+**Task**: R08 integration evidence; real sleep pending
+**Branch**: `main`
+
+### Summary
+
+R01-R07 complete. R08 AC1-5 pass; AC6 actual OS sleep remains UNVERIFIED. Temporary processes and credentials cleaned. No commit, archive, install or daily Chrome changes.
+
+### Main Changes
+
+- Added user guide, two browser integration scenarios, native daily/B10K/live/DPI/system observation harnesses and complete acceptance mapping.
+
+### Git Commits
+
+(No commits - planning session)
+
+### Testing
+
+- [OK] 178 Vitest + 6 scripts; 60 E2E; lint/typecheck PASS. Same frozen R07 exe 804d9207, Rust146 + 3 ignored/protocol/build gates reused explicitly.
+- [OK] Native daily c4d33b1e 7PASS; live e5a17113 100 events p95 82ms max88ms; B10K 1a3d7a21 warm30 p95 129.2ms cold3 700.829-732.339ms; DPI69aebea8 actual125/150 and cross-monitor PASS.
+- [OK] Probe52c7576b actual nonlive apply READ_ONLY; sleep34833920 NOT_RUN because user manual sleep pending, cleanup successful.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- After user availability, rerun native-system.mjs sleep; observe genuine >=60sec Kernel-Power sleep/wake, same epoch/new session/revision/fulltree/no replay. Independent review before completing R08 and parent.
+
+
+## Session 12: Close redesign after explicit sleep-test waiver
+<!-- trellis-session: v=2 fp=ce80ae9b9540d33c -->
+
+**Date**: 2026-10-13
+**Task**: Close redesign after explicit sleep-test waiver
+**Branch**: `main`
+
+### Summary
+
+User explicitly waived real OS sleep/wake acceptance. R08 and redesign parent completed under revised scope. AC6 WAIVED, actual NOT_RUN; legacy V04 remains UNVERIFIED.
+
+### Main Changes
+
+- Updated current waiver authority, R08 and parent gates/receipts/metadata, AGENTS and baseline; preserved prior decision history and raw execution reports.
+
+### Git Commits
+
+(No commits - planning session)
+
+### Testing
+
+- [OK] Independent trellis-check documentation review: no retained-gate blocker. R08 and parent JSONL validation PASS, diff check PASS. Product unchanged; prior test results retained without claiming new executions.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- No remaining work in the approved redesign scope. Commit/archive/release/installation require separate user authorization.
+
+
+## Session 13: 工作台改版审计、撤销安全修复与十一项任务归档
+<!-- trellis-session: v=2 fp=8dafe7be6bb6aec1 -->
+
+**Date**: 2026-10-13
+**Task**: 工作台改版审计、撤销安全修复与十一项任务归档
+**Branch**: `main`
+
+### Summary
+
+按用户明确授权审计并提交累计工作台改版；修复撤销新建文件夹误删外部后代的边界，自动与新构建原生定向回归通过；归档改版父任务/R01–R08及旧03/04共11项，整理剩余13/14/15与原父任务的下一对话Prompt。未推送、发布或日常安装。
+
+### Main Changes
+
+- 蓝色简洁工作台及连接、浏览搜索、日常编辑批量、标签详情、预览、历史导出和条件撤销已提交。
+- 撤销创建folder要求逆序模拟后为空，附带单节点expectedSubtree，扩展以非递归remove保护最终读写竞态；外部内容保留。
+- 同步同一真实睡眠项用户豁免：WAIVED，执行NOT_RUN、历史V04 UNVERIFIED；旧03/04其余AC已有证据后结案。归档及引用修正完成，原父12/15 done。
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `a3bb951` | fix(dev): 修复 Windows 启动参数传递与工具类型检查 |
+| `0bd492b` | feat(workspace): 重设计书签工作台并完善日常管理与安全撤销 |
+| `4daa535` | chore(trellis): 归档十一项已完成任务并记录验收与后续计划 |
+
+### Testing
+
+- [OK] 本轮180 Vitest+6 scripts、147 Rust（3既有ignored）、lint/typecheck/fmt/clippy/protocol/build与native扫描PASS；60 E2E复用未变前端源码对应记录。
+- [OK] 新exe 4a7f12fe… / extension365f16a0…真实原生3项PASS：正常空folder撤销、外部后代冲突取消、确认冲突后Chrome全树不变；凭据已清理。
+- [OK] 归档后514条context、11份任务清单、56个JavaScript语法及受影响链接/导入均通过；原生性能/DPI/权限历史证据注明不同binary分层复用。
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- 按 docs/next-session-prompt.md 恢复既有13，补核实诊断导出和当前NSIS隔离安装验收；旧包PASS不代表新版。
+- 13通过后推进14平台适配及15本地语义检索；14缺环境不阻塞独立15，无主机/模型不虚构原生或质量PASS。
