@@ -8,6 +8,7 @@ for (const size of [{ width: 1440, height: 900 }, { width: 1100, height: 760 }, 
     await page.setViewportSize(size);
     await page.goto('/');
     await page.getByRole('button', { name: '设置', exact: true }).click();
+  await page.getByRole('tab', { name: 'Chrome 连接', exact: true }).click();
     const region = page.getByRole('region', { name: '诊断导出' });
     const button = region.getByRole('button', { name: '导出诊断 JSON' });
     await button.scrollIntoViewIfNeeded();
@@ -31,6 +32,7 @@ test('13 cancellation and safe failures remain distinct from saving, with retry'
   await mockBridge(page);
   await page.goto('/');
   await page.getByRole('button', { name: '设置', exact: true }).click();
+  await page.getByRole('tab', { name: 'Chrome 连接', exact: true }).click();
   const region = page.getByRole('region', { name: '诊断导出' });
   const button = region.getByRole('button', { name: '导出诊断 JSON' });
   for (const status of ['cancelled', 'failed', 'rejected', 'saved']) {

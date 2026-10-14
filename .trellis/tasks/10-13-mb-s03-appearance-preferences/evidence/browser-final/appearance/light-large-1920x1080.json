@@ -1,0 +1,329 @@
+[
+  {
+    "tab": "通用",
+    "theme": "light",
+    "rootText": "15px",
+    "width": 1920,
+    "height": 1080,
+    "documentWidth": 1920,
+    "documentHeight": 1080,
+    "tabs": {
+      "x": 216,
+      "right": 400,
+      "width": 184
+    },
+    "content": {
+      "x": 400,
+      "right": 1920,
+      "scrollTop": 0
+    },
+    "controls": [
+      {
+        "x": 1104,
+        "right": 1218.65625,
+        "height": 44,
+        "name": "跟随系统"
+      },
+      {
+        "x": 1226.65625,
+        "right": 1341.328125,
+        "height": 44,
+        "name": "浅色"
+      },
+      {
+        "x": 1349.328125,
+        "right": 1464,
+        "height": 44,
+        "name": "深色"
+      },
+      {
+        "x": 1104,
+        "right": 1464,
+        "height": 44,
+        "name": "系统字体微软雅黑宋体"
+      },
+      {
+        "x": 1104,
+        "right": 1464,
+        "height": 44,
+        "name": "小标准大"
+      },
+      {
+        "x": 424,
+        "right": 540,
+        "height": 44,
+        "name": "恢复默认外观"
+      }
+    ]
+  },
+  {
+    "tab": "Chrome 连接",
+    "theme": "light",
+    "rootText": "15px",
+    "width": 1920,
+    "height": 1080,
+    "documentWidth": 1920,
+    "documentHeight": 1080,
+    "tabs": {
+      "x": 216,
+      "right": 400,
+      "width": 184
+    },
+    "content": {
+      "x": 400,
+      "right": 1920,
+      "scrollTop": 0
+    },
+    "controls": [
+      {
+        "x": 424,
+        "right": 525,
+        "height": 44,
+        "name": "浏览此资料"
+      },
+      {
+        "x": 533,
+        "right": 619,
+        "height": 44,
+        "name": "重新连接"
+      },
+      {
+        "x": 627,
+        "right": 713,
+        "height": 44,
+        "name": "吊销配对"
+      },
+      {
+        "x": 424,
+        "right": 525,
+        "height": 44,
+        "name": "浏览此资料"
+      },
+      {
+        "x": 533,
+        "right": 619,
+        "height": 44,
+        "name": "重新连接"
+      },
+      {
+        "x": 627,
+        "right": 713,
+        "height": 44,
+        "name": "吊销配对"
+      },
+      {
+        "x": 424,
+        "right": 664,
+        "height": 44,
+        "name": ""
+      },
+      {
+        "x": 676,
+        "right": 762,
+        "height": 44,
+        "name": "枚举资料"
+      },
+      {
+        "x": 774,
+        "right": 860,
+        "height": 44,
+        "name": "重新读取"
+      },
+      {
+        "x": 424,
+        "right": 549.96875,
+        "height": 44,
+        "name": "导出诊断 JSON"
+      },
+      {
+        "x": 1222.5,
+        "right": 1362.5,
+        "height": 44,
+        "name": ""
+      },
+      {
+        "x": 1355.390625,
+        "right": 1456.390625,
+        "height": 44,
+        "name": "连接已启动"
+      },
+      {
+        "x": 1222.5,
+        "right": 1462.5,
+        "height": 44,
+        "name": ""
+      },
+      {
+        "x": 1474.5,
+        "right": 1575.5,
+        "height": 44,
+        "name": "生成配对串"
+      }
+    ]
+  },
+  {
+    "tab": "AI",
+    "theme": "light",
+    "rootText": "15px",
+    "width": 1920,
+    "height": 1080,
+    "documentWidth": 1920,
+    "documentHeight": 1080,
+    "tabs": {
+      "x": 216,
+      "right": 400,
+      "width": 184
+    },
+    "content": {
+      "x": 400,
+      "right": 1920,
+      "scrollTop": 0
+    },
+    "controls": [
+      {
+        "x": 1536,
+        "right": 1552,
+        "height": 16,
+        "name": ""
+      },
+      {
+        "x": 1536,
+        "right": 1896,
+        "height": 44,
+        "name": "未选择Ollama兼容端点"
+      },
+      {
+        "x": 1536,
+        "right": 1896,
+        "height": 44,
+        "name": ""
+      },
+      {
+        "x": 1536,
+        "right": 1896,
+        "height": 44,
+        "name": ""
+      },
+      {
+        "x": 424,
+        "right": 510,
+        "height": 44,
+        "name": "保存配置"
+      },
+      {
+        "x": 1536,
+        "right": 1896,
+        "height": 44,
+        "name": ""
+      },
+      {
+        "x": 424,
+        "right": 510,
+        "height": 44,
+        "name": "保存密钥"
+      },
+      {
+        "x": 518,
+        "right": 604,
+        "height": 44,
+        "name": "清除凭据"
+      },
+      {
+        "x": 612,
+        "right": 698,
+        "height": 44,
+        "name": "测试连接"
+      }
+    ]
+  },
+  {
+    "tab": "语义检索",
+    "theme": "light",
+    "rootText": "15px",
+    "width": 1920,
+    "height": 1080,
+    "documentWidth": 1920,
+    "documentHeight": 1080,
+    "tabs": {
+      "x": 216,
+      "right": 400,
+      "width": 184
+    },
+    "content": {
+      "x": 400,
+      "right": 1920,
+      "scrollTop": 0
+    },
+    "controls": [
+      {
+        "x": 1536,
+        "right": 1552,
+        "height": 16,
+        "name": ""
+      },
+      {
+        "x": 1536,
+        "right": 1896,
+        "height": 44,
+        "name": ""
+      },
+      {
+        "x": 1536,
+        "right": 1896,
+        "height": 44,
+        "name": ""
+      },
+      {
+        "x": 424,
+        "right": 540,
+        "height": 44,
+        "name": "保存语义配置"
+      },
+      {
+        "x": 548,
+        "right": 664,
+        "height": 44,
+        "name": "检查本地模型"
+      }
+    ]
+  },
+  {
+    "tab": "备份导出",
+    "theme": "light",
+    "rootText": "15px",
+    "width": 1920,
+    "height": 1080,
+    "documentWidth": 1920,
+    "documentHeight": 1080,
+    "tabs": {
+      "x": 216,
+      "right": 400,
+      "width": 184
+    },
+    "content": {
+      "x": 400,
+      "right": 1920,
+      "scrollTop": 0
+    },
+    "controls": [
+      {
+        "x": 424,
+        "right": 784,
+        "height": 44,
+        "name": "测试研究资料 · Chrome另一份资料 · Chrome"
+      },
+      {
+        "x": 1796.84375,
+        "right": 1896,
+        "height": 44,
+        "name": "导出 HTML"
+      },
+      {
+        "x": 1770.03125,
+        "right": 1896,
+        "height": 44,
+        "name": "导出侧车 JSON"
+      }
+    ]
+  }
+]

@@ -1,0 +1,129 @@
+{
+  "contrast": [
+    {
+      "foreground": "ink",
+      "background": "surface",
+      "foregroundColor": "#e8edf5",
+      "backgroundColor": "#232a35",
+      "ratio": 12.285161765169004,
+      "minimum": 4.5
+    },
+    {
+      "foreground": "muted",
+      "background": "surface",
+      "foregroundColor": "#a8b3c4",
+      "backgroundColor": "#232a35",
+      "ratio": 6.815480257284148,
+      "minimum": 4.5
+    },
+    {
+      "foreground": "muted",
+      "background": "sidebar",
+      "foregroundColor": "#a8b3c4",
+      "backgroundColor": "#1d222b",
+      "ratio": 7.530841035118401,
+      "minimum": 4.5
+    },
+    {
+      "foreground": "blue",
+      "background": "selected",
+      "foregroundColor": "#7cacff",
+      "backgroundColor": "#263e61",
+      "ratio": 4.733365210512185,
+      "minimum": 4.5
+    },
+    {
+      "foreground": "danger",
+      "background": "surface",
+      "foregroundColor": "#ff9296",
+      "backgroundColor": "#232a35",
+      "ratio": 6.742474243232281,
+      "minimum": 4.5
+    },
+    {
+      "foreground": "caution",
+      "background": "surface",
+      "foregroundColor": "#e4ba73",
+      "backgroundColor": "#232a35",
+      "ratio": 7.95698054677686,
+      "minimum": 4.5
+    },
+    {
+      "foreground": "disabled-ink",
+      "background": "disabled-surface",
+      "foregroundColor": "#a8b3c4",
+      "backgroundColor": "#29313e",
+      "ratio": 6.181577317058376,
+      "minimum": 4.5
+    },
+    {
+      "foreground": "primary-ink",
+      "background": "primary-fill",
+      "foregroundColor": "#ffffff",
+      "backgroundColor": "#2466c8",
+      "ratio": 5.512406800540132,
+      "minimum": 4.5
+    },
+    {
+      "foreground": "primary-ink",
+      "background": "primary-hover",
+      "foregroundColor": "#ffffff",
+      "backgroundColor": "#1c59b5",
+      "ratio": 6.676064312625832,
+      "minimum": 4.5
+    },
+    {
+      "foreground": "control-border",
+      "background": "surface",
+      "foregroundColor": "#8290a6",
+      "backgroundColor": "#232a35",
+      "ratio": 4.4627511911864355,
+      "minimum": 3
+    },
+    {
+      "foreground": "control-border",
+      "background": "disabled-surface",
+      "foregroundColor": "#8290a6",
+      "backgroundColor": "#29313e",
+      "ratio": 4.0476738973206565,
+      "minimum": 3
+    },
+    {
+      "foreground": "blue",
+      "background": "surface",
+      "foregroundColor": "#7cacff",
+      "backgroundColor": "#232a35",
+      "ratio": 6.328509826564266,
+      "minimum": 3
+    },
+    {
+      "foreground": "blue",
+      "background": "selected",
+      "foregroundColor": "#7cacff",
+      "backgroundColor": "#263e61",
+      "ratio": 4.733365210512185,
+      "minimum": 3
+    },
+    {
+      "foreground": "primary-border",
+      "background": "surface",
+      "foregroundColor": "#8290a6",
+      "backgroundColor": "#232a35",
+      "ratio": 4.4627511911864355,
+      "minimum": 3
+    },
+    {
+      "foreground": "primary-border",
+      "background": "canvas",
+      "foregroundColor": "#8290a6",
+      "backgroundColor": "#171b22",
+      "ratio": 5.335102272499378,
+      "minimum": 3
+    }
+  ],
+  "renderedPrimary": {
+    "fill": "rgb(36, 102, 200)",
+    "border": "rgb(130, 144, 166)",
+    "ink": "rgb(255, 255, 255)"
+  }
+}

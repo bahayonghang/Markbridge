@@ -1,0 +1,312 @@
+{
+  "runId": "run-1791949706426-73a68df7",
+  "os": "Windows 11 Pro",
+  "release": "10.0.26300",
+  "node": "v26.7.0",
+  "isolationRoot": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-s01-ghlcnY",
+  "executable": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-s01-ghlcnY\\install\\markbridge-desktop.exe",
+  "appData": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-s01-ghlcnY\\app-data",
+  "copiedPortableExeOnly": true,
+  "installerRun": false,
+  "paired": false,
+  "exeBytes": 25361920,
+  "exeSha256": "ef06b936da825542c990bbb2125f620075172992ac25d4e680bd58adb663b41e",
+  "webview": "Edg/155.0.4283.45",
+  "mainDataEvidence": {
+    "mainDirectoryExists": true,
+    "observations": [
+      {
+        "pid": 64500,
+        "observedDirectoryExists": true,
+        "relativeDirectory": "app-data/main-webview/EBWebView",
+        "parent": 120380,
+        "insideFixture": true,
+        "creationUtcTicks": "639275465066004560",
+        "expectedMain": true,
+        "expectedPreview": false
+      }
+    ],
+    "previewDirectoryExists": false,
+    "owner": 120380
+  },
+  "sidebar": {
+    "tag": "IMG",
+    "source": "/assets/markbridge-o0EVGiPW.png",
+    "width": 32,
+    "height": 32,
+    "naturalWidth": 128,
+    "naturalHeight": 128
+  },
+  "viewport": {
+    "width": 1100,
+    "height": 760,
+    "devicePixelRatio": 1.25
+  },
+  "windows": {
+    "taskbar": {
+      "name": "Markbridge · 签桥 - 1 running window",
+      "width": 186,
+      "y": 1380,
+      "method": "owned_button_UIAutomation_CopyFromScreen",
+      "x": 1516,
+      "height": 60
+    },
+    "clientWidth": 1375,
+    "ownedExecutableVerified": true,
+    "icons": [
+      {
+        "width": 32,
+        "source": "WM_GETICON",
+        "height": 32,
+        "kind": "small"
+      },
+      {
+        "kind": "large",
+        "present": false
+      }
+    ],
+    "printed": true,
+    "windowHandle": "F0EF2",
+    "dpi": 120,
+    "pid": 120380,
+    "title": "Markbridge · 签桥",
+    "clientHeight": 950
+  },
+  "chromeVersion": "Chrome/155.0.8059.39",
+  "chromeProfile": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-s01-ghlcnY\\chrome-a",
+  "extension": {
+    "id": "blbapbmincddiilocledaajcegiekbfk",
+    "icons": [
+      {
+        "size": 16,
+        "path": "icons/16.png",
+        "width": 16,
+        "height": 16,
+        "sha256": "10501b9d533592078063a657602b2736d70d67a1e600c4bc207285dbd1033471"
+      },
+      {
+        "size": 32,
+        "path": "icons/32.png",
+        "width": 32,
+        "height": 32,
+        "sha256": "f66e41f24fa33bf3036484919593021bc3055c94a406cffd635cad0f057f9949"
+      },
+      {
+        "size": 48,
+        "path": "icons/48.png",
+        "width": 48,
+        "height": 48,
+        "sha256": "66357ddcee2d5f8fa2a2333ae72ea4a0a46f1b05835824ac2e0c39687f391410"
+      },
+      {
+        "size": 128,
+        "path": "icons/128.png",
+        "width": 128,
+        "height": 128,
+        "sha256": "9200bd10c383059396744d388527f52d1120a818baf63b26d6bd3b1418f40bcb"
+      }
+    ],
+    "defaultIcon": {
+      "16": "icons/16.png",
+      "32": "icons/32.png",
+      "48": "icons/48.png",
+      "128": "icons/128.png"
+    },
+    "permissions": [
+      "bookmarks",
+      "storage",
+      "alarms",
+      "scripting",
+      "activeTab"
+    ],
+    "csp": {
+      "extension_pages": "script-src 'self'; object-src 'none'; connect-src ws://127.0.0.1:*"
+    }
+  },
+  "extensionCard": {
+    "name": "Markbridge · 签桥",
+    "imageWidth": 48,
+    "imageHeight": 48,
+    "imageDataSha256": "f4fb72725466eee43606ae76a1955779bc0cedc52fcf0bc05f3249b8179c61b4",
+    "sourceKind": "data:image/png"
+  },
+  "status": "PASS_PENDING_VISUAL_REVIEW",
+  "chromeClose": {
+    "kind": "owned_chrome_close",
+    "pid": 144232,
+    "method": "Browser.close",
+    "pipeEofMode": "immediate",
+    "methodVersion": 2,
+    "observationBudgetMs": 180000,
+    "startedAtMs": 1791949714321,
+    "phase": "exit-verified",
+    "acknowledged": true,
+    "childExitObserved": true,
+    "exitCode": 0,
+    "signal": null,
+    "events": [
+      {
+        "event": "close_frame_queued",
+        "elapsedMs": 0
+      },
+      {
+        "event": "pipe_eof_requested",
+        "elapsedMs": 0
+      },
+      {
+        "event": "close_frame_write_callback",
+        "elapsedMs": 0
+      },
+      {
+        "event": "close_acknowledged",
+        "elapsedMs": 0
+      },
+      {
+        "event": "pipe_eof_flushed",
+        "elapsedMs": 0
+      },
+      {
+        "event": "pipe_write_closed",
+        "elapsedMs": 36
+      },
+      {
+        "event": "pipe_read_closed",
+        "elapsedMs": 37
+      },
+      {
+        "event": "child_exit_observed",
+        "elapsedMs": 126
+      }
+    ],
+    "frameQueued": true,
+    "pipeEofRequested": true,
+    "frameWriteCallback": true,
+    "pipeEofFlushed": true,
+    "pipeWriteClosed": true,
+    "pipeReadClosed": true,
+    "elapsedMs": 141
+  },
+  "appClose": {
+    "pid": 120380,
+    "exitCode": 0,
+    "signal": null,
+    "method": "verified_main_and_preview_windows_WM_CLOSE",
+    "phase": "known-webview-exit",
+    "windowPosts": [
+      {
+        "action": "close",
+        "posted": 1,
+        "pid": 120380,
+        "windows": [
+          {
+            "emptyTitle": false,
+            "handle": "F0EF2",
+            "messageOnly": false,
+            "visible": true,
+            "closeEligible": true,
+            "className": "UNREPORTED_CLASS",
+            "role": "main",
+            "threadId": 147304
+          },
+          {
+            "emptyTitle": true,
+            "handle": "2D11788",
+            "messageOnly": false,
+            "visible": true,
+            "closeEligible": false,
+            "className": "TAO_THREAD_EVENT_TARGET",
+            "role": "other",
+            "threadId": 147304
+          },
+          {
+            "emptyTitle": false,
+            "handle": "A21FD2",
+            "messageOnly": false,
+            "visible": false,
+            "closeEligible": false,
+            "className": "IME",
+            "role": "other",
+            "threadId": 147304
+          },
+          {
+            "emptyTitle": false,
+            "handle": "1B0EC2",
+            "messageOnly": false,
+            "visible": false,
+            "closeEligible": false,
+            "className": "UNREPORTED_CLASS",
+            "role": "other",
+            "threadId": 147304
+          },
+          {
+            "emptyTitle": true,
+            "handle": "110EF8",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "Chrome_MessageWindow",
+            "role": "other",
+            "threadId": 87444
+          },
+          {
+            "emptyTitle": true,
+            "handle": "194039C",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "Chrome_MessageWindow",
+            "role": "other",
+            "threadId": 147304
+          },
+          {
+            "emptyTitle": false,
+            "handle": "560F06",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "CicMarshalWndClass",
+            "role": "other",
+            "threadId": 147304
+          },
+          {
+            "emptyTitle": false,
+            "handle": "1A0F14",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "OleMainThreadWndClass",
+            "role": "other",
+            "threadId": 147304
+          }
+        ],
+        "ownedWindows": 8,
+        "processAbsent": false
+      }
+    ],
+    "knownWebviewPids": [
+      64500
+    ],
+    "knownWebviewIdentities": [
+      {
+        "pid": 64500,
+        "creationUtcTicks": "639275465066004560"
+      }
+    ],
+    "nativeStageOrder": [],
+    "knownWebviewAbsence": {
+      "observations": [
+        {
+          "creationUtcTicks": "639275465066004560",
+          "pid": 64500,
+          "state": "absent"
+        }
+      ],
+      "presentPids": [],
+      "reusedPids": []
+    }
+  },
+  "finalProcesses": {
+    "processes": [],
+    "listeners": []
+  }
+}

@@ -29,7 +29,7 @@ for (const [width, height] of [[1440, 900], [1100, 760], [640, 760], [1100, 480]
     expect(await page.evaluate(() => (window as unknown as { __r01calls: string[] }).__r01calls.includes('apply'))).toBe(false);
     await page.getByRole('button', { name: '备份导出', exact: true }).click();
     await expect(page.getByRole('tab', { name: '备份导出' })).toHaveAttribute('aria-selected', 'true');
-    const exportPage = page.locator('.workspace-page').filter({ has: page.getByRole('region', { name: '备份导出' }) });
+    const exportPage = page.locator('.settings-scroll');
     await exportPage.evaluate((element) => { element.scrollTop = 0; });
     const title = await page.getByRole('heading', { name: '备份与导出' }).boundingBox();
     const scrollBox = await exportPage.boundingBox();

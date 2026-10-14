@@ -1,0 +1,3075 @@
+{
+  "runId": "run-1791965980131-17ad4cfd",
+  "startedAt": "2026-10-14T08:19:40.156Z",
+  "os": "Windows 11 Pro",
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-s03-5IPpQo",
+  "executable": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-s03-5IPpQo\\install\\markbridge-desktop.exe",
+  "appData": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-s03-5IPpQo\\app-data",
+  "productionSourceFingerprint": "f2124fcee69de1eb3f2a390343f083aca2982f0af4fd1abd87959e4b54b0df89",
+  "exeBytes": 25387008,
+  "exeSha256": "b94cb2f1e5f11d4db66ae680a5975bf05091c51d582f2a3fafd73a838a8d4866",
+  "controls": [
+    {
+      "name": "first_run_pairing_through_current_settings_real_ipc",
+      "status": "PASS",
+      "profileId": "p:8d83d5df6f36e0382659479e47e98ec0ddc97084044cd97e3a581ca9ff45e116"
+    },
+    {
+      "name": "six_sizes_five_tabs_native_geometry_and_vertical_focus",
+      "status": "PASS",
+      "screens": 30
+    },
+    {
+      "name": "real_ipc_navigation_retains_drafts",
+      "status": "PASS",
+      "ipcObserverVerified": true,
+      "commands": [
+        "semantic_settings"
+      ]
+    },
+    {
+      "name": "history_exports_current_profile_with_real_cancel_and_saved_file",
+      "status": "PASS"
+    },
+    {
+      "name": "mirror_html_only_real_failed_readonly_receipt_and_late_previous_source_reply_ignored",
+      "status": "PASS",
+      "rejected": {
+        "status": "failed",
+        "metadata": null,
+        "errorCode": "READ_ONLY"
+      }
+    },
+    {
+      "name": "native_all_fonts_sizes_and_tree_bookmark_row_geometry",
+      "status": "PASS",
+      "measurements": 9
+    },
+    {
+      "name": "native_hidden_library_anchor_draft_selection_last_item_and_checkbox",
+      "status": "PASS",
+      "oldScroll": 1811.199951171875,
+      "newScroll": 1571.199951171875,
+      "expectedScroll": 1571.199951171875,
+      "anchorIndex": 30,
+      "offset": 11.199951171875,
+      "toleranceCssPx": 1,
+      "standardRow": 52,
+      "largeRow": 60
+    },
+    {
+      "name": "native_preferences_session_and_emulated_system_media",
+      "status": "PASS",
+      "preferences": {
+        "version": 1,
+        "theme": "dark",
+        "font": "song",
+        "fontSize": "large"
+      },
+      "ipcObserverVerified": true,
+      "commands": [
+        "cache_tree",
+        "cache_query",
+        "cache_get",
+        "cache_query",
+        "tag_state",
+        "tag_state",
+        "cache_get",
+        "tag_state",
+        "cache_get"
+      ],
+      "systemStimulus": "CDP emulated prefers-color-scheme, no OS preference changes"
+    },
+    {
+      "name": "actual_125_and_150_percent_native_monitors_large_font",
+      "status": "PASS",
+      "displays": 12
+    },
+    {
+      "name": "true_native_process_exit_restart_persists_theme_font_size",
+      "status": "PASS",
+      "restarted": {
+        "preferences": {
+          "version": 1,
+          "theme": "dark",
+          "font": "song",
+          "fontSize": "large"
+        },
+        "theme": "dark",
+        "font": "song",
+        "fontSize": "large",
+        "family": "\"Times New Roman\", SimSun, serif",
+        "text": "15px"
+      }
+    },
+    {
+      "name": "native_reset_only_appearance",
+      "status": "PASS"
+    }
+  ],
+  "screens": [
+    {
+      "tab": "通用",
+      "width": 1440,
+      "height": 900,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY2",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 1800,
+        "dpi": 120,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 1125
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1440,
+          "height": 900,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 184,
+          "height": 812
+        },
+        "content": {
+          "x": 400,
+          "y": 56,
+          "width": 1040,
+          "height": 812
+        },
+        "bodyWidth": 1440,
+        "bodyHeight": 900,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "Chrome 连接",
+      "width": 1440,
+      "height": 900,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY2",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 1800,
+        "dpi": 120,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 1125
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1440,
+          "height": 900,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 184,
+          "height": 812
+        },
+        "content": {
+          "x": 400,
+          "y": 56,
+          "width": 1040,
+          "height": 812
+        },
+        "bodyWidth": 1440,
+        "bodyHeight": 900,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "AI",
+      "width": 1440,
+      "height": 900,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY2",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 1800,
+        "dpi": 120,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 1125
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1440,
+          "height": 900,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 184,
+          "height": 812
+        },
+        "content": {
+          "x": 400,
+          "y": 56,
+          "width": 1040,
+          "height": 812
+        },
+        "bodyWidth": 1440,
+        "bodyHeight": 900,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "语义检索",
+      "width": 1440,
+      "height": 900,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY2",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 1800,
+        "dpi": 120,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 1125
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1440,
+          "height": 900,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 184,
+          "height": 812
+        },
+        "content": {
+          "x": 400,
+          "y": 56,
+          "width": 1040,
+          "height": 812
+        },
+        "bodyWidth": 1440,
+        "bodyHeight": 900,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "备份导出",
+      "width": 1440,
+      "height": 900,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY2",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 1800,
+        "dpi": 120,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 1125
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1440,
+          "height": 900,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 184,
+          "height": 812
+        },
+        "content": {
+          "x": 400,
+          "y": 56,
+          "width": 1040,
+          "height": 812
+        },
+        "bodyWidth": 1440,
+        "bodyHeight": 900,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "通用",
+      "width": 1100,
+      "height": 760,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY2",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 1375,
+        "dpi": 120,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 950
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1100,
+          "height": 760,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 152,
+          "height": 672
+        },
+        "content": {
+          "x": 368,
+          "y": 56,
+          "width": 732,
+          "height": 672
+        },
+        "bodyWidth": 1100,
+        "bodyHeight": 760,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "Chrome 连接",
+      "width": 1100,
+      "height": 760,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY2",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 1375,
+        "dpi": 120,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 950
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1100,
+          "height": 760,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 152,
+          "height": 672
+        },
+        "content": {
+          "x": 368,
+          "y": 56,
+          "width": 732,
+          "height": 672
+        },
+        "bodyWidth": 1100,
+        "bodyHeight": 760,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "AI",
+      "width": 1100,
+      "height": 760,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY2",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 1375,
+        "dpi": 120,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 950
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1100,
+          "height": 760,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 152,
+          "height": 672
+        },
+        "content": {
+          "x": 368,
+          "y": 56,
+          "width": 732,
+          "height": 672
+        },
+        "bodyWidth": 1100,
+        "bodyHeight": 760,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "语义检索",
+      "width": 1100,
+      "height": 760,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY2",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 1375,
+        "dpi": 120,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 950
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1100,
+          "height": 760,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 152,
+          "height": 672
+        },
+        "content": {
+          "x": 368,
+          "y": 56,
+          "width": 732,
+          "height": 672
+        },
+        "bodyWidth": 1100,
+        "bodyHeight": 760,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "备份导出",
+      "width": 1100,
+      "height": 760,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY2",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 1375,
+        "dpi": 120,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 950
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1100,
+          "height": 760,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 152,
+          "height": 672
+        },
+        "content": {
+          "x": 368,
+          "y": 56,
+          "width": 732,
+          "height": 672
+        },
+        "bodyWidth": 1100,
+        "bodyHeight": 760,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "通用",
+      "width": 640,
+      "height": 760,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY2",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 800,
+        "dpi": 120,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 950
+      },
+      "geometry": {
+        "viewport": {
+          "width": 640,
+          "height": 760,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 64,
+          "y": 56,
+          "width": 132,
+          "height": 672
+        },
+        "content": {
+          "x": 196,
+          "y": 56,
+          "width": 444,
+          "height": 672
+        },
+        "bodyWidth": 640,
+        "bodyHeight": 760,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "Chrome 连接",
+      "width": 640,
+      "height": 760,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY2",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 800,
+        "dpi": 120,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 950
+      },
+      "geometry": {
+        "viewport": {
+          "width": 640,
+          "height": 760,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 64,
+          "y": 56,
+          "width": 132,
+          "height": 672
+        },
+        "content": {
+          "x": 196,
+          "y": 56,
+          "width": 444,
+          "height": 672
+        },
+        "bodyWidth": 640,
+        "bodyHeight": 760,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "AI",
+      "width": 640,
+      "height": 760,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY2",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 800,
+        "dpi": 120,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 950
+      },
+      "geometry": {
+        "viewport": {
+          "width": 640,
+          "height": 760,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 64,
+          "y": 56,
+          "width": 132,
+          "height": 672
+        },
+        "content": {
+          "x": 196,
+          "y": 56,
+          "width": 444,
+          "height": 672
+        },
+        "bodyWidth": 640,
+        "bodyHeight": 760,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "语义检索",
+      "width": 640,
+      "height": 760,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY2",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 800,
+        "dpi": 120,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 950
+      },
+      "geometry": {
+        "viewport": {
+          "width": 640,
+          "height": 760,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 64,
+          "y": 56,
+          "width": 132,
+          "height": 672
+        },
+        "content": {
+          "x": 196,
+          "y": 56,
+          "width": 444,
+          "height": 672
+        },
+        "bodyWidth": 640,
+        "bodyHeight": 760,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "备份导出",
+      "width": 640,
+      "height": 760,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY2",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 800,
+        "dpi": 120,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 950
+      },
+      "geometry": {
+        "viewport": {
+          "width": 640,
+          "height": 760,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 64,
+          "y": 56,
+          "width": 132,
+          "height": 672
+        },
+        "content": {
+          "x": 196,
+          "y": 56,
+          "width": 444,
+          "height": 672
+        },
+        "bodyWidth": 640,
+        "bodyHeight": 760,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "通用",
+      "width": 1100,
+      "height": 480,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY2",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 1375,
+        "dpi": 120,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 600
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1100,
+          "height": 480,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 152,
+          "height": 392
+        },
+        "content": {
+          "x": 368,
+          "y": 56,
+          "width": 732,
+          "height": 392
+        },
+        "bodyWidth": 1100,
+        "bodyHeight": 480,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "Chrome 连接",
+      "width": 1100,
+      "height": 480,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY2",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 1375,
+        "dpi": 120,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 600
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1100,
+          "height": 480,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 152,
+          "height": 392
+        },
+        "content": {
+          "x": 368,
+          "y": 56,
+          "width": 732,
+          "height": 392
+        },
+        "bodyWidth": 1100,
+        "bodyHeight": 480,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "AI",
+      "width": 1100,
+      "height": 480,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY2",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 1375,
+        "dpi": 120,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 600
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1100,
+          "height": 480,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 152,
+          "height": 392
+        },
+        "content": {
+          "x": 368,
+          "y": 56,
+          "width": 732,
+          "height": 392
+        },
+        "bodyWidth": 1100,
+        "bodyHeight": 480,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "语义检索",
+      "width": 1100,
+      "height": 480,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY2",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 1375,
+        "dpi": 120,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 600
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1100,
+          "height": 480,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 152,
+          "height": 392
+        },
+        "content": {
+          "x": 368,
+          "y": 56,
+          "width": 732,
+          "height": 392
+        },
+        "bodyWidth": 1100,
+        "bodyHeight": 480,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "备份导出",
+      "width": 1100,
+      "height": 480,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY2",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 1375,
+        "dpi": 120,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 600
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1100,
+          "height": 480,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 152,
+          "height": 392
+        },
+        "content": {
+          "x": 368,
+          "y": 56,
+          "width": 732,
+          "height": 392
+        },
+        "bodyWidth": 1100,
+        "bodyHeight": 480,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "通用",
+      "width": 640,
+      "height": 480,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY2",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 800,
+        "dpi": 120,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 600
+      },
+      "geometry": {
+        "viewport": {
+          "width": 640,
+          "height": 480,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 64,
+          "y": 56,
+          "width": 132,
+          "height": 392
+        },
+        "content": {
+          "x": 196,
+          "y": 56,
+          "width": 444,
+          "height": 392
+        },
+        "bodyWidth": 640,
+        "bodyHeight": 480,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "Chrome 连接",
+      "width": 640,
+      "height": 480,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY2",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 800,
+        "dpi": 120,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 600
+      },
+      "geometry": {
+        "viewport": {
+          "width": 640,
+          "height": 480,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 64,
+          "y": 56,
+          "width": 132,
+          "height": 392
+        },
+        "content": {
+          "x": 196,
+          "y": 56,
+          "width": 444,
+          "height": 392
+        },
+        "bodyWidth": 640,
+        "bodyHeight": 480,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "AI",
+      "width": 640,
+      "height": 480,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY2",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 800,
+        "dpi": 120,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 600
+      },
+      "geometry": {
+        "viewport": {
+          "width": 640,
+          "height": 480,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 64,
+          "y": 56,
+          "width": 132,
+          "height": 392
+        },
+        "content": {
+          "x": 196,
+          "y": 56,
+          "width": 444,
+          "height": 392
+        },
+        "bodyWidth": 640,
+        "bodyHeight": 480,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "语义检索",
+      "width": 640,
+      "height": 480,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY2",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 800,
+        "dpi": 120,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 600
+      },
+      "geometry": {
+        "viewport": {
+          "width": 640,
+          "height": 480,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 64,
+          "y": 56,
+          "width": 132,
+          "height": 392
+        },
+        "content": {
+          "x": 196,
+          "y": 56,
+          "width": 444,
+          "height": 392
+        },
+        "bodyWidth": 640,
+        "bodyHeight": 480,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "备份导出",
+      "width": 640,
+      "height": 480,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY2",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 800,
+        "dpi": 120,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 600
+      },
+      "geometry": {
+        "viewport": {
+          "width": 640,
+          "height": 480,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 64,
+          "y": 56,
+          "width": 132,
+          "height": 392
+        },
+        "content": {
+          "x": 196,
+          "y": 56,
+          "width": 444,
+          "height": 392
+        },
+        "bodyWidth": 640,
+        "bodyHeight": 480,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "通用",
+      "width": 1920,
+      "height": 1080,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY2",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 2400,
+        "dpi": 120,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 1350
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1920,
+          "height": 1080,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 184,
+          "height": 992
+        },
+        "content": {
+          "x": 400,
+          "y": 56,
+          "width": 1520,
+          "height": 992
+        },
+        "bodyWidth": 1920,
+        "bodyHeight": 1080,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "Chrome 连接",
+      "width": 1920,
+      "height": 1080,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY2",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 2400,
+        "dpi": 120,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 1350
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1920,
+          "height": 1080,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 184,
+          "height": 992
+        },
+        "content": {
+          "x": 400,
+          "y": 56,
+          "width": 1520,
+          "height": 992
+        },
+        "bodyWidth": 1920,
+        "bodyHeight": 1080,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "AI",
+      "width": 1920,
+      "height": 1080,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY2",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 2400,
+        "dpi": 120,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 1350
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1920,
+          "height": 1080,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 184,
+          "height": 992
+        },
+        "content": {
+          "x": 400,
+          "y": 56,
+          "width": 1520,
+          "height": 992
+        },
+        "bodyWidth": 1920,
+        "bodyHeight": 1080,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "语义检索",
+      "width": 1920,
+      "height": 1080,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY2",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 2400,
+        "dpi": 120,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 1350
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1920,
+          "height": 1080,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 184,
+          "height": 992
+        },
+        "content": {
+          "x": 400,
+          "y": 56,
+          "width": 1520,
+          "height": 992
+        },
+        "bodyWidth": 1920,
+        "bodyHeight": 1080,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "备份导出",
+      "width": 1920,
+      "height": 1080,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY2",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 2400,
+        "dpi": 120,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 1350
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1920,
+          "height": 1080,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 184,
+          "height": 992
+        },
+        "content": {
+          "x": 400,
+          "y": 56,
+          "width": 1520,
+          "height": 992
+        },
+        "bodyWidth": 1920,
+        "bodyHeight": 1080,
+        "scrollTop": 0
+      }
+    }
+  ],
+  "webview": "Edg/155.0.4283.45",
+  "mainDataEvidence": {
+    "mainDirectoryExists": true,
+    "observations": [
+      {
+        "pid": 157872,
+        "observedDirectoryExists": true,
+        "relativeDirectory": "app-data/main-webview/EBWebView",
+        "parent": 124808,
+        "insideFixture": true,
+        "creationUtcTicks": "639275627803204200",
+        "expectedMain": true,
+        "expectedPreview": false
+      }
+    ],
+    "previewDirectoryExists": false,
+    "owner": 124808
+  },
+  "ipcObserver": {
+    "method": "CDP network request paths only",
+    "verified": true
+  },
+  "chromeVersion": "Chrome/155.0.8059.39",
+  "chromeProfile": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-s03-5IPpQo\\chrome-a",
+  "lastGeometry": {
+    "tab": "备份导出",
+    "width": 1920,
+    "height": 1080,
+    "os": {
+      "pid": 124808,
+      "device": "\\\\.\\DISPLAY2",
+      "title": "Markbridge · 签桥",
+      "clientWidth": 2400,
+      "dpi": 120,
+      "ownedExecutableVerified": true,
+      "monitors": [
+        {
+          "device": "\\\\.\\DISPLAY1",
+          "left": -2560,
+          "width": 2560,
+          "top": -169,
+          "height": 1528,
+          "primary": false
+        },
+        {
+          "device": "\\\\.\\DISPLAY2",
+          "left": 0,
+          "width": 2560,
+          "top": 0,
+          "height": 1380,
+          "primary": true
+        },
+        {
+          "device": "\\\\.\\DISPLAY5",
+          "left": 2560,
+          "width": 1600,
+          "top": -1142,
+          "height": 2488,
+          "primary": false
+        }
+      ],
+      "clientHeight": 1350
+    },
+    "geometry": {
+      "viewport": {
+        "width": 1920,
+        "height": 1080,
+        "devicePixelRatio": 1.25
+      },
+      "tabs": {
+        "x": 216,
+        "y": 56,
+        "width": 184,
+        "height": 992
+      },
+      "content": {
+        "x": 400,
+        "y": 56,
+        "width": 1520,
+        "height": 992
+      },
+      "bodyWidth": 1920,
+      "bodyHeight": 1080,
+      "scrollTop": 0
+    }
+  },
+  "typography": [
+    {
+      "font": "system",
+      "fontSize": "small",
+      "tree": 40,
+      "bookmark": 48,
+      "text": "12px",
+      "family": "\"Segoe UI Variable Text\", \"Segoe UI\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", sans-serif"
+    },
+    {
+      "font": "system",
+      "fontSize": "standard",
+      "tree": 40,
+      "bookmark": 52,
+      "text": "13px",
+      "family": "\"Segoe UI Variable Text\", \"Segoe UI\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", sans-serif"
+    },
+    {
+      "font": "system",
+      "fontSize": "large",
+      "tree": 48,
+      "bookmark": 60,
+      "text": "15px",
+      "family": "\"Segoe UI Variable Text\", \"Segoe UI\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", sans-serif"
+    },
+    {
+      "font": "yahei",
+      "fontSize": "small",
+      "tree": 40,
+      "bookmark": 48,
+      "text": "12px",
+      "family": "\"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Segoe UI\", sans-serif"
+    },
+    {
+      "font": "yahei",
+      "fontSize": "standard",
+      "tree": 40,
+      "bookmark": 52,
+      "text": "13px",
+      "family": "\"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Segoe UI\", sans-serif"
+    },
+    {
+      "font": "yahei",
+      "fontSize": "large",
+      "tree": 48,
+      "bookmark": 60,
+      "text": "15px",
+      "family": "\"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Segoe UI\", sans-serif"
+    },
+    {
+      "font": "song",
+      "fontSize": "small",
+      "tree": 40,
+      "bookmark": 48,
+      "text": "12px",
+      "family": "\"Times New Roman\", SimSun, serif"
+    },
+    {
+      "font": "song",
+      "fontSize": "standard",
+      "tree": 40,
+      "bookmark": 52,
+      "text": "13px",
+      "family": "\"Times New Roman\", SimSun, serif"
+    },
+    {
+      "font": "song",
+      "fontSize": "large",
+      "tree": 48,
+      "bookmark": 60,
+      "text": "15px",
+      "family": "\"Times New Roman\", SimSun, serif"
+    }
+  ],
+  "endNavigationGeometry": {
+    "scrollTop": 5668.7998046875,
+    "clientHeight": 571,
+    "scrollHeight": 6240,
+    "list": {
+      "x": 232,
+      "y": 263.3999938964844,
+      "width": 880,
+      "height": 570.6000366210938
+    },
+    "last": {
+      "x": 232,
+      "y": 782.6000366210938,
+      "width": 864.7999877929688,
+      "height": 52
+    },
+    "activeDescendant": "library-row-profile:p:8d83d5df6f36e0382659479e47e98ec0ddc97084044cd97e3a581ca9ff45e116:125",
+    "focusedRole": null
+  },
+  "displays": [
+    {
+      "theme": "light",
+      "width": 1100,
+      "height": 760,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY1",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 1650,
+        "dpi": 144,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 1140
+      },
+      "geometry": {
+        "width": 1100,
+        "height": 760,
+        "dpr": 1.5,
+        "documentWidth": 1100,
+        "documentHeight": 760,
+        "text": "15px"
+      }
+    },
+    {
+      "theme": "light",
+      "width": 640,
+      "height": 480,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY1",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 960,
+        "dpi": 144,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 720
+      },
+      "geometry": {
+        "width": 640,
+        "height": 480,
+        "dpr": 1.5,
+        "documentWidth": 640,
+        "documentHeight": 480,
+        "text": "15px"
+      }
+    },
+    {
+      "theme": "dark",
+      "width": 1100,
+      "height": 760,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY1",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 1650,
+        "dpi": 144,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 1140
+      },
+      "geometry": {
+        "width": 1100,
+        "height": 760,
+        "dpr": 1.5,
+        "documentWidth": 1100,
+        "documentHeight": 760,
+        "text": "15px"
+      }
+    },
+    {
+      "theme": "dark",
+      "width": 640,
+      "height": 480,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY1",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 960,
+        "dpi": 144,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 720
+      },
+      "geometry": {
+        "width": 640,
+        "height": 480,
+        "dpr": 1.5,
+        "documentWidth": 640,
+        "documentHeight": 480,
+        "text": "15px"
+      }
+    },
+    {
+      "theme": "light",
+      "width": 1100,
+      "height": 760,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY2",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 1375,
+        "dpi": 120,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 950
+      },
+      "geometry": {
+        "width": 1100,
+        "height": 760,
+        "dpr": 1.25,
+        "documentWidth": 1100,
+        "documentHeight": 760,
+        "text": "15px"
+      }
+    },
+    {
+      "theme": "light",
+      "width": 640,
+      "height": 480,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY2",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 800,
+        "dpi": 120,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 600
+      },
+      "geometry": {
+        "width": 640,
+        "height": 480,
+        "dpr": 1.25,
+        "documentWidth": 640,
+        "documentHeight": 480,
+        "text": "15px"
+      }
+    },
+    {
+      "theme": "dark",
+      "width": 1100,
+      "height": 760,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY2",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 1375,
+        "dpi": 120,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 950
+      },
+      "geometry": {
+        "width": 1100,
+        "height": 760,
+        "dpr": 1.25,
+        "documentWidth": 1100,
+        "documentHeight": 760,
+        "text": "15px"
+      }
+    },
+    {
+      "theme": "dark",
+      "width": 640,
+      "height": 480,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY2",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 800,
+        "dpi": 120,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 600
+      },
+      "geometry": {
+        "width": 640,
+        "height": 480,
+        "dpr": 1.25,
+        "documentWidth": 640,
+        "documentHeight": 480,
+        "text": "15px"
+      }
+    },
+    {
+      "theme": "light",
+      "width": 1100,
+      "height": 760,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY5",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 1650,
+        "dpi": 144,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 1140
+      },
+      "geometry": {
+        "width": 1100,
+        "height": 760,
+        "dpr": 1.5,
+        "documentWidth": 1100,
+        "documentHeight": 760,
+        "text": "15px"
+      }
+    },
+    {
+      "theme": "light",
+      "width": 640,
+      "height": 480,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY5",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 960,
+        "dpi": 144,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 720
+      },
+      "geometry": {
+        "width": 640,
+        "height": 480,
+        "dpr": 1.5,
+        "documentWidth": 640,
+        "documentHeight": 480,
+        "text": "15px"
+      }
+    },
+    {
+      "theme": "dark",
+      "width": 1100,
+      "height": 760,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY5",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 1650,
+        "dpi": 144,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 1140
+      },
+      "geometry": {
+        "width": 1100,
+        "height": 760,
+        "dpr": 1.5,
+        "documentWidth": 1100,
+        "documentHeight": 760,
+        "text": "15px"
+      }
+    },
+    {
+      "theme": "dark",
+      "width": 640,
+      "height": 480,
+      "os": {
+        "pid": 124808,
+        "device": "\\\\.\\DISPLAY5",
+        "title": "Markbridge · 签桥",
+        "clientWidth": 960,
+        "dpi": 144,
+        "ownedExecutableVerified": true,
+        "monitors": [
+          {
+            "device": "\\\\.\\DISPLAY1",
+            "left": -2560,
+            "width": 2560,
+            "top": -169,
+            "height": 1528,
+            "primary": false
+          },
+          {
+            "device": "\\\\.\\DISPLAY2",
+            "left": 0,
+            "width": 2560,
+            "top": 0,
+            "height": 1380,
+            "primary": true
+          },
+          {
+            "device": "\\\\.\\DISPLAY5",
+            "left": 2560,
+            "width": 1600,
+            "top": -1142,
+            "height": 2488,
+            "primary": false
+          }
+        ],
+        "clientHeight": 720
+      },
+      "geometry": {
+        "width": 640,
+        "height": 480,
+        "dpr": 1.5,
+        "documentWidth": 640,
+        "documentHeight": 480,
+        "text": "15px"
+      }
+    }
+  ],
+  "firstClose": {
+    "pid": 124808,
+    "exitCode": 0,
+    "signal": null,
+    "method": "verified_main_and_preview_windows_WM_CLOSE",
+    "phase": "known-webview-exit",
+    "windowPosts": [
+      {
+        "action": "close",
+        "posted": 1,
+        "pid": 124808,
+        "windows": [
+          {
+            "emptyTitle": false,
+            "handle": "5461422",
+            "messageOnly": false,
+            "visible": true,
+            "closeEligible": true,
+            "className": "UNREPORTED_CLASS",
+            "role": "main",
+            "threadId": 103952
+          },
+          {
+            "emptyTitle": true,
+            "handle": "4410526",
+            "messageOnly": false,
+            "visible": true,
+            "closeEligible": false,
+            "className": "TAO_THREAD_EVENT_TARGET",
+            "role": "other",
+            "threadId": 103952
+          },
+          {
+            "emptyTitle": false,
+            "handle": "1971F5C",
+            "messageOnly": false,
+            "visible": false,
+            "closeEligible": false,
+            "className": "UNREPORTED_CLASS",
+            "role": "other",
+            "threadId": 103952
+          },
+          {
+            "emptyTitle": false,
+            "handle": "3460AFA",
+            "messageOnly": false,
+            "visible": false,
+            "closeEligible": false,
+            "className": "IME",
+            "role": "other",
+            "threadId": 103952
+          },
+          {
+            "emptyTitle": true,
+            "handle": "382128C",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "wetype.renderer.window",
+            "role": "other",
+            "threadId": 103952
+          },
+          {
+            "emptyTitle": true,
+            "handle": "2841FF2",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "UNREPORTED_CLASS",
+            "role": "other",
+            "threadId": 103952
+          },
+          {
+            "emptyTitle": true,
+            "handle": "3461C22",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "Chrome_MessageWindow",
+            "role": "other",
+            "threadId": 111716
+          },
+          {
+            "emptyTitle": true,
+            "handle": "2231876",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "Chrome_MessageWindow",
+            "role": "other",
+            "threadId": 103952
+          },
+          {
+            "emptyTitle": false,
+            "handle": "2831C8A",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "CicMarshalWndClass",
+            "role": "other",
+            "threadId": 103952
+          },
+          {
+            "emptyTitle": false,
+            "handle": "3E017D6",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "OleMainThreadWndClass",
+            "role": "other",
+            "threadId": 103952
+          },
+          {
+            "emptyTitle": true,
+            "handle": "28F1F26",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "UNREPORTED_CLASS",
+            "role": "other",
+            "threadId": 67156
+          }
+        ],
+        "ownedWindows": 11,
+        "processAbsent": false
+      }
+    ],
+    "knownWebviewPids": [
+      157872
+    ],
+    "knownWebviewIdentities": [
+      {
+        "pid": 157872,
+        "creationUtcTicks": "639275627803204200"
+      }
+    ],
+    "nativeStageOrder": [],
+    "knownWebviewAbsence": {
+      "observations": [
+        {
+          "creationUtcTicks": "639275627803204200",
+          "pid": 157872,
+          "state": "absent"
+        }
+      ],
+      "presentPids": [],
+      "reusedPids": []
+    }
+  },
+  "restartWebview": "Edg/155.0.4283.45",
+  "restartMainDataEvidence": {
+    "mainDirectoryExists": true,
+    "observations": [
+      {
+        "pid": 65776,
+        "observedDirectoryExists": true,
+        "relativeDirectory": "app-data/main-webview/EBWebView",
+        "parent": 132572,
+        "insideFixture": true,
+        "creationUtcTicks": "639275628990216490",
+        "expectedMain": true,
+        "expectedPreview": false
+      }
+    ],
+    "previewDirectoryExists": false,
+    "owner": 132572
+  },
+  "status": "PASS",
+  "chromeClose": {
+    "kind": "owned_chrome_close",
+    "pid": 164256,
+    "method": "Browser.close",
+    "pipeEofMode": "immediate",
+    "methodVersion": 2,
+    "observationBudgetMs": 180000,
+    "startedAtMs": 1791966105584,
+    "phase": "exit-verified",
+    "acknowledged": true,
+    "childExitObserved": true,
+    "exitCode": 0,
+    "signal": null,
+    "events": [
+      {
+        "event": "close_frame_queued",
+        "elapsedMs": 0
+      },
+      {
+        "event": "pipe_eof_requested",
+        "elapsedMs": 0
+      },
+      {
+        "event": "close_frame_write_callback",
+        "elapsedMs": 0
+      },
+      {
+        "event": "pipe_eof_flushed",
+        "elapsedMs": 0
+      },
+      {
+        "event": "close_acknowledged",
+        "elapsedMs": 0
+      },
+      {
+        "event": "pipe_write_closed",
+        "elapsedMs": 45
+      },
+      {
+        "event": "pipe_read_closed",
+        "elapsedMs": 45
+      },
+      {
+        "event": "child_exit_observed",
+        "elapsedMs": 150
+      }
+    ],
+    "frameQueued": true,
+    "pipeEofRequested": true,
+    "frameWriteCallback": true,
+    "pipeEofFlushed": true,
+    "pipeWriteClosed": true,
+    "pipeReadClosed": true,
+    "elapsedMs": 183
+  },
+  "appClose": {
+    "pid": 132572,
+    "exitCode": 0,
+    "signal": null,
+    "method": "verified_main_and_preview_windows_WM_CLOSE",
+    "phase": "known-webview-exit",
+    "windowPosts": [
+      {
+        "action": "close",
+        "posted": 1,
+        "pid": 132572,
+        "windows": [
+          {
+            "emptyTitle": false,
+            "handle": "156041A",
+            "messageOnly": false,
+            "visible": true,
+            "closeEligible": true,
+            "className": "UNREPORTED_CLASS",
+            "role": "main",
+            "threadId": 19480
+          },
+          {
+            "emptyTitle": true,
+            "handle": "1D71F1C",
+            "messageOnly": false,
+            "visible": true,
+            "closeEligible": false,
+            "className": "TAO_THREAD_EVENT_TARGET",
+            "role": "other",
+            "threadId": 19480
+          },
+          {
+            "emptyTitle": false,
+            "handle": "1791C74",
+            "messageOnly": false,
+            "visible": false,
+            "closeEligible": false,
+            "className": "IME",
+            "role": "other",
+            "threadId": 19480
+          },
+          {
+            "emptyTitle": false,
+            "handle": "A1160C",
+            "messageOnly": false,
+            "visible": false,
+            "closeEligible": false,
+            "className": "UNREPORTED_CLASS",
+            "role": "other",
+            "threadId": 19480
+          },
+          {
+            "emptyTitle": true,
+            "handle": "3470AFA",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "Chrome_MessageWindow",
+            "role": "other",
+            "threadId": 89348
+          },
+          {
+            "emptyTitle": true,
+            "handle": "3501954",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "Chrome_MessageWindow",
+            "role": "other",
+            "threadId": 19480
+          },
+          {
+            "emptyTitle": false,
+            "handle": "610F40",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "CicMarshalWndClass",
+            "role": "other",
+            "threadId": 19480
+          },
+          {
+            "emptyTitle": false,
+            "handle": "1AD0600",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "OleMainThreadWndClass",
+            "role": "other",
+            "threadId": 19480
+          }
+        ],
+        "ownedWindows": 8,
+        "processAbsent": false
+      }
+    ],
+    "knownWebviewPids": [
+      65776
+    ],
+    "knownWebviewIdentities": [
+      {
+        "pid": 65776,
+        "creationUtcTicks": "639275628990216490"
+      }
+    ],
+    "nativeStageOrder": [],
+    "knownWebviewAbsence": {
+      "observations": [
+        {
+          "creationUtcTicks": "639275628990216490",
+          "pid": 65776,
+          "state": "absent"
+        }
+      ],
+      "presentPids": [],
+      "reusedPids": []
+    }
+  },
+  "finalProcesses": {
+    "processes": [],
+    "listeners": []
+  }
+}

@@ -85,7 +85,7 @@ function neighbor(ids: string[], current: string | null, delta: number): string 
   return ids[next] ?? null;
 }
 
-export function LibraryWorkspace({ state, invalid, native, focusMirrorId, section = 'library', active = true, sidebarHost, onSettings, onLibrary, onExport, onOrganize, onAiSettings, onSemanticSettings, onHistory, sourceRequest, onCurrentSource }: {
+export function LibraryWorkspace({ state, invalid, native, focusMirrorId, section = 'library', active = true, sidebarHost, exportHost, onSettings, onLibrary, onExport, onOrganize, onAiSettings, onSemanticSettings, onHistory, sourceRequest, onCurrentSource }: {
   state: BridgeState | null;
   invalid: boolean;
   native: boolean;
@@ -93,6 +93,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
   section?: 'library' | 'organize' | 'semantic' | 'history' | 'export';
   active?: boolean;
   sidebarHost?: HTMLDivElement | null;
+  exportHost?: HTMLDivElement | null;
   onSettings?: () => void;
   onLibrary?: () => void;
   onExport?: () => void;
@@ -575,15 +576,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
           )}
         </div>
   ) : null;
-  return <>
-    {pendingDraftLeave && <ConfirmDialog title="放弃未保存的本地草稿？" confirmLabel="放弃草稿并继续" returnFocus={detailReturn} onCancel={() => { pendingNavigation.current = null; setPendingDraftLeave(false); }} onConfirm={() => { const next = pendingNavigation.current; pendingNavigation.current = null; setPendingDraftLeave(false); setMetadataDirty(false); setMetadataDraftIds(null); setDraftReset((value) => value + 1); next?.(); }}>
-      <p>标签或备注的输入尚未保存。已保存的本地内容会保留。</p>
-    </ConfirmDialog>}
-    {pendingSource && <ConfirmDialog title="切换书签来源？" confirmLabel="清除当前输入并切换" returnFocus={sourceTrigger} onCancel={() => setPendingSource(null)} onConfirm={() => { setInputsChanged(false); setManual(pendingSource); setPendingSource(null); }}>
-      <p>切换会关闭当前详情，清除详情中的输入和未确认预览。已保存的内容会保留。</p><p>要继续编辑当前输入，请留在当前页面。</p>
-    </ConfirmDialog>}
-    {sidebarHost && createPortal(folderPane, sidebarHost)}
-    <section className={`library ${sidebarHost ? 'in-shell' : 'standalone'} ${detailOpen ? 'has-detail' : ''}`} hidden={!active} id={section === 'export' ? 'settings-panel-export' : undefined} role={section === 'export' ? 'tabpanel' : undefined} aria-labelledby={section === 'export' ? 'settings-tab-export' : undefined} aria-busy={(source && native && phase === 'loading') || undefined} aria-label={section === 'library' ? '书签工作区' : section === 'organize' ? '整理工作区' : section === 'semantic' ? '语义工作区' : section === 'history' ? '历史工作区' : '导出工作区'}>
+  const toolbar = (
       <div className="library-toolbar">
         {state && (profiles.length > 0 || mirrors.length > 0) && <div className="library-controls">
           <label htmlFor="library-source">书签来源
@@ -619,6 +612,24 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
         {phase === 'error' && <p role="alert">无法读取书签。请稍后重试。</p>}
         {openFailed && <p role="alert">无法打开链接。</p>}
       </div>
+  );
+  const exportView = (
+        <div className="workspace-page" hidden={section !== 'export'}>
+          <div className="page-intro"><h2>备份与导出</h2><p>保存本地缓存，保留一份可检查的文件。</p></div>
+          {section === 'export' && source && <ExportDesk source={{ kind: source.kind, id: source.id }} name={profile?.displayName ?? mirror?.displayName ?? '书签来源'} cachedAt={profile?.lastSyncedAt ?? mirror?.lastSyncedAt ?? null} />}
+        </div>
+  );
+  return <>
+    {pendingDraftLeave && <ConfirmDialog title="放弃未保存的本地草稿？" confirmLabel="放弃草稿并继续" returnFocus={detailReturn} onCancel={() => { pendingNavigation.current = null; setPendingDraftLeave(false); }} onConfirm={() => { const next = pendingNavigation.current; pendingNavigation.current = null; setPendingDraftLeave(false); setMetadataDirty(false); setMetadataDraftIds(null); setDraftReset((value) => value + 1); next?.(); }}>
+      <p>标签或备注的输入尚未保存。已保存的本地内容会保留。</p>
+    </ConfirmDialog>}
+    {pendingSource && <ConfirmDialog title="切换书签来源？" confirmLabel="清除当前输入并切换" returnFocus={sourceTrigger} onCancel={() => setPendingSource(null)} onConfirm={() => { setInputsChanged(false); setManual(pendingSource); setPendingSource(null); }}>
+      <p>切换会关闭当前详情，清除详情中的输入和未确认预览。已保存的内容会保留。</p><p>要继续编辑当前输入，请留在当前页面。</p>
+    </ConfirmDialog>}
+    {sidebarHost && createPortal(folderPane, sidebarHost)}
+    {section === 'export' && exportHost && createPortal(<>{toolbar}{source && native && !invalid ? exportView : <p className="secondary">请先选择可用的书签来源，再导出缓存。</p>}</>, exportHost)}
+    <section className={`library ${sidebarHost ? 'in-shell' : 'standalone'} ${detailOpen ? 'has-detail' : ''}`} hidden={!active || (section === 'export' && !!exportHost)} aria-busy={(source && native && phase === 'loading') || undefined} aria-label={section === 'library' ? '书签工作区' : section === 'organize' ? '整理工作区' : section === 'semantic' ? '语义工作区' : section === 'history' ? '历史工作区' : '导出工作区'}>
+      {section !== 'export' || !exportHost ? toolbar : null}
       {!source && state && <div className="empty-state">
         <span className="empty-mark"><WorkspaceIcon name="bookmark" /></span><h2>连接你的 Chrome 书签</h2>
         <p>尚未接入书签来源。配对 Chrome 或接入只读文件后，可在此浏览。</p>
@@ -641,7 +652,6 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
           {phase === 'loading' || waitingForCache ? <p role="status">正在读取书签。</p> : phase === 'error' && visible.length === 0 ? <p>书签列表暂不可用。可在设置中检查来源。</p> : visible.length === 0 ? <p>{filtering ? '没有带这个标签的书签。' : searching ? '没有匹配的标题或网址。' : '此文件夹没有书签。'}</p> : (
             <VirtualRows
               rows={visible}
-              rowHeight={52}
               rowKey={(row) => rowKey(sourceKey, row.chromeId)}
               label={filtering ? '标签筛选' : searching ? '搜索结果' : '书签列表'}
               role="listbox"
@@ -763,10 +773,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
             }} />}
           {section === 'semantic' && (!profile || epochRef.current.epoch === null) && <><h2>本地语义检索</h2><p>{profile ? '正在确认此资料的缓存身份。完成后可选择索引范围。' : '请选择 Chrome 资料。只读文件来源不建立语义索引。'}</p><button type="button" onClick={onLibrary}>返回普通搜索</button></>}
         </div>
-        <div className="workspace-page" hidden={section !== 'export'}>
-          <div className="page-intro"><h2>备份与导出</h2><p>保存本地缓存，保留一份可检查的文件。</p></div>
-          {section === 'export' && source && <ExportDesk source={{ kind: source.kind, id: source.id }} name={profile?.displayName ?? mirror?.displayName ?? '书签来源'} cachedAt={profile?.lastSyncedAt ?? mirror?.lastSyncedAt ?? null} />}
-        </div>
+        {!exportHost && exportView}
         {section === 'library' && <div className="library-status"><span role="status">{selectionNotice || (pickedIds.length > 0 ? `已选 ${pickedIds.length} 项` : `${visible.length} 项`)}</span><span>按 Chrome 顺序 · 方向键浏览，Enter 打开</span></div>}
       </>}
     </section>

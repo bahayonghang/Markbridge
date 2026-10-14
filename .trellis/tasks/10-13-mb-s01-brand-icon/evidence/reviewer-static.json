@@ -1,0 +1,265 @@
+{
+  "status": "PASS",
+  "reviewedAtUtc": "2026-10-14T03:45:28.175496+00:00",
+  "reviewer": "trellis-check",
+  "assets": [
+    {
+      "path": "assets/brand/markbridge-master.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "alpha": [
+        0,
+        255
+      ],
+      "edgeAlphaMax": 0,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": "26ee24eb8b7763c26d74572304f8033ebcc5405e253fd14767d65598cce16e5b"
+    },
+    {
+      "path": "apps/desktop/src/assets/markbridge.png",
+      "size": [
+        128,
+        128
+      ],
+      "mode": "RGBA",
+      "alpha": [
+        0,
+        255
+      ],
+      "edgeAlphaMax": 0,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": "9200bd10c383059396744d388527f52d1120a818baf63b26d6bd3b1418f40bcb"
+    },
+    {
+      "path": "apps/desktop/src-tauri/icons/icon.png",
+      "size": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alpha": [
+        0,
+        255
+      ],
+      "edgeAlphaMax": 0,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": "8967d1a3455e14db084e5e96bde96612aebc30fba1acceff7115c5582677c488"
+    },
+    {
+      "path": "apps/desktop/src-tauri/icons/icon.ico",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "alpha": [
+        0,
+        255
+      ],
+      "edgeAlphaMax": 0,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": "15d66c6cdb18a055449fab7217d61645845dc61c64f31d289b3768383f7e8339",
+      "frames": [
+        {
+          "size": [
+            16,
+            16
+          ],
+          "mode": "RGBA",
+          "alpha": [
+            0,
+            255
+          ]
+        },
+        {
+          "size": [
+            24,
+            24
+          ],
+          "mode": "RGBA",
+          "alpha": [
+            0,
+            255
+          ]
+        },
+        {
+          "size": [
+            32,
+            32
+          ],
+          "mode": "RGBA",
+          "alpha": [
+            0,
+            255
+          ]
+        },
+        {
+          "size": [
+            48,
+            48
+          ],
+          "mode": "RGBA",
+          "alpha": [
+            0,
+            255
+          ]
+        },
+        {
+          "size": [
+            64,
+            64
+          ],
+          "mode": "RGBA",
+          "alpha": [
+            0,
+            255
+          ]
+        },
+        {
+          "size": [
+            256,
+            256
+          ],
+          "mode": "RGBA",
+          "alpha": [
+            0,
+            255
+          ]
+        }
+      ]
+    },
+    {
+      "path": "apps/extension/public/icons/16.png",
+      "size": [
+        16,
+        16
+      ],
+      "mode": "RGBA",
+      "alpha": [
+        0,
+        255
+      ],
+      "edgeAlphaMax": 3,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": "10501b9d533592078063a657602b2736d70d67a1e600c4bc207285dbd1033471"
+    },
+    {
+      "path": "apps/extension/public/icons/32.png",
+      "size": [
+        32,
+        32
+      ],
+      "mode": "RGBA",
+      "alpha": [
+        0,
+        255
+      ],
+      "edgeAlphaMax": 0,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": "f66e41f24fa33bf3036484919593021bc3055c94a406cffd635cad0f057f9949"
+    },
+    {
+      "path": "apps/extension/public/icons/48.png",
+      "size": [
+        48,
+        48
+      ],
+      "mode": "RGBA",
+      "alpha": [
+        0,
+        255
+      ],
+      "edgeAlphaMax": 0,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": "66357ddcee2d5f8fa2a2333ae72ea4a0a46f1b05835824ac2e0c39687f391410"
+    },
+    {
+      "path": "apps/extension/public/icons/128.png",
+      "size": [
+        128,
+        128
+      ],
+      "mode": "RGBA",
+      "alpha": [
+        0,
+        255
+      ],
+      "edgeAlphaMax": 0,
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": "9200bd10c383059396744d388527f52d1120a818baf63b26d6bd3b1418f40bcb"
+    }
+  ],
+  "checks": {
+    "masterMatchesSelected": true,
+    "derivedPngPixelEquality": true,
+    "allIcoFramesDecodeAndHaveAlpha": true,
+    "extensionManifestOnlyIconsChanged": true,
+    "extensionBuiltPngByteEquality": true,
+    "viteHashedAssetReferenceAndByteEquality": true,
+    "binaryScanningRulesUnchanged": true,
+    "exportHelperCurrentAndArchivePathDiscovery": true,
+    "inspectHelperCurrentAndArchiveTaskAssetPaths": true,
+    "finalLintAndTypecheckAfterEvidenceFixes": true,
+    "nativeHelperCurrentAndArchiveRootAndTask13ImportPaths": true,
+    "nativeHelperSyntaxCheckAfterEvidenceOnlyEdit": true
+  },
+  "independentCommands": {
+    "pnpm lint": "PASS",
+    "pnpm typecheck": "PASS",
+    "git diff --check": "PASS"
+  },
+  "note": "Initial exploratory edgeAlpha==0 assertion was overstrict for the 16px LANCZOS derivative (actual edge alpha3); corrected to inspect real alpha, corners, derivation equality and visual no-matte evidence. Initial git subprocess decoding used Windows gbk and was rerun with explicit UTF-8.",
+  "nativeAudit": {
+    "runId": "run-1791949706426-73a68df7",
+    "status": "PASS",
+    "visualTitlebarSidebarTaskbarChromeCard": true,
+    "exeHashMatches": true,
+    "runtimeChromePngHashesMatch": true,
+    "ownedIsolationAndCleanupVerified": true,
+    "physicalToCssDpiConsistent": true,
+    "priorWrongTaskbarRunInvalid": "run-1791949541810-5a0cbe9a"
+  }
+}

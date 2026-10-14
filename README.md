@@ -1,6 +1,6 @@
 # Markbridge（签桥）
 
-本地优先的 Tauri 2 书签工作台，提供 Chrome 配对与实时镜像、离线只读、确认编辑与条件撤销、本地标签备注、内容与独立网页预览、历史导出、可选 AI 整理及库维护。Chrome 写入只经 MV3 扩展的 chrome.bookmarks；Rust 串行写入本机 SQLite。原 01–12 与新版工作台已完成；当前 13–15 及原父任务状态见 [实施状态](docs/implementation-status-2026-10-13.md) 和 [当前集成证据](.trellis/tasks/10-10-mb-13-windows-acceptance/evidence/current-integration-2026-10-13.md)。使用方法见 [操作指南](docs/user-guide.md)。
+本地优先的 Tauri 2 书签工作台，提供 Chrome 配对与实时镜像、离线只读、确认编辑与条件撤销、本地标签备注、内容与独立网页预览、历史导出、可选 AI 整理及库维护。Chrome 写入只经 MV3 扩展的 chrome.bookmarks；Rust 串行写入本机 SQLite。原 01–12、新版工作台及品牌设置改版已完成；当前 13、15 及原父任务状态见 [实施状态](docs/implementation-status-2026-10-14.md) 和 [当前集成证据](.trellis/tasks/10-10-mb-13-windows-acceptance/evidence/current-integration-2026-10-13.md)。使用方法见 [操作指南](docs/user-guide.md)。
 
 当前源码新增 macOS/Linux 适配和独立默认关闭的本地语义检索。平台原生验收、真实 embedding 模型及人工标注质量/性能证据仍缺失，不能声明支持或达标。语义检索只索引确认范围的标题与已保存摘要，SQLite 保存派生向量，Rust 有界精确排名；无 ANN 服务或后台全库抓取。功能与模型验收分层见 [任务 15 评测说明](.trellis/tasks/10-10-mb-15-semantic-search/evidence/evaluation.md)。
 
@@ -54,6 +54,7 @@ pnpm --filter @markbridge/desktop tauri dev
 | `pnpm build` | 前端和扩展生产构建，协议消费者检查，产物扫描 |
 | `pnpm build:native` | 当前原生 host 的 release 程序构建、格式/架构检查、路径映射及 UTF-8/UTF-16 扫描；不生成安装包 |
 | `pnpm build:package` | 先执行 `build:native`，再生成当前 host 包并核对/扫描实际包内程序；不安装或发布 |
+| `just install-app` | 先执行 `build-package`，再将当前 Windows NSIS 包以 `/S` 安装到当前用户默认目录；会创建正常注册项和快捷方式 |
 | `pnpm protocol:generate` | Rust serde/schemars → JSON Schema → TypeScript |
 | `pnpm protocol:check` | 在内存重新生成并比较已跟踪 schema/类型；漂移退出非零 |
 | `pnpm test:e2e` | Playwright 浏览器空态、键盘焦点和窗口尺寸；没有原生 Tauri 或已安装扩展断言 |
@@ -63,6 +64,8 @@ pnpm --filter @markbridge/desktop tauri dev
 | `pnpm --filter @markbridge/desktop tauri dev` | 原生开发窗口，需人工验收 |
 
 首次浏览器测试需先运行 `pnpm exec playwright install chromium`，下载 Playwright 的专用测试浏览器。浏览器数据不使用日常 Chrome Profile。
+
+`just install-app` 是日常安装入口，只有用户明确要求安装时才执行；提交、构建和验收不自动调用。它不使用隔离验收的 `/NS` 或临时 `/D` 路径。单独运行 `node scripts/install-app.mjs` 只按原生目标、产品版本和文件名选择已有 Windows 包并安装，不重新构建；缺包、候选不唯一或文件名不符时拒绝执行。包内程序与当前构建的核对在 `build-package` 阶段完成，因此需要新包时使用完整的 `just install-app` 入口。开发与构建命令会持续转发子进程输出，原生编译长时间无输出时显示等待提示，并保留失败退出码。
 
 Web 生产资产扫描拒绝 sourcemap、绝对 Windows 用户/文档路径、私钥头及常见密钥模式。`build:native` 对实际 release 程序分别扫描 UTF-8/UTF-16 的 Windows 绝对路径、POSIX 用户路径、当前配置的真实构建前缀、私钥头及常见密钥模式，并验证 PE/ELF/Mach-O 与目标架构。模式扫描只能证明所列模式未出现。运行时密钥放在 OS 凭据存储，React 和扩展不接收密钥；不添加遥测。不要把凭据放入前端环境变量或扩展资源。
 

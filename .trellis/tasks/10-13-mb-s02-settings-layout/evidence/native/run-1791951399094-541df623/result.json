@@ -1,0 +1,219 @@
+{
+  "runId": "run-1791951399094-541df623",
+  "startedAt": "2026-10-14T04:16:39.117Z",
+  "os": "Windows 11 Pro",
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-s02-tjqxgd",
+  "executable": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-s02-tjqxgd\\install\\markbridge-desktop.exe",
+  "appData": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-s02-tjqxgd\\app-data",
+  "exeBytes": 25361920,
+  "exeSha256": "9122fd08c64d8a46deff5ed2432c95a307ea1a0175027be4633c7ef68ada6be6",
+  "controls": [
+    {
+      "name": "first_run_pairing_through_current_settings_real_ipc",
+      "status": "PASS",
+      "profileId": "p:afb6d71a546010d65948dc55e9e3a95727b611b2a087e8226f2c02523f690ed5"
+    }
+  ],
+  "screens": [],
+  "webview": "Edg/155.0.4283.45",
+  "mainDataEvidence": {
+    "mainDirectoryExists": true,
+    "observations": [
+      {
+        "pid": 160164,
+        "observedDirectoryExists": true,
+        "relativeDirectory": "app-data/main-webview/EBWebView",
+        "parent": 128972,
+        "insideFixture": true,
+        "creationUtcTicks": "639275481992664270",
+        "expectedMain": true,
+        "expectedPreview": false
+      }
+    ],
+    "previewDirectoryExists": false,
+    "owner": 128972
+  },
+  "chromeVersion": "Chrome/155.0.8059.39",
+  "chromeProfile": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-s02-tjqxgd\\chrome-a",
+  "status": "FAIL",
+  "stage": "geometry",
+  "error": "NATIVE_LAYOUT_OVERFLOW_OR_OLD_SCROLL",
+  "chromeClose": {
+    "kind": "owned_chrome_close",
+    "pid": 30628,
+    "method": "Browser.close",
+    "pipeEofMode": "immediate",
+    "methodVersion": 2,
+    "observationBudgetMs": 180000,
+    "startedAtMs": 1791951408009,
+    "phase": "exit-verified",
+    "acknowledged": true,
+    "childExitObserved": true,
+    "exitCode": 0,
+    "signal": null,
+    "events": [
+      {
+        "event": "close_frame_queued",
+        "elapsedMs": 0
+      },
+      {
+        "event": "pipe_eof_requested",
+        "elapsedMs": 0
+      },
+      {
+        "event": "close_frame_write_callback",
+        "elapsedMs": 0
+      },
+      {
+        "event": "close_acknowledged",
+        "elapsedMs": 0
+      },
+      {
+        "event": "pipe_eof_flushed",
+        "elapsedMs": 0
+      },
+      {
+        "event": "pipe_write_closed",
+        "elapsedMs": 39
+      },
+      {
+        "event": "pipe_read_closed",
+        "elapsedMs": 39
+      },
+      {
+        "event": "child_exit_observed",
+        "elapsedMs": 141
+      }
+    ],
+    "frameQueued": true,
+    "pipeEofRequested": true,
+    "frameWriteCallback": true,
+    "pipeEofFlushed": true,
+    "pipeWriteClosed": true,
+    "pipeReadClosed": true,
+    "elapsedMs": 177
+  },
+  "appClose": {
+    "pid": 128972,
+    "exitCode": 0,
+    "signal": null,
+    "method": "verified_main_and_preview_windows_WM_CLOSE",
+    "phase": "known-webview-exit",
+    "windowPosts": [
+      {
+        "action": "close",
+        "posted": 1,
+        "pid": 128972,
+        "windows": [
+          {
+            "emptyTitle": false,
+            "handle": "6416A0",
+            "messageOnly": false,
+            "visible": true,
+            "closeEligible": true,
+            "className": "UNREPORTED_CLASS",
+            "role": "main",
+            "threadId": 102592
+          },
+          {
+            "emptyTitle": true,
+            "handle": "339177A",
+            "messageOnly": false,
+            "visible": true,
+            "closeEligible": false,
+            "className": "TAO_THREAD_EVENT_TARGET",
+            "role": "other",
+            "threadId": 102592
+          },
+          {
+            "emptyTitle": false,
+            "handle": "2A11664",
+            "messageOnly": false,
+            "visible": false,
+            "closeEligible": false,
+            "className": "IME",
+            "role": "other",
+            "threadId": 102592
+          },
+          {
+            "emptyTitle": false,
+            "handle": "660F06",
+            "messageOnly": false,
+            "visible": false,
+            "closeEligible": false,
+            "className": "UNREPORTED_CLASS",
+            "role": "other",
+            "threadId": 102592
+          },
+          {
+            "emptyTitle": true,
+            "handle": "2601942",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "Chrome_MessageWindow",
+            "role": "other",
+            "threadId": 136356
+          },
+          {
+            "emptyTitle": true,
+            "handle": "761FFA",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "Chrome_MessageWindow",
+            "role": "other",
+            "threadId": 102592
+          },
+          {
+            "emptyTitle": false,
+            "handle": "3A90F44",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "CicMarshalWndClass",
+            "role": "other",
+            "threadId": 102592
+          },
+          {
+            "emptyTitle": false,
+            "handle": "581626",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "OleMainThreadWndClass",
+            "role": "other",
+            "threadId": 102592
+          }
+        ],
+        "ownedWindows": 8,
+        "processAbsent": false
+      }
+    ],
+    "knownWebviewPids": [
+      160164
+    ],
+    "knownWebviewIdentities": [
+      {
+        "pid": 160164,
+        "creationUtcTicks": "639275481992664270"
+      }
+    ],
+    "nativeStageOrder": [],
+    "knownWebviewAbsence": {
+      "observations": [
+        {
+          "creationUtcTicks": "639275481992664270",
+          "pid": 160164,
+          "state": "absent"
+        }
+      ],
+      "presentPids": [],
+      "reusedPids": []
+    }
+  },
+  "finalProcesses": {
+    "processes": [],
+    "listeners": []
+  }
+}

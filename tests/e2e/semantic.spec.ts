@@ -71,10 +71,10 @@ test('semantic defaults, explicit missing model and settings keyboard remain ind
   await expect(page.getByRole('button', { name: '审查本次范围' })).toBeDisabled();
   expect((await calls(page)).filter(call => ['check_model', 'start', 'query'].includes(call))).toEqual([]);
   await page.getByRole('button', { name: '语义设置' }).click();
-  await page.getByRole('tab', { name: '语义检索', exact: true }).focus(); await page.keyboard.press('ArrowLeft');
+  await page.getByRole('tab', { name: '语义检索', exact: true }).focus(); await page.keyboard.press('ArrowUp');
   await expect(page.getByRole('tab', { name: 'AI', exact: true })).toBeFocused();
   await expect(page.getByLabel('启用 AI')).not.toBeChecked();
-  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('ArrowDown');
   await expect(page.getByRole('tab', { name: '语义检索', exact: true })).toBeFocused();
   await page.getByLabel('向量模型', { exact: true }).fill('missing-local');
   await page.getByRole('button', { name: '保存语义配置' }).click();

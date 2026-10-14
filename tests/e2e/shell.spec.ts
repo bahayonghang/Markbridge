@@ -51,13 +51,16 @@ for (const size of sizes) {
     await page.getByRole('button', { name: '操作历史', exact: true }).click();
     await expect(page.getByText('还没有操作记录。')).toBeVisible();
     await page.getByRole('button', { name: '设置', exact: true }).click();
+    await page.getByRole('tab', { name: 'Chrome 连接', exact: true }).click();
     await expect(page.getByLabel('端口', { exact: true })).not.toBeVisible();
     await page.getByText('高级：连接端口', { exact: true }).click();
     await expect(page.getByLabel('端口', { exact: true })).toBeVisible();
     await page.getByRole('tab', { name: 'AI', exact: true }).click();
     await page.keyboard.press('Home');
+    await expect(page.getByRole('tab', { name: '通用' })).toBeFocused();
+    await page.keyboard.press('ArrowDown');
     await expect(page.getByRole('tab', { name: 'Chrome 连接' })).toBeFocused();
-    await page.keyboard.press('ArrowRight');
+    await page.keyboard.press('ArrowDown');
     await expect(page.getByRole('tab', { name: 'AI', exact: true })).toBeFocused();
     await expect(page.getByLabel('启用 AI')).not.toBeChecked();
     expect(await page.getByLabel('启用 AI').evaluate((element) => element.getBoundingClientRect().width)).toBe(16);
@@ -92,6 +95,7 @@ test('R01 keeps edit drafts on navigation and stops hidden content previews', as
   await page.getByRole('option', { name: /Human Interface Guidelines/ }).first().click();
   await page.getByLabel('新标题', { exact: true }).fill('尚未保存的标题');
   await page.getByRole('button', { name: '设置', exact: true }).click();
+    await page.getByRole('tab', { name: 'Chrome 连接', exact: true }).click();
   const reads = await page.evaluate(() => (window as unknown as { __r01calls: string[] }).__r01calls.filter((call) => call === 'content_preview').length);
   await page.getByRole('tab', { name: 'AI', exact: true }).click();
   await page.getByLabel('端点', { exact: true }).fill('http://localhost:11434');
@@ -101,6 +105,8 @@ test('R01 keeps edit drafts on navigation and stops hidden content previews', as
   await page.getByRole('button', { name: '书签', exact: true }).click();
   await expect(page.getByLabel('新标题', { exact: true })).toHaveValue('尚未保存的标题');
   await page.getByRole('button', { name: '设置', exact: true }).click();
+  await expect(page.getByRole('tab', { name: '通用', exact: true })).toHaveAttribute('aria-selected', 'true');
+  await page.getByRole('tab', { name: 'AI', exact: true }).click();
   await expect(page.getByLabel('端点', { exact: true })).toHaveValue('http://localhost:11434');
 });
 

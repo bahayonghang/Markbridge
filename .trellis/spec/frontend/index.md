@@ -8,6 +8,7 @@ Read [Project baseline](../project-baseline.md) first. The React workspace inclu
 | [Components](component-guidelines.md) | Workspace, preview, accessibility |
 | [Async lifecycle](hook-guidelines.md) | Subscriptions and cancellation |
 | [State](state-management.md) | Cache, drafts, proposals |
+| [UI preferences](ui-preferences.md) | Local theme/font/size, storage and virtual-row geometry |
 | [Types](type-safety.md) | Validated DTOs |
 | [Quality](quality-guidelines.md) | UI and native evidence |
 | [Semantic search contract](../backend/semantic-search.md) | Validated source-bound controls and explicit queries |

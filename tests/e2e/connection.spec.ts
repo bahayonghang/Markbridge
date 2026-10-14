@@ -39,6 +39,7 @@ test('R02 source-switch confirmation keeps focus and separates identical Chrome 
   await expect(page.getByLabel('书签来源')).toHaveValue('profile:profile-test');
   await expect(page.getByLabel('新标题')).toHaveValue('当前资料的未确认输入');
   await page.getByRole('button', { name: '设置', exact: true }).click();
+  await page.getByRole('tab', { name: 'Chrome 连接', exact: true }).click();
   await page.getByRole('article').filter({ hasText: '另一份资料' }).getByRole('button', { name: '浏览此资料' }).click();
   await expect(page.getByRole('dialog', { name: '切换书签来源？' })).toBeVisible();
   await page.keyboard.press('Escape');
@@ -62,6 +63,7 @@ test('R02 revocation requires a second action and Escape returns to its trigger'
   await mockBridge(page);
   await page.goto('/');
   await page.getByRole('button', { name: '设置', exact: true }).click();
+  await page.getByRole('tab', { name: 'Chrome 连接', exact: true }).click();
   const revoke = page.getByRole('button', { name: '吊销配对', exact: true });
   await revoke.click();
   await expect(page.getByRole('dialog')).toContainText('本机缓存、标签和备注都会保留');

@@ -1,0 +1,243 @@
+{
+  "contrast": [
+    {
+      "foreground": "ink",
+      "background": "surface",
+      "foregroundColor": "#202733",
+      "backgroundColor": "#ffffff",
+      "ratio": 15.006151323037027,
+      "minimum": 4.5
+    },
+    {
+      "foreground": "muted",
+      "background": "surface",
+      "foregroundColor": "#606b7c",
+      "backgroundColor": "#ffffff",
+      "ratio": 5.396398171276228,
+      "minimum": 4.5
+    },
+    {
+      "foreground": "muted",
+      "background": "sidebar",
+      "foregroundColor": "#606b7c",
+      "backgroundColor": "#eceff4",
+      "ratio": 4.681890619276661,
+      "minimum": 4.5
+    },
+    {
+      "foreground": "blue",
+      "background": "selected",
+      "foregroundColor": "#1767d2",
+      "backgroundColor": "#e8f0fe",
+      "ratio": 4.690452949957813,
+      "minimum": 4.5
+    },
+    {
+      "foreground": "danger",
+      "background": "surface",
+      "foregroundColor": "#b43438",
+      "backgroundColor": "#ffffff",
+      "ratio": 6.018983821845265,
+      "minimum": 4.5
+    },
+    {
+      "foreground": "caution",
+      "background": "surface",
+      "foregroundColor": "#895c16",
+      "backgroundColor": "#ffffff",
+      "ratio": 5.8234383695314955,
+      "minimum": 4.5
+    },
+    {
+      "foreground": "disabled-ink",
+      "background": "disabled-surface",
+      "foregroundColor": "#606b7c",
+      "backgroundColor": "#f0f2f6",
+      "ratio": 4.81478708861506,
+      "minimum": 4.5
+    },
+    {
+      "foreground": "primary-ink",
+      "background": "primary-fill",
+      "foregroundColor": "#ffffff",
+      "backgroundColor": "#1767d2",
+      "ratio": 5.374748616413246,
+      "minimum": 4.5
+    },
+    {
+      "foreground": "primary-ink",
+      "background": "primary-hover",
+      "foregroundColor": "#ffffff",
+      "backgroundColor": "#1256b3",
+      "ratio": 6.981917501629431,
+      "minimum": 4.5
+    },
+    {
+      "foreground": "control-border",
+      "background": "surface",
+      "foregroundColor": "#7a8697",
+      "backgroundColor": "#ffffff",
+      "ratio": 3.694303730038844,
+      "minimum": 3
+    },
+    {
+      "foreground": "control-border",
+      "background": "disabled-surface",
+      "foregroundColor": "#7a8697",
+      "backgroundColor": "#f0f2f6",
+      "ratio": 3.296140376648089,
+      "minimum": 3
+    },
+    {
+      "foreground": "blue",
+      "background": "surface",
+      "foregroundColor": "#1767d2",
+      "backgroundColor": "#ffffff",
+      "ratio": 5.374748616413246,
+      "minimum": 3
+    },
+    {
+      "foreground": "blue",
+      "background": "selected",
+      "foregroundColor": "#1767d2",
+      "backgroundColor": "#e8f0fe",
+      "ratio": 4.690452949957813,
+      "minimum": 3
+    },
+    {
+      "foreground": "primary-border",
+      "background": "surface",
+      "foregroundColor": "#1767d2",
+      "backgroundColor": "#ffffff",
+      "ratio": 5.374748616413246,
+      "minimum": 3
+    },
+    {
+      "foreground": "primary-border",
+      "background": "canvas",
+      "foregroundColor": "#1767d2",
+      "backgroundColor": "#f3f5f8",
+      "ratio": 4.921059072344271,
+      "minimum": 3
+    }
+  ],
+  "renderedPrimary": {
+    "fill": "rgb(23, 103, 210)",
+    "border": "rgb(23, 103, 210)",
+    "ink": "rgb(255, 255, 255)"
+  },
+  "renderedConsumers": [
+    {
+      "name": "selected category text",
+      "foreground": "rgb(23, 103, 210)",
+      "background": "rgb(232, 240, 254)",
+      "ratio": 4.690452949957813,
+      "minimum": 4.5
+    },
+    {
+      "name": "selected category keyboard text",
+      "foreground": "rgb(23, 103, 210)",
+      "background": "rgb(232, 240, 254)",
+      "ratio": 4.690452949957813,
+      "minimum": 4.5
+    },
+    {
+      "name": "selected category keyboard focus",
+      "foreground": "rgb(23, 103, 210)",
+      "background": "rgb(243, 245, 248)",
+      "ratio": 4.921059072344271,
+      "minimum": 3
+    },
+    {
+      "name": "text control text",
+      "foreground": "rgb(32, 39, 51)",
+      "background": "rgb(255, 255, 255)",
+      "ratio": 15.006151323037027,
+      "minimum": 4.5
+    },
+    {
+      "name": "text control boundary",
+      "foreground": "rgb(122, 134, 151)",
+      "background": "rgb(255, 255, 255)",
+      "ratio": 3.694303730038844,
+      "minimum": 3
+    },
+    {
+      "name": "disabled listener text",
+      "foreground": "rgb(96, 107, 124)",
+      "background": "rgb(240, 242, 246)",
+      "ratio": 4.81478708861506,
+      "minimum": 4.5
+    },
+    {
+      "name": "disabled listener boundary",
+      "foreground": "rgb(122, 134, 151)",
+      "background": "rgb(255, 255, 255)",
+      "ratio": 3.694303730038844,
+      "minimum": 3
+    },
+    {
+      "name": "primary normal text",
+      "foreground": "rgb(255, 255, 255)",
+      "background": "rgb(23, 103, 210)",
+      "ratio": 5.374748616413246,
+      "minimum": 4.5
+    },
+    {
+      "name": "primary normal boundary",
+      "foreground": "rgb(23, 103, 210)",
+      "background": "rgb(255, 255, 255)",
+      "ratio": 5.374748616413246,
+      "minimum": 3
+    },
+    {
+      "name": "primary hover text",
+      "foreground": "rgb(255, 255, 255)",
+      "background": "rgb(18, 86, 179)",
+      "ratio": 6.981917501629431,
+      "minimum": 4.5
+    },
+    {
+      "name": "primary hover boundary",
+      "foreground": "rgb(23, 103, 210)",
+      "background": "rgb(255, 255, 255)",
+      "ratio": 5.374748616413246,
+      "minimum": 3
+    },
+    {
+      "name": "confirmation action text",
+      "foreground": "rgb(180, 52, 56)",
+      "background": "rgb(255, 255, 255)",
+      "ratio": 6.018983821845265,
+      "minimum": 4.5
+    },
+    {
+      "name": "confirmation action boundary",
+      "foreground": "rgb(180, 52, 56)",
+      "background": "rgb(255, 255, 255)",
+      "ratio": 6.018983821845265,
+      "minimum": 3
+    },
+    {
+      "name": "confirmation keyboard text",
+      "foreground": "rgb(180, 52, 56)",
+      "background": "rgb(255, 255, 255)",
+      "ratio": 6.018983821845265,
+      "minimum": 4.5
+    },
+    {
+      "name": "confirmation keyboard boundary",
+      "foreground": "rgb(180, 52, 56)",
+      "background": "rgb(255, 255, 255)",
+      "ratio": 6.018983821845265,
+      "minimum": 3
+    },
+    {
+      "name": "confirmation keyboard focus",
+      "foreground": "rgb(23, 103, 210)",
+      "background": "rgb(255, 255, 255)",
+      "ratio": 5.374748616413246,
+      "minimum": 3
+    }
+  ]
+}

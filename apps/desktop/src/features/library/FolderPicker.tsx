@@ -29,7 +29,7 @@ export function FolderPicker({ nodes, value, excluded = [], onChange }: {
   return <details className="folder-picker" ref={details}>
     <summary ref={summary}>目标文件夹：{paths.find((row) => row.id === value)?.path ?? '请选择'}</summary>
     <label htmlFor={id}>搜索文件夹路径<input id={id} value={query} onChange={(event) => setQuery(event.target.value)} /></label>
-    <div className="folder-picker-list"><VirtualRows rows={rows} rowHeight={52} rowKey={(row) => `${id}:${row.id}`} label="目标文件夹" role="listbox" itemRole="option" activeKey={value ? `${id}:${value}` : null}
+    <div className="folder-picker-list"><VirtualRows rows={rows} rowKey={(row) => `${id}:${row.id}`} label="目标文件夹" role="listbox" itemRole="option" activeKey={value ? `${id}:${value}` : null}
       onKeyDown={(event) => {
         const available = rows.filter((row) => !row.reason);
         if (event.key === 'Enter' && available.some((row) => row.id === value)) { event.preventDefault(); close(); return; }

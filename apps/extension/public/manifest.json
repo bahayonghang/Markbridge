@@ -4,7 +4,12 @@
   "version": "0.1.0",
   "description": "Markbridge 本地书签工作台：配对与只读实时同步。",
   "minimum_chrome_version": "134",
-  "action": { "default_popup": "index.html", "default_title": "Markbridge · 签桥" },
+  "icons": { "16": "icons/16.png", "32": "icons/32.png", "48": "icons/48.png", "128": "icons/128.png" },
+  "action": {
+    "default_popup": "index.html",
+    "default_title": "Markbridge · 签桥",
+    "default_icon": { "16": "icons/16.png", "32": "icons/32.png", "48": "icons/48.png", "128": "icons/128.png" }
+  },
   "options_ui": { "page": "options.html", "open_in_tab": true },
   "background": { "service_worker": "worker.js", "type": "module" },
   "permissions": ["bookmarks", "storage", "alarms", "scripting", "activeTab"],

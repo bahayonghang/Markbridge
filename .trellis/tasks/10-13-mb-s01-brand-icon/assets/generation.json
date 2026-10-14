@@ -1,0 +1,14 @@
+{
+  "mode": "built-in image_gen",
+  "createdAt": "2026-10-13",
+  "prompts": {
+    "A": "Use case: logo-brand. Create one refined app icon for Markbridge, a local-first Chrome bookmark workspace connecting personal bookmarks to a desktop workspace. A compact solid blue bookmark silhouette with one simple bridge-like negative-space arch connecting the two inner sides, subtly suggesting an M. Bookmark first, bridge second. A single iconic integrated geometric mark, no separate objects. Flat, deliberate, broad readable shapes and generous negative space. At most three flat colors: primary blue #1767D2, deeper blue #114AA3 and white. Square high-resolution canvas, centered mark occupying about 82% of width and height, optically balanced, gently rounded outer corners, truly transparent outside the mark. Simple bold enough to read at 16 pixels. This is a production icon asset, not a mockup. No text, letters, Chrome logo, cloud, arrows, sparkles, gradients, glow, 3D, thin cables, scene, matte background, drop shadow or watermark.",
+    "B": "Use case: logo-brand. Create one refined app icon for Markbridge, a local-first Chrome bookmark workspace connecting personal bookmarks to a desktop workspace. Two abstract blue bookmark ribbons join across the top into a single compact M-shaped bridge span. Both bookmark notches clearly visible, connection broad and minimal. A single integrated geometric mark, not two disconnected icons. Flat, deliberate, broad readable shapes, generous negative space. At most three flat colors: primary blue #1767D2, deeper blue #114AA3 and white. Square high-resolution canvas, centered mark occupying about 82% of width and height, optically balanced, gently rounded outer corners, truly transparent outside the mark. Bold enough to read at 16 pixels. Production icon asset, not a mockup. No text, literal lettering, Chrome logo, cloud, arrows, sparkles, gradients, glow, 3D, thin cables, scene, matte background, drop shadow or watermark."
+  },
+  "selected": "A refined",
+  "selectionBasis": "Approved plan recommended A. Root visual review favors bookmark silhouette and broad bridge arch over B folded ribbons; no new user veto. A refined shown inline before integration.",
+  "originalA": "C:\\Users\\lyh\\.codex\\generated_images\\01a1385b-75a4-7c12-a2bf-812830cdcb58\\exec-7348f922-fd95-4a8a-9303-05666d27b2f3.png",
+  "originalB": "C:\\Users\\lyh\\.codex\\generated_images\\01a1385b-75a4-7c12-a2bf-812830cdcb58\\exec-3a3531cc-71d3-4ef1-aa4c-6bfe6b969dc2.png",
+  "refined": "C:\\Users\\lyh\\.codex\\generated_images\\01a1385b-75a4-7c12-a2bf-812830cdcb58\\exec-40b5a129-136d-417f-8424-f0c9345abab4.png",
+  "refinementPrompt": "Preserve exact bookmark silhouette, placement, rounded corners, bottom notch and white bridge arch. Change only rendering to flat uniform #1767D2 blue and white, remove shading/texture/bevel, retain transparent clean antialiased edges, no new shapes or text."
+}

@@ -1,4 +1,7 @@
-import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react';
+import { appearanceSizes } from '../settings/ui-preferences';
+
+export const RowHeightsContext = createContext<{ folderRow: number; bookmarkRow: number }>(appearanceSizes.standard);
 
 type VirtualRowsProps<T> = {
   rows: T[];
@@ -20,14 +23,38 @@ type VirtualRowsProps<T> = {
   render: (row: T, active: boolean) => ReactNode;
 };
 
-export function VirtualRows<T>({ rows, rowHeight = 40, rowKey, label, role, itemRole, activeKey, resetKey, onActive, onActivate, selectedKeys, total, onKeyDown, rowProps, dragId, onDropRow, render }: VirtualRowsProps<T>) {
+export function VirtualRows<T>({ rows, rowHeight: explicitRowHeight, rowKey, label, role, itemRole, activeKey, resetKey, onActive, onActivate, selectedKeys, total, onKeyDown, rowProps, dragId, onDropRow, render }: VirtualRowsProps<T>) {
+  const sizes = useContext(RowHeightsContext);
+  const rowHeight = explicitRowHeight ?? (role === 'tree' ? sizes.folderRow : sizes.bookmarkRow);
   const scroller = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState(320);
   const [scrollTop, setScrollTop] = useState(0);
+  const position = useRef({ top: 0, rowHeight, resetKey, atBottom: false });
+  function rememberPosition(element: HTMLDivElement) {
+    position.current.top = element.scrollTop;
+    position.current.atBottom = element.scrollHeight > element.clientHeight && element.scrollHeight - element.clientHeight - element.scrollTop <= 1;
+    setScrollTop(element.scrollTop);
+  }
+  useLayoutEffect(() => {
+    const previous = position.current;
+    const top = previous.resetKey !== resetKey ? 0 : Math.floor(previous.top / previous.rowHeight) * rowHeight + Math.min(previous.top % previous.rowHeight, rowHeight - 1);
+    position.current = { top, rowHeight, resetKey, atBottom: previous.resetKey === resetKey && previous.atBottom };
+    const element = scroller.current;
+    if (element && element.clientHeight > 0) {
+      element.scrollTop = position.current.atBottom ? element.scrollHeight - element.clientHeight : top;
+      rememberPosition(element);
+    } else setScrollTop(top);
+  }, [rowHeight, resetKey]);
   useEffect(() => {
     const element = scroller.current;
     if (!element || typeof ResizeObserver === 'undefined') return;
-    const measure = () => setHeight(element.clientHeight || 320);
+    const measure = () => {
+      // Hidden panels can report zero scrollTop. Restore the stored row anchor on return.
+      if (!element.clientHeight) return;
+      element.scrollTop = position.current.atBottom ? element.scrollHeight - element.clientHeight : position.current.top;
+      rememberPosition(element);
+      setHeight(element.clientHeight);
+    };
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(element);
@@ -39,6 +66,8 @@ export function VirtualRows<T>({ rows, rowHeight = 40, rowKey, label, role, item
     if (!element) return;
     if (activeIndex < 0) {
       element.scrollTop = 0;
+      position.current.top = 0;
+      position.current.atBottom = false;
       setScrollTop(0);
       return;
     }
@@ -46,8 +75,9 @@ export function VirtualRows<T>({ rows, rowHeight = 40, rowKey, label, role, item
     const view = element.clientHeight || height;
     if (top < element.scrollTop) element.scrollTop = top;
     else if (top + rowHeight > element.scrollTop + view) element.scrollTop = top + rowHeight - view;
-    setScrollTop(element.scrollTop);
-  }, [activeIndex, height, rowHeight, resetKey]);
+    rememberPosition(element);
+    // Geometry changes preserve the visible anchor; only navigation/replaced data reveals the active row.
+  }, [activeIndex, activeKey, resetKey]);
   useEffect(() => {
     if (!activeKey) return;
     const element = document.getElementById(`library-row-${activeKey}`);
@@ -70,7 +100,7 @@ export function VirtualRows<T>({ rows, rowHeight = 40, rowKey, label, role, item
       aria-multiselectable={selectedKeys ? true : undefined}
       aria-activedescendant={activeIndex >= 0 ? `library-row-${activeKey}` : undefined}
       tabIndex={rows.length === 0 ? 0 : -1}
-      onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)}
+      onScroll={(event) => { if (event.currentTarget.clientHeight > 0) rememberPosition(event.currentTarget); }}
       onKeyDown={onKeyDown}
     >
       <div className="virtual-space" style={{ height: rows.length * rowHeight }}>

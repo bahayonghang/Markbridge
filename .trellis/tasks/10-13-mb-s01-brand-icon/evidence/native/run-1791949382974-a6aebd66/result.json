@@ -1,0 +1,170 @@
+{
+  "runId": "run-1791949382974-a6aebd66",
+  "os": "Windows 11 Pro",
+  "release": "10.0.26300",
+  "node": "v26.7.0",
+  "isolationRoot": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-s01-SvHtEU",
+  "executable": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-s01-SvHtEU\\install\\markbridge-desktop.exe",
+  "appData": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-s01-SvHtEU\\app-data",
+  "copiedPortableExeOnly": true,
+  "installerRun": false,
+  "paired": false,
+  "exeBytes": 25361920,
+  "exeSha256": "ef06b936da825542c990bbb2125f620075172992ac25d4e680bd58adb663b41e",
+  "webview": "Edg/155.0.4283.45",
+  "mainDataEvidence": {
+    "mainDirectoryExists": true,
+    "observations": [
+      {
+        "pid": 116696,
+        "observedDirectoryExists": true,
+        "relativeDirectory": "app-data/main-webview/EBWebView",
+        "parent": 52548,
+        "insideFixture": true,
+        "creationUtcTicks": "639275461831535510",
+        "expectedMain": true,
+        "expectedPreview": false
+      }
+    ],
+    "previewDirectoryExists": false,
+    "owner": 52548
+  },
+  "sidebar": {
+    "tag": "IMG",
+    "source": "/assets/markbridge-o0EVGiPW.png",
+    "width": 32,
+    "height": 32,
+    "naturalWidth": 128,
+    "naturalHeight": 128
+  },
+  "viewport": {
+    "width": 1100,
+    "height": 760,
+    "devicePixelRatio": 1.25
+  },
+  "status": "FAIL",
+  "error": "Command failed: powershell -NoProfile -ExecutionPolicy Bypass -File D:\\Documents\\Code\\Tauri\\Markbridge\\.trellis\\tasks\\10-13-mb-s01-brand-icon\\evidence\\native-brand.ps1 -TargetProcessId 52548 -IsolationRoot C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-s01-SvHtEU -EvidenceDirectory D:\\Documents\\Code\\Tauri\\Markbridge\\.trellis\\tasks\\10-13-mb-s01-brand-icon\\evidence\\native\\run-1791949382974-a6aebd66\nOWNED_MAIN_WINDOW_NOT_FOUND\r\nAt D:\\Documents\\Code\\Tauri\\Markbridge\\.trellis\\tasks\\10-13-mb-s01-brand-icon\\evidence\\native-brand.ps1:52 char:35\r\n+ ...  ($window -eq [IntPtr]::Zero) { throw 'OWNED_MAIN_WINDOW_NOT_FOUND' }\r\n+                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n    + CategoryInfo          : OperationStopped: (OWNED_MAIN_WINDOW_NOT_FOUND:String) [], RuntimeException\r\n    + FullyQualifiedErrorId : OWNED_MAIN_WINDOW_NOT_FOUND\r\n \r\n",
+  "appClose": {
+    "pid": 52548,
+    "exitCode": 0,
+    "signal": null,
+    "method": "verified_main_and_preview_windows_WM_CLOSE",
+    "phase": "known-webview-exit",
+    "windowPosts": [
+      {
+        "action": "close",
+        "posted": 1,
+        "pid": 52548,
+        "windows": [
+          {
+            "emptyTitle": false,
+            "handle": "120E2C",
+            "messageOnly": false,
+            "visible": true,
+            "closeEligible": true,
+            "className": "UNREPORTED_CLASS",
+            "role": "main",
+            "threadId": 123128
+          },
+          {
+            "emptyTitle": true,
+            "handle": "130ED2",
+            "messageOnly": false,
+            "visible": true,
+            "closeEligible": false,
+            "className": "TAO_THREAD_EVENT_TARGET",
+            "role": "other",
+            "threadId": 123128
+          },
+          {
+            "emptyTitle": false,
+            "handle": "13F1C74",
+            "messageOnly": false,
+            "visible": false,
+            "closeEligible": false,
+            "className": "IME",
+            "role": "other",
+            "threadId": 123128
+          },
+          {
+            "emptyTitle": false,
+            "handle": "50FB4",
+            "messageOnly": false,
+            "visible": false,
+            "closeEligible": false,
+            "className": "UNREPORTED_CLASS",
+            "role": "other",
+            "threadId": 123128
+          },
+          {
+            "emptyTitle": true,
+            "handle": "30FB0",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "Chrome_MessageWindow",
+            "role": "other",
+            "threadId": 35308
+          },
+          {
+            "emptyTitle": true,
+            "handle": "D0F08",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "Chrome_MessageWindow",
+            "role": "other",
+            "threadId": 123128
+          },
+          {
+            "emptyTitle": false,
+            "handle": "160D3A",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "CicMarshalWndClass",
+            "role": "other",
+            "threadId": 123128
+          },
+          {
+            "emptyTitle": false,
+            "handle": "180E2A",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "OleMainThreadWndClass",
+            "role": "other",
+            "threadId": 123128
+          }
+        ],
+        "ownedWindows": 8,
+        "processAbsent": false
+      }
+    ],
+    "knownWebviewPids": [
+      116696
+    ],
+    "knownWebviewIdentities": [
+      {
+        "pid": 116696,
+        "creationUtcTicks": "639275461831535510"
+      }
+    ],
+    "nativeStageOrder": [],
+    "knownWebviewAbsence": {
+      "observations": [
+        {
+          "creationUtcTicks": "639275461831535510",
+          "pid": 116696,
+          "state": "absent"
+        }
+      ],
+      "presentPids": [],
+      "reusedPids": []
+    }
+  },
+  "finalProcesses": {
+    "processes": [],
+    "listeners": []
+  }
+}

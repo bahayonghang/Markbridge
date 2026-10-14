@@ -110,20 +110,16 @@ export function ConnectionSettings({ state, error, native, accept, onBrowseSourc
 
   const pending = state?.pending.filter((candidate) => candidate.expiresAt > now) ?? [];
   const unavailable = !native || busy || !state || error === 'event';
-  return <div className="connection-settings">
-    {onboarding && <div className="onboarding-intro">
-      <h2>连接你的 Chrome 书签</h2>
-      <p>连接扩展后可实时查看和管理书签。无需配置 AI。</p>
-      <div className="actions"><button type="button" aria-pressed={path === 'connect'} onClick={() => setPath('connect')}>连接 Chrome</button><button type="button" aria-pressed={path === 'readonly'} onClick={() => setPath('readonly')}>只读浏览文件</button></div>
-    </div>}
-    {(message || state?.errorCode) && <p className="notice" role="alert">{message ?? safeError(state?.errorCode ?? null)}</p>}
-    <div hidden={onboarding && path !== 'connect'}>
-    <section className="connection-panel" aria-labelledby="extension-title">
-      <h2 id="extension-title">1. 准备 Chrome 扩展</h2>
+  const hasSources = !!(state?.profiles.length || state?.mirrors.length);
+  const setup = (
+    <div key="setup" className="connection-setup" hidden={onboarding && path !== 'connect'}>
+    {hasSources && !onboarding && <h2 className="settings-group-title">接入新的 Chrome 资料</h2>}
+    <details className="connection-panel extension-instructions" open={!hasSources || pending.length > 0 || !!offer}>
+      <summary><h2 id="extension-title">1. 准备 Chrome 扩展</h2></summary>
       <p>在要接入的 Chrome 资料中打开 <code>chrome://extensions</code>，启用开发者模式，选择“加载已解压的扩展程序”，选择 Markbridge 扩展目录。</p>
       <p className="secondary">加载后打开扩展的“配对设置”。应用不会自动安装或扫描 Chrome。</p>
       <details className="connection-advanced"><summary>开发构建：扩展目录</summary><p className="secondary">从源码构建时，扩展目录为 <code>apps/extension/dist</code>。开发和验收请使用单独的临时 Chrome 资料。</p></details>
-    </section>
+    </details>
             <section className="connection-panel" aria-labelledby="listener-title">
               <div className="panel-heading"><h2 id="listener-title">2. 启动本机连接</h2><span className="secondary">{state?.port ? `127.0.0.1:${state.port}` : '监听尚未启动'}</span></div>
               <form className="inline-form" onSubmit={start} noValidate>
@@ -157,7 +153,10 @@ export function ConnectionSettings({ state, error, native, accept, onBrowseSourc
               </div>)}
             </section>
     </div>
-            <section className="connection-panel" aria-labelledby="profiles-title" hidden={onboarding && !state?.profiles.length}>
+  );
+  const sources = (
+    <div key="sources" className="connection-sources">
+            <section className="connection-panel" aria-labelledby="profiles-title" hidden={!state?.profiles.length}>
               <div className="panel-heading"><h2 id="profiles-title">已配对资料</h2><span className="secondary">{state?.profiles.length ?? 0} 个资料</span></div>
               {!state?.profiles.length ? <p className="secondary">尚未连接书签来源。完成配对后，可在此查看同步状态和节点计数。</p> : state.profiles.map((profile) => <article className="profile" key={profile.profileId}>
                 <div className="panel-heading"><h3>{profile.displayName}</h3><span className="source-state">{error === 'event' ? '状态无效 · 只读' : connectionLabels[profile.connection]}</span></div>
@@ -227,6 +226,16 @@ export function ConnectionSettings({ state, error, native, accept, onBrowseSourc
               </article>)}
             </section>
     <DiagnosticExport native={native} />
+    </div>
+  );
+  return <div className={`connection-settings ${hasSources ? 'has-sources' : 'first-connection'}`}>
+    {onboarding && <div className="onboarding-intro">
+      <h2>连接你的 Chrome 书签</h2>
+      <p>连接扩展后可实时查看和管理书签。无需配置 AI。</p>
+      <div className="actions"><button type="button" aria-pressed={path === 'connect'} onClick={() => setPath('connect')}>连接 Chrome</button><button type="button" aria-pressed={path === 'readonly'} onClick={() => setPath('readonly')}>只读浏览文件</button></div>
+    </div>}
+    {(message || state?.errorCode) && <p className="notice" role="alert">{message ?? safeError(state?.errorCode ?? null)}</p>}
+    <div className="connection-columns">{hasSources ? [sources, setup] : [setup, sources]}</div>
     {revoke && <ConfirmDialog title={`吊销“${revoke.displayName}”的配对？`} confirmLabel="确认吊销配对" onCancel={() => setRevoke(null)} onConfirm={() => {
       const id = revoke.profileId;
       setRevoke(null);

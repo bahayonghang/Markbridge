@@ -1,0 +1,1153 @@
+{
+  "runId": "run-1791960082767-06815e5f",
+  "startedAt": "2026-10-14T06:41:22.792Z",
+  "os": "Windows 11 Pro",
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-s02-Qpt9kN",
+  "executable": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-s02-Qpt9kN\\install\\markbridge-desktop.exe",
+  "appData": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-s02-Qpt9kN\\app-data",
+  "exeBytes": 25382912,
+  "exeSha256": "9d26ee941a25b6e0b577607e253768fa4756a749307f40c272c9259c10ef5aaa",
+  "controls": [
+    {
+      "name": "first_run_pairing_through_current_settings_real_ipc",
+      "status": "PASS",
+      "profileId": "p:d25c94afb9ab9875da18ff0b7aacff3998417f026495e2034717ee6d5a18580b"
+    },
+    {
+      "name": "six_sizes_four_tabs_native_geometry_and_vertical_focus",
+      "status": "PASS",
+      "screens": 24
+    },
+    {
+      "name": "real_ipc_navigation_retains_drafts",
+      "status": "PASS",
+      "ipcObserverVerified": true,
+      "commands": [
+        "semantic_settings"
+      ]
+    },
+    {
+      "name": "history_exports_current_profile_with_real_cancel_and_saved_file",
+      "status": "PASS"
+    },
+    {
+      "name": "mirror_html_only_real_failed_readonly_receipt_and_late_previous_source_reply_ignored",
+      "status": "PASS",
+      "rejected": {
+        "status": "failed",
+        "metadata": null,
+        "errorCode": "READ_ONLY"
+      }
+    }
+  ],
+  "screens": [
+    {
+      "tab": "Chrome 连接",
+      "width": 1440,
+      "height": 900,
+      "os": {
+        "ownedExecutableVerified": true,
+        "clientWidth": 1800,
+        "pid": 166008,
+        "clientHeight": 1125,
+        "dpi": 120,
+        "title": "Markbridge · 签桥"
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1440,
+          "height": 900,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 184,
+          "height": 812
+        },
+        "content": {
+          "x": 400,
+          "y": 56,
+          "width": 1040,
+          "height": 812
+        },
+        "bodyWidth": 1440,
+        "bodyHeight": 900,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "AI",
+      "width": 1440,
+      "height": 900,
+      "os": {
+        "ownedExecutableVerified": true,
+        "clientWidth": 1800,
+        "pid": 166008,
+        "clientHeight": 1125,
+        "dpi": 120,
+        "title": "Markbridge · 签桥"
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1440,
+          "height": 900,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 184,
+          "height": 812
+        },
+        "content": {
+          "x": 400,
+          "y": 56,
+          "width": 1040,
+          "height": 812
+        },
+        "bodyWidth": 1440,
+        "bodyHeight": 900,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "语义检索",
+      "width": 1440,
+      "height": 900,
+      "os": {
+        "ownedExecutableVerified": true,
+        "clientWidth": 1800,
+        "pid": 166008,
+        "clientHeight": 1125,
+        "dpi": 120,
+        "title": "Markbridge · 签桥"
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1440,
+          "height": 900,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 184,
+          "height": 812
+        },
+        "content": {
+          "x": 400,
+          "y": 56,
+          "width": 1040,
+          "height": 812
+        },
+        "bodyWidth": 1440,
+        "bodyHeight": 900,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "备份导出",
+      "width": 1440,
+      "height": 900,
+      "os": {
+        "ownedExecutableVerified": true,
+        "clientWidth": 1800,
+        "pid": 166008,
+        "clientHeight": 1125,
+        "dpi": 120,
+        "title": "Markbridge · 签桥"
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1440,
+          "height": 900,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 184,
+          "height": 812
+        },
+        "content": {
+          "x": 400,
+          "y": 56,
+          "width": 1040,
+          "height": 812
+        },
+        "bodyWidth": 1440,
+        "bodyHeight": 900,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "Chrome 连接",
+      "width": 1100,
+      "height": 760,
+      "os": {
+        "ownedExecutableVerified": true,
+        "clientWidth": 1375,
+        "pid": 166008,
+        "clientHeight": 950,
+        "dpi": 120,
+        "title": "Markbridge · 签桥"
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1100,
+          "height": 760,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 152,
+          "height": 672
+        },
+        "content": {
+          "x": 368,
+          "y": 56,
+          "width": 732,
+          "height": 672
+        },
+        "bodyWidth": 1100,
+        "bodyHeight": 760,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "AI",
+      "width": 1100,
+      "height": 760,
+      "os": {
+        "ownedExecutableVerified": true,
+        "clientWidth": 1375,
+        "pid": 166008,
+        "clientHeight": 950,
+        "dpi": 120,
+        "title": "Markbridge · 签桥"
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1100,
+          "height": 760,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 152,
+          "height": 672
+        },
+        "content": {
+          "x": 368,
+          "y": 56,
+          "width": 732,
+          "height": 672
+        },
+        "bodyWidth": 1100,
+        "bodyHeight": 760,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "语义检索",
+      "width": 1100,
+      "height": 760,
+      "os": {
+        "ownedExecutableVerified": true,
+        "clientWidth": 1375,
+        "pid": 166008,
+        "clientHeight": 950,
+        "dpi": 120,
+        "title": "Markbridge · 签桥"
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1100,
+          "height": 760,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 152,
+          "height": 672
+        },
+        "content": {
+          "x": 368,
+          "y": 56,
+          "width": 732,
+          "height": 672
+        },
+        "bodyWidth": 1100,
+        "bodyHeight": 760,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "备份导出",
+      "width": 1100,
+      "height": 760,
+      "os": {
+        "ownedExecutableVerified": true,
+        "clientWidth": 1375,
+        "pid": 166008,
+        "clientHeight": 950,
+        "dpi": 120,
+        "title": "Markbridge · 签桥"
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1100,
+          "height": 760,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 152,
+          "height": 672
+        },
+        "content": {
+          "x": 368,
+          "y": 56,
+          "width": 732,
+          "height": 672
+        },
+        "bodyWidth": 1100,
+        "bodyHeight": 760,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "Chrome 连接",
+      "width": 640,
+      "height": 760,
+      "os": {
+        "ownedExecutableVerified": true,
+        "clientWidth": 800,
+        "pid": 166008,
+        "clientHeight": 950,
+        "dpi": 120,
+        "title": "Markbridge · 签桥"
+      },
+      "geometry": {
+        "viewport": {
+          "width": 640,
+          "height": 760,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 64,
+          "y": 56,
+          "width": 132,
+          "height": 672
+        },
+        "content": {
+          "x": 196,
+          "y": 56,
+          "width": 444,
+          "height": 672
+        },
+        "bodyWidth": 640,
+        "bodyHeight": 760,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "AI",
+      "width": 640,
+      "height": 760,
+      "os": {
+        "ownedExecutableVerified": true,
+        "clientWidth": 800,
+        "pid": 166008,
+        "clientHeight": 950,
+        "dpi": 120,
+        "title": "Markbridge · 签桥"
+      },
+      "geometry": {
+        "viewport": {
+          "width": 640,
+          "height": 760,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 64,
+          "y": 56,
+          "width": 132,
+          "height": 672
+        },
+        "content": {
+          "x": 196,
+          "y": 56,
+          "width": 444,
+          "height": 672
+        },
+        "bodyWidth": 640,
+        "bodyHeight": 760,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "语义检索",
+      "width": 640,
+      "height": 760,
+      "os": {
+        "ownedExecutableVerified": true,
+        "clientWidth": 800,
+        "pid": 166008,
+        "clientHeight": 950,
+        "dpi": 120,
+        "title": "Markbridge · 签桥"
+      },
+      "geometry": {
+        "viewport": {
+          "width": 640,
+          "height": 760,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 64,
+          "y": 56,
+          "width": 132,
+          "height": 672
+        },
+        "content": {
+          "x": 196,
+          "y": 56,
+          "width": 444,
+          "height": 672
+        },
+        "bodyWidth": 640,
+        "bodyHeight": 760,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "备份导出",
+      "width": 640,
+      "height": 760,
+      "os": {
+        "ownedExecutableVerified": true,
+        "clientWidth": 800,
+        "pid": 166008,
+        "clientHeight": 950,
+        "dpi": 120,
+        "title": "Markbridge · 签桥"
+      },
+      "geometry": {
+        "viewport": {
+          "width": 640,
+          "height": 760,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 64,
+          "y": 56,
+          "width": 132,
+          "height": 672
+        },
+        "content": {
+          "x": 196,
+          "y": 56,
+          "width": 444,
+          "height": 672
+        },
+        "bodyWidth": 640,
+        "bodyHeight": 760,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "Chrome 连接",
+      "width": 1100,
+      "height": 480,
+      "os": {
+        "ownedExecutableVerified": true,
+        "clientWidth": 1375,
+        "pid": 166008,
+        "clientHeight": 600,
+        "dpi": 120,
+        "title": "Markbridge · 签桥"
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1100,
+          "height": 480,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 152,
+          "height": 392
+        },
+        "content": {
+          "x": 368,
+          "y": 56,
+          "width": 732,
+          "height": 392
+        },
+        "bodyWidth": 1100,
+        "bodyHeight": 480,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "AI",
+      "width": 1100,
+      "height": 480,
+      "os": {
+        "ownedExecutableVerified": true,
+        "clientWidth": 1375,
+        "pid": 166008,
+        "clientHeight": 600,
+        "dpi": 120,
+        "title": "Markbridge · 签桥"
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1100,
+          "height": 480,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 152,
+          "height": 392
+        },
+        "content": {
+          "x": 368,
+          "y": 56,
+          "width": 732,
+          "height": 392
+        },
+        "bodyWidth": 1100,
+        "bodyHeight": 480,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "语义检索",
+      "width": 1100,
+      "height": 480,
+      "os": {
+        "ownedExecutableVerified": true,
+        "clientWidth": 1375,
+        "pid": 166008,
+        "clientHeight": 600,
+        "dpi": 120,
+        "title": "Markbridge · 签桥"
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1100,
+          "height": 480,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 152,
+          "height": 392
+        },
+        "content": {
+          "x": 368,
+          "y": 56,
+          "width": 732,
+          "height": 392
+        },
+        "bodyWidth": 1100,
+        "bodyHeight": 480,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "备份导出",
+      "width": 1100,
+      "height": 480,
+      "os": {
+        "ownedExecutableVerified": true,
+        "clientWidth": 1375,
+        "pid": 166008,
+        "clientHeight": 600,
+        "dpi": 120,
+        "title": "Markbridge · 签桥"
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1100,
+          "height": 480,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 152,
+          "height": 392
+        },
+        "content": {
+          "x": 368,
+          "y": 56,
+          "width": 732,
+          "height": 392
+        },
+        "bodyWidth": 1100,
+        "bodyHeight": 480,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "Chrome 连接",
+      "width": 640,
+      "height": 480,
+      "os": {
+        "ownedExecutableVerified": true,
+        "clientWidth": 800,
+        "pid": 166008,
+        "clientHeight": 600,
+        "dpi": 120,
+        "title": "Markbridge · 签桥"
+      },
+      "geometry": {
+        "viewport": {
+          "width": 640,
+          "height": 480,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 64,
+          "y": 56,
+          "width": 132,
+          "height": 392
+        },
+        "content": {
+          "x": 196,
+          "y": 56,
+          "width": 444,
+          "height": 392
+        },
+        "bodyWidth": 640,
+        "bodyHeight": 480,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "AI",
+      "width": 640,
+      "height": 480,
+      "os": {
+        "ownedExecutableVerified": true,
+        "clientWidth": 800,
+        "pid": 166008,
+        "clientHeight": 600,
+        "dpi": 120,
+        "title": "Markbridge · 签桥"
+      },
+      "geometry": {
+        "viewport": {
+          "width": 640,
+          "height": 480,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 64,
+          "y": 56,
+          "width": 132,
+          "height": 392
+        },
+        "content": {
+          "x": 196,
+          "y": 56,
+          "width": 444,
+          "height": 392
+        },
+        "bodyWidth": 640,
+        "bodyHeight": 480,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "语义检索",
+      "width": 640,
+      "height": 480,
+      "os": {
+        "ownedExecutableVerified": true,
+        "clientWidth": 800,
+        "pid": 166008,
+        "clientHeight": 600,
+        "dpi": 120,
+        "title": "Markbridge · 签桥"
+      },
+      "geometry": {
+        "viewport": {
+          "width": 640,
+          "height": 480,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 64,
+          "y": 56,
+          "width": 132,
+          "height": 392
+        },
+        "content": {
+          "x": 196,
+          "y": 56,
+          "width": 444,
+          "height": 392
+        },
+        "bodyWidth": 640,
+        "bodyHeight": 480,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "备份导出",
+      "width": 640,
+      "height": 480,
+      "os": {
+        "ownedExecutableVerified": true,
+        "clientWidth": 800,
+        "pid": 166008,
+        "clientHeight": 600,
+        "dpi": 120,
+        "title": "Markbridge · 签桥"
+      },
+      "geometry": {
+        "viewport": {
+          "width": 640,
+          "height": 480,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 64,
+          "y": 56,
+          "width": 132,
+          "height": 392
+        },
+        "content": {
+          "x": 196,
+          "y": 56,
+          "width": 444,
+          "height": 392
+        },
+        "bodyWidth": 640,
+        "bodyHeight": 480,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "Chrome 连接",
+      "width": 1920,
+      "height": 1080,
+      "os": {
+        "ownedExecutableVerified": true,
+        "clientWidth": 2400,
+        "pid": 166008,
+        "clientHeight": 1350,
+        "dpi": 120,
+        "title": "Markbridge · 签桥"
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1920,
+          "height": 1080,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 184,
+          "height": 992
+        },
+        "content": {
+          "x": 400,
+          "y": 56,
+          "width": 1520,
+          "height": 992
+        },
+        "bodyWidth": 1920,
+        "bodyHeight": 1080,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "AI",
+      "width": 1920,
+      "height": 1080,
+      "os": {
+        "ownedExecutableVerified": true,
+        "clientWidth": 2400,
+        "pid": 166008,
+        "clientHeight": 1350,
+        "dpi": 120,
+        "title": "Markbridge · 签桥"
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1920,
+          "height": 1080,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 184,
+          "height": 992
+        },
+        "content": {
+          "x": 400,
+          "y": 56,
+          "width": 1520,
+          "height": 992
+        },
+        "bodyWidth": 1920,
+        "bodyHeight": 1080,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "语义检索",
+      "width": 1920,
+      "height": 1080,
+      "os": {
+        "ownedExecutableVerified": true,
+        "clientWidth": 2400,
+        "pid": 166008,
+        "clientHeight": 1350,
+        "dpi": 120,
+        "title": "Markbridge · 签桥"
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1920,
+          "height": 1080,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 184,
+          "height": 992
+        },
+        "content": {
+          "x": 400,
+          "y": 56,
+          "width": 1520,
+          "height": 992
+        },
+        "bodyWidth": 1920,
+        "bodyHeight": 1080,
+        "scrollTop": 0
+      }
+    },
+    {
+      "tab": "备份导出",
+      "width": 1920,
+      "height": 1080,
+      "os": {
+        "ownedExecutableVerified": true,
+        "clientWidth": 2400,
+        "pid": 166008,
+        "clientHeight": 1350,
+        "dpi": 120,
+        "title": "Markbridge · 签桥"
+      },
+      "geometry": {
+        "viewport": {
+          "width": 1920,
+          "height": 1080,
+          "devicePixelRatio": 1.25
+        },
+        "tabs": {
+          "x": 216,
+          "y": 56,
+          "width": 184,
+          "height": 992
+        },
+        "content": {
+          "x": 400,
+          "y": 56,
+          "width": 1520,
+          "height": 992
+        },
+        "bodyWidth": 1920,
+        "bodyHeight": 1080,
+        "scrollTop": 0
+      }
+    }
+  ],
+  "webview": "Edg/155.0.4283.45",
+  "mainDataEvidence": {
+    "mainDirectoryExists": true,
+    "observations": [
+      {
+        "pid": 16764,
+        "observedDirectoryExists": true,
+        "relativeDirectory": "app-data/main-webview/EBWebView",
+        "parent": 166008,
+        "insideFixture": true,
+        "creationUtcTicks": "639275568829303380",
+        "expectedMain": true,
+        "expectedPreview": false
+      }
+    ],
+    "previewDirectoryExists": false,
+    "owner": 166008
+  },
+  "ipcObserver": {
+    "method": "CDP network request paths only",
+    "verified": true
+  },
+  "chromeVersion": "Chrome/155.0.8059.39",
+  "chromeProfile": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-s02-Qpt9kN\\chrome-a",
+  "lastGeometry": {
+    "tab": "备份导出",
+    "width": 1920,
+    "height": 1080,
+    "os": {
+      "ownedExecutableVerified": true,
+      "clientWidth": 2400,
+      "pid": 166008,
+      "clientHeight": 1350,
+      "dpi": 120,
+      "title": "Markbridge · 签桥"
+    },
+    "geometry": {
+      "viewport": {
+        "width": 1920,
+        "height": 1080,
+        "devicePixelRatio": 1.25
+      },
+      "tabs": {
+        "x": 216,
+        "y": 56,
+        "width": 184,
+        "height": 992
+      },
+      "content": {
+        "x": 400,
+        "y": 56,
+        "width": 1520,
+        "height": 992
+      },
+      "bodyWidth": 1920,
+      "bodyHeight": 1080,
+      "scrollTop": 0
+    }
+  },
+  "status": "PASS",
+  "chromeClose": {
+    "kind": "owned_chrome_close",
+    "pid": 156552,
+    "method": "Browser.close",
+    "pipeEofMode": "immediate",
+    "methodVersion": 2,
+    "observationBudgetMs": 180000,
+    "startedAtMs": 1791960130182,
+    "phase": "exit-verified",
+    "acknowledged": true,
+    "childExitObserved": true,
+    "exitCode": 0,
+    "signal": null,
+    "events": [
+      {
+        "event": "close_frame_queued",
+        "elapsedMs": 0
+      },
+      {
+        "event": "pipe_eof_requested",
+        "elapsedMs": 0
+      },
+      {
+        "event": "close_frame_write_callback",
+        "elapsedMs": 0
+      },
+      {
+        "event": "close_acknowledged",
+        "elapsedMs": 0
+      },
+      {
+        "event": "pipe_eof_flushed",
+        "elapsedMs": 0
+      },
+      {
+        "event": "pipe_write_closed",
+        "elapsedMs": 39
+      },
+      {
+        "event": "pipe_read_closed",
+        "elapsedMs": 39
+      },
+      {
+        "event": "child_exit_observed",
+        "elapsedMs": 143
+      }
+    ],
+    "frameQueued": true,
+    "pipeEofRequested": true,
+    "frameWriteCallback": true,
+    "pipeEofFlushed": true,
+    "pipeWriteClosed": true,
+    "pipeReadClosed": true,
+    "elapsedMs": 187
+  },
+  "appClose": {
+    "pid": 166008,
+    "exitCode": 0,
+    "signal": null,
+    "method": "verified_main_and_preview_windows_WM_CLOSE",
+    "phase": "known-webview-exit",
+    "windowPosts": [
+      {
+        "action": "close",
+        "posted": 1,
+        "pid": 166008,
+        "windows": [
+          {
+            "emptyTitle": false,
+            "handle": "3E0D40",
+            "messageOnly": false,
+            "visible": true,
+            "closeEligible": true,
+            "className": "UNREPORTED_CLASS",
+            "role": "main",
+            "threadId": 74700
+          },
+          {
+            "emptyTitle": true,
+            "handle": "3A91472",
+            "messageOnly": false,
+            "visible": true,
+            "closeEligible": false,
+            "className": "TAO_THREAD_EVENT_TARGET",
+            "role": "other",
+            "threadId": 74700
+          },
+          {
+            "emptyTitle": false,
+            "handle": "27F0F30",
+            "messageOnly": false,
+            "visible": false,
+            "closeEligible": false,
+            "className": "UNREPORTED_CLASS",
+            "role": "other",
+            "threadId": 74700
+          },
+          {
+            "emptyTitle": false,
+            "handle": "17814CE",
+            "messageOnly": false,
+            "visible": false,
+            "closeEligible": false,
+            "className": "IME",
+            "role": "other",
+            "threadId": 74700
+          },
+          {
+            "emptyTitle": true,
+            "handle": "4161D08",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "wetype.renderer.window",
+            "role": "other",
+            "threadId": 74700
+          },
+          {
+            "emptyTitle": true,
+            "handle": "1721CE8",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "UNREPORTED_CLASS",
+            "role": "other",
+            "threadId": 74700
+          },
+          {
+            "emptyTitle": true,
+            "handle": "74C09C4",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "Chrome_MessageWindow",
+            "role": "other",
+            "threadId": 125296
+          },
+          {
+            "emptyTitle": true,
+            "handle": "3E2198E",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "Chrome_MessageWindow",
+            "role": "other",
+            "threadId": 74700
+          },
+          {
+            "emptyTitle": false,
+            "handle": "3060AC4",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "CicMarshalWndClass",
+            "role": "other",
+            "threadId": 74700
+          },
+          {
+            "emptyTitle": false,
+            "handle": "7FD125A",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "OleMainThreadWndClass",
+            "role": "other",
+            "threadId": 74700
+          },
+          {
+            "emptyTitle": true,
+            "handle": "3171910",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "UNREPORTED_CLASS",
+            "role": "other",
+            "threadId": 120772
+          }
+        ],
+        "ownedWindows": 11,
+        "processAbsent": false
+      }
+    ],
+    "knownWebviewPids": [
+      16764
+    ],
+    "knownWebviewIdentities": [
+      {
+        "pid": 16764,
+        "creationUtcTicks": "639275568829303380"
+      }
+    ],
+    "nativeStageOrder": [],
+    "knownWebviewAbsence": {
+      "observations": [
+        {
+          "creationUtcTicks": "639275568829303380",
+          "pid": 16764,
+          "state": "absent"
+        }
+      ],
+      "presentPids": [],
+      "reusedPids": []
+    }
+  },
+  "finalProcesses": {
+    "processes": [],
+    "listeners": []
+  }
+}

@@ -1,5 +1,7 @@
 # 后续会话实施与验收 Prompt
 
+2026-10-14补充：较新的品牌与设置改版父任务`10-13-mb-settings-brand-refresh`及S01–S03已全部验收通过，详细状态见[2026-10-14实施状态](implementation-status-2026-10-14.md)。S03真实重启、actual125/150%DPI及最终独立自动检查已有当前b94程序证据。四项task.json仍in_progress，acceptance_status为passed，等待单独提交/归档授权；本轮没有安装、提交、归档或发布。继续时先读该父execution-status/check-report和S03收据，不新建重复任务、不重做实现。期间存在的独立backend/protocol/build/install改动仍需保留。原13/V12、15/V18及原父任务仍未完成，下文关于实际模型与安全边界的交接继续有效。
+
 以下内容可直接复制。不要按旧 Prompt 重做已经完成的实现或创建重复任务。
 
 ---

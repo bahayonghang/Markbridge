@@ -12,6 +12,7 @@ for (const size of [{ width: 1440, height: 900 }, { width: 1100, height: 760 }, 
       (window as unknown as { __r07patch: (value: object) => void }).__r07patch({ errorCode: 'STORAGE_ERROR' });
     });
     await page.getByRole('button', { name: '设置', exact: true }).click();
+  await page.getByRole('tab', { name: 'Chrome 连接', exact: true }).click();
     const storage = page.getByText(before ? '无法读取本机缓存。请重新打开应用。' : '本机存储不可用。请检查缓存权限及系统凭据服务是否已解锁，再重试。', { exact: true });
     await storage.scrollIntoViewIfNeeded();
     await expect(storage).toBeVisible();
@@ -45,6 +46,7 @@ test('14 secure-store pairing rejection preserves existing profiles with safe gu
   await mockBridge(page);
   await page.goto('/');
   await page.getByRole('button', { name: '设置', exact: true }).click();
+  await page.getByRole('tab', { name: 'Chrome 连接', exact: true }).click();
   await page.evaluate(() => { (window as unknown as { __t14PairingFailure: boolean }).__t14PairingFailure = true; });
   await page.getByRole('button', { name: '生成配对串', exact: true }).click();
   await expect(page.getByRole('alert')).toHaveText('本机存储不可用。请检查缓存权限及系统凭据服务是否已解锁，再重试。');

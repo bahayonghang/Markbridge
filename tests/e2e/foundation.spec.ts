@@ -14,6 +14,7 @@ for (const size of [{ width: 1100, height: 760 }, { width: 640, height: 480 }]) 
     await expect(page.getByRole('link', { name: '跳至内容' })).toBeFocused();
     await expect(page.getByText(/浏览器预览 · 仅显示界面/)).toBeVisible();
     await page.getByRole('button', { name: '设置', exact: true }).click();
+  await page.getByRole('tab', { name: 'Chrome 连接', exact: true }).click();
     await expect(page.getByRole('button', { name: '启动连接' })).toBeDisabled();
     await expect(page.getByRole('button', { name: '生成配对串' })).toBeDisabled();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -27,6 +28,7 @@ for (const size of [{ width: 1100, height: 760 }, { width: 640, height: 480 }]) 
     await page.goto('/?harness=bridge');
     await expect(page.getByRole('status').filter({ hasText: '已连接 Chrome' })).toHaveText('已连接 Chrome');
     await page.getByRole('button', { name: '设置', exact: true }).click();
+  await page.getByRole('tab', { name: 'Chrome 连接', exact: true }).click();
     await expect(page.getByText('27', { exact: true })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.screenshot({ path: `${evidence}/browser-diagnostics-mock-${size.width}x${size.height}.png`, fullPage: true });
@@ -51,6 +53,7 @@ test('port conflict allows an edited retry without exposing rejection details', 
   await mockBridge(page, 'port-conflict');
   await page.goto('/?harness=bridge');
   await page.getByRole('button', { name: '设置', exact: true }).click();
+  await page.getByRole('tab', { name: 'Chrome 连接', exact: true }).click();
   await expect(page.getByRole('button', { name: '启动连接' })).toBeEnabled();
   await page.getByText('高级：连接端口', { exact: true }).click();
   await page.getByLabel('端口').fill('70000');

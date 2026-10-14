@@ -5,6 +5,7 @@
 | Browser tree and revision | Backend cache derived from Chrome |
 | Tags, notes, summaries, history | SQLite through backend |
 | Selection, search input, panels | Frontend |
+| Pure visual theme, font, size | One App state and versioned main-WebView localStorage key |
 | Unsaved edits and selected proposals | Explicit UI drafts |
 | Remote webpage session | Isolated preview WebView |
 
@@ -27,6 +28,10 @@ R03 keeps one full folder index for paths and separately loads the visible query
 Metadata invalidation follows validated saved flags even if the active bookmark changed before completion; discard the old success UI but keep source-visit guards on the invalidation callback. Receipt handling can restore/merge metadata after the corresponding Chrome event, so sidecar-dependent queries also use the existing global BridgeState revision as a conservative invalidation signal. This may reread a filtered query after another profile's publication; plain title/URL queries do not use this extra token. Do not overwrite unsaved detail drafts to refresh a query.
 
 Active keyboard focus and multi-selection are separate. Ctrl+A selects the currently loaded scope; loading another page does not silently add selected items. Folder/query/filter/source changes clear selection with a visible notice. Virtualized keyboard navigation must scroll the active item into view and preserve truthful aria-posinset/aria-setsize; tree values describe siblings, list values describe the full result count. Deep breadcrumbs scroll the current location into view. Pure navigation between app sections retains the library query and drafts.
+
+Settings category state belongs to `App`, separate from library state. `SettingsWorkspace` controls only category navigation and its local scroll pane. AI settings remains mounted once visited; semantic settings receives its existing `active` guard. Moving between settings categories may read local settings but must not fetch remote content, call models, build an index or write to Chrome. Export shares the library source owner through a stable portal, including its discard/cancel guard and stale-result generations.
+
+Appearance follows [UI preferences](ui-preferences.md), which is a pure visual storage exception and does not relocate SQLite sidecar data into the frontend. Initial application and media listeners never save; explicit changes/reset save only the versioned appearance key. Typography changes preserve visible library anchors, focus, selection and unsaved drafts without rebuilding source data or triggering backend work.
 
 R04 keeps blank bookmark and folder creation drafts separate from selected-node edits. Preview completion is bound to source visit, node, revision and draft generation. A changed draft or external revision invalidates confirmation while retaining input. Own write events may advance revision before apply resolves; retain the returned operation for the same identity/draft rather than losing its receipt watcher. Lock duplicate confirmation synchronously.
 

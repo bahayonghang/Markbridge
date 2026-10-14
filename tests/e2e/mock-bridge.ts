@@ -16,6 +16,7 @@ export async function mockBridge(page: Page, scenario: 'connected' | 'startup-er
       ${scenario === 'editing' ? `rows.unshift({ chromeId: 'empty', parentId: '1', position: 0, kind: 'folder', title: '空目录', url: null }, { chromeId: 'target', parentId: '1', position: 1, kind: 'folder', title: '阅读归档', url: null }); rows.forEach((row, index) => { row.position = index; });` : ''}
       window.__r01calls = [];
       window.__r07patch = (patch) => { state = { ...state, revision: state.revision + 1, profiles: state.profiles.map((item) => ({ ...item, ...patch })) }; receive?.(state); };
+      window.__s02state = (patch) => { state = { ...state, ...patch, revision: state.revision + 1 }; receive?.(state); };
       const currentProfile = () => state.profiles[0] || profile;
       const member = (node) => ({ bookmarkId: 'bm-' + node.chromeId, chromeId: node.chromeId, title: node.title, url: 'https://example.com/reference', tags: ['阅读'], note: '保留的本地备注' });
       const maintenanceReport = (ids) => ({ profileId: profile.profileId, sourceEpoch: 1, revision: currentProfile().revision, requestId: 'fixture-maintenance', duplicates: [{ normalizedUrl: 'https://example.com/reference', members: rows.filter((row) => ids.includes(row.chromeId)).slice(0, 2).map(member) }], links: [], cleanup: null, running: false, failure: null, failureMessage: null });
