@@ -471,3 +471,41 @@ User explicitly waived real OS sleep/wake acceptance. R08 and redesign parent co
 ### Next Steps
 
 - 13 仍待真实本地模型完成 V12；15 仍待真实 embedding 与人工标签完成 V18。其他平台暂不验收。
+
+
+## Session 15: 品牌设置改版验收、提交与归档
+<!-- trellis-session: v=2 fp=f9c23074f068200b -->
+
+**Date**: 2026-10-14
+**Task**: 品牌设置改版验收、提交与归档
+**Branch**: `main`
+
+### Summary
+
+完成S03及父改版验收；按用户授权提交全部当前改动并归档S01–S03和父任务，原13/15及原父任务保持未完成。
+
+### Main Changes
+
+- 三个功能提交覆盖协议延迟加载与取消顺序、原生命令输出与安装入口、品牌设置与外观偏好。
+- 四项已通过任务归档，修正上下文与文档引用，同步AGENTS、baseline和后续Prompt；不推送、不安装、不发布。
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `f964bae` | refactor: 延迟加载协议校验并保留原生取消顺序 |
+| `df90cf1` | chore: 统一原生命令输出并增加本地安装入口 |
+| `d966d67` | feat: 统一品牌图标并完善设置和外观偏好 |
+
+### Testing
+
+- [OK] 此前完整检查通过：232 Vitest、25 Node、133浏览器、protocol/build/native及真实重启与actual125/150%DPI原生11控制。
+- [OK] 归档后49上下文、13文档链接、8辅助脚本语法及Python解析通过，生产源码字节未变、diff检查通过。
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- 原13/V12与15/V18仍缺实际模型及人工评测证据，原父任务不关闭；非Windows与外部同步缺口保持原状态。
