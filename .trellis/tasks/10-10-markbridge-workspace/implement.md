@@ -34,7 +34,7 @@
 | pnpm test | Vitest 单次执行全部单元/组件测试 |
 | pnpm build | 前端、协议消费者和扩展生产构建 |
 | pnpm build:native | 当前真实 host 的原生 release 程序构建与格式/架构、路径/已知密钥扫描；显式 target，构建/扫描同一 releaseDirectory；不生成包，不代表原生交互通过 |
-| pnpm build:package | 复用同一 host/路径映射生成 NSIS、app/dmg 或 deb/AppImage，扫描实际包内程序并严格比较 release hash；不安装、签名或发布 |
+| pnpm build:package | 复用同一 host/路径映射生成 NSIS、app/dmg 或 deb/AppImage，扫描实际包内程序。deb/NSIS/app/dmg 与 release 字节一致；AppImage 只允许动态链接元数据不同。不安装、签名或发布 |
 | pnpm protocol:check | 生成协议与已提交类型/schema 无差异 |
 | pnpm test:e2e | 可自动化的浏览器工作台与扩展用例；不代表原生 Tauri |
 | cargo fmt --all -- --check | Rust 格式 |

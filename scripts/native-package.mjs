@@ -62,10 +62,77 @@ export async function assertContainedProgram(container, program) {
   assert.ok((await lstat(program)).isFile() && await realpath(program) === join(await realpath(container), suffix), 'Package program is not a contained regular file.');
 }
 
-export function verifyPackagedProgram(data, releaseBytes, release) {
+const loaderSection = name => name === '.interp' || name === '.dynamic' || name === '.dynstr' || name === '.dynsym'
+  || name === '.gnu.hash' || name === '.hash' || name === '.comment' || name === '.shstrtab'
+  || name.startsWith('.gnu.version') || name.startsWith('.rela.') || name.startsWith('.rel.') || name.startsWith('.note');
+
+function readElfOffset(data, at) {
+  const value = data.readBigUInt64LE(at);
+  assert.ok(value <= BigInt(Number.MAX_SAFE_INTEGER), 'AppImage program offset is too large.');
+  return Number(value);
+}
+
+function elfProgramSections(data) {
+  assert.ok(data.length >= 64 && data.subarray(0, 4).equals(Buffer.from([0x7f, 0x45, 0x4c, 0x46])) && data[4] === 2 && data[5] === 1, 'AppImage program is not an ELF64 image.');
+  const shoff = readElfOffset(data, 40);
+  const shentsize = data.readUInt16LE(58);
+  const shnum = data.readUInt16LE(60);
+  const shstrndx = data.readUInt16LE(62);
+  assert.ok(shoff > 0 && shnum > 0 && shentsize >= 64 && shstrndx < shnum, 'AppImage program has no section table to compare.');
+  const tableEnd = shoff + shnum * shentsize;
+  assert.ok(tableEnd <= data.length, 'AppImage program section table is out of range.');
+  const header = index => {
+    const at = shoff + index * shentsize;
+    return {
+      nameOffset: data.readUInt32LE(at),
+      type: data.readUInt32LE(at + 4),
+      offset: readElfOffset(data, at + 24),
+      size: readElfOffset(data, at + 32),
+    };
+  };
+  const namesHeader = header(shstrndx);
+  assert.ok(namesHeader.offset + namesHeader.size <= data.length, 'AppImage program section names are out of range.');
+  const names = data.subarray(namesHeader.offset, namesHeader.offset + namesHeader.size);
+  const sectionName = offset => {
+    assert.ok(offset < names.length, 'AppImage program section name is out of range.');
+    const end = names.indexOf(0, offset);
+    assert.ok(end >= 0, 'AppImage program section name is not terminated.');
+    return names.toString('utf8', offset, end);
+  };
+  const sections = new Map();
+  for (let index = 0; index < shnum; index += 1) {
+    const item = header(index);
+    if (item.type !== 1) continue;
+    const name = sectionName(item.nameOffset);
+    if (loaderSection(name)) continue;
+    assert.ok(!sections.has(name), 'AppImage program section name is ambiguous.');
+    assert.ok(item.offset + item.size <= data.length, 'AppImage program section is out of range.');
+    sections.set(name, data.subarray(item.offset, item.offset + item.size));
+  }
+  assert.ok(sections.get('.text')?.length > 0, 'AppImage program has no .text section.');
+  return sections;
+}
+
+export function mismatchedAppImageSection(packaged, releaseBytes) {
+  const left = elfProgramSections(packaged);
+  const right = elfProgramSections(releaseBytes);
+  const names = [...new Set([...left.keys(), ...right.keys()])].sort();
+  return names.find(name => {
+    const actual = left.get(name);
+    const expected = right.get(name);
+    return actual === undefined || expected === undefined || !actual.equals(expected);
+  }) ?? null;
+}
+
+export function verifyPackagedProgram(data, releaseBytes, release, kind) {
   inspectNativeArtifact(data, release);
-  assert.ok(data.equals(releaseBytes), 'Packaged executable does not match the post-bundle release executable.');
-  return { bytes: data.length, sha256: sha256(data), matchesPostBundleRelease: true };
+  if (data.equals(releaseBytes)) return { bytes: data.length, sha256: sha256(data), matchesPostBundleRelease: true };
+  if (kind === 'appimage') {
+    const section = mismatchedAppImageSection(data, releaseBytes);
+    assert.equal(section, null, `AppImage program section ${section ?? ''} does not match the post-bundle release executable.`);
+    return { bytes: data.length, sha256: sha256(data), matchesPostBundleRelease: false };
+  }
+  assert.fail('Packaged executable does not match the post-bundle release executable.');
 }
 
 export function debProgramMember(listing, binaryName) {
@@ -97,7 +164,7 @@ async function inspectMacApp(directory, releaseBytes, release, config, command) 
     ['CFBundleShortVersionString', config.version], ['LSMinimumSystemVersion', '14.0']]) {
     assert.equal(command('/usr/bin/plutil', ['-extract', key, 'raw', '-o', '-', plist]).trim(), expected, 'macOS bundle metadata does not match the configured native target.');
   }
-  return verifyPackagedProgram(await readFile(program), releaseBytes, release);
+  return verifyPackagedProgram(await readFile(program), releaseBytes, release, 'app');
 }
 
 export async function inspectBundle(kind, bundle, releaseBytes, release, config, command = runTool) {
@@ -138,7 +205,7 @@ export async function inspectBundle(kind, bundle, releaseBytes, release, config,
     }
     await assertExtractionRoot(directory);
     await assertContainedProgram(directory, program);
-    return verifyPackagedProgram(await readFile(program), releaseBytes, release);
+    return verifyPackagedProgram(await readFile(program), releaseBytes, release, kind);
   } finally {
     if (mountAttempted) {
       // Never recursively remove a mounted volume. Failed detach preserves this owned temporary root.
@@ -192,6 +259,9 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   assert.ok(config.productName && !/[\\/\0]/.test(config.productName), 'Bundle product name is not a file component.');
   for (const entry of await currentBundleFiles(release, config)) {
     const result = await inspectBundle(entry.kind, entry.path, releaseBytes, release, config);
-    console.log('Packaged executable (' + entry.kind + '): PASS; ' + result.bytes + ' bytes; SHA256 ' + result.sha256 + '; matches post-bundle release; unsigned; unpublished.');
+    const relation = result.matchesPostBundleRelease
+      ? 'matches post-bundle release'
+      : 'program sections match post-bundle release; dynamic loader metadata differs';
+    console.log('Packaged executable (' + entry.kind + '): PASS; ' + result.bytes + ' bytes; SHA256 ' + result.sha256 + '; ' + relation + '; unsigned; unpublished.');
   }
 }

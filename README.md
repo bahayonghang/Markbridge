@@ -42,7 +42,7 @@ pnpm --filter @markbridge/desktop tauri dev
 
 原生 release 验证使用 `pnpm build:native`。该命令检查实际 Node 平台/架构和 Rust 工具链 host，并显式选择 Windows x64、macOS arm64 或 Linux x64 对应原生 target，避免继承的跨平台配置指向旧产物。以当前 workspace、Cargo、Rustup、target 和用户目录生成临时路径映射，使用 `--locked` 构建，再扫描 `<CARGO_TARGET_DIR>/<host-target>/release/markbridge-desktop[.exe]`。默认 target 根为 workspace 下的 `target`；相对自定义值也从 workspace 解析，构建和扫描共用同一绝对目录。不生成安装包，不安装或运行应用。直接运行裸 Tauri build 不经过该映射和扫描入口，不能替代此产物门槛。
 
-`pnpm build:package` 先运行上述构建和扫描，再以同一 host、映射、`--no-sign`、`--no-binary-patching` 生成 Windows 当前用户 NSIS、macOS app/dmg 或 Linux deb/AppImage。检查实际包内程序的格式/架构、内容扫描和 release hash 一致性；Mac 使用只读 DMG 挂载，Linux 不执行 AppRun。Windows 提取需要 7-Zip，macOS 使用系统 plutil/hdiutil，Linux 使用 dpkg-deb/tar 及 AppImage 自身提取入口。脚本只构建和验证，不安装或发布；跟踪配置的 `bundle.active` 仍是 false。当前实际验收只有 Windows，macOS/Linux 入口和 CI 源码不能作为平台通过证据。平台前提和支持边界见 [原生平台指南](docs/native-platforms.md)。
+`pnpm build:package` 先运行上述构建和扫描，再以同一 host、映射、`--no-sign`、`--no-binary-patching` 生成 Windows 当前用户 NSIS、macOS app/dmg 或 Linux deb/AppImage。检查实际包内程序的格式/架构和内容扫描；deb、NSIS、app 与 dmg 必须与打包后的 release 字节一致，AppImage 只允许动态链接元数据不同；Mac 使用只读 DMG 挂载，Linux 不执行 AppRun。Windows 提取需要 7-Zip，macOS 使用系统 plutil/hdiutil，Linux 使用 dpkg-deb/tar 及 AppImage 自身提取入口。脚本只构建和验证，不安装或发布；跟踪配置的 `bundle.active` 仍是 false。当前实际验收只有 Windows，macOS/Linux 入口和 CI 源码不能作为平台通过证据。平台前提和支持边界见 [原生平台指南](docs/native-platforms.md)。
 
 ## 验证命令
 

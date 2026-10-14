@@ -106,6 +106,50 @@ test('packaged program byte mismatch and wrong format remain hard failures', () 
   assert.throws(() => verifyPackagedProgram(executable('darwin'), bytes, release), /format\/architecture/);
 });
 
+function elfWith({ text, dynstr }) {
+  const nameTable = Buffer.from('\0.text\0.dynstr\0.shstrtab\0');
+  const textBytes = Buffer.from(text);
+  const dynBytes = Buffer.from(dynstr);
+  const shoff = 64 + textBytes.length + dynBytes.length + nameTable.length;
+  const data = Buffer.alloc(shoff + 4 * 64);
+  Buffer.from([0x7f, 0x45, 0x4c, 0x46, 2, 1]).copy(data);
+  data.writeUInt16LE(2, 16);
+  data.writeUInt16LE(62, 18);
+  data.writeBigUInt64LE(BigInt(shoff), 40);
+  data.writeUInt16LE(64, 58);
+  data.writeUInt16LE(4, 60);
+  data.writeUInt16LE(3, 62);
+  const textAt = 64;
+  const dynAt = textAt + textBytes.length;
+  const namesAt = dynAt + dynBytes.length;
+  textBytes.copy(data, textAt);
+  dynBytes.copy(data, dynAt);
+  nameTable.copy(data, namesAt);
+  const writeHeader = (index, nameOffset, type, offset, size) => {
+    const at = shoff + index * 64;
+    data.writeUInt32LE(nameOffset, at);
+    data.writeUInt32LE(type, at + 4);
+    data.writeBigUInt64LE(BigInt(offset), at + 24);
+    data.writeBigUInt64LE(BigInt(size), at + 32);
+  };
+  writeHeader(1, 1, 1, textAt, textBytes.length);
+  writeHeader(2, 7, 3, dynAt, dynBytes.length);
+  writeHeader(3, 15, 3, namesAt, nameTable.length);
+  return data;
+}
+
+test('AppImage may differ in loader metadata but not in program sections', () => {
+  const release = releaseFor('linux');
+  const original = elfWith({ text: 'HELLO', dynstr: '\0old\0' });
+  const patched = elfWith({ text: 'HELLO', dynstr: '\0new-rpath-value\0' });
+  const rewritten = elfWith({ text: 'WORLD', dynstr: '\0old\0' });
+  assert.equal(verifyPackagedProgram(original, original, release, 'appimage').matchesPostBundleRelease, true);
+  assert.equal(verifyPackagedProgram(patched, original, release, 'appimage').matchesPostBundleRelease, false);
+  assert.throws(() => verifyPackagedProgram(rewritten, original, release, 'appimage'), /section \.text/);
+  assert.throws(() => verifyPackagedProgram(patched, original, release, 'deb'), /does not match/);
+  assert.throws(() => verifyPackagedProgram(executable('linux'), original, release, 'appimage'), /no section table/);
+});
+
 test('Debian selectors reject missing/duplicate program and metadata mismatches', () => {
   assert.equal(debProgramMember('./usr/bin/markbridge-desktop\n./usr/share/data\n', 'markbridge-desktop'), './usr/bin/markbridge-desktop');
   for (const listing of ['../usr/bin/markbridge-desktop', './usr/bin/other', './usr/bin/markbridge-desktop\nusr/bin/markbridge-desktop']) assert.throws(() => debProgramMember(listing, 'markbridge-desktop'));
