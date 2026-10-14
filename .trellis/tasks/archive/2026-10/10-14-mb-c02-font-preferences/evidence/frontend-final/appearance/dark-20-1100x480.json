@@ -1,0 +1,389 @@
+[
+  {
+    "tab": "通用",
+    "theme": "dark",
+    "rootText": "20px",
+    "width": 1100,
+    "height": 480,
+    "documentWidth": 1100,
+    "documentHeight": 480,
+    "tabs": {
+      "x": 216,
+      "right": 368,
+      "width": 152
+    },
+    "content": {
+      "x": 368,
+      "right": 1100,
+      "scrollTop": 0
+    },
+    "controls": [
+      {
+        "x": 716,
+        "right": 830.65625,
+        "height": 50,
+        "name": "跟随系统"
+      },
+      {
+        "x": 838.65625,
+        "right": 953.328125,
+        "height": 50,
+        "name": "浅色"
+      },
+      {
+        "x": 961.328125,
+        "right": 1076,
+        "height": 50,
+        "name": "深色"
+      },
+      {
+        "x": 970,
+        "right": 1076,
+        "height": 50,
+        "name": "选择字体"
+      },
+      {
+        "x": 716,
+        "right": 1047.0625,
+        "height": 48,
+        "name": ""
+      },
+      {
+        "x": 716,
+        "right": 786.78125,
+        "height": 50,
+        "name": "12 px"
+      },
+      {
+        "x": 794.78125,
+        "right": 865.5625,
+        "height": 50,
+        "name": "14 px"
+      },
+      {
+        "x": 873.5625,
+        "right": 944.34375,
+        "height": 50,
+        "name": "16 px"
+      },
+      {
+        "x": 952.34375,
+        "right": 1023.125,
+        "height": 50,
+        "name": "18 px"
+      },
+      {
+        "x": 716,
+        "right": 789.984375,
+        "height": 50,
+        "name": "20 px"
+      },
+      {
+        "x": 392,
+        "right": 538,
+        "height": 50,
+        "name": "恢复默认外观"
+      }
+    ],
+    "rowGeometry": {
+      "rowHeight": 76,
+      "titleTop": 7.703125,
+      "captionBottom": 68.296875,
+      "captionSize": 18
+    }
+  },
+  {
+    "tab": "Chrome 连接",
+    "theme": "dark",
+    "rootText": "20px",
+    "width": 1100,
+    "height": 480,
+    "documentWidth": 1100,
+    "documentHeight": 480,
+    "tabs": {
+      "x": 216,
+      "right": 368,
+      "width": 152
+    },
+    "content": {
+      "x": 368,
+      "right": 1100,
+      "scrollTop": 0
+    },
+    "controls": [
+      {
+        "x": 392,
+        "right": 518,
+        "height": 50,
+        "name": "浏览此资料"
+      },
+      {
+        "x": 526,
+        "right": 632,
+        "height": 50,
+        "name": "重新连接"
+      },
+      {
+        "x": 640,
+        "right": 746,
+        "height": 50,
+        "name": "吊销配对"
+      },
+      {
+        "x": 392,
+        "right": 518,
+        "height": 50,
+        "name": "浏览此资料"
+      },
+      {
+        "x": 526,
+        "right": 632,
+        "height": 50,
+        "name": "重新连接"
+      },
+      {
+        "x": 640,
+        "right": 746,
+        "height": 50,
+        "name": "吊销配对"
+      },
+      {
+        "x": 392,
+        "right": 632,
+        "height": 48,
+        "name": ""
+      },
+      {
+        "x": 644,
+        "right": 750,
+        "height": 50,
+        "name": "枚举资料"
+      },
+      {
+        "x": 762,
+        "right": 868,
+        "height": 50,
+        "name": "重新读取"
+      },
+      {
+        "x": 392,
+        "right": 551.28125,
+        "height": 50,
+        "name": "导出诊断 JSON"
+      },
+      {
+        "x": 392,
+        "right": 532,
+        "height": 48,
+        "name": ""
+      },
+      {
+        "x": 565.1875,
+        "right": 691.1875,
+        "height": 50,
+        "name": "连接已启动"
+      },
+      {
+        "x": 392,
+        "right": 632,
+        "height": 48,
+        "name": ""
+      },
+      {
+        "x": 644,
+        "right": 770,
+        "height": 50,
+        "name": "生成配对串"
+      }
+    ],
+    "rowGeometry": {
+      "rowHeight": 76,
+      "titleTop": 7.703125,
+      "captionBottom": 68.296875,
+      "captionSize": 18
+    }
+  },
+  {
+    "tab": "AI",
+    "theme": "dark",
+    "rootText": "20px",
+    "width": 1100,
+    "height": 480,
+    "documentWidth": 1100,
+    "documentHeight": 480,
+    "tabs": {
+      "x": 216,
+      "right": 368,
+      "width": 152
+    },
+    "content": {
+      "x": 368,
+      "right": 1100,
+      "scrollTop": 0
+    },
+    "controls": [
+      {
+        "x": 716,
+        "right": 732,
+        "height": 16,
+        "name": ""
+      },
+      {
+        "x": 716,
+        "right": 1076,
+        "height": 48,
+        "name": "未选择Ollama兼容端点"
+      },
+      {
+        "x": 716,
+        "right": 1076,
+        "height": 48,
+        "name": ""
+      },
+      {
+        "x": 716,
+        "right": 1076,
+        "height": 48,
+        "name": ""
+      },
+      {
+        "x": 392,
+        "right": 498,
+        "height": 50,
+        "name": "保存配置"
+      },
+      {
+        "x": 716,
+        "right": 1076,
+        "height": 48,
+        "name": ""
+      },
+      {
+        "x": 392,
+        "right": 498,
+        "height": 50,
+        "name": "保存密钥"
+      },
+      {
+        "x": 506,
+        "right": 612,
+        "height": 50,
+        "name": "清除凭据"
+      },
+      {
+        "x": 620,
+        "right": 726,
+        "height": 50,
+        "name": "测试连接"
+      }
+    ],
+    "rowGeometry": {
+      "rowHeight": 76,
+      "titleTop": 7.703125,
+      "captionBottom": 68.296875,
+      "captionSize": 18
+    }
+  },
+  {
+    "tab": "语义检索",
+    "theme": "dark",
+    "rootText": "20px",
+    "width": 1100,
+    "height": 480,
+    "documentWidth": 1100,
+    "documentHeight": 480,
+    "tabs": {
+      "x": 216,
+      "right": 368,
+      "width": 152
+    },
+    "content": {
+      "x": 368,
+      "right": 1100,
+      "scrollTop": 0
+    },
+    "controls": [
+      {
+        "x": 716,
+        "right": 732,
+        "height": 16,
+        "name": ""
+      },
+      {
+        "x": 716,
+        "right": 1076,
+        "height": 48,
+        "name": ""
+      },
+      {
+        "x": 716,
+        "right": 1076,
+        "height": 48,
+        "name": ""
+      },
+      {
+        "x": 392,
+        "right": 538,
+        "height": 50,
+        "name": "保存语义配置"
+      },
+      {
+        "x": 546,
+        "right": 692,
+        "height": 50,
+        "name": "检查本地模型"
+      }
+    ],
+    "rowGeometry": {
+      "rowHeight": 76,
+      "titleTop": 7.703125,
+      "captionBottom": 68.296875,
+      "captionSize": 18
+    }
+  },
+  {
+    "tab": "备份导出",
+    "theme": "dark",
+    "rootText": "20px",
+    "width": 1100,
+    "height": 480,
+    "documentWidth": 1100,
+    "documentHeight": 480,
+    "tabs": {
+      "x": 216,
+      "right": 368,
+      "width": 152
+    },
+    "content": {
+      "x": 368,
+      "right": 1100,
+      "scrollTop": 0
+    },
+    "controls": [
+      {
+        "x": 392,
+        "right": 752,
+        "height": 48,
+        "name": "测试研究资料 · Chrome另一份资料 · Chrome"
+      },
+      {
+        "x": 952.46875,
+        "right": 1076,
+        "height": 50,
+        "name": "导出 HTML"
+      },
+      {
+        "x": 916.71875,
+        "right": 1076,
+        "height": 50,
+        "name": "导出侧车 JSON"
+      }
+    ],
+    "rowGeometry": {
+      "rowHeight": 76,
+      "titleTop": 7.703125,
+      "captionBottom": 68.296875,
+      "captionSize": 18
+    }
+  }
+]

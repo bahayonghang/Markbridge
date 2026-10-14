@@ -1,0 +1,42 @@
+{
+  "id": "mb-c02-font-preferences",
+  "name": "mb-c02-font-preferences",
+  "title": "C02 Windows 字体列表与通用设置增强",
+  "description": "按需读取已安装字体，支持搜索选择、预览和精确字号，迁移既有外观偏好并保持列表几何。",
+  "status": "completed",
+  "dev_type": "fullstack",
+  "scope": "ui-fonts-claude",
+  "package": null,
+  "priority": "P2",
+  "creator": "lyh",
+  "assignee": "lyh",
+  "createdAt": "2026-10-14",
+  "completedAt": "2026-10-14",
+  "branch": "dev",
+  "base_branch": "dev",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "10-14-mb-claude-workspace-optimization",
+  "relatedFiles": [
+    "DESIGN.md",
+    ".trellis/tasks/10-14-mb-c02-font-preferences/prd.md",
+    ".trellis/tasks/10-14-mb-c02-font-preferences/design.md",
+    ".trellis/tasks/10-14-mb-c02-font-preferences/implement.md"
+  ],
+  "notes": "",
+  "meta": {
+    "implementation_approval": "granted",
+    "planning_status": "approved",
+    "depends_on": [
+      "10-14-mb-c01-claude-foundation"
+    ],
+    "font_scope": "installed_font_list_search_select_preview; no_file_import",
+    "approval_evidence": "2026-10-14 user approved sequential implementation of the reviewed C01-C04 plan",
+    "acceptance_status": "passed",
+    "execution_status": "completed_pending_archive",
+    "acceptance_evidence": "evidence/check-report.md"
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "capturedAt": "2026-10-14T15:06:02.9644933Z",
+  "gitHead": "100010394c4891434efed395d02ccf28aff49eba",
+  "runtime": "Microsoft Windows NT 10.0.26300.0",
+  "files": [
+    {
+      "path": "apps/desktop/src-tauri/src/fonts.rs",
+      "sha256": "ed17aff3e515357e8a4300c817b2e7e87f5e56d1563d9a431959697a49a2ce58"
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/main.rs",
+      "sha256": "5b404062db0729ff9737f56b8d54e95a7e627152ec716a58b50fd2e3eff93d70"
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/preview.rs",
+      "sha256": "4e5c1d958d93964387f322808bbaeacb0f8b2e1454797c30dd0d2f5d7abc281d"
+    },
+    {
+      "path": "apps/desktop/src-tauri/Cargo.toml",
+      "sha256": "1d4435d5261df3116bd760e275d2b782fe15fad14e39e51dd5fa86aa4eb2df4f"
+    },
+    {
+      "path": "Cargo.lock",
+      "sha256": "ef87e7e306b2820fe47465494f9fe9fe81f4794a13618c2313bb939c7d396fb2"
+    },
+    {
+      "path": "crates/protocol/src/ui_fonts.rs",
+      "sha256": "aa0bd62aed6c8f27107f80ebe00d02859f67427e4dd0b475ea8171bd28e52e42"
+    },
+    {
+      "path": "crates/protocol/src/lib.rs",
+      "sha256": "62a87157ef676fa10d80f0a099b637ba4011d77b8d273ef79c0143a4ef18533d"
+    },
+    {
+      "path": "crates/protocol/src/bin/export-schema.rs",
+      "sha256": "579fe2af04dd5cecfdf724975d8f7fe768ef6d3241949704f15f3f1a89487118"
+    },
+    {
+      "path": "packages/protocol/package.json",
+      "sha256": "ffce5cc23e10690c8ff6d086d3c23dd69ff60d3f0e8868bbd8e84e4ab63f4ef7"
+    },
+    {
+      "path": "packages/protocol/src/index.ts",
+      "sha256": "1c2f9abfddb8edf7e5d579d1e3cf3f97145e2652e9ce4d52371547cb4db2e262"
+    },
+    {
+      "path": "packages/protocol/src/ui-fonts.ts",
+      "sha256": "d046e5806976adad0735b086e1a0d9236a466e6b7ec9f8d8197b2a1fc3339381"
+    },
+    {
+      "path": "packages/protocol/src/ui-fonts.test.ts",
+      "sha256": "bae538ebde8d2b93ad8aa80394b529be63a31ede4f8c9d77c255e5c925c3dbaf"
+    },
+    {
+      "path": "packages/protocol/src/generated/installed-font-catalog.schema.json",
+      "sha256": "55707499a38b571eaa185857ae66a158e94e25b71e284f1ac38304bf74165e78"
+    },
+    {
+      "path": "packages/protocol/src/generated/installed-font-catalog.d.ts",
+      "sha256": "c7714d06ec8adcba5a5769654f3416fce742d03a36ea6fb66b17dc6693ce3f96"
+    },
+    {
+      "path": "packages/protocol/src/generated/installed-font-catalog.validator.js",
+      "sha256": "cb3be74e1c4a32b23e682db2e2afe6f31bd68fead83c69fdfb0d147573c2c87f"
+    },
+    {
+      "path": "packages/protocol/src/generated/installed-font-catalog.validator.d.ts",
+      "sha256": "985b32c3f40362a38a7db03001b1a26aa84071a0ae41f18603abae22291360c1"
+    },
+    {
+      "path": "apps/desktop/src/backend.ts",
+      "sha256": "9dee5bb58737a2b61306b9a99bbbd7c4bf3fe75bc454320301d6934c951b3f14"
+    },
+    {
+      "path": "apps/desktop/src/backend-fonts.test.tsx",
+      "sha256": "41adb6cd44e56128b1c5e165c7c9d716fa6c049c2b067ca0ac13a5de0947e954"
+    },
+    {
+      "path": "scripts/protocol.mjs",
+      "sha256": "fbf01d12808a11e9e3121264ccf94205c20cc94a5a16f2bc65a75b47a0948a1a"
+    }
+  ]
+}
