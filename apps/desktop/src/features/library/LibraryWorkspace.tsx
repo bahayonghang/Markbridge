@@ -593,8 +593,8 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
             }} />
           </label>
           {section === 'library' && <>
-            <button type="button" className="folder-toggle" ref={folderTrigger} onClick={() => { setFoldersOpen(true); requestAnimationFrame(() => document.querySelector<HTMLElement>('.folder-pane .library-row[tabindex="0"]')?.focus()); }}><WorkspaceIcon name="folder" />文件夹</button>
-            <button type="button" ref={detailTrigger} aria-pressed={detailOpen} disabled={!detailView && !multiSelection} onClick={() => { if (detailOpen) closeDetail(); else showDetail(); }}><WorkspaceIcon name="detail" />详情</button>
+            <button type="button" className="folder-toggle" aria-label="文件夹" title="文件夹" ref={folderTrigger} onClick={() => { setFoldersOpen(true); requestAnimationFrame(() => document.querySelector<HTMLElement>('.folder-pane .library-row[tabindex="0"]')?.focus()); }}><WorkspaceIcon name="folder" /><span>文件夹</span></button>
+            <button type="button" className="detail-toggle" aria-label="详情" title="详情" ref={detailTrigger} aria-pressed={detailOpen} disabled={!detailView && !multiSelection} onClick={() => { if (detailOpen) closeDetail(); else showDetail(); }}><WorkspaceIcon name="detail" /><span>详情</span></button>
           </>}
         </div>}
 

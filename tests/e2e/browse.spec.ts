@@ -107,7 +107,10 @@ test('R04 long paths with classic scrollbars keep selection rows stationary and 
   for (const [width, height] of [[1440, 900], [1100, 760], [640, 760], [1100, 480], [640, 480]]) {
     await page.setViewportSize({ width: width!, height: height! });
     const crumbs = page.getByRole('navigation', { name: '当前目录' });
-    expect(await crumbs.evaluate((node) => node.getBoundingClientRect().height - node.clientHeight)).toBe(16);
+    expect(await crumbs.evaluate((node) => {
+      if (!(node instanceof HTMLElement)) throw new Error('EXPECTED_HTML_BREADCRUMBS');
+      return node.offsetHeight - node.clientHeight;
+    })).toBe(16);
     await crumbs.getByRole('button', { name: /第19层/ }).focus();
     await expect(crumbs.getByRole('button', { name: /第19层/ })).toBeInViewport();
     const before = await row.boundingBox();

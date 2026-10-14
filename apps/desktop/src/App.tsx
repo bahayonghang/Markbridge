@@ -7,7 +7,7 @@ import { WorkspaceIcon, type IconName } from './features/library/WorkspaceIcon';
 import { ConnectionSettings } from './features/settings/ConnectionSettings';
 import { SettingsWorkspace, type SettingsTab } from './features/settings/SettingsWorkspace';
 import { GeneralSettings } from './features/settings/GeneralSettings';
-import { appearanceSizes, applyUiPreferences, readUiPreferences, saveUiPreferences, type UiPreferences } from './features/settings/ui-preferences';
+import { resolveAppearanceMetrics, applyUiPreferences, readUiPreferences, saveUiPreferences, type UiPreferences } from './features/settings/ui-preferences';
 import { RowHeightsContext } from './features/library/VirtualRows';
 import { useBridge } from './useBridge';
 import { connectionLabels, fileLabels, type SourceRequest, type SourceTarget } from './features/settings/source-status';
@@ -76,7 +76,7 @@ export function App({ initialPreferences }: { initialPreferences?: UiPreferences
     requestAnimationFrame(() => heading.current?.focus());
   }
 
-  return <RowHeightsContext.Provider value={appearanceSizes[preferences.fontSize]}><div className="workspace" lang="zh-CN">
+  return <RowHeightsContext.Provider value={resolveAppearanceMetrics(preferences.fontSizePx)}><div className="workspace" lang="zh-CN">
     <a className="skip-link" href="#main-content">跳至内容</a>
     <aside className="app-sidebar" aria-label="工作区导航">
       <div className="brand"><img className="brand-mark" src={brandIcon} alt="" width={32} height={32} /><strong lang="en">Markbridge</strong></div>

@@ -8,6 +8,7 @@ import { DEFAULT_UI_PREFERENCES, UI_PREFERENCES_KEY } from './features/settings/
 
 vi.mock('./backend', () => ({
   getStartupState: vi.fn(), getBridgeState: vi.fn(), subscribeBridgeState: vi.fn(),
+  listInstalledFonts: vi.fn(async () => ({ status: 'ready', families: [] })),
   hasNativeBridge: vi.fn(), startBridge: vi.fn(), beginPairing: vi.fn(),
   confirmPairing: vi.fn(), cancelPairing: vi.fn(), revokePairing: vi.fn(), reconnectProfile: vi.fn(),
   enumerateChromeUserData: vi.fn(), attachFileMirror: vi.fn(), rescanFileMirrors: vi.fn(),
@@ -89,7 +90,8 @@ it('applies failed saves for the session and resets only appearance without writ
   fireEvent.click(screen.getByRole('button', { name: '深色' }));
   expect(document.documentElement.dataset.theme).toBe('dark');
   expect(screen.getByRole('alert')).toHaveTextContent('当前外观已应用，但未能保存');
-  fireEvent.change(screen.getByLabelText('字号'), { target: { value: 'large' } });
+  fireEvent.change(screen.getByLabelText('字号'), { target: { value: '15' } });
+  fireEvent.keyDown(screen.getByLabelText('字号'), { key: 'Enter' });
   expect(document.documentElement.style.getPropertyValue('--text-size')).toBe('15px');
   save.mockRestore();
   fireEvent.click(screen.getByRole('button', { name: '恢复默认外观' }));

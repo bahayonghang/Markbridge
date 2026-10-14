@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react';
-import { appearanceSizes } from '../settings/ui-preferences';
+import { resolveAppearanceMetrics } from '../settings/ui-preferences';
 
-export const RowHeightsContext = createContext<{ folderRow: number; bookmarkRow: number }>(appearanceSizes.standard);
+export const RowHeightsContext = createContext<{ folderRow: number; bookmarkRow: number }>(resolveAppearanceMetrics(14));
 
 type VirtualRowsProps<T> = {
   rows: T[];

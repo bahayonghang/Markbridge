@@ -25,6 +25,7 @@ export async function mockBridge(page: Page, scenario: 'connected' | 'startup-er
       const nodesFor = (profileId) => window.__r03nodes || (profileId === 'profile-second' ? rows.map((row) => ({ ...row, title: '另一份资料 ' + row.chromeId })) : rows);
       window.__r02disconnect = () => { state = { ...state, revision: state.revision + 1, profiles: state.profiles.map((item) => item.profileId === 'profile-second' ? { ...item, connection: 'cached_read_only' } : item) }; receive?.(state); };
       export const hasNativeBridge = () => true;
+      export async function listInstalledFonts() { window.__c02FontCalls = (window.__c02FontCalls || 0) + 1; if (window.__c02FontLoad) return window.__c02FontLoad(); return window.__c02Fonts || { status: 'ready', families: [{ family: 'Arial', displayName: 'Arial' }, { family: 'Microsoft YaHei UI', displayName: '微软雅黑 UI' }, { family: 'SimSun', displayName: '宋体' }] }; }
       export async function subscribeBridgeState(next) { receive = next; return () => { if (receive === next) receive = undefined; }; }
       export async function getStartupState() { ${scenario === 'startup-error' ? "throw new Error('sensitive-raw-error');" : "return { protocolVersion: 1, state: 'unpaired' };"} }
       export async function getBridgeState() {

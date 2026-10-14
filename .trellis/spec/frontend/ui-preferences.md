@@ -1,67 +1,54 @@
-# Local appearance preferences
+# Local appearance and installed fonts
 
-## 1. Scope / trigger
+## Scope and ownership
 
-`apps/desktop/src/features/settings/ui-preferences.ts` owns pure visual preferences for the trusted main WebView. LocalStorage integration requires an explicit storage contract. `App` owns one preference state; `GeneralSettings` consumes values and a change callback. No SQLite, Rust command, protocol field, remote font request or permission is added. Remote preview windows and extension pages do not consume this module.
+`apps/desktop/src/features/settings/ui-preferences.ts` owns pure visual preferences for the trusted main WebView. App owns one preference state; GeneralSettings consumes it and owns a session-only font catalog cache. Rust enumerates the Windows font collection through the main-only `list_installed_fonts` command; `backend.ts` validates its generated DTO. No font directory, path, font bytes, network font, SQLite migration, extension message or widened preview capability is involved. Remote previews, extension pages and OS dialogs do not inherit these preferences.
 
-## 2. Signatures
+## Preference contract
 
 ```ts
-type UiPreferences = {
-  version: 1;
-  theme: 'system' | 'light' | 'dark';
-  font: 'system' | 'yahei' | 'song';
-  fontSize: 'small' | 'standard' | 'large';
-};
+type UiFont = { kind: 'preset'; value: 'system' | 'yahei' | 'song' } | { kind: 'installed'; family: string };
+type UiPreferences = { version: 2; theme: 'system' | 'light' | 'dark'; font: UiFont; fontSizePx: number };
 parseUiPreferences(raw: string | null): UiPreferences;
 readUiPreferences(storage?: Pick<Storage, 'getItem'>): UiPreferences;
 saveUiPreferences(value: UiPreferences, storage?: Pick<Storage, 'setItem'>): boolean;
+fontFamilyCss(font: UiFont): string;
+resolveAppearanceMetrics(fontSizePx: number): AppearanceMetrics;
 applyUiPreferences(value: UiPreferences, darkSystem: boolean, root?: HTMLElement): void;
 ```
 
-## 3. Contracts
+Read `markbridge.ui-preferences.v2` first. Only when that key is absent, read `markbridge.ui-preferences.v1` and migrate in memory: preserve theme and preset font, map small/standard/large to 12/13/15px. New users and reset use system theme, system preset, 14px. Invalid or unknown v2 uses defaults without reading v1 or overwriting either record. Invalid fields default independently; unknown fields are dropped from the normalized in-memory value. An installed family is nonblank, at most256 Unicode scalars, with no controls or unpaired surrogates. Size must be an integer12..20.
 
-The sole key is `markbridge.ui-preferences.v1`. Default record: `{"version":1,"theme":"system","font":"system","fontSize":"standard"}`. Parsing accepts only the listed enums and returns a fresh normalized object. Reads and startup application never write or delete storage, including unknown versions. Save only after explicit selection or restoring default appearance, and affect only this key.
+`main.tsx` reads and applies before React render. Startup, media changes and enumeration never save. Explicit theme selection, font application, valid size commit and reset write only v2. v1 remains byte-for-byte unchanged for code rollback; old code cannot see newer v2 changes. Storage failures keep the session value and the existing truthful save-failure alert. Reset also clears an invalid size input draft, even if the active size already equals14.
 
-`main.tsx` reads and applies preferences before `createRoot().render`, passing the same initial values to `App`. Application sets `data-theme` to resolved light/dark, `data-font`, `data-font-size` and bounded CSS variables. For system mode, subscribe to `matchMedia('(prefers-color-scheme: dark)')` changes with cleanup; fixed themes ignore media changes. Changing settings applies in this session even if storage fails. Do not display saved success on a failed write.
+Installed family is escaped as one single-quoted CSS string, with backslashes and quotes escaped, followed by a fixed local system fallback. It is never a stylesheet, selector, URL or unquoted family list. Apply saved values synchronously without waiting for enumeration. Only a successful catalog can establish that the saved family is missing; failure cannot. Missing families remain saved and use fallback until reinstalled. Code/ports retain their monospace role.
 
-Font presets use local fallbacks: system prefers Segoe UI/微软雅黑, yahei prefers 微软雅黑, song prefers Times New Roman/SimSun. Missing fonts fall back without scanning or downloading. Controls inherit the selected family; code/ports retain their monospace role.
+## Picker and catalog lifecycle
 
-`appearanceSizes` is the single geometry source. Apply its text/control CSS variables; `RowHeightsContext` distributes its folder/bookmark heights to `VirtualRows`, whose inline CSS top/height and spacer arithmetic use those same values. Do not introduce unused mirror variables or maintain independent CSS and JS scales.
+`createFontCatalogSession` is owned by the mounted GeneralSettings instance, not a module singleton. No settings-entry enumeration occurs. Opening the picker reads/cache-hits; refresh explicitly invokes a new census. Concurrent reads share one physical IPC. Closing invalidates UI and cache updates; reopening during an old request waits for it to settle, then obtains a fresh census. Queued consumers share a generation-bound promise and closing that generation prevents new closed-picker work. React StrictMode effect replay retains the same physical request; deferred release checks whether any consumer remains before invalidating.
 
-| Size | Body px | Folder row px | Bookmark row px | Control minimum px |
-|---|---:|---:|---:|---:|
-| small | 12 | 40 | 48 | 40 |
-| standard | 13 | 40 | 52 | 40 |
-| large | 15 | 48 | 60 | 44 |
+The modal uses native dialog focus containment and returns focus to the trigger on cancel/Escape/apply. Presets are separate from installed families. Sort installed families by localized display name then canonical family; search both. List names stay in the current stable UI font; only the selected candidate sample uses its font. Candidates never write preferences or change global appearance. Apply is explicit. Refresh preserves the query and candidate; missing installed candidates cannot be applied. Failure, unsupported platform, catalog bound, empty and no matches have distinct stable copy. A1000-entry catalog keeps bounded DOM using VirtualRows; row IDs use fixture-independent index keys rather than raw family names.
 
-Font roles change with this scale, including auxiliary text, titles and inputs. Use neither CSS zoom nor transform scaling. Preserve the visible virtual-row anchor across typography changes, including while the library is hidden. If the visible list was already at its scroll bottom, preserve that bottom instead so increasing row height cannot hide the last item. Determine bottom proximity with `Math.abs(scrollHeight - clientHeight - scrollTop) <= 1`; actual Windows DPI can produce fractional CSS scroll positions. Hidden zero-height measurements must not replace the stored anchor or bottom state. Actual keyboard navigation must still reveal its active row. Keep query, source, selection and drafts mounted.
+## Shared typography and geometry
 
-## 4. Validation & error matrix
+The pure metrics function is the only text/row/control calculation. With n an integer12..20:
 
-| Input / failure | Behavior |
-|---|---|
-| Missing key, invalid JSON, non-object or missing version | Defaults; no startup write or crash |
-| Version 1 with invalid/missing enum field | Default that field; retain valid fields |
-| Unknown version | Defaults; preserve original stored string until an explicit user change |
-| `getItem` throws or storage unavailable | Defaults; application starts |
-| `setItem` throws | Return false; apply session values; show `当前外观已应用，但未能保存。重启后可能恢复默认。` |
-| Restore default appearance | Save the default record to this key only; preserve bookmarks and AI/semantic settings |
+- body n; caption max(12,n-2); list title n+1; section n+2; page heading n+6.
+- folder row and control minimum: max(40,ceilTo4(1.6*n+16)).
+- bookmark row: max(48,ceilTo4(1.6*(n+1)+1.5*max(12,n-2)+12)).
 
-## 5. Good / base / bad cases
+| Body | Folder | Bookmark | Control |
+|---|---:|---:|---:|
+|12|40|52|40|
+|14|40|56|40|
+|20|48|76|48|
 
-- Good: dark/song/large reloads in the same isolated main WebView data directory with matching controls, text and row geometry.
-- Base: no record starts system/system/standard without persisting a synthetic default.
-- Bad: `font: 'url(...)'` never enters CSS; unknown version 2 is not overwritten on startup; storage failure never reports durable success.
+Root typography CSS variables and RowHeightsContext consume the same result. CSS does not maintain separate rem scale ratios. Library title/caption line heights follow1.6/1.5. Header uses min-height and padding; status text may grow. No zoom, transform text scaling, or per-bookmark measurement. Captions never fall below12px. The Claude colors and semantic interaction states follow root DESIGN.md.
 
-## 6. Tests required
+VirtualRows preserves visible row/pixel anchor during geometry changes, including hidden library panels; a list already at bottom stays at bottom. Use a1 CSSpx fractional scroll tolerance. Hidden zero-size measurement cannot replace remembered state. Actual keyboard navigation reveals its new active row. Preserve checkbox focus, query, selection and drafts. Font-picker row geometry reuses the same bookmark metric.
 
-`features/settings/ui-preferences.test.tsx` and `App.test.tsx` cover normalization, all invalid inputs, preserved unknown-version record, denied read/write and cleanup of system listeners. `tests/e2e/appearance.spec.ts` asserts ordinary Settings opens General while existing shortcuts target their categories; all three fields change actual computed styles, explicit theme ignores emulated media changes and reset affects only appearance. Verify no implicit model/fetch/index/browser mutations.
+## Required checks and evidence
 
-Virtual-row regressions must scroll away from the previous active row, change size in General and return to the same visible item/offset. Separately, navigate to the last item, confirm any dirty-draft discard, change standard/large size through hidden settings, and assert the last item remains visible and the list remains at its bottom; cover both 24 and 120 rows. Also check keyboard reveal, checkbox focus and retained drafts. Native scroll comparisons use a 1 CSS px tolerance rather than exact integer equality. Cover six CSS viewports, large at640×480, both palettes and relevant disabled/error/confirmation states with measured contrast. Native receipts separately prove real process exit/restart persistence and owned-window actual125/150%DPI, with executable hash, OS DPI, WebView ratio, dimensions and isolated paths. Emulated media/process scaling is labelled and cannot replace actual monitor DPI evidence.
+Unit tests cover all12..20 values, exact boundary formula, all legacy presets and sizes, malformed/unknown records, Unicode validation, CSS escaping, read/write denial, key isolation, system-media cleanup, single-flight cancellation/queued-close/StrictMode and invalid draft reset. Browser tests cover keyboard/focus, preview/apply/cancel, refresh/empty/failure/missing recovery,1000-family bounded DOM, read-only migration, theme changes, actual computed colors, six required viewports plus2549x1356,12/14/20px and20px640x480. Keep24/120-row hidden anchors/bottom/drafts/checkbox regressions.
 
-## 7. Wrong vs correct
-
-Wrong: write defaults in a render/effect, accept arbitrary stored strings as CSS, change only root font size while fixed px rows stay unchanged, or reveal the old active row when restoring a hidden resized list.
-
-Correct: read/normalize before rendering, save only explicit changes, apply bounded semantic tokens and the shared geometry mapping, retain the user's visible scroll anchor, and use keyboard navigation as the deliberate active-row reveal trigger.
+A mock font name does not establish local installation or actual glyph rendering. Native evidence separately proves real DirectWrite CJK/Latin families, platform-font glyph mapping, current executable process restart, main/preview denial, calibrated IPC side effects and actual125/150%DPI. Never substitute document.fonts.check or computed CSS stack for actual font mapping. Current C02/C04 receipts own acceptance; historical S03 evidence is not current-product proof.

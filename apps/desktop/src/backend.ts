@@ -1,6 +1,7 @@
 import { invoke, isTauri } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import type {
+  InstalledFontCatalog,
   SemanticSettings, SemanticConfig, SemanticScope, SemanticScopeReview, SemanticStatus,
   SemanticQuery, SemanticQueryResult, SemanticModelCheck, DiagnosticSaveResult,
   OperationDetail, UndoPreview, ExportSaveResult, ExportSource,
@@ -19,6 +20,13 @@ const loadAi = () => import('@markbridge/protocol/ai');
 const loadOrganization = () => import('@markbridge/protocol/organization');
 const loadMaintenance = () => import('@markbridge/protocol/maintenance');
 const loadSemantic = () => import('@markbridge/protocol/semantic');
+const loadUiFonts = () => import('@markbridge/protocol/ui-fonts');
+
+export async function listInstalledFonts(): Promise<InstalledFontCatalog> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  const { parseInstalledFontCatalog } = await loadUiFonts();
+  return parseInstalledFontCatalog(await invoke<unknown>('list_installed_fonts'));
+}
 
 export async function semanticSettings(): Promise<SemanticSettings> {
   if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
