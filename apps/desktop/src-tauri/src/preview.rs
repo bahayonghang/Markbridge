@@ -55,6 +55,8 @@ struct Current {
 struct NativeLoad {
     token: NativeNavigation,
     failed: bool,
+    // The macOS history watch is the only runtime reader. Linux completes loads from WebKit signals.
+    #[cfg(any(target_os = "macos", test))]
     started: Instant,
 }
 #[cfg(any(target_os = "macos", target_os = "linux", test))]
@@ -722,6 +724,7 @@ impl PreviewHost {
 
 #[cfg(any(target_os = "macos", target_os = "linux", test))]
 impl Current {
+    #[cfg(any(target_os = "macos", test))]
     fn native_load_timed_out(&self, now: Instant) -> bool {
         self.phase == WebPreviewPhase::Loading
             && self.native_load.as_ref().is_some_and(|load| {
@@ -740,6 +743,7 @@ impl Current {
         self.native_load = Some(NativeLoad {
             token: token.clone(),
             failed: false,
+            #[cfg(any(target_os = "macos", test))]
             started: Instant::now(),
         });
         self.phase = WebPreviewPhase::Loading;
@@ -1306,10 +1310,7 @@ fn attach_mac_page_events<'a>(
 fn start_mac_history_watch(window: &WebviewWindow, app: AppHandle, generation: u64) {
     let window = window.clone();
     tauri::async_runtime::spawn(async move {
-        loop {
-            let Some(host) = app.try_state::<PreviewHost>() else {
-                break;
-            };
+        while let Some(host) = app.try_state::<PreviewHost>() {
             if !host
                 .lock()
                 .current

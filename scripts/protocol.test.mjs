@@ -14,6 +14,10 @@ test('drift gate rejects changed TypeScript and schema, without touching tracked
     const outputs = await generateProtocol();
     for (const [name, content] of outputs) await writeFile(join(directory, name), content);
     await checkProtocol(directoryUrl);
+    for (const [name, content] of outputs) {
+      await writeFile(join(directory, name), content.replaceAll('\n', '\r\n'));
+    }
+    await checkProtocol(directoryUrl);
     const types = 'startup-state.d.ts';
     await writeFile(join(directory, types), `${outputs.get(types)}\nexport type Drift = true;\n`);
     await assert.rejects(checkProtocol(directoryUrl), /Protocol drift: startup-state.d.ts/);

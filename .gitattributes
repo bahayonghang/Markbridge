@@ -7,3 +7,7 @@
 # picking either side (task state lives in task.json, not index.md). See
 # .trellis/spec/cli/backend/directory-structure.md for details.
 .trellis/workspace/*/journal-*.md merge=union
+
+# Generated protocol text is compared after newline normalization, and must
+# stay LF in Git even when core.autocrlf rewrites other text files on checkout.
+packages/protocol/src/generated/** text eol=lf

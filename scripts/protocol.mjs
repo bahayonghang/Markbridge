@@ -54,12 +54,17 @@ export async function generateProtocol() {
   return outputs;
 }
 
+function protocolText(value) {
+  // Checkout on Windows rewrites LF as CRLF. The gate compares generated text, not that rewrite.
+  return value.replaceAll('\r\n', '\n').replaceAll('\r', '\n');
+}
+
 export async function checkProtocol(directory = generatedDir) {
   const outputs = await generateProtocol();
   const drift = [];
   for (const [name, expected] of outputs) {
     const actual = await readFile(new URL(name, directory), 'utf8').catch(() => null);
-    if (actual !== expected) drift.push(name);
+    if (actual === null || protocolText(actual) !== protocolText(expected)) drift.push(name);
   }
   if (drift.length) throw new Error(`Protocol drift: ${drift.join(', ')}. Run pnpm protocol:generate.`);
 }
