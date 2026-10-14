@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-14",
+  "scope": "C01 browser/dev and production build; no native executable acceptance",
+  "sourceAndAssets": {
+    "apps/desktop/src/styles.css": "4320369f8166310f6a7802120f7e9b7af07aab9b4436e77f4d4d517d5fec36a2",
+    "tests/e2e/appearance.spec.ts": "6237ce1600f4a74580f12664ab3293bc6c448089900d4374cb04febd323a5445",
+    "apps/desktop/src/features/settings/ui-preferences.ts": "8822fe5bc4fcca9459965d8df7c584795cd1b89d332a68f93ed3a8ca1d71f825",
+    "apps/desktop/src/features/library/VirtualRows.tsx": "677876b682546c1e51274751c07fb58e56c7584e89fb6b97f36cf71a7506fa17",
+    "DESIGN.md": "5effcba5da97721b02aa934de2391b28122508270b64267e4be35a9363e02f03",
+    ".trellis/spec/frontend/component-guidelines.md": "ab677832bbf89e12f1f9f7b1f6f7be1534890107bef0559efcab6cd5bfeeca33",
+    ".trellis/spec/frontend/ui-preferences.md": "a56fd98a0ea189cfa2cc3fc4d5129f60c7e3d57f67ff394899fc0626ccb2d050",
+    "apps/desktop/dist/assets/ai-nFD0DX_4.js": "68d4b77aebc02343a805323dae68b8122886f792fd324c6cb65f6e10b80c0fc9",
+    "apps/desktop/dist/assets/batch-edit-DHj_Xqyy.js": "96729a341e6f8de1561360e191505649aca338e60edf8b1e956db2d8de767f98",
+    "apps/desktop/dist/assets/bridge-D8gMwtSU.js": "1fb7ad0eea4398319eee9a7e6ea60bc3c207637e68939a7583b0347007e3d9fb",
+    "apps/desktop/dist/assets/diagnostics-CgbfxvKq.js": "a347e5c0f9ce54c8a82b8efa6e2ffa8dbc91d737f09bde1a99a4375e722a7d98",
+    "apps/desktop/dist/assets/history-DrYKL8_N.js": "060b693fb2e78dc546ee12e3f3241384c24ebc7c5dfdffb12e2b016cdcee7e0f",
+    "apps/desktop/dist/assets/index-CZuVysH-.css": "d8ff952424776fad52825b29dbd8a4d65d4005312b298e67a1ee552a51ab6878",
+    "apps/desktop/dist/assets/index-D5Rr-mTx.js": "0d348fe21891ed373b7361ff8ec93a0100dde76a9878f0cc3928e44dc876c57d",
+    "apps/desktop/dist/assets/maintenance-CXrkBHUb.js": "d3ef2849c871b3b36e32f1c48ae0028604a44b7a2436621c8e30600d6bf3a244",
+    "apps/desktop/dist/assets/markbridge-o0EVGiPW.png": "9200bd10c383059396744d388527f52d1120a818baf63b26d6bd3b1418f40bcb",
+    "apps/desktop/dist/assets/organization-CmRPtQmK.js": "0a6d775d3b2aaae0092dc1debe72c65ea6045686b61eb324c38ab58a0bf1395a",
+    "apps/desktop/dist/assets/semantic-CYGx8YVt.js": "bee1e885d1da8e8a013ab051a549fe20ded2ea7da28ef047751e75cb94ad293f",
+    "apps/desktop/dist/assets/startup-Bb53QXHS.js": "10bcad6d19526c5fd0d022e1211b0c4a8814e84b5cb90f460ca5d54de7826d73",
+    "apps/desktop/dist/assets/ucs2length-BlWZ3tF9.js": "e6aa3b3de3e87f36ec0f1df286f8861a4a6aac8cf381cbfa4068f1240a291f2c",
+    "apps/desktop/dist/index.html": "7db2d8901586f951dafa443c2ae757e659058011ad79e56a7687f90732ec213a"
+  }
+}

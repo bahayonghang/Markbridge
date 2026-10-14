@@ -1,0 +1,443 @@
+{
+  "contrast": [
+    {
+      "foreground": "ink",
+      "background": "surface",
+      "foregroundColor": "#efede5",
+      "backgroundColor": "#2e2c27",
+      "ratio": 11.897985084181938,
+      "minimum": 4.5
+    },
+    {
+      "foreground": "muted",
+      "background": "surface",
+      "foregroundColor": "#b6b2a7",
+      "backgroundColor": "#2e2c27",
+      "ratio": 6.584929766556528,
+      "minimum": 4.5
+    },
+    {
+      "foreground": "muted",
+      "background": "sidebar",
+      "foregroundColor": "#b6b2a7",
+      "backgroundColor": "#201f1b",
+      "ratio": 7.787383622676993,
+      "minimum": 4.5
+    },
+    {
+      "foreground": "accent",
+      "background": "selected",
+      "foregroundColor": "#dea58b",
+      "backgroundColor": "#40392f",
+      "ratio": 5.346641195509616,
+      "minimum": 4.5
+    },
+    {
+      "foreground": "danger",
+      "background": "surface",
+      "foregroundColor": "#ffaba3",
+      "backgroundColor": "#2e2c27",
+      "ratio": 7.707870210521763,
+      "minimum": 4.5
+    },
+    {
+      "foreground": "caution",
+      "background": "surface",
+      "foregroundColor": "#e8c47d",
+      "backgroundColor": "#2e2c27",
+      "ratio": 8.383441307581093,
+      "minimum": 4.5
+    },
+    {
+      "foreground": "disabled-ink",
+      "background": "disabled-surface",
+      "foregroundColor": "#b6b2a7",
+      "backgroundColor": "#302e28",
+      "ratio": 6.408822518695086,
+      "minimum": 4.5
+    },
+    {
+      "foreground": "primary-ink",
+      "background": "primary-fill",
+      "foregroundColor": "#26241f",
+      "backgroundColor": "#e3ded2",
+      "ratio": 11.550194777769686,
+      "minimum": 4.5
+    },
+    {
+      "foreground": "primary-ink",
+      "background": "primary-hover",
+      "foregroundColor": "#26241f",
+      "backgroundColor": "#f2eee4",
+      "ratio": 13.38123287563214,
+      "minimum": 4.5
+    },
+    {
+      "foreground": "primary-ink",
+      "background": "primary-pressed",
+      "foregroundColor": "#26241f",
+      "backgroundColor": "#d1cabb",
+      "ratio": 9.506362908389383,
+      "minimum": 4.5
+    },
+    {
+      "foreground": "muted",
+      "background": "hover",
+      "foregroundColor": "#b6b2a7",
+      "backgroundColor": "#38352e",
+      "ratio": 5.775238458134691,
+      "minimum": 4.5
+    },
+    {
+      "foreground": "muted",
+      "background": "pressed",
+      "foregroundColor": "#b6b2a7",
+      "backgroundColor": "#40392f",
+      "ratio": 5.376132220047417,
+      "minimum": 4.5
+    },
+    {
+      "foreground": "muted",
+      "background": "selected",
+      "foregroundColor": "#b6b2a7",
+      "backgroundColor": "#40392f",
+      "ratio": 5.376132220047417,
+      "minimum": 4.5
+    },
+    {
+      "foreground": "control-border",
+      "background": "surface",
+      "foregroundColor": "#8c877a",
+      "backgroundColor": "#2e2c27",
+      "ratio": 3.8929131684276186,
+      "minimum": 3
+    },
+    {
+      "foreground": "control-border",
+      "background": "disabled-surface",
+      "foregroundColor": "#8c877a",
+      "backgroundColor": "#302e28",
+      "ratio": 3.788801165937141,
+      "minimum": 3
+    },
+    {
+      "foreground": "focus",
+      "background": "surface",
+      "foregroundColor": "#dea58b",
+      "backgroundColor": "#2e2c27",
+      "ratio": 6.548807826586177,
+      "minimum": 3
+    },
+    {
+      "foreground": "focus",
+      "background": "selected",
+      "foregroundColor": "#dea58b",
+      "backgroundColor": "#40392f",
+      "ratio": 5.346641195509616,
+      "minimum": 3
+    },
+    {
+      "foreground": "primary-border",
+      "background": "surface",
+      "foregroundColor": "#e3ded2",
+      "backgroundColor": "#2e2c27",
+      "ratio": 10.39046515263893,
+      "minimum": 3
+    },
+    {
+      "foreground": "primary-border",
+      "background": "canvas",
+      "foregroundColor": "#e3ded2",
+      "backgroundColor": "#24231f",
+      "ratio": 11.717477508895941,
+      "minimum": 3
+    }
+  ],
+  "renderedPrimary": {
+    "fill": "rgb(227, 222, 210)",
+    "border": "rgb(227, 222, 210)",
+    "ink": "rgb(38, 36, 31)"
+  },
+  "renderedConsumers": [
+    {
+      "name": "library title text",
+      "foreground": "rgb(239, 237, 229)",
+      "background": "rgb(46, 44, 39)",
+      "ratio": 11.897985084181938,
+      "minimum": 4.5
+    },
+    {
+      "name": "library URL text",
+      "foreground": "rgb(182, 178, 167)",
+      "background": "rgb(46, 44, 39)",
+      "ratio": 6.584929766556528,
+      "minimum": 4.5
+    },
+    {
+      "name": "selected navigation text",
+      "foreground": "rgb(222, 165, 139)",
+      "background": "rgb(64, 57, 47)",
+      "ratio": 5.346641195509616,
+      "minimum": 4.5
+    },
+    {
+      "name": "selected bookmark hover text",
+      "foreground": "rgb(239, 237, 229)",
+      "background": "rgb(64, 57, 47)",
+      "ratio": 9.71386836797859,
+      "minimum": 4.5
+    },
+    {
+      "name": "selected bookmark URL text",
+      "foreground": "rgb(182, 178, 167)",
+      "background": "rgb(64, 57, 47)",
+      "ratio": 5.376132220047417,
+      "minimum": 4.5
+    },
+    {
+      "name": "selected detail tab hover text",
+      "foreground": "rgb(222, 165, 139)",
+      "background": "rgb(64, 57, 47)",
+      "ratio": 5.346641195509616,
+      "minimum": 4.5
+    },
+    {
+      "name": "selected theme text",
+      "foreground": "rgb(222, 165, 139)",
+      "background": "rgb(64, 57, 47)",
+      "ratio": 5.346641195509616,
+      "minimum": 4.5
+    },
+    {
+      "name": "selected theme boundary",
+      "foreground": "rgb(222, 165, 139)",
+      "background": "rgb(46, 44, 39)",
+      "ratio": 6.548807826586177,
+      "minimum": 3
+    },
+    {
+      "name": "selected theme pressed text",
+      "foreground": "rgb(222, 165, 139)",
+      "background": "rgb(64, 57, 47)",
+      "ratio": 5.346641195509616,
+      "minimum": 4.5
+    },
+    {
+      "name": "selected theme pressed boundary",
+      "foreground": "rgb(222, 165, 139)",
+      "background": "rgb(46, 44, 39)",
+      "ratio": 6.548807826586177,
+      "minimum": 3
+    },
+    {
+      "name": "selected category text",
+      "foreground": "rgb(222, 165, 139)",
+      "background": "rgb(64, 57, 47)",
+      "ratio": 5.346641195509616,
+      "minimum": 4.5
+    },
+    {
+      "name": "selected category keyboard text",
+      "foreground": "rgb(222, 165, 139)",
+      "background": "rgb(64, 57, 47)",
+      "ratio": 5.346641195509616,
+      "minimum": 4.5
+    },
+    {
+      "name": "selected category keyboard focus",
+      "foreground": "rgb(222, 165, 139)",
+      "background": "rgb(36, 35, 31)",
+      "ratio": 7.385185099111396,
+      "minimum": 3
+    },
+    {
+      "name": "text control text",
+      "foreground": "rgb(239, 237, 229)",
+      "background": "rgb(46, 44, 39)",
+      "ratio": 11.897985084181938,
+      "minimum": 4.5
+    },
+    {
+      "name": "text control boundary",
+      "foreground": "rgb(140, 135, 122)",
+      "background": "rgb(46, 44, 39)",
+      "ratio": 3.8929131684276186,
+      "minimum": 3
+    },
+    {
+      "name": "disabled listener text",
+      "foreground": "rgb(182, 178, 167)",
+      "background": "rgb(48, 46, 40)",
+      "ratio": 6.408822518695086,
+      "minimum": 4.5
+    },
+    {
+      "name": "disabled listener boundary",
+      "foreground": "rgb(140, 135, 122)",
+      "background": "rgb(46, 44, 39)",
+      "ratio": 3.8929131684276186,
+      "minimum": 3
+    },
+    {
+      "name": "disabled listener hover text",
+      "foreground": "rgb(182, 178, 167)",
+      "background": "rgb(48, 46, 40)",
+      "ratio": 6.408822518695086,
+      "minimum": 4.5
+    },
+    {
+      "name": "disabled listener hover boundary",
+      "foreground": "rgb(140, 135, 122)",
+      "background": "rgb(46, 44, 39)",
+      "ratio": 3.8929131684276186,
+      "minimum": 3
+    },
+    {
+      "name": "primary normal text",
+      "foreground": "rgb(38, 36, 31)",
+      "background": "rgb(227, 222, 210)",
+      "ratio": 11.550194777769686,
+      "minimum": 4.5
+    },
+    {
+      "name": "primary normal boundary",
+      "foreground": "rgb(227, 222, 210)",
+      "background": "rgb(46, 44, 39)",
+      "ratio": 10.39046515263893,
+      "minimum": 3
+    },
+    {
+      "name": "primary hover text",
+      "foreground": "rgb(38, 36, 31)",
+      "background": "rgb(242, 238, 228)",
+      "ratio": 13.38123287563214,
+      "minimum": 4.5
+    },
+    {
+      "name": "primary hover boundary",
+      "foreground": "rgb(227, 222, 210)",
+      "background": "rgb(46, 44, 39)",
+      "ratio": 10.39046515263893,
+      "minimum": 3
+    },
+    {
+      "name": "primary pressed text",
+      "foreground": "rgb(38, 36, 31)",
+      "background": "rgb(209, 202, 187)",
+      "ratio": 9.506362908389383,
+      "minimum": 4.5
+    },
+    {
+      "name": "primary pressed boundary",
+      "foreground": "rgb(227, 222, 210)",
+      "background": "rgb(46, 44, 39)",
+      "ratio": 10.39046515263893,
+      "minimum": 3
+    },
+    {
+      "name": "ordinary hover text",
+      "foreground": "rgb(239, 237, 229)",
+      "background": "rgb(56, 53, 46)",
+      "ratio": 10.43499376127941,
+      "minimum": 4.5
+    },
+    {
+      "name": "ordinary hover boundary",
+      "foreground": "rgb(182, 178, 167)",
+      "background": "rgb(46, 44, 39)",
+      "ratio": 6.584929766556528,
+      "minimum": 3
+    },
+    {
+      "name": "ordinary pressed text",
+      "foreground": "rgb(239, 237, 229)",
+      "background": "rgb(64, 57, 47)",
+      "ratio": 9.71386836797859,
+      "minimum": 4.5
+    },
+    {
+      "name": "ordinary pressed boundary",
+      "foreground": "rgb(182, 178, 167)",
+      "background": "rgb(46, 44, 39)",
+      "ratio": 6.584929766556528,
+      "minimum": 3
+    },
+    {
+      "name": "confirmation action text",
+      "foreground": "rgb(255, 171, 163)",
+      "background": "rgb(46, 44, 39)",
+      "ratio": 7.707870210521763,
+      "minimum": 4.5
+    },
+    {
+      "name": "confirmation action boundary",
+      "foreground": "rgb(255, 171, 163)",
+      "background": "rgb(46, 44, 39)",
+      "ratio": 7.707870210521763,
+      "minimum": 3
+    },
+    {
+      "name": "confirmation copy text",
+      "foreground": "rgb(239, 237, 229)",
+      "background": "rgb(46, 44, 39)",
+      "ratio": 11.897985084181938,
+      "minimum": 4.5
+    },
+    {
+      "name": "confirmation keyboard text",
+      "foreground": "rgb(255, 171, 163)",
+      "background": "rgb(46, 44, 39)",
+      "ratio": 7.707870210521763,
+      "minimum": 4.5
+    },
+    {
+      "name": "confirmation keyboard boundary",
+      "foreground": "rgb(255, 171, 163)",
+      "background": "rgb(46, 44, 39)",
+      "ratio": 7.707870210521763,
+      "minimum": 3
+    },
+    {
+      "name": "confirmation keyboard focus",
+      "foreground": "rgb(222, 165, 139)",
+      "background": "rgb(46, 44, 39)",
+      "ratio": 6.548807826586177,
+      "minimum": 3
+    },
+    {
+      "name": "pairing error text",
+      "foreground": "rgb(255, 171, 163)",
+      "background": "rgb(46, 44, 39)",
+      "ratio": 7.707870210521763,
+      "minimum": 4.5
+    },
+    {
+      "name": "readonly state text",
+      "foreground": "rgb(182, 178, 167)",
+      "background": "rgb(46, 44, 39)",
+      "ratio": 6.584929766556528,
+      "minimum": 4.5
+    },
+    {
+      "name": "loading state text",
+      "foreground": "rgb(182, 178, 167)",
+      "background": "rgb(46, 44, 39)",
+      "ratio": 6.584929766556528,
+      "minimum": 4.5
+    },
+    {
+      "name": "cache-error state text",
+      "foreground": "rgb(255, 171, 163)",
+      "background": "rgb(46, 44, 39)",
+      "ratio": 7.707870210521763,
+      "minimum": 4.5
+    },
+    {
+      "name": "startup-error state text",
+      "foreground": "rgb(255, 171, 163)",
+      "background": "rgb(46, 44, 39)",
+      "ratio": 7.707870210521763,
+      "minimum": 4.5
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "date": "2026-10-14",
+  "scope": "Final C01 after reviewer caption fix; browser and production build only",
+  "sourceAndAssets": {
+    "apps/desktop/src/styles.css": "05f372b8e87d1cb9ef0ec87db7723a0fa8e37a22143bb68258db9a061ee4cdb9",
+    "tests/e2e/appearance.spec.ts": "6237ce1600f4a74580f12664ab3293bc6c448089900d4374cb04febd323a5445",
+    "tests/e2e/appearance-captions.spec.ts": "0eac4cdd301ebb7d60f9e68ff12a3aabdea386eaca1729d71013702c056e1cc4",
+    "apps/desktop/src/features/settings/ui-preferences.ts": "8822fe5bc4fcca9459965d8df7c584795cd1b89d332a68f93ed3a8ca1d71f825",
+    "apps/desktop/src/features/library/VirtualRows.tsx": "677876b682546c1e51274751c07fb58e56c7584e89fb6b97f36cf71a7506fa17",
+    "DESIGN.md": "5effcba5da97721b02aa934de2391b28122508270b64267e4be35a9363e02f03",
+    ".trellis/spec/frontend/component-guidelines.md": "ab677832bbf89e12f1f9f7b1f6f7be1534890107bef0559efcab6cd5bfeeca33",
+    ".trellis/spec/frontend/ui-preferences.md": "a56fd98a0ea189cfa2cc3fc4d5129f60c7e3d57f67ff394899fc0626ccb2d050",
+    "apps/desktop/dist/assets/ai-CMehcPww.js": "98af459bba0b11cd775d8ff459c668155d55bbf4e080a1e1b77a7bf7a732bafa",
+    "apps/desktop/dist/assets/batch-edit-DSiIy1nn.js": "4448fef8a18b5cd50fa8f23c25d3f3884fa2bde54316b9554fbb3eda3a1015d2",
+    "apps/desktop/dist/assets/bridge-DLW9Jrys.js": "38b943a617c2fded93a08eac42d349f9edae38e982d2582ac481d6e73ac536e2",
+    "apps/desktop/dist/assets/diagnostics-B0hWcf5-.js": "9d5b83a11c8fef1ac7448010930a9149b75ef513724c1837e4bc742b92baf075",
+    "apps/desktop/dist/assets/history-C8ElCrBN.js": "8e028ef67c50d0b60c8a4a445876ca8c96d951381035fffc06f148524d41dde8",
+    "apps/desktop/dist/assets/index-BkpH6g17.js": "e12208bd8ea95bce8482ce3e332b05689f3f905a45061908116fe657949c971a",
+    "apps/desktop/dist/assets/index-S2jBUJQC.css": "5d21556431e81b6657f6b52fcc454ed863b5680a090ae1099e828417ffbdeb72",
+    "apps/desktop/dist/assets/maintenance-UMGkfaWJ.js": "5af2c0d6852cd06f07588135bc60590df9227d047b3574c21e6459c041601c59",
+    "apps/desktop/dist/assets/markbridge-o0EVGiPW.png": "9200bd10c383059396744d388527f52d1120a818baf63b26d6bd3b1418f40bcb",
+    "apps/desktop/dist/assets/organization-B0tFS8mm.js": "fa089d673815a6024e11ec708959fc504b1de0e1b14a5b2b142b0321d1540b48",
+    "apps/desktop/dist/assets/semantic-6wLmYBtS.js": "fbddcbce8fd4b80811b087e4ef623718664785a6797ea558fe82e5096f4c1be8",
+    "apps/desktop/dist/assets/startup-Bb53QXHS.js": "10bcad6d19526c5fd0d022e1211b0c4a8814e84b5cb90f460ca5d54de7826d73",
+    "apps/desktop/dist/assets/ucs2length-D5rG3CpB.js": "e557e8adf2ac7bcb6c6e3864d0aa1ae4b7b3dc3a414faf5c0e150166989763d5",
+    "apps/desktop/dist/index.html": "3f2cf49f6e9b98844a97e20a7df4fc52f71b0358723565cf6332fa5b2f38867f"
+  }
+}

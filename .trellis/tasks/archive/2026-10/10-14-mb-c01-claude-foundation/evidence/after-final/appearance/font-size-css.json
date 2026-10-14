@@ -1,0 +1,56 @@
+[
+  {
+    "selectedFont": "system",
+    "fontSize": "small",
+    "font": "\"Segoe UI Variable Text\", \"Segoe UI\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", sans-serif",
+    "size": "12px"
+  },
+  {
+    "selectedFont": "system",
+    "fontSize": "standard",
+    "font": "\"Segoe UI Variable Text\", \"Segoe UI\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", sans-serif",
+    "size": "13px"
+  },
+  {
+    "selectedFont": "system",
+    "fontSize": "large",
+    "font": "\"Segoe UI Variable Text\", \"Segoe UI\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", sans-serif",
+    "size": "15px"
+  },
+  {
+    "selectedFont": "yahei",
+    "fontSize": "small",
+    "font": "\"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Segoe UI\", sans-serif",
+    "size": "12px"
+  },
+  {
+    "selectedFont": "yahei",
+    "fontSize": "standard",
+    "font": "\"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Segoe UI\", sans-serif",
+    "size": "13px"
+  },
+  {
+    "selectedFont": "yahei",
+    "fontSize": "large",
+    "font": "\"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Segoe UI\", sans-serif",
+    "size": "15px"
+  },
+  {
+    "selectedFont": "song",
+    "fontSize": "small",
+    "font": "\"Times New Roman\", SimSun, serif",
+    "size": "12px"
+  },
+  {
+    "selectedFont": "song",
+    "fontSize": "standard",
+    "font": "\"Times New Roman\", SimSun, serif",
+    "size": "13px"
+  },
+  {
+    "selectedFont": "song",
+    "fontSize": "large",
+    "font": "\"Times New Roman\", SimSun, serif",
+    "size": "15px"
+  }
+]
