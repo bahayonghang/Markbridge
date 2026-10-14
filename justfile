@@ -1,8 +1,11 @@
 # Markbridge local commands. `ci` follows .github/workflows/ci.yml.
 # `build` is the web and extension production build. `build-native` is the
 # Windows release executable scan. `dev` opens the native window.
+#
+# Windows PowerShell 5.1 captures native stderr, so cargo clippy's status
+# never reaches the console and `just ci` looks stuck. cmd.exe does not.
 
-set windows-shell := ["powershell.exe", "-NoLogo", "-Command"]
+set windows-shell := ["cmd.exe", "/c"]
 
 # List recipes.
 default:
