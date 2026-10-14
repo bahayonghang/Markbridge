@@ -1,7 +1,8 @@
 //! Native-selected export destinations stay in Rust. No frontend filesystem scope.
 use markbridge_core::bridge::ExportSnapshot;
 use markbridge_protocol::{
-    EditDocumentKind, ErrorCode, ExportSaveResult, ExportSaveStatus, RequiredNullable,
+    DiagnosticReport, DiagnosticSaveResult, EditDocumentKind, ErrorCode, ExportSaveResult,
+    ExportSaveStatus, RequiredNullable,
 };
 use std::{
     fs::OpenOptions,
@@ -12,6 +13,12 @@ use std::{
 
 static SAVING: AtomicBool = AtomicBool::new(false);
 static TEMP_ID: AtomicU64 = AtomicU64::new(0);
+#[derive(Clone, Copy)]
+enum SaveKind {
+    Html,
+    Sidecar,
+    Diagnostic,
+}
 pub struct SaveGuard;
 impl SaveGuard {
     pub fn acquire() -> Result<Self, ErrorCode> {
@@ -28,23 +35,54 @@ impl Drop for SaveGuard {
 }
 
 pub async fn save(window: &tauri::WebviewWindow, snapshot: ExportSnapshot) -> ExportSaveResult {
-    let selected = destination(window, snapshot.metadata.format).await;
-    let (status, error) = match selected {
-        Ok(Some(path)) => match tauri::async_runtime::spawn_blocking(move || {
-            write_atomic(&path, snapshot.body.as_bytes())
-        })
-        .await
-        {
-            Ok(Ok(())) => (ExportSaveStatus::Saved, None),
-            _ => (ExportSaveStatus::Failed, Some(ErrorCode::StorageError)),
-        },
-        Ok(None) => (ExportSaveStatus::Cancelled, None),
-        Err(error) => (ExportSaveStatus::Failed, Some(error)),
+    let kind = match snapshot.metadata.format {
+        EditDocumentKind::Html => SaveKind::Html,
+        EditDocumentKind::Sidecar => SaveKind::Sidecar,
     };
+    let (status, error) = save_body(window, kind, snapshot.body.into_bytes()).await;
     ExportSaveResult {
         status,
         metadata: RequiredNullable(Some(snapshot.metadata)),
         error_code: RequiredNullable(error),
+    }
+}
+
+pub async fn save_diagnostic(
+    window: &tauri::WebviewWindow,
+    report: DiagnosticReport,
+) -> DiagnosticSaveResult {
+    let (status, error) = match serde_json::to_vec_pretty(&report) {
+        Ok(body) => save_body(window, SaveKind::Diagnostic, body).await,
+        Err(_) => (ExportSaveStatus::Failed, Some(ErrorCode::StorageError)),
+    };
+    DiagnosticSaveResult {
+        status,
+        error_code: RequiredNullable(error),
+    }
+}
+
+async fn save_body(
+    window: &tauri::WebviewWindow,
+    kind: SaveKind,
+    body: Vec<u8>,
+) -> (ExportSaveStatus, Option<ErrorCode>) {
+    let selected = destination(window, kind).await;
+    tauri::async_runtime::spawn_blocking(move || write_selected(selected, &body))
+        .await
+        .unwrap_or((ExportSaveStatus::Failed, Some(ErrorCode::StorageError)))
+}
+
+fn write_selected(
+    selected: Result<Option<PathBuf>, ErrorCode>,
+    body: &[u8],
+) -> (ExportSaveStatus, Option<ErrorCode>) {
+    match selected {
+        Ok(Some(path)) => match write_atomic(&path, body) {
+            Ok(()) => (ExportSaveStatus::Saved, None),
+            Err(_) => (ExportSaveStatus::Failed, Some(ErrorCode::StorageError)),
+        },
+        Ok(None) => (ExportSaveStatus::Cancelled, None),
+        Err(error) => (ExportSaveStatus::Failed, Some(error)),
     }
 }
 
@@ -113,7 +151,7 @@ fn replace(from: &Path, to: &Path) -> std::io::Result<()> {
 #[cfg(windows)]
 async fn destination(
     window: &tauri::WebviewWindow,
-    kind: EditDocumentKind,
+    kind: SaveKind,
 ) -> Result<Option<PathBuf>, ErrorCode> {
     let owner = window.hwnd().map_err(|_| ErrorCode::StorageError)?.0 as usize;
     let (sender, receiver) = tokio::sync::oneshot::channel();
@@ -124,29 +162,152 @@ async fn destination(
         .map_err(|_| ErrorCode::StorageError)?;
     receiver.await.map_err(|_| ErrorCode::StorageError)?
 }
-#[cfg(not(windows))]
+#[cfg(any(target_os = "macos", target_os = "linux"))]
+impl SaveKind {
+    fn dialog_details(self) -> (&'static str, &'static str, &'static str) {
+        match self {
+            Self::Html => ("保存书签 HTML", "bookmarks.html", "*.html"),
+            Self::Sidecar => ("保存侧车 JSON", "bookmarks-sidecar.json", "*.json"),
+            Self::Diagnostic => ("保存诊断 JSON", "markbridge-diagnostics.json", "*.json"),
+        }
+    }
+}
+
+#[cfg(target_os = "linux")]
 async fn destination(
-    _: &tauri::WebviewWindow,
-    _: EditDocumentKind,
+    window: &tauri::WebviewWindow,
+    kind: SaveKind,
 ) -> Result<Option<PathBuf>, ErrorCode> {
+    use gtk::prelude::*;
+    let owner = window.clone();
+    let (sender, receiver) = tokio::sync::oneshot::channel();
+    window
+        .run_on_main_thread(move || {
+            let Ok(parent) = owner.gtk_window() else {
+                let _ = sender.send(Err(ErrorCode::StorageError));
+                return;
+            };
+            let (title, name, pattern) = kind.dialog_details();
+            let dialog = gtk::FileChooserNative::new(
+                Some(title),
+                Some(&parent),
+                gtk::FileChooserAction::Save,
+                Some("保存"),
+                Some("取消"),
+            );
+            dialog.set_current_name(name);
+            dialog.set_do_overwrite_confirmation(true);
+            let filter = gtk::FileFilter::new();
+            filter.add_pattern(pattern);
+            dialog.set_filter(&filter);
+            let retained = std::rc::Rc::new(std::cell::RefCell::new(Some(dialog.clone())));
+            let sender = std::cell::RefCell::new(Some(sender));
+            dialog.connect_response(move |dialog, response| {
+                let result = match response {
+                    gtk::ResponseType::Accept => accepted_destination(dialog.filename()),
+                    gtk::ResponseType::Cancel | gtk::ResponseType::DeleteEvent => Ok(None),
+                    _ => Err(ErrorCode::StorageError),
+                };
+                if let Some(sender) = sender.borrow_mut().take() {
+                    let _ = sender.send(result);
+                }
+                dialog.destroy();
+                retained.borrow_mut().take();
+            });
+            dialog.show();
+        })
+        .map_err(|_| ErrorCode::StorageError)?;
+    receiver.await.map_err(|_| ErrorCode::StorageError)?
+}
+
+#[cfg(target_os = "macos")]
+async fn destination(
+    window: &tauri::WebviewWindow,
+    kind: SaveKind,
+) -> Result<Option<PathBuf>, ErrorCode> {
+    use objc2::MainThreadMarker;
+    use objc2_app_kit::{NSModalResponseCancel, NSModalResponseOK, NSSavePanel, NSWindow};
+    use objc2_foundation::NSString;
+    let owner = window.clone();
+    let (sender, receiver) = tokio::sync::oneshot::channel();
+    window
+        .run_on_main_thread(move || {
+            let Some(mtm) = MainThreadMarker::new() else {
+                let _ = sender.send(Err(ErrorCode::StorageError));
+                return;
+            };
+            let Ok(pointer) = owner.ns_window() else {
+                let _ = sender.send(Err(ErrorCode::StorageError));
+                return;
+            };
+            if pointer.is_null() {
+                let _ = sender.send(Err(ErrorCode::StorageError));
+                return;
+            }
+            let parent = unsafe { &*pointer.cast::<NSWindow>() };
+            let panel = NSSavePanel::savePanel(mtm);
+            let (title, name, _) = kind.dialog_details();
+            panel.setTitle(Some(&NSString::from_str(title)));
+            panel.setNameFieldStringValue(&NSString::from_str(name));
+            let retained = panel.clone();
+            let sender = std::cell::RefCell::new(Some(sender));
+            let completed = block2::RcBlock::new(move |response| {
+                let result = if response == NSModalResponseOK {
+                    accepted_destination(
+                        retained
+                            .URL()
+                            .filter(|url| url.isFileURL())
+                            .and_then(|url| url.path())
+                            .map(|path| PathBuf::from(path.to_string())),
+                    )
+                } else if response == NSModalResponseCancel {
+                    Ok(None)
+                } else {
+                    Err(ErrorCode::StorageError)
+                };
+                if let Some(sender) = sender.borrow_mut().take() {
+                    let _ = sender.send(result);
+                }
+            });
+            panel.beginSheetModalForWindow_completionHandler(parent, &completed);
+        })
+        .map_err(|_| ErrorCode::StorageError)?;
+    receiver.await.map_err(|_| ErrorCode::StorageError)?
+}
+
+#[cfg(any(target_os = "macos", target_os = "linux", test))]
+fn accepted_destination(path: Option<PathBuf>) -> Result<Option<PathBuf>, ErrorCode> {
+    path.filter(|path| path.is_absolute())
+        .map(Some)
+        .ok_or(ErrorCode::StorageError)
+}
+
+#[cfg(not(any(windows, target_os = "macos", target_os = "linux")))]
+async fn destination(_: &tauri::WebviewWindow, _: SaveKind) -> Result<Option<PathBuf>, ErrorCode> {
     Err(ErrorCode::ReadOnly)
 }
 
 #[cfg(windows)]
-fn dialog(owner: usize, kind: EditDocumentKind) -> Result<Option<PathBuf>, ErrorCode> {
+fn dialog(owner: usize, kind: SaveKind) -> Result<Option<PathBuf>, ErrorCode> {
     use std::os::windows::ffi::OsStringExt;
     use windows_sys::Win32::UI::Controls::Dialogs::*;
     let (title, name, filter, extension) = match kind {
-        EditDocumentKind::Html => (
+        SaveKind::Html => (
             "保存书签 HTML",
             "bookmarks.html",
             "书签 HTML\0*.html\0\0",
             "html",
         ),
-        EditDocumentKind::Sidecar => (
+        SaveKind::Sidecar => (
             "保存侧车 JSON",
             "bookmarks-sidecar.json",
             "侧车 JSON\0*.json\0\0",
+            "json",
+        ),
+        SaveKind::Diagnostic => (
+            "保存诊断 JSON",
+            "markbridge-diagnostics.json",
+            "诊断 JSON\0*.json\0\0",
             "json",
         ),
     };
@@ -199,6 +360,41 @@ fn dialog(owner: usize, kind: EditDocumentKind) -> Result<Option<PathBuf>, Error
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn accepted_native_response_requires_an_absolute_selected_path() {
+        assert_eq!(accepted_destination(None), Err(ErrorCode::StorageError));
+        assert_eq!(
+            accepted_destination(Some("relative.json".into())),
+            Err(ErrorCode::StorageError)
+        );
+        let path = std::env::temp_dir().join("diagnostic.json");
+        assert_eq!(accepted_destination(Some(path.clone())), Ok(Some(path)));
+    }
+    #[test]
+    fn cancelled_dialog_and_failed_destination_never_claim_a_saved_diagnostic() {
+        let root = tempfile::tempdir().unwrap();
+        let body = b"{\"formatVersion\":1}";
+        assert_eq!(
+            write_selected(Ok(None), body),
+            (ExportSaveStatus::Cancelled, None)
+        );
+        assert_eq!(std::fs::read_dir(root.path()).unwrap().count(), 0);
+        assert_eq!(
+            write_selected(Err(ErrorCode::StorageError), body),
+            (ExportSaveStatus::Failed, Some(ErrorCode::StorageError))
+        );
+        let path = root.path().join("missing").join("diagnostic.json");
+        assert_eq!(
+            write_selected(Ok(Some(path)), body),
+            (ExportSaveStatus::Failed, Some(ErrorCode::StorageError))
+        );
+        let path = root.path().join("diagnostic.json");
+        assert_eq!(
+            write_selected(Ok(Some(path.clone())), body),
+            (ExportSaveStatus::Saved, None)
+        );
+        assert_eq!(std::fs::read(path).unwrap(), body);
+    }
     #[test]
     fn actual_file_is_complete_and_failed_replace_preserves_destination_and_removes_temp() {
         let root = tempfile::tempdir().unwrap();

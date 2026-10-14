@@ -1,4 +1,4 @@
-//! OS credential storage. Unsupported platforms fail closed until child 14.
+//! Native OS credential storage. Missing or locked services never fall back to plaintext.
 use markbridge_protocol::ErrorCode;
 
 pub trait CredentialStore: Send + Sync {
@@ -16,6 +16,17 @@ impl OsCredentialStore {
             namespace: namespace.into(),
         }
     }
+    fn validate_identity(&self, reference: &str) -> Result<(), ErrorCode> {
+        if self.namespace.is_empty()
+            || reference.is_empty()
+            || self.namespace.bytes().any(|byte| byte == 0 || byte == b'/')
+            || reference.bytes().any(|byte| byte == 0 || byte == b'/')
+        {
+            Err(ErrorCode::StorageError)
+        } else {
+            Ok(())
+        }
+    }
     /// Windows Credential Manager comments hold at most 256 characters.
     /// keyring 3.6.1 writes `{user}@{service}:{user}.{service}` there.
     /// `Markbridge.Task03.{uuid}` plus `credential:` and 32 bytes exceeds that limit,
@@ -26,13 +37,7 @@ impl OsCredentialStore {
         const SERVICE: &str = "Markbridge";
         const USER: &str = "pairing";
         const MAX_TARGET_BYTES: usize = 180;
-        if self.namespace.is_empty()
-            || reference.is_empty()
-            || self.namespace.bytes().any(|byte| byte == 0 || byte == b'/')
-            || reference.bytes().any(|byte| byte == 0 || byte == b'/')
-        {
-            return Err(ErrorCode::StorageError);
-        }
+        self.validate_identity(reference)?;
         let target = format!("Markbridge/{}/{}", self.namespace, reference);
         if target.len() > MAX_TARGET_BYTES {
             return Err(ErrorCode::StorageError);
@@ -43,43 +48,60 @@ impl OsCredentialStore {
         );
         keyring::Entry::new_with_target(&target, SERVICE, USER).map_err(|_| ErrorCode::StorageError)
     }
+    #[cfg(any(target_os = "macos", target_os = "linux"))]
+    fn entry(&self, reference: &str) -> Result<keyring::Entry, ErrorCode> {
+        self.validate_identity(reference)?;
+        // Entry::new uses service/account on Keychain and Secret Service, not a Windows target/domain.
+        keyring::Entry::new(&self.namespace, reference).map_err(|_| ErrorCode::StorageError)
+    }
 }
 impl CredentialStore for OsCredentialStore {
     fn get(&self, reference: &str) -> Result<String, ErrorCode> {
-        #[cfg(windows)]
+        #[cfg(any(windows, target_os = "macos", target_os = "linux"))]
         {
-            self.entry(reference)?
-                .get_password()
-                .map_err(|_| ErrorCode::Unpaired)
+            self.entry(reference)?.get_password().map_err(|error| {
+                #[cfg(windows)]
+                {
+                    let _ = error;
+                    ErrorCode::Unpaired
+                }
+                #[cfg(not(windows))]
+                {
+                    match error {
+                        keyring::Error::NoEntry => ErrorCode::Unpaired,
+                        _ => ErrorCode::StorageError,
+                    }
+                }
+            })
         }
-        #[cfg(not(windows))]
+        #[cfg(not(any(windows, target_os = "macos", target_os = "linux")))]
         {
             let _ = (&self.namespace, reference);
             Err(ErrorCode::StorageError)
         }
     }
     fn set(&self, reference: &str, secret: &str) -> Result<(), ErrorCode> {
-        #[cfg(windows)]
+        #[cfg(any(windows, target_os = "macos", target_os = "linux"))]
         {
             self.entry(reference)?
                 .set_password(secret)
                 .map_err(|_| ErrorCode::StorageError)
         }
-        #[cfg(not(windows))]
+        #[cfg(not(any(windows, target_os = "macos", target_os = "linux")))]
         {
             let _ = (&self.namespace, reference, secret);
             Err(ErrorCode::StorageError)
         }
     }
     fn delete(&self, reference: &str) -> Result<(), ErrorCode> {
-        #[cfg(windows)]
+        #[cfg(any(windows, target_os = "macos", target_os = "linux"))]
         {
             match self.entry(reference)?.delete_credential() {
                 Ok(()) | Err(keyring::Error::NoEntry) => Ok(()),
                 Err(_) => Err(ErrorCode::StorageError),
             }
         }
-        #[cfg(not(windows))]
+        #[cfg(not(any(windows, target_os = "macos", target_os = "linux")))]
         {
             let _ = (&self.namespace, reference);
             Err(ErrorCode::StorageError)
@@ -119,5 +141,30 @@ mod tests {
     }
     fn scopeguard<'a>(store: &'a OsCredentialStore, reference: &'a str) -> Remove<'a> {
         Remove(store, reference)
+    }
+}
+
+#[cfg(test)]
+mod identity_tests {
+    use super::OsCredentialStore;
+    #[test]
+    fn native_identity_rejects_ambiguous_or_empty_service_and_account() {
+        for service in ["", "Markbridge/other", "Markbridge\0other"] {
+            assert!(
+                OsCredentialStore::new(service)
+                    .validate_identity("credential:abc")
+                    .is_err()
+            );
+        }
+        let store = OsCredentialStore::new("Markbridge.Task14.synthetic");
+        for reference in ["", "credential/other", "credential\0other"] {
+            assert!(store.validate_identity(reference).is_err());
+        }
+        assert!(store.validate_identity("credential:abc").is_ok());
+        assert!(
+            OsCredentialStore::new("Markbridge.Model")
+                .validate_identity("model:abc")
+                .is_ok()
+        );
     }
 }

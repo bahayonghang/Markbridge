@@ -10,6 +10,7 @@ const empty: AiSettingsDto = {
   credentialConfigured: false,
   schemaSupported: null,
 };
+const credentialFailure = '密钥未保存。请检查系统凭据服务是否已解锁，再重试。';
 
 export function AiSettings({ native }: { native: boolean }) {
   const [settings, setSettings] = useState<AiSettingsDto>(empty);
@@ -41,14 +42,14 @@ export function AiSettings({ native }: { native: boolean }) {
     return () => { mounted.current = false; };
   }, [native]);
 
-  async function run(work: () => Promise<void>) {
+  async function run(work: () => Promise<void>, failure = '操作未完成。没有发送页面内容。') {
     if (!native || busy) return;
     setBusy(true);
     setMessage(null);
     try {
       await work();
     } catch {
-      if (mounted.current) setMessage('操作未完成。没有发送页面内容。');
+      if (mounted.current) setMessage(failure);
     } finally {
       if (mounted.current) setBusy(false);
     }
@@ -77,8 +78,8 @@ export function AiSettings({ native }: { native: boolean }) {
       if (input) input.value = '';
       if (!mounted.current) return;
       setSettings(next);
-      setMessage(next.credentialConfigured ? '密钥已保存到系统凭据存储。' : '未能保存密钥。');
-    });
+      setMessage(next.credentialConfigured ? '密钥已保存到系统凭据存储。' : credentialFailure);
+    }, credentialFailure);
   }
 
   function clearSecret() {
