@@ -433,3 +433,41 @@ User explicitly waived real OS sleep/wake acceptance. R08 and redesign parent co
 
 - 按 docs/next-session-prompt.md 恢复既有13，补核实诊断导出和当前NSIS隔离安装验收；旧包PASS不代表新版。
 - 13通过后推进14平台适配及15本地语义检索；14缺环境不阻塞独立15，无主机/模型不虚构原生或质量PASS。
+
+
+## Session 14: 提交平台适配与语义检索并延期其他平台
+<!-- trellis-session: v=2 fp=a4a672aefe6c9533 -->
+
+**Date**: 2026-10-13
+**Task**: 提交平台适配与语义检索并延期其他平台
+**Branch**: `main`
+
+### Summary
+
+拆分提交 macOS/Linux 可执行适配、默认关闭的语义检索、文档和 13–15 证据。按用户决定把 14 移出活动队列，V17 仍为 NOT_RUN，不声明支持。13 的真实模型 V12 与 15 的 V18 未关闭。未推送。
+
+### Main Changes
+
+- 平台适配、语义检索与诊断导出、规范文档、任务证据分四次提交。
+- 14 归档到 archive/2026-10。AC14-1/2/3 与 V17 保持 NOT_RUN，不是平台验收通过。
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `d31b0b8` | feat(platform): 补齐 macOS 与 Linux 可执行适配，Windows 仍为默认交付 |
+| `dfa9c33` | feat(search): 增加默认关闭的本地语义检索和脱敏诊断导出 |
+| `ce5cf21` | docs: 记录 Windows 默认交付和语义检索边界 |
+| `606081e` | docs(task): 保存 13 到 15 的验收证据和平台延期决定 |
+
+### Testing
+
+- [OK] 本轮没有新跑测试。沿用已记录的 192 Rust、217 Vitest、20 Node、80 E2E、4fc/284478 安装、73edf 合成语义和 6c7e B10K 收据。
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- 13 仍待真实本地模型完成 V12；15 仍待真实 embedding 与人工标签完成 V18。其他平台暂不验收。

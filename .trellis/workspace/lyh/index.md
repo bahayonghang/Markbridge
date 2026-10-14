@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 13
+- **Total Sessions**: 14
 - **Last Active**: 2026-10-13
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~435 | Active |
+| `journal-1.md` | ~473 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 14 | 2026-10-13 | 提交平台适配与语义检索并延期其他平台 | `d31b0b8`, `dfa9c33`, `ce5cf21`, `606081e` | `main` |
 | 13 | 2026-10-13 | 工作台改版审计、撤销安全修复与十一项任务归档 | `a3bb951`, `0bd492b`, `4daa535` | `main` |
 | 12 | 2026-10-13 | Close redesign after explicit sleep-test waiver | - | `main` |
 | 11 | 2026-10-13 | R08 integration evidence; real sleep pending | - | `main` |
