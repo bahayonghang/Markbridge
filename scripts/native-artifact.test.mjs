@@ -4,6 +4,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { access, mkdir, readFile, rename, symlink, unlink, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { inspectNativeArtifact, inspectNativeFormat, nativePlatform, nativeReleaseContext, parseRustHost } from './native-build.mjs';
+import { localInstallCommand } from './install-app.mjs';
 import { assertContainedProgram, assertExtractionRoot, bundleArguments, checkDebMetadata, createExtractionRoot, currentBundleFiles,
   debProgramMember, expectedBundleFile, inspectBundle, removeExtractionRoot, verifyPackagedProgram } from './native-package.mjs';
 
@@ -286,6 +287,19 @@ test('bundle selection ignores other versions but rejects missing/ambiguous curr
     await writeFile(join(owner, 'bundle/deb/Markbridge_0.1.0_arm64.deb'), 'other-target');
     await assert.rejects(currentBundleFiles(release, config), /absent or ambiguous/);
   } finally { await removeExtractionRoot(owner); }
+});
+
+test('local install uses silent current-user NSIS and not the isolated acceptance flags', () => {
+  const installer = 'D:\\packages\\Markbridge_0.1.0_x64-setup.exe';
+  assert.deepEqual(localInstallCommand([{ kind: 'nsis', path: installer }]), { file: installer, args: ['/S'] });
+  assert.throws(() => localInstallCommand([
+    { kind: 'deb', path: 'Markbridge_0.1.0_amd64.deb' },
+    { kind: 'appimage', path: 'Markbridge_0.1.0_amd64.AppImage' },
+  ]), /Windows NSIS/);
+  assert.throws(() => localInstallCommand([
+    { kind: 'nsis', path: installer },
+    { kind: 'nsis', path: installer + '.bak' },
+  ]), /Windows NSIS/);
 });
 
 test('locked bundle filename contracts preserve product casing and exact target architecture', async () => {

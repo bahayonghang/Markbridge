@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import { runVisible } from './run-command.mjs';
 import { createHash } from 'node:crypto';
 import { realpathSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
@@ -109,12 +110,11 @@ export function assertNativeHost(release) {
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const release = nativeReleaseContext(root);
   assertNativeHost(release);
-  const build = spawnSync(process.execPath, [release.cli, 'build', '--target', release.target, '--no-bundle', '--', '--locked'], {
+  const build = await runVisible(process.execPath, [release.cli, 'build', '--target', release.target, '--no-bundle', '--', '--locked'], {
     cwd: resolve(root, 'apps/desktop'),
     env: release.env,
-    stdio: 'inherit',
+    idleMessage: (seconds) => `Native release compile is still running (${seconds}s). Cargo prints the next line when this crate finishes.\n`,
   });
-  if (build.error) throw build.error;
   if (build.status !== 0) process.exit(build.status ?? 1);
   const data = await readFile(release.artifact);
   inspectNativeArtifact(data, release);

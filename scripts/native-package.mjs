@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import { runVisible } from './run-command.mjs';
 import { createHash, randomUUID } from 'node:crypto';
 import { access, lstat, mkdir, mkdtemp, readFile, readdir, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -242,15 +243,14 @@ export async function currentBundleFiles(release, config) {
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const release = nativeReleaseContext(root);
-  const built = spawnSync(process.execPath, [fileURLToPath(new URL('./native-build.mjs', import.meta.url))], {
-    cwd: root, env: release.env, stdio: 'inherit',
+  const built = await runVisible(process.execPath, [fileURLToPath(new URL('./native-build.mjs', import.meta.url))], {
+    cwd: root, env: release.env, idleNoticeMs: 0,
   });
-  if (built.error) throw built.error;
   if (built.status !== 0) process.exit(built.status ?? 1);
-  const bundle = spawnSync(process.execPath, bundleArguments(release), {
-    cwd: resolve(root, 'apps/desktop'), env: release.env, stdio: 'inherit',
+  const bundle = await runVisible(process.execPath, bundleArguments(release), {
+    cwd: resolve(root, 'apps/desktop'), env: release.env,
+    idleMessage: (seconds) => `Native package build is still running (${seconds}s). Cargo prints the next line when this crate finishes.\n`,
   });
-  if (bundle.error) throw bundle.error;
   if (bundle.status !== 0) process.exit(bundle.status ?? 1);
   const releaseBytes = await readFile(release.artifact);
   inspectNativeArtifact(releaseBytes, release);

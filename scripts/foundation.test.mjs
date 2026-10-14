@@ -14,7 +14,7 @@ test('native dev preserves JSON arguments, desktop cwd, port and CLI exit status
   const cliDirectory = join(desktop, 'node_modules/@tauri-apps/cli');
   await mkdir(cliDirectory, { recursive: true });
   await mkdir(join(root, 'scripts'));
-  for (const name of ['tauri-dev.mjs', 'dev-port.mjs']) {
+  for (const name of ['tauri-dev.mjs', 'dev-port.mjs', 'run-command.mjs']) {
     await copyFile(new URL(name, import.meta.url), join(root, 'scripts', name));
   }
   for (const exitCode of [0, 23]) {
