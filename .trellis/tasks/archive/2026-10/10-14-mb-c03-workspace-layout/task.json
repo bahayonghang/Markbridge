@@ -1,0 +1,42 @@
+{
+  "id": "mb-c03-workspace-layout",
+  "name": "mb-c03-workspace-layout",
+  "title": "C03 全工作台排版与布局优化",
+  "description": "统一书签、详情、整理、语义、历史及设置页的信息层级、内容宽度与响应式布局。",
+  "status": "completed",
+  "dev_type": "frontend",
+  "scope": "ui-fonts-claude",
+  "package": null,
+  "priority": "P2",
+  "creator": "lyh",
+  "assignee": "lyh",
+  "createdAt": "2026-10-14",
+  "completedAt": "2026-10-14",
+  "branch": "dev",
+  "base_branch": "dev",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "10-14-mb-claude-workspace-optimization",
+  "relatedFiles": [
+    "DESIGN.md",
+    ".trellis/tasks/10-14-mb-c03-workspace-layout/prd.md",
+    ".trellis/tasks/10-14-mb-c03-workspace-layout/design.md",
+    ".trellis/tasks/10-14-mb-c03-workspace-layout/implement.md"
+  ],
+  "notes": "",
+  "meta": {
+    "implementation_approval": "granted",
+    "planning_status": "approved",
+    "depends_on": [
+      "10-14-mb-c02-font-preferences"
+    ],
+    "font_scope": "installed_font_list_search_select_preview; no_file_import",
+    "approval_evidence": "2026-10-14 user approved sequential implementation of the reviewed C01-C04 plan",
+    "execution_status": "completed_pending_archive",
+    "acceptance_status": "passed",
+    "acceptance_evidence": "evidence/check-report.md"
+  }
+}
