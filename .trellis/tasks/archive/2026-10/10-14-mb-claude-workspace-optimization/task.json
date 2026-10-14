@@ -1,0 +1,60 @@
+{
+  "id": "mb-claude-workspace-optimization",
+  "name": "mb-claude-workspace-optimization",
+  "title": "Markbridge 通用设置增强与 Claude 风格全应用优化",
+  "description": "分析现有通用设置与截图差异，规划自定义字体、精确字号及 Claude 风格的全应用样式布局优化。仅规划，不启动实施。",
+  "status": "completed",
+  "dev_type": "fullstack",
+  "scope": "ui-fonts-claude",
+  "package": null,
+  "priority": "P2",
+  "creator": "lyh",
+  "assignee": "lyh",
+  "createdAt": "2026-10-14",
+  "completedAt": "2026-10-14",
+  "branch": null,
+  "base_branch": "dev",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [
+    "10-14-mb-c01-claude-foundation",
+    "10-14-mb-c02-font-preferences",
+    "10-14-mb-c03-workspace-layout",
+    "10-14-mb-c04-visual-acceptance"
+  ],
+  "parent": null,
+  "relatedFiles": [
+    "DESIGN.md",
+    ".trellis/tasks/10-14-mb-claude-workspace-optimization/prd.md",
+    ".trellis/tasks/10-14-mb-claude-workspace-optimization/design.md",
+    ".trellis/tasks/10-14-mb-claude-workspace-optimization/implement.md"
+  ],
+  "notes": "",
+  "meta": {
+    "implementation_approval": "granted",
+    "planning_approval": "granted",
+    "planning_status": "approved",
+    "depends_on": [],
+    "font_scope": "installed_font_list_search_select_preview; no_file_import",
+    "approval_evidence": "2026-10-14 user approved sequential implementation of the reviewed C01-C04 plan",
+    "execution_status": "completed_pending_archive",
+    "acceptance_status": "passed",
+    "acceptance_scope": "approved C01-C04 requirements; supplementary startup failure retained",
+    "acceptance_evidence": "../10-14-mb-c04-visual-acceptance/evidence/check-report.md",
+    "open_observations": [
+      {
+        "id": "startup_over_3000ms",
+        "status": "unresolved",
+        "scope": "supplemental startup observation; outside approved new V14 ordinary-search gate",
+        "evidence": "../10-14-mb-c04-visual-acceptance/evidence/performance-validation.md",
+        "valuesMs": [
+          4605.9007,
+          4552.3225
+        ],
+        "cause": "UNVERIFIED"
+      }
+    ]
+  }
+}

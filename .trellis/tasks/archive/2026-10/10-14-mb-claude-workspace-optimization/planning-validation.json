@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "checks": {
+    "tasks": 5,
+    "markdown": 20,
+    "context_entries": 130,
+    "local_links": 32,
+    "source_anchors": 18
+  },
+  "candidate_color_pairs": 20,
+  "tracked_product_changes": [],
+  "errors": [],
+  "implementation": "NOT_STARTED",
+  "browser_baseline": "UNVERIFIED",
+  "native": "NOT_RUN"
+}
