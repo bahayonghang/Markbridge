@@ -40,7 +40,9 @@ it('shows a title, a description summary, and a source image', async () => {
   });
   render(<ContentPreviewPanel profileId="profile-a" chromeId="10" url="https://allowed.test/a" />);
   await act(async () => { await vi.advanceTimersByTimeAsync(200); });
-  expect(screen.getByText('Page A')).toBeVisible();
+  vi.useRealTimers();
+  // The first preview also cold-loads its generated response parser.
+  expect(await screen.findByText('Page A', {}, { timeout: 5000 })).toBeVisible();
   expect(screen.getByText('摘要 A')).toBeVisible();
   expect(screen.getByRole('img', { name: '来源图片 og:image' })).toHaveAttribute('src', `data:image/gif;base64,${gif}`);
   expect(screen.queryByText('没有来源图片')).toBeNull();
@@ -54,15 +56,15 @@ it('shows an empty image state and a failure reason', async () => {
   });
   const view = render(<ContentPreviewPanel profileId="profile-a" chromeId="11" url="https://allowed.test/b" />);
   await act(async () => { await vi.advanceTimersByTimeAsync(200); });
-  expect(screen.getByText('没有来源图片')).toBeVisible();
+  vi.useRealTimers();
+  expect(await screen.findByText('没有来源图片')).toBeVisible();
   view.rerender(<ContentPreviewPanel profileId="profile-a" chromeId="12" url="https://allowed.test/missing" />);
   vi.mocked(invoke).mockImplementation(async (command: string, raw?: unknown) => {
     if (command === 'cancel_content_preview') return null;
     const requestId = (raw as { requestId?: string }).requestId ?? 'pv1';
     return preview({ requestId, chromeId: '12', status: 'failed', failure: 'TIMED_OUT', failureMessage: '抓取超过 10 秒' });
   });
-  await act(async () => { await vi.advanceTimersByTimeAsync(200); });
-  expect(screen.getByText('抓取超过 10 秒')).toBeVisible();
+  expect(await screen.findByText('抓取超过 10 秒')).toBeVisible();
   expect(screen.queryByText('No Image')).toBeNull();
 });
 
@@ -78,8 +80,12 @@ it('keeps the latest selection when older previews resolve late', async () => {
     const chromeId = index % 2 === 0 ? '10' : '11';
     const url = chromeId === '10' ? 'https://allowed.test/a' : 'https://allowed.test/b';
     view.rerender(<ContentPreviewPanel profileId="profile-a" chromeId={chromeId} url={url} />);
-    await act(async () => { await vi.advanceTimersByTimeAsync(200); });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(200);
+      await vi.waitFor(() => expect(pending.size).toBe(index + 1));
+    });
   }
+  vi.useRealTimers();
   const entries = [...pending.entries()];
   expect(entries.length).toBeGreaterThanOrEqual(20);
   const last = entries[entries.length - 1];
@@ -90,7 +96,7 @@ it('keeps the latest selection when older previews resolve late', async () => {
   expect(screen.queryByText(/旧标题/)).toBeNull();
   last[1](preview({ requestId: last[0], chromeId: '11', status: 'ready', title: 'No Image', summary: '只有文字' }));
   await act(async () => { await Promise.resolve(); });
-  expect(screen.getByText('No Image')).toBeVisible();
+  expect(await screen.findByText('No Image')).toBeVisible();
   expect(screen.queryByText(/旧标题/)).toBeNull();
 });
 
@@ -105,7 +111,8 @@ it('shows a cache time label and ignores a cancelled payload', async () => {
   });
   render(<ContentPreviewPanel profileId="profile-a" chromeId="11" url="https://allowed.test/b" />);
   await act(async () => { await vi.advanceTimersByTimeAsync(200); });
-  expect(screen.getByText('离线缓存 · 1970-01-01 00:00 UTC')).toBeVisible();
+  vi.useRealTimers();
+  expect(await screen.findByText('离线缓存 · 1970-01-01 00:00 UTC')).toBeVisible();
   fireEvent.click(screen.getByRole('button', { name: '取消' }));
   expect(screen.getByText('已取消')).toBeVisible();
   expect(screen.queryByText('No Image')).toBeNull();
@@ -127,7 +134,10 @@ it('R05 cancels on unmount and cancels a request before the debounce has fired',
   expect(invoke).not.toHaveBeenCalledWith('content_preview', expect.anything());
   first.unmount();
   const second = render(<ContentPreviewPanel profileId="profile-a" chromeId="10" url="https://allowed.test/a" />);
-  await act(async () => { await vi.advanceTimersByTimeAsync(250); });
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(250);
+    await vi.waitFor(() => expect(invoke).toHaveBeenCalledWith('content_preview', expect.objectContaining({ chromeId: '10' })));
+  });
   second.unmount();
   expect(invoke).toHaveBeenCalledWith('cancel_content_preview', expect.objectContaining({ requestId: expect.stringMatching(/^pv\d+$/) }));
 });
@@ -137,7 +147,8 @@ it('R05 renders cached untrusted text without injecting markup', async () => {
   vi.mocked(invoke).mockImplementation(async (command, raw) => command === 'content_preview' ? preview({ requestId: (raw as { requestId: string }).requestId, chromeId: '10', status: 'cached', title: '缓存页面', summary: payload, fetchedAt: 1791800000000 }) : null);
   render(<ContentPreviewPanel profileId="profile-a" chromeId="10" url="https://allowed.test/a" />);
   await act(async () => { await vi.advanceTimersByTimeAsync(250); });
-  expect(screen.getByText(payload)).toBeVisible();
+  vi.useRealTimers();
+  expect(await screen.findByText(payload)).toBeVisible();
   expect(screen.getByText(/离线缓存/)).toHaveTextContent('2026');
   expect(document.querySelector('.content-preview script, .content-preview img')).toBeNull();
 });

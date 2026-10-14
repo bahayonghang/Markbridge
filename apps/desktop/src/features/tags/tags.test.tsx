@@ -273,6 +273,7 @@ it('R05 preserves dirty notes through external refresh and typing during a confi
   await waitFor(() => expect(screen.getByRole('button', { name: '保存备注' })).toBeEnabled());
   fireEvent.change(screen.getByLabelText('备注'), { target: { value: '已提交' } });
   fireEvent.click(screen.getByRole('button', { name: '保存备注' }));
+  await waitFor(() => expect(finish).toBeTypeOf('function'));
   fireEvent.change(screen.getByLabelText('备注'), { target: { value: '保存期间的新草稿' } });
   view.rerender(<TagDesk sourceEpoch={1} {...props} revision={5} />);
   await act(async () => finish(catalog({ entries: entries('已提交'), affected: 1 })));
@@ -368,6 +369,7 @@ it('R05 invalidates both displayed and late title diffs when another metadata ed
   expect(screen.queryByRole('button', { name: '确认写入标题' })).not.toBeInTheDocument();
   pending = true;
   fireEvent.click(screen.getByRole('button', { name: '预览标题差异' }));
+  await waitFor(() => expect(finishPreview).toBeTypeOf('function'));
   view.rerender(<TagDesk {...props} refreshVersion={2} />);
   await act(async () => finishPreview(encodingPreview([{ before: 'Alpha', after: 'Alpha | Old' }])));
   expect(screen.queryByRole('button', { name: '确认写入标题' })).not.toBeInTheDocument();
@@ -390,6 +392,7 @@ it('R05 cannot save the prior clean note while the new epoch catalog is loading'
   expect(screen.getByLabelText('添加标签')).toHaveAttribute('readonly');
   fireEvent.click(screen.getByRole('button', { name: '保存备注' }));
   expect(vi.mocked(invoke).mock.calls.some(([command]) => command === 'tag_command')).toBe(false);
+  await waitFor(() => expect(finishNew).toBeTypeOf('function'));
   await act(async () => finishNew(catalog({ entries: entries('新身份内容') })));
   expect(screen.getByRole('button', { name: '保存备注' })).toBeEnabled();
   expect(screen.getByLabelText('备注')).toHaveValue('新身份内容');

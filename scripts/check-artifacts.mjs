@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readFile, readdir } from 'node:fs/promises';
+import { readFile, readdir, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -14,6 +14,12 @@ async function inspect(directory) {
   }
 }
 for (const root of roots) await inspect(fileURLToPath(new URL(`../${root}`, import.meta.url)));
+const desktopAssets = fileURLToPath(new URL('../apps/desktop/dist/assets/', import.meta.url));
+for (const name of await readdir(desktopAssets)) {
+  if (!name.endsWith('.js')) continue;
+  const bytes = (await stat(join(desktopAssets, name))).size;
+  assert.ok(bytes <= 500_000, `Desktop chunk ${name} is ${bytes} bytes. Split that module below 500 kB.`);
+}
 const extension = new URL('../apps/extension/dist/', import.meta.url);
 const manifest = JSON.parse(await readFile(new URL('manifest.json', extension), 'utf8'));
 assert.equal(manifest.manifest_version, 3);

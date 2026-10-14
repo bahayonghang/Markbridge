@@ -272,7 +272,9 @@ it('R03 refreshes summary search after a confirmed local AI save without a Chrom
   expect(screen.getByText(/已加载 200 \/ 201/)).toBeVisible();
   view.rerender(<LibraryWorkspace state={workspaceState} invalid={false} native focusMirrorId={null} section="organize" />);
   fireEvent.click(await screen.findByRole('tab', { name: '单条建议' }));
-  fireEvent.click(await screen.findByRole('button', { name: '生成建议' }));
+  const generate = await screen.findByRole('button', { name: '生成建议' });
+  await waitFor(() => expect(generate).toBeEnabled());
+  fireEvent.click(generate);
   fireEvent.click(await screen.findByLabelText('保存摘要'));
   fireEvent.click(screen.getByLabelText('保存标签'));
   fireEvent.click(screen.getByRole('button', { name: '确认这条建议' }));

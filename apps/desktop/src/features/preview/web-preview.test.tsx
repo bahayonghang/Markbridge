@@ -39,9 +39,10 @@ it('names the profile and selected url before opening the page', async () => {
   expect(screen.queryByRole('button', { name: '前进' })).not.toBeInTheDocument();
   expect(screen.queryByRole('button', { name: '刷新' })).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: '打开应用内网页' }));
-  expect(invoke).toHaveBeenCalledWith('open_web_preview', expect.objectContaining({
+  // Dispatch waits for the cold-loaded generated parser on the first open.
+  await waitFor(() => expect(invoke).toHaveBeenCalledWith('open_web_preview', expect.objectContaining({
     profileId: 'profile-a', chromeId: '10', url: 'https://example.com/a', requestId: expect.stringMatching(/^wp\d+$/),
-  }));
+  })), { timeout: 5000 });
 });
 
 it('enables history controls only for the open window of this profile', async () => {
@@ -67,6 +68,7 @@ it('enables history controls only for the open window of this profile', async ()
   fireEvent.click(screen.getByRole('button', { name: '前进' }));
   await waitFor(() => expect(screen.getByRole('button', { name: '刷新' })).toBeEnabled());
   fireEvent.click(screen.getByRole('button', { name: '刷新' }));
+  await waitFor(() => expect(screen.getByRole('button', { name: '刷新' })).toBeEnabled());
   expect(invoke).toHaveBeenCalledWith('web_preview_action', { action: 'back' });
   expect(invoke).toHaveBeenCalledWith('web_preview_action', { action: 'forward' });
   expect(invoke).toHaveBeenCalledWith('web_preview_action', { action: 'reload' });
@@ -107,9 +109,9 @@ it('clears the profile session only after confirmation', async () => {
   fireEvent.click(await screen.findByRole('button', { name: '清除此资料的预览会话' }));
   expect(invoke).not.toHaveBeenCalledWith('clear_web_preview_session', expect.anything());
   fireEvent.click(screen.getByRole('button', { name: '确认清除预览会话' }));
-  expect(invoke).toHaveBeenCalledWith('clear_web_preview_session', expect.objectContaining({
+  await waitFor(() => expect(invoke).toHaveBeenCalledWith('clear_web_preview_session', expect.objectContaining({
     profileId: 'profile-a', requestId: expect.stringMatching(/^wp\d+$/),
-  }));
+  })));
   expect(await screen.findByText('已清除此资料的预览会话')).toBeVisible();
 });
 
@@ -124,8 +126,10 @@ it('ignores a late open after a newer close', async () => {
   panel();
   expect(await screen.findByText('应用内网页已打开')).toBeVisible();
   fireEvent.click(screen.getByRole('button', { name: '打开应用内网页' }));
+  await waitFor(() => expect(resolveOpen).toBeTypeOf('function'));
   fireEvent.click(screen.getByRole('button', { name: '关闭预览' }));
-  await act(async () => { resolveOpen?.(state({ phase: 'ready', profileId: 'profile-a', url: 'https://example.com/late', currentUrl: 'https://example.com/late' })); });
+  await screen.findByText('尚未打开应用内网页。');
+  await act(async () => { resolveOpen!(state({ phase: 'ready', profileId: 'profile-a', url: 'https://example.com/late', currentUrl: 'https://example.com/late' })); });
   expect(screen.queryByText('预览窗口网址：https://example.com/late')).toBeNull();
   expect(screen.getByText('尚未打开应用内网页。')).toBeVisible();
 });
