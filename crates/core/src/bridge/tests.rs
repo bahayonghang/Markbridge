@@ -2845,6 +2845,8 @@ async fn open_leaves_an_unacked_edit_create_uncertain_and_does_not_replay() {
     bridge.shutdown().await.unwrap();
 }
 
+// Toolhelp and ntdll imports. Other platforms have no kernel32 to link.
+#[cfg(windows)]
 #[path = "b100.rs"]
 mod b100;
 
