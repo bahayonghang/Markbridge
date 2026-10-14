@@ -19,6 +19,8 @@ Numbered SQL sources are `migrations/001_identity.sql` and `migrations/002_histo
 
 Child 07 adds `crates/core/src/storage/migrations/004_tags.sql` for `raw_title`, `last_encoded_title`, and `tag_journal`. `crates/core/src/storage/tags.rs` writes notes, tag links, merge, delete, and undo. `crates/core/src/tags/mod.rs` owns normalization and the reversible title codec. Those paths do not write Chrome.
 
+Child 15 adds `crates/core/src/storage/migrations/008_semantic.sql`; current `SCHEMA_VERSION` is 8. Frozen index members, little-endian normalized f32 vectors, endpoint/model/digest/dimension, content fingerprints and generation stay in the Storage worker. Metadata SQL triggers cover title/summary invalidation across every write/restore path; final-tree deletion avoids temporary tombstone loss. Persistent transitions precede cancellation, late commits use exact generation/content guards, and deleting derived rows preserves cache/metadata/tags/FTS. Populated v7 WAL backup, v8 migration and injected rollback have deterministic evidence. See [semantic search](semantic-search.md) for signatures, lifecycle and actual-model acceptance boundaries.
+
 ## 3. Contracts
 
 Use `(profile_id, source_epoch, chrome_id)` as the unique browser cache key. Keep chrome IDs as strings. A new cache entry receives an independent random bookmark_id. Refresh updates the same entry; an epoch reset creates a new entry. Duplicate URLs remain separate bookmarks. File mirror cache uses `(mirror_source_id, chrome_id)` in a separate table; association requires the later explicit workflow.

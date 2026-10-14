@@ -16,6 +16,8 @@ R06 separates `HistoryWorkspace` and `ExportDesk` from `EditDesk`, which owns ed
 
 Exports are reachable from settings and history. `save_export` opens a Rust-owned native dialog and returns saved/cancelled/failed. Report saved only after actual writing succeeds; cancellation must not show success. Display the captured source, revision and cache time. Mirror sources offer HTML only. Sidecar JSON retains local metadata but is not a full-library restore format. Neither output body nor selected filesystem path enters the frontend.
 
+Task13 `DiagnosticExport` is a sibling in Chrome connection settings. State the fixed report contents and exclusions before the explicit action, call no-argument `save_diagnostics` only on click, and prevent duplicate clicks with an immediate lock. Do not receive or render report contents or paths. Use generated `DiagnosticSaveResult`, safe saved/cancelled/failed copy, an unmount guard, and the existing panel/typography/focus tokens. See backend [diagnostic export contract](../backend/logging-guidelines.md) and `tests/e2e/diagnostics.spec.ts`; browser IPC mocks remain separate from native save and preview-denial evidence.
+
 The user requested content previews and full webpage browsing. Separate metadata, modification diffs, and remote content. Never inject fetched HTML into the trusted application DOM. Remote pages have no application file, secret, or mutation permissions.
 
 ## Connection and source handoff (R02)

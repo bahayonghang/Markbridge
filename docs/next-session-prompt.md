@@ -1,30 +1,30 @@
-# 下一对话实施 Prompt
+# 后续会话实施与验收 Prompt
 
-以下内容可直接复制到下一对话：
+以下内容可直接复制。不要按旧 Prompt 重做已经完成的实现或创建重复任务。
 
 ---
 
-请在 `D:\Documents\Code\Tauri\Markbridge` 继续已批准的 Trellis 规划，推进所有未完成任务，直到完成全部可执行工作；遇到真实环境或必要授权缺口时记录明确阻塞，继续不依赖它的工作，不要只停在计划或笼统的“等待确认”。
+请继续 D:\Documents\Code\Tauri\Markbridge。先使用 Trellis start/continue 读取 AGENTS.md、Git 状态、.trellis/spec/project-baseline.md、docs/implementation-status-2026-10-13.md，原父任务 execution-status/PRD/design/task-map/verification/implement/current-integration，以及既有 13/14/15 的 task.json、PRD/design/implement 和最新 evidence。以实际源码、收据与状态恢复，不对父任务运行 start，不新建同一任务，不重做已归档工作台。
 
-先使用 Trellis start/continue 读取 AGENTS.md、当前 Git 状态、`.trellis/spec/project-baseline.md`、`docs/implementation-status-2026-10-13.md`、当前父任务 execution-status/PRD/design/task-map/verification/implement，以及本轮归档 R08 中的 `research/remaining-task-audit.md` 和 `evidence/precommit-closeout.md`。按实际目录和 task.json 恢复既有任务，不创建重复任务，不对父任务执行 start。遵循项目要求，实施与独立检查使用相应 Trellis 子代理；一次只启动一个前置验收满足的子任务。
+旧 01–12、新版 R01–R08 及改版父任务已经完成。13 已完成本轮 Windows 安装、脱敏诊断与集成条件；15 已实现独立默认关闭本地语义检索、范围确认、migration 008、取消/失效、精确排名和 UI。源码、最终包及原生功能结果以最新收据为准。2026-10-13 晚用户明确目前默认 Windows，其他平台先不管：14 已离开活动队列，V17 仍为 NOT_RUN，不声明 macOS/Linux 支持。13 的 V12、15 的 V18 与原父任务仍未正式完成。
 
-当前已完成：旧 01–12、新版 R01–R08 及改版父任务。2026-10-13 已获授权做本地提交和归档。未完成的是 `10-10-mb-13-windows-acceptance`、`10-10-mb-14-cross-platform`、`10-10-mb-15-semantic-search`，以及原父任务 `10-10-markbridge-workspace` 的最终集成。
+本轮已批准启动依赖例外：13 当前 Windows 安装、诊断和受影响自动检查通过即可推进 14/15，13 真实模型 V12/完整验收仍未完成。15 只依赖 12、13，不依赖 14。用户明确没有 macOS/Linux 原生主机或本地 embedding 模型，要求记录未验证并继续所有可执行工作。这些答复不是模型或平台验收 PASS。
 
-按以下顺序推进：
+按实际剩余门槛推进：
 
-1. **13 Windows 集成验收**：先核对最新收据，不能被旧 notes 中的 FAIL/NOT_RUN 误导，也不能拿旧版安装包 PASS 当新版通过。检查并补齐原 PRD/design 已要求的用户显式触发、脱敏的诊断导出。运行受影响自动检查，构建并扫描当前版本 NSIS，核对包内 exe hash/版本/内容，再执行已获授权的隔离安装、配对、日常管理、退出重启及卸载数据保留验收。实施和准备工作先做完；仅在实际需要且尚无授权的隔离安装前请求该具体授权。汇总 V01–V15 的当前结论和证据复用范围。V16 缺专用 Floccus 测试库与第二客户端时保留 UNVERIFIED，按合同不阻塞基础本地功能结论。
-2. **14 macOS/Linux**：13 通过后实施平台能力，覆盖 Keychain/Secret Service、Profile 路径、外部打开、保存对话框、main/preview 会话隔离、平台构建和必要 Windows 回归。两种平台分别完成真实原生运行/安装/回滚验收并记录版本。缺主机时完成能独立进行的实现和检查，明确未测项与所需环境，不宣称支持，也不擅自关闭任务；清除当前活动指针后可推进 15。
-3. **15 可选本地语义检索**：依赖 12、13，**不依赖 14**。沿用批准的本地 embedding + SQLite + Rust 有界精确 cosine 方案，默认零请求，启用前说明模型、索引范围和空间影响；实现暂停/恢复、删除/摘要更新失效、模型与维度隔离、删除索引不影响普通搜索/标签/摘要。只索引明确授权范围，不自动抓全库。用实际本地模型完成 20 条人工标注查询 Recall@5 ≥ 0.8 和 B10K 暖态 p95 ≤ 1 s。无真实模型则质量项 NOT_RUN，不能拿模拟响应关闭该验收。
-4. **原父任务收尾**：更新 R01–R16 覆盖、依赖、证据矩阵、用户指南及平台支持范围。只有 13/14/15 满足各自门槛，或我明确调整范围后，才可宣布父任务整体完成。Windows 完成可以作为独立里程碑报告。
+1. **13 / V12**：有用户明确配置的实际本地 AI 模型后，完成原单条/批量 AI 的真实模型验收及 13 完整矩阵。脚本协议响应、Chrome 批量写回及功能测试分别记录，不能替代模型证据。V16 缺专用 Floccus 库和第二客户端时保持 UNVERIFIED。代码更改后按新 hash 检查，不把历史安装结果当新产物重验。
+2. **14 / V17**：用户已明确其他平台先不管，14 不在当前活动队列。可执行适配源码已提交，不要重做。将来若重新打开 macOS 14+ arm64 和 Ubuntu 24.04 x64 验收，再分别运行目标编译、包内扫描和 V02/V04 普通恢复/V08/V11/V15。当前 V17 保持 NOT_RUN，不能声明支持。CI 配置未运行，Windows 编译不会检查 cfg 排除的平台分支。
+3. **15 / V18**：取得本地 embedding 模型与真实人工审查的 20 条标签后，按 evidence/evaluation.md 执行真实评测。固定 B10K 10,000 书签、1,000 文件夹、20 层；保留实际 model/digest/dimension、20 条相关性结果和至少 30 次暖态 UI 输入→HTTP→Rust 排名→协议校验→呈现的全部时延。平均 Recall@5 >=0.8、暖态 p95 <=1 s；低于门槛也保留。relevance-candidates.json 是开发者候选，不能自动改成 HUMAN_REVIEWED；synthetic-native 收据不是真实模型验收。不安装模型、不自动 pull 或调用云模型。
+4. **原父任务**：检查 R01–R16 覆盖、验收复用范围、支持矩阵和指南。14 已按 Windows 默认范围移出活动队列，这不关闭 13、15 或父任务。只有 V12/V18 实际满足或用户再明确调整范围，才关闭剩余任务。未获环境时报告具体缺口，不重复实施已完成内容。
 
-重要既有决定与约束：
+保持以下决定：
 
-- 我已明确“这一条不用管，使用的时候也不会睡眠”。真实 OS 休眠/唤醒项为 WAIVED，实际 NOT_RUN，历史 V04 保留 UNVERIFIED。不要重新要求睡眠、调整电源策略，或把豁免写成测试通过。普通断连、重连、重启和非 live 禁写仍需验证。
-- UI 保持 Codex / Apple 简洁风格，以蓝色为基础；涉及 UI 继续使用 `$ui` 和 `$frontend-design:frontend-design`，保留截图及真实交互证据。
-- Chrome 写入只经扩展 `chrome.bookmarks`；Rust 唯一写 SQLite；确认 apply、执行前备份、串行回执、lost ack 不确定、保护节点、非 live 禁写与重连不回放等边界不变。
-- 保留最新修复的条件撤销安全：新建文件夹后来含外部内容时拒绝撤销删除，且执行前验证预期子树，不能覆盖外部改动。
-- 只使用新建临时 Chrome Profile、应用目录和凭据命名空间；不得修改日常 Chrome/扩展/书签。main WebView 只用 `MARKBRIDGE_APP_DATA/main-webview`，preview 独立；不得复用会探查日常路径或设置全局 `WEBVIEW2_USER_DATA_FOLDER` 的旧验收脚本。
-- 先看已有 diff，保留用户工作；遵循 Rust DTO → schema → TS 的生成及检查流程。源码检查、自动测试、原生、安装、模型质量和外部同步证据分别报告；旧 hash 的收据不能冒充新二进制重验。
-- 当前继续实施授权有效，不必重复询问是否实施。2026-10-13 的提交/归档授权仅对应上一轮，后续提交/归档按当轮授权处理；push、发布、签名、付费模型调用或日常安装都需要单独授权。
+- 真实 OS 睡眠/唤醒为 WAIVED，实际 NOT_RUN，历史 V04 UNVERIFIED。不要再次要求休眠或调整电源策略。普通退出、重启、断连/重连和非 live 禁写仍有验收合同。
+- 涉及 UI 使用 ui 和 frontend-design:frontend-design，保持现有蓝色、Codex/Apple 简洁风格，保存前后截图和实际交互证据。遵循 Trellis 实施/独立检查子代理要求，一次只实施一个满足启动门槛的既有任务。
+- 浏览器写入唯一经扩展 chrome.bookmarks，Rust 唯一写 SQLite。保护节点、显式确认、执行前备份、串行回执、lost ack 不确定、重连不回放和条件撤销外部子节点保护保持不变。
+- 仅使用新建临时 Chrome Profile、独立 app-data 和凭据命名空间。main 必须使用隔离根/main-webview，实际 OS 目录守卫通过后才交互；preview 独立。不要使用设置全局 WEBVIEW2_USER_DATA_FOLDER 或探查日常目录的旧脚本。早期默认 main store 写入过合成 r08-main 的事实保持记录，影响未验证，不自行检查或清理默认目录。
+- semantic 默认关闭，与聊天独立。只发送确认范围的实际标题与已保存摘要；URL/备注/本地标签字段不进入输入，已编码进 Chrome 标题的文本仍属于标题。取消/暂停/禁用/删除/模型变更和世代守卫不能让迟到响应恢复旧索引；删除派生数据保留侧车和普通搜索。
+- schema 008 不能用旧 schema 007 收据冒充当前检查。迁移前一致性备份，降级拒绝，不删除数据库绕过版本检查。Rust DTO→schema→TypeScript/validator 和 pnpm protocol:check 同步。
+- 当前继续实施授权对剩余的 13 与 15 有效；隔离安装及必要重测只限已披露临时根、当前用户安装注册和标准卸载范围，保留数据。2026-10-13 晚已经授权并执行当时工作树的拆分提交，以及 14 的范围归档。新的 push、发布、签名、日常安装或付费/云模型请求仍需单独授权。
 
-完成后给出每个任务的实际状态、改动和证据、剩余具体阻塞及可执行下一步。不要虚构通过，也不要因 14 的环境不足而漏做独立的 15。
+完成后给出实际状态、关键检查和收据、剩余具体环境及验收入口。持续完成所有可执行工作，不只停在计划，不虚构模型、原生平台或整体完成。

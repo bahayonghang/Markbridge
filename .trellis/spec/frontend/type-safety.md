@@ -14,6 +14,8 @@ Documentation fixture:
 
 The protocol task owns one schema with cross-language compatibility tests. Invalid AI output must leave bookmarks unchanged.
 
+Child15's eight semantic parsers in `packages/protocol/src/semantic.ts` wrap Rust-generated schemas and reject malformed Unicode, nonfinite/out-of-range scores, unknown fields and invalid identity/status bounds. Required nullable fields remain present even when null. `apps/desktop/src/backend.ts` validates requests and replies; UI additionally verifies repeated request/Profile/epoch/indexId/generation before rendering or navigation. No vector BLOB/table crosses this boundary. See [semantic contracts](../backend/semantic-search.md).
+
 ## Foundation startup DTO
 
 ### 1. Scope and trigger

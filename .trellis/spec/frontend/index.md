@@ -10,3 +10,4 @@ Read [Project baseline](../project-baseline.md) first. The React workspace inclu
 | [State](state-management.md) | Cache, drafts, proposals |
 | [Types](type-safety.md) | Validated DTOs |
 | [Quality](quality-guidelines.md) | UI and native evidence |
+| [Semantic search contract](../backend/semantic-search.md) | Validated source-bound controls and explicit queries |
