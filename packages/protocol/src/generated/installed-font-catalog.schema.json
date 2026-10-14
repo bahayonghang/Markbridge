@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "InstalledFontCatalog",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "families": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/InstalledFontFamily"
+          },
+          "maxItems": 10000
+        },
+        "status": {
+          "type": "string",
+          "const": "ready"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "families"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "reason": {
+          "$ref": "#/$defs/FontCatalogUnavailableReason"
+        },
+        "status": {
+          "type": "string",
+          "const": "unavailable"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "reason"
+      ]
+    }
+  ],
+  "$defs": {
+    "FontCatalogUnavailableReason": {
+      "type": "string",
+      "enum": [
+        "unsupported_platform",
+        "enumeration_failed",
+        "catalog_limit"
+      ]
+    },
+    "InstalledFontFamily": {
+      "type": "object",
+      "properties": {
+        "displayName": {
+          "type": "string",
+          "maxLength": 256,
+          "minLength": 1,
+          "pattern": "^[^\\u0000-\\u001F\\u007F-\\u009F\\uD800-\\uDFFF]+$"
+        },
+        "family": {
+          "type": "string",
+          "maxLength": 256,
+          "minLength": 1,
+          "pattern": "^[^\\u0000-\\u001F\\u007F-\\u009F\\uD800-\\uDFFF]+$"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "family",
+        "displayName"
+      ]
+    }
+  }
+}

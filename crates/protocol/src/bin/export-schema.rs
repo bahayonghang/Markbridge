@@ -21,6 +21,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Some("undo-preview") => schemars::schema_for!(markbridge_protocol::UndoPreview),
         Some("export-save-result") => schemars::schema_for!(markbridge_protocol::ExportSaveResult),
         Some("diagnostic-report") => schemars::schema_for!(markbridge_protocol::DiagnosticReport),
+        Some("installed-font-catalog") => {
+            schemars::schema_for!(markbridge_protocol::InstalledFontCatalog)
+        }
         Some("diagnostic-save-result") => {
             schemars::schema_for!(markbridge_protocol::DiagnosticSaveResult)
         }

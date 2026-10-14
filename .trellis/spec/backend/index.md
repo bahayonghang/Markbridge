@@ -10,4 +10,5 @@ Read [Project baseline](../project-baseline.md) first. Rust owns SQLite writes a
 | [Logging](logging-guidelines.md) | Diagnostic fields and redaction |
 | [Quality](quality-guidelines.md) | Contract-specific evidence |
 | [Semantic search](semantic-search.md) | Optional local embedding, frozen scope and derived index lifecycle |
+| [UI font catalog](ui-fonts.md) | Main-only installed Windows font families, bounded metadata and native verification |
 | [Extension](../extension/index.md) | Browser adapter and transport |

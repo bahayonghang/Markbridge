@@ -9,6 +9,7 @@
     "./bridge": "./src/bridge.ts",
     "./history": "./src/history.ts",
     "./diagnostics": "./src/diagnostics.ts",
+    "./ui-fonts": "./src/ui-fonts.ts",
     "./batch-edit": "./src/batch-edit.ts",
     "./ai": "./src/ai.ts",
     "./organization": "./src/organization.ts",

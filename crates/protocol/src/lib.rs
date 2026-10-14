@@ -9,6 +9,8 @@ mod history;
 pub use history::*;
 mod diagnostics;
 pub use diagnostics::*;
+mod ui_fonts;
+pub use ui_fonts::*;
 
 pub const PROTOCOL_VERSION: u8 = 1;
 
