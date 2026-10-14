@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SemanticScopeReview",
+  "type": "object",
+  "properties": {
+    "clippedCount": {
+      "type": "integer",
+      "format": "uint16",
+      "maximum": 10000,
+      "minimum": 0
+    },
+    "count": {
+      "type": "integer",
+      "format": "uint16",
+      "maximum": 10000,
+      "minimum": 1
+    },
+    "expectedRevision": {
+      "$ref": "#/$defs/Counter"
+    },
+    "inputRecipeVersion": {
+      "type": "integer",
+      "format": "uint8",
+      "maximum": 255,
+      "minimum": 0
+    },
+    "maxInputBytes": {
+      "type": "integer",
+      "format": "uint16",
+      "maximum": 65535,
+      "minimum": 0
+    },
+    "maxInputChars": {
+      "type": "integer",
+      "format": "uint16",
+      "maximum": 65535,
+      "minimum": 0
+    },
+    "model": {
+      "type": "string",
+      "maxLength": 128,
+      "minLength": 1
+    },
+    "profileId": {
+      "$ref": "#/$defs/Id"
+    },
+    "reviewId": {
+      "$ref": "#/$defs/Id"
+    },
+    "sourceEpoch": {
+      "$ref": "#/$defs/SourceEpoch"
+    },
+    "upperBytes": {
+      "$ref": "#/$defs/Counter"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "reviewId",
+    "profileId",
+    "sourceEpoch",
+    "expectedRevision",
+    "count",
+    "clippedCount",
+    "upperBytes",
+    "model",
+    "inputRecipeVersion",
+    "maxInputChars",
+    "maxInputBytes"
+  ],
+  "$defs": {
+    "Counter": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 9007199254740991,
+      "minimum": 0
+    },
+    "Id": {
+      "type": "string",
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*(?![\\s\\S])"
+    },
+    "SourceEpoch": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 9007199254740991,
+      "minimum": 1
+    }
+  }
+}

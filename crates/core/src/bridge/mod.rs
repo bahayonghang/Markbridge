@@ -4,6 +4,7 @@ mod batch_edit;
 pub mod credentials;
 mod edit;
 mod history;
+mod semantic;
 pub use history::ExportSnapshot;
 mod file_mirror;
 mod maintenance;
@@ -36,6 +37,7 @@ pub struct Bridge {
     model_credentials: Arc<dyn CredentialStore>,
     model_transport: Arc<dyn crate::ai::ModelTransport>,
     ai_gate: crate::ai::Gate,
+    semantic: Arc<semantic::Runtime>,
     ai_audit: crate::ai::Audit,
     lifecycle: Arc<Mutex<()>>,
     watches: Arc<Mutex<BTreeMap<String, file_mirror::Watch>>>,
@@ -150,6 +152,7 @@ impl Bridge {
             .join("backups");
         let storage = Storage::open(path).await?;
         storage.freeze_inflight().await?;
+        storage.semantic_restart().await?;
         let blocked = storage.blocked_profiles().await?;
         let mut profiles = BTreeMap::new();
         for stored in storage.profiles().await? {
@@ -218,6 +221,7 @@ impl Bridge {
             model_credentials,
             model_transport,
             ai_gate: crate::ai::Gate::default(),
+            semantic: Arc::new(semantic::Runtime::new()?),
             ai_audit: crate::ai::Audit::default(),
             lifecycle: Arc::new(Mutex::new(())),
             watches: Arc::new(Mutex::new(BTreeMap::new())),
@@ -409,6 +413,7 @@ impl Bridge {
     }
     pub async fn shutdown(&self) -> Result<()> {
         let _lifecycle = self.lifecycle.lock().await;
+        let semantic_result = self.shutdown_semantic().await;
         self.preview.cancel_all().await;
         self.links.cancel_all().await;
         self.ai_gate.cancel_all().await;
@@ -431,7 +436,7 @@ impl Bridge {
         if let Some(storage) = storage {
             storage.close().await?;
         }
-        Ok(())
+        semantic_result
     }
     /// Local Rust consumers only. Never exposed by the production WebSocket listener.
     pub async fn cache(

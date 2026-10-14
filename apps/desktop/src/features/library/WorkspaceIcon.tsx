@@ -1,9 +1,10 @@
-export type IconName = 'bookmark' | 'folder' | 'organize' | 'history' | 'settings' | 'back' | 'detail' | 'close' | 'chevron';
+export type IconName = 'bookmark' | 'folder' | 'organize' | 'search' | 'history' | 'settings' | 'back' | 'detail' | 'close' | 'chevron';
 
 const paths: Record<IconName, string> = {
   bookmark: 'M6 3h12v18l-6-4-6 4V3Z',
   folder: 'M3 6h7l2 3h9v11H3V6Z',
   organize: 'm12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3Z',
+  search: 'M10.5 3a7.5 7.5 0 1 0 0 15 7.5 7.5 0 0 0 0-15Zm5.5 13 5 5',
   history: 'M4 4v5h5M4 9a8 8 0 1 1-1 7M12 7v5l3 2',
   settings: 'M10 3h4l1 3 3 1 3 3v4l-3 1-1 3-3 3h-4l-1-3-3-1-3-3v-4l3-1 1-3 3-3ZM9 12a3 3 0 1 0 6 0 3 3 0 0 0-6 0',
   back: 'm10 5-7 7 7 7M3 12h18',

@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SemanticModelCheck",
+  "type": "object",
+  "properties": {
+    "available": {
+      "type": "boolean"
+    },
+    "digest": {
+      "$ref": "#/$defs/RequiredNullable"
+    },
+    "dimension": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "maximum": 4096,
+      "minimum": 1
+    },
+    "failure": {
+      "$ref": "#/$defs/RequiredNullable2"
+    },
+    "failureMessage": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 120
+    },
+    "model": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 128
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "available",
+    "model",
+    "digest",
+    "dimension",
+    "failure",
+    "failureMessage"
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string",
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*(?![\\s\\S])"
+    },
+    "RequiredNullable": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Id"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "RequiredNullable2": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SemanticFailure"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "SemanticFailure": {
+      "type": "string",
+      "enum": [
+        "DISABLED",
+        "ENDPOINT_DENIED",
+        "MISSING_MODEL",
+        "REMOTE_MODEL",
+        "DIMENSION_MISMATCH",
+        "INVALID_VECTOR",
+        "MODEL_CHANGED",
+        "STALE_INDEX",
+        "CANCELLED",
+        "TIMED_OUT",
+        "UNREACHABLE",
+        "INVALID_RESPONSE",
+        "LIMIT_EXCEEDED",
+        "STORAGE_ERROR"
+      ]
+    }
+  }
+}

@@ -39,6 +39,8 @@ test('generated validators run with string code generation disabled, as required
     import pairing from ${JSON.stringify(new URL('pairing-offer.validator.js', generated).href)};
     import mirrorTree from ${JSON.stringify(new URL('mirror-tree.validator.js', generated).href)};
     import chromeProfiles from ${JSON.stringify(new URL('chrome-profiles.validator.js', generated).href)};
+    import diagnosticReport from ${JSON.stringify(new URL('diagnostic-report.validator.js', generated).href)};
+    import diagnosticSave from ${JSON.stringify(new URL('diagnostic-save-result.validator.js', generated).href)};
     try {
     assert.throws(() => Function('return 1'), /Code generation from strings disallowed/);
     assert.equal(startup({protocolVersion:1,state:'unpaired'}), true);
@@ -56,6 +58,11 @@ test('generated validators run with string code generation disabled, as required
     assert.equal(chromeProfiles({profiles:[{directoryKey:'Default',displayName:'Personal'}]}), false);
     assert.equal(pairing({profileId:'profile-test',pairingCode:'fixture',expiresAt:1}), true);
     assert.equal(pairing({profileId:'profile-test',pairingCode:'fixture',expiresAt:-1}), false);
+    const diagnostic = {formatVersion:1,appVersion:'0.1.0',protocolVersion:1,schemaVersion:7,platform:'windows',architecture:'x86_64',bridgeListening:false,bridgeErrorCode:null,connections:{unpaired:0,connecting:0,reconciling:0,live:0,cachedReadOnly:0,error:0},mirrors:{current:0,stale:0,unavailable:0}};
+    assert.equal(diagnosticReport(diagnostic), true);
+    assert.equal(diagnosticReport({...diagnostic,profileId:'private-canary'}), false);
+    assert.equal(diagnosticSave({status:'saved',errorCode:null}), true);
+    assert.equal(diagnosticSave({status:'saved',errorCode:null,path:'private-canary'}), false);
     } catch (error) { console.error(error.name + ': ' + error.message); process.exit(1); }
   `;
   const result = spawnSync(process.execPath, ['--disallow-code-generation-from-strings', '--input-type=module', '--eval', source], { encoding: 'utf8' });

@@ -1,0 +1,178 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DiagnosticReport",
+  "type": "object",
+  "properties": {
+    "appVersion": {
+      "type": "string",
+      "maxLength": 32,
+      "minLength": 1
+    },
+    "architecture": {
+      "$ref": "#/$defs/DiagnosticArchitecture"
+    },
+    "bridgeErrorCode": {
+      "$ref": "#/$defs/RequiredNullable"
+    },
+    "bridgeListening": {
+      "type": "boolean"
+    },
+    "connections": {
+      "$ref": "#/$defs/DiagnosticConnections"
+    },
+    "formatVersion": {
+      "$ref": "#/$defs/Version"
+    },
+    "mirrors": {
+      "$ref": "#/$defs/DiagnosticMirrors"
+    },
+    "platform": {
+      "$ref": "#/$defs/DiagnosticPlatform"
+    },
+    "protocolVersion": {
+      "$ref": "#/$defs/Version"
+    },
+    "schemaVersion": {
+      "$ref": "#/$defs/Counter"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "formatVersion",
+    "appVersion",
+    "protocolVersion",
+    "schemaVersion",
+    "platform",
+    "architecture",
+    "bridgeListening",
+    "bridgeErrorCode",
+    "connections",
+    "mirrors"
+  ],
+  "$defs": {
+    "Counter": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 9007199254740991,
+      "minimum": 0
+    },
+    "DiagnosticArchitecture": {
+      "type": "string",
+      "enum": [
+        "x86_64",
+        "aarch64",
+        "other"
+      ]
+    },
+    "DiagnosticConnections": {
+      "type": "object",
+      "properties": {
+        "cachedReadOnly": {
+          "$ref": "#/$defs/Counter"
+        },
+        "connecting": {
+          "$ref": "#/$defs/Counter"
+        },
+        "error": {
+          "$ref": "#/$defs/Counter"
+        },
+        "live": {
+          "$ref": "#/$defs/Counter"
+        },
+        "reconciling": {
+          "$ref": "#/$defs/Counter"
+        },
+        "unpaired": {
+          "$ref": "#/$defs/Counter"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "unpaired",
+        "connecting",
+        "reconciling",
+        "live",
+        "cachedReadOnly",
+        "error"
+      ]
+    },
+    "DiagnosticMirrors": {
+      "type": "object",
+      "properties": {
+        "current": {
+          "$ref": "#/$defs/Counter"
+        },
+        "stale": {
+          "$ref": "#/$defs/Counter"
+        },
+        "unavailable": {
+          "$ref": "#/$defs/Counter"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "current",
+        "stale",
+        "unavailable"
+      ]
+    },
+    "DiagnosticPlatform": {
+      "type": "string",
+      "enum": [
+        "windows",
+        "macos",
+        "linux",
+        "other"
+      ]
+    },
+    "ErrorCode": {
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "INVALID_MESSAGE",
+            "UNSUPPORTED_VERSION",
+            "FRAME_TOO_LARGE",
+            "LIMIT_EXCEEDED",
+            "INVALID_TREE",
+            "UNPAIRED",
+            "READ_ONLY",
+            "WRONG_PROFILE",
+            "STALE_PROPOSAL",
+            "PROTECTED_NODE",
+            "UNCERTAIN_WRITE",
+            "FETCH_DENIED",
+            "INVALID_AI_OUTPUT",
+            "STORAGE_ERROR",
+            "STORAGE_NEWER_SCHEMA",
+            "MIGRATION_FAILED",
+            "CONFLICT",
+            "CANCELLED"
+          ]
+        },
+        {
+          "description": "The selected Chrome directory is missing, unreadable, or not a User Data directory.",
+          "type": "string",
+          "const": "PATH_UNAVAILABLE"
+        }
+      ]
+    },
+    "RequiredNullable": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ErrorCode"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "Version": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 1,
+      "minimum": 1
+    }
+  }
+}

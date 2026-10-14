@@ -7,6 +7,8 @@ mod batch_edit;
 pub use batch_edit::*;
 mod history;
 pub use history::*;
+mod diagnostics;
+pub use diagnostics::*;
 
 pub const PROTOCOL_VERSION: u8 = 1;
 
@@ -59,6 +61,8 @@ pub mod organization;
 pub use organization::*;
 pub mod maintenance;
 pub use maintenance::*;
+pub mod semantic;
+pub use semantic::*;
 
 #[cfg(test)]
 mod wire_tests;

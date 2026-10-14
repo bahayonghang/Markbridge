@@ -357,6 +357,39 @@ button.danger-button { color: var(--danger); border-color: var(--danger); }
 .ai-config-form button { justify-self: start; }
 .ai-credentials label { flex: 1 1 240px; max-width: 360px; }
 .ai-credentials input { width: 100%; }
+/* Optional semantic search shares the local settings and review vocabulary. */
+.semantic-settings { max-width: 880px; }
+.semantic-config-form { display: grid; gap: 16px; max-width: 720px; margin: 24px 0 16px; }
+.semantic-config-form input:not([type="checkbox"]) { width: 100%; }
+.semantic-config-form .edit-actions { margin: 0; }
+.semantic-workspace { max-width: 1040px; margin-inline: auto; }
+.semantic-heading { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; }
+.semantic-heading > button { flex: none; }
+.semantic-workspace .scope-bar .edit-actions { margin: 0; }
+.semantic-facts { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 8px 16px; margin: 16px 0; }
+.semantic-facts dd { font-variant-numeric: tabular-nums; }
+.semantic-index { padding: 8px 0 16px; border-bottom: 1px solid var(--line); }
+.semantic-index progress { width: 100%; max-width: 480px; accent-color: var(--blue); }
+.semantic-scope, .semantic-query { padding-top: 20px; margin-top: 16px; border-top: 1px solid var(--line); }
+.semantic-scope .edit-actions > label { flex: 1 1 240px; max-width: 640px; }
+.semantic-scope select { width: 100%; }
+.semantic-review { margin: 16px 0; padding: 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--canvas); }
+.semantic-query-form { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+.semantic-query-form > label { flex: 1 1 280px; }
+.semantic-query-form input:not([type="checkbox"]):not([type="radio"]) { width: 100%; }
+.semantic-hits { padding: 0; margin: 16px 0; list-style: none; }
+.semantic-hits > li { border-bottom: 1px solid var(--line); }
+.semantic-hit { justify-content: space-between; width: 100%; gap: 16px; padding: 12px 8px; border: 0; border-radius: var(--radius); text-align: left; }
+.semantic-hit > span:first-child { min-width: 0; overflow-wrap: anywhere; }
+.semantic-hit > .secondary { flex: none; font-variant-numeric: tabular-nums; font-size: 12px; }
+@media (max-width: 799px) {
+  .semantic-facts { grid-template-columns: 80px minmax(0, 1fr); gap: 8px 12px; }
+  .semantic-heading, .semantic-workspace .scope-bar { align-items: flex-start; }
+}
+@media (max-height: 550px) {
+  .semantic-query-form, .semantic-hits { margin-block: 8px; }
+  .semantic-query > p { margin-block: 4px; }
+}
 @media (max-width: 799px) {
   .organization-assignments .org-row { grid-template-columns: minmax(0, 1fr) 80px; gap: 8px 16px; }
   .org-source { grid-column: 1 / -1; }

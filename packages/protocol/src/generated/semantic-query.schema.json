@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SemanticQuery",
+  "type": "object",
+  "properties": {
+    "generation": {
+      "$ref": "#/$defs/Counter"
+    },
+    "indexId": {
+      "$ref": "#/$defs/Id"
+    },
+    "profileId": {
+      "$ref": "#/$defs/Id"
+    },
+    "requestId": {
+      "$ref": "#/$defs/Id"
+    },
+    "sourceEpoch": {
+      "$ref": "#/$defs/SourceEpoch"
+    },
+    "text": {
+      "type": "string",
+      "maxLength": 4096,
+      "minLength": 1
+    },
+    "topK": {
+      "type": "integer",
+      "format": "uint8",
+      "maximum": 50,
+      "minimum": 1
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "requestId",
+    "profileId",
+    "sourceEpoch",
+    "indexId",
+    "generation",
+    "text",
+    "topK"
+  ],
+  "$defs": {
+    "Counter": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 9007199254740991,
+      "minimum": 0
+    },
+    "Id": {
+      "type": "string",
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*(?![\\s\\S])"
+    },
+    "SourceEpoch": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 9007199254740991,
+      "minimum": 1
+    }
+  }
+}

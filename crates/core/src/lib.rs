@@ -23,6 +23,7 @@ mod tests {
 
 pub mod ai;
 pub mod bridge;
+pub mod diagnostics;
 pub mod editing;
 mod maintenance;
 pub mod mirror;
@@ -30,3 +31,5 @@ pub mod organization;
 pub mod preview;
 pub mod storage;
 pub mod tags;
+
+pub(crate) mod semantic;

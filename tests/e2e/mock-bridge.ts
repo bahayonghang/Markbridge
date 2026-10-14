@@ -38,7 +38,7 @@ export async function mockBridge(page: Page, scenario: 'connected' | 'startup-er
         state = { ...state, revision: state.revision + 1, port };
         return state;
       }
-      export async function beginPairing() { throw new Error('mock-offer-unavailable'); }
+      export async function beginPairing() { if (window.__t14PairingFailure) throw 'STORAGE_ERROR'; throw new Error('mock-offer-unavailable'); }
       export async function confirmPairing() { throw new Error('mock-confirm-unavailable'); }
       export async function cancelPairing() { return state; }
       export async function reconnectProfile() {
@@ -65,7 +65,7 @@ export async function mockBridge(page: Page, scenario: 'connected' | 'startup-er
       export async function openHttpUrl() { window.__r01calls.push('open_url'); }
       export async function aiSettings() { window.__r01calls.push('ai_settings'); return window.__r07settings || { enabled: false, provider: null, endpointLabel: null, model: null, credentialConfigured: false, schemaSupported: null }; }
       export async function saveAiConfig() { return aiSettings(); }
-      export async function setAiCredential() { return aiSettings(); }
+      export async function setAiCredential() { if (window.__t14CredentialFailure) throw new Error('fixture-private-credential-detail'); return aiSettings(); }
       export async function clearAiCredential() { return aiSettings(); }
       export async function testAiConnection() { window.__r01calls.push('test_ai'); return { ok: false, failureMessage: null, settings: await aiSettings() }; }
       export async function listOperations() { return { operations: window.__r06history || [] }; }
@@ -84,6 +84,7 @@ export async function mockBridge(page: Page, scenario: 'connected' | 'startup-er
       export async function applyEdit() { window.__r01calls.push('apply'); return { operationId: 'op-edit', state: 'applied', errorCode: null, conflicts: [] }; }
       export async function exportHtml() { throw new Error('mock'); }
       export async function exportSidecar() { throw new Error('mock'); }
+      export async function saveDiagnostics() { window.__r01calls.push('save_diagnostics'); const status = window.__t13DiagnosticStatus || 'saved'; if (status === 'rejected') throw new Error('C:/private sk-secret'); return { status, errorCode: status === 'failed' ? 'STORAGE_ERROR' : null }; }
       const localNotes = new Map(); const localTags = new Map();
       const metadataKey = (profileId, chromeId) => profileId + ':' + chromeId;
       export async function readTagState(profileId, chromeIds = []) {
@@ -116,6 +117,24 @@ export async function mockBridge(page: Page, scenario: 'connected' | 'startup-er
       export async function webPreviewAction() { throw new Error('mock'); }
       export async function clearWebPreviewSession() { throw new Error('mock'); }
       export async function subscribeWebPreview() { return () => {}; }
+      window.__semanticCalls = [];
+      let semanticConfig = { enabled: false, endpointLabel: null, model: null, inputRecipeVersion: 1, maxInputChars: 8192, maxInputBytes: 32768 };
+      const semanticIndexes = new Map();
+      const semanticReviews = new Map();
+      const semanticCopy = value => JSON.parse(JSON.stringify(value));
+      const semanticKey = (profileId, epoch) => profileId + ':' + epoch;
+      const semanticCall = command => window.__semanticCalls.push(command);
+      export async function semanticSettings() { semanticCall('settings'); return semanticCopy(semanticConfig); }
+      export async function saveSemanticConfig(config) { semanticCall('save_config'); semanticConfig = { ...semanticConfig, enabled: config.enabled, endpointLabel: config.endpoint, model: config.model }; for (const index of semanticIndexes.values()) { index.generation += 1; if (!config.enabled && index.phase === 'running') index.phase = 'paused'; } return semanticCopy(semanticConfig); }
+      export async function checkSemanticModel() { semanticCall('check_model'); return window.__semanticMissing ? { available: false, model: null, digest: null, dimension: null, failure: 'MISSING_MODEL', failureMessage: 'fixture-private-model-error' } : { available: true, model: semanticConfig.model, digest: 'a'.repeat(64), dimension: 768, failure: null, failureMessage: null }; }
+      export async function semanticStatus(profileId, sourceEpoch) { semanticCall('status'); const index = semanticIndexes.get(semanticKey(profileId, sourceEpoch)); if (index?.phase === 'running' && !window.__semanticHoldBuild) { index.ready = Math.min(index.total, index.ready + 4); index.pending = index.total - index.ready; index.storedBytes = index.ready * 768 * 4; if (!index.pending) index.phase = 'ready'; } return semanticCopy({ settings: semanticConfig, index: index || null }); }
+      export async function reviewSemanticScope(scope) { semanticCall('review'); const count = scope.folderId ? rows.filter(row => row.kind === 'bookmark').length : scope.selectedChromeIds.length; const value = { reviewId: 'review-' + (semanticReviews.size + 1), profileId: scope.profileId, sourceEpoch: scope.sourceEpoch, expectedRevision: scope.expectedRevision, count, clippedCount: Math.min(count, 1), upperBytes: count * 4096 * 4, model: semanticConfig.model, inputRecipeVersion: 1, maxInputChars: 8192, maxInputBytes: 32768 }; semanticReviews.set(value.reviewId, value); return semanticCopy(value); }
+      export async function startSemanticIndex(reviewId) { semanticCall('start'); const review = semanticReviews.get(reviewId); const key = semanticKey(review.profileId, review.sourceEpoch); semanticIndexes.set(key, { indexId: 'index-' + semanticReviews.size, profileId: review.profileId, sourceEpoch: review.sourceEpoch, generation: 1, phase: window.__semanticMissing ? 'failed' : 'running', model: review.model, digest: 'a'.repeat(64), dimension: 768, total: review.count, ready: 0, pending: review.count, storedBytes: 0, failure: window.__semanticMissing ? 'MISSING_MODEL' : null, failureMessage: window.__semanticMissing ? 'fixture-private-model-error' : null }); return semanticCopy({ settings: semanticConfig, index: semanticIndexes.get(key) }); }
+      export async function pauseSemanticIndex(profileId, sourceEpoch) { semanticCall('pause'); const index = semanticIndexes.get(semanticKey(profileId, sourceEpoch)); index.generation += 1; index.phase = 'paused'; return semanticCopy({ settings: semanticConfig, index }); }
+      export async function resumeSemanticIndex(profileId, sourceEpoch) { semanticCall('resume'); const index = semanticIndexes.get(semanticKey(profileId, sourceEpoch)); index.generation += 1; index.phase = 'running'; return semanticCopy({ settings: semanticConfig, index }); }
+      export async function deleteSemanticIndex(profileId, sourceEpoch) { semanticCall('delete'); semanticIndexes.delete(semanticKey(profileId, sourceEpoch)); return semanticCopy({ settings: semanticConfig, index: null }); }
+      export async function querySemantic(query) { semanticCall('query'); if (window.__semanticQueryMode === 'error') throw new Error('fixture-private-query-body'); const value = { requestId: query.requestId, profileId: query.profileId, sourceEpoch: query.sourceEpoch, indexId: query.indexId, generation: query.generation, hits: window.__semanticQueryMode === 'empty' ? [] : [{ bookmarkId: 'bm-10', chromeId: '10', title: nodesFor(query.profileId).find(row => row.chromeId === '10').title, score: 0.913 }], failure: null, failureMessage: null }; if (window.__semanticQueryMode === 'hold') return new Promise(resolve => { window.__semanticResolveQuery = () => resolve(semanticCopy(value)); }); return semanticCopy(value); }
+      export async function cancelSemanticQuery() { semanticCall('cancel_query'); }
     `,
   }));
 }

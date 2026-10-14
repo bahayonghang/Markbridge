@@ -24,6 +24,7 @@ vi.mock('./backend', () => ({
   applyEdit: vi.fn(),
   exportHtml: vi.fn(async () => ({ kind: 'html', body: '' })),
   exportSidecar: vi.fn(async () => ({ kind: 'sidecar', body: '{}' })),
+  saveDiagnostics: vi.fn(async () => ({ status: 'cancelled', errorCode: null })),
   aiSettings: vi.fn(async () => ({ enabled: false, provider: null, endpointLabel: null, model: null, credentialConfigured: false, schemaSupported: null })),
   saveAiConfig: vi.fn(), setAiCredential: vi.fn(), clearAiCredential: vi.fn(), testAiConnection: vi.fn(),
   suggestAi: vi.fn(), cancelAi: vi.fn(), applyAi: vi.fn(),

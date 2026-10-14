@@ -1,17 +1,19 @@
 import { useRef, useState } from 'react';
 import { hasNativeBridge } from './backend';
 import { AiSettings } from './features/ai/AiSettings';
+import { SemanticSettings } from './features/semantic/SemanticSettings';
 import { LibraryWorkspace } from './features/library/LibraryWorkspace';
 import { WorkspaceIcon, type IconName } from './features/library/WorkspaceIcon';
 import { ConnectionSettings } from './features/settings/ConnectionSettings';
 import { useBridge } from './useBridge';
 import { connectionLabels, fileLabels, type SourceRequest, type SourceTarget } from './features/settings/source-status';
 
-type Section = 'library' | 'organize' | 'history' | 'settings';
-type SettingsTab = 'connection' | 'ai' | 'export';
+type Section = 'library' | 'organize' | 'semantic' | 'history' | 'settings';
+type SettingsTab = 'connection' | 'ai' | 'semantic' | 'export';
 const sections: { id: Section; label: string; icon: IconName }[] = [
   { id: 'library', label: '书签', icon: 'bookmark' },
   { id: 'organize', label: '整理', icon: 'organize' },
+  { id: 'semantic', label: '语义检索', icon: 'search' },
   { id: 'history', label: '操作历史', icon: 'history' },
   { id: 'settings', label: '设置', icon: 'settings' },
 ];
@@ -23,6 +25,7 @@ export function App() {
   const [settingsTab, setSettingsTab] = useState<SettingsTab>('connection');
   const [visitedSettings, setVisitedSettings] = useState(false);
   const [visitedAi, setVisitedAi] = useState(false);
+  const [visitedSemantic, setVisitedSemantic] = useState(false);
   const [sourceRequest, setSourceRequest] = useState<SourceRequest | null>(null);
   const [currentSource, setCurrentSource] = useState<SourceTarget | null>(null);
   const [sidebarHost, setSidebarHost] = useState<HTMLDivElement | null>(null);
@@ -45,6 +48,7 @@ export function App() {
   function chooseSettingsTab(tab: SettingsTab) {
     setSettingsTab(tab);
     if (tab === 'ai') setVisitedAi(true);
+    if (tab === 'semantic') setVisitedSemantic(true);
   }
 
   function navigate(next: Section) {
@@ -73,23 +77,25 @@ export function App() {
           section={section === 'settings' ? 'export' : section} active={!onboarding && (section !== 'settings' || settingsTab === 'export')}
           sidebarHost={sidebarHost} onSettings={() => { setSettingsTab('connection'); navigate('settings'); }} onLibrary={() => navigate('library')}
           onExport={() => { chooseSettingsTab('export'); navigate('settings'); }} onOrganize={() => navigate('organize')}
+          onSemanticSettings={() => { chooseSettingsTab('semantic'); navigate('settings'); }}
           onAiSettings={() => { chooseSettingsTab('ai'); navigate('settings'); }} onHistory={() => navigate('history')} />
         <section className="settings-page" hidden={section !== 'settings' && !onboarding} aria-label={onboarding ? '首次接入' : '设置内容'}>
           <div className="settings-tabs" hidden={onboarding} role="tablist" aria-label="设置分类" onKeyDown={(event) => {
-            const tabs: SettingsTab[] = ['connection', 'ai', 'export'];
+            const tabs: SettingsTab[] = ['connection', 'ai', 'semantic', 'export'];
             const current = tabs.indexOf(settingsTab);
-            const next = event.key === 'ArrowRight' ? tabs[(current + 1) % tabs.length] : event.key === 'ArrowLeft' ? tabs[(current + tabs.length - 1) % tabs.length] : event.key === 'Home' ? tabs[0] : event.key === 'End' ? tabs[2] : undefined;
+            const next = event.key === 'ArrowRight' ? tabs[(current + 1) % tabs.length] : event.key === 'ArrowLeft' ? tabs[(current + tabs.length - 1) % tabs.length] : event.key === 'Home' ? tabs[0] : event.key === 'End' ? tabs.at(-1) : undefined;
             if (!next) return;
             event.preventDefault();
             chooseSettingsTab(next);
             document.getElementById(`settings-tab-${next}`)?.focus();
           }}>
-            {([{ id: 'connection', label: 'Chrome 连接' }, { id: 'ai', label: 'AI' }, { id: 'export', label: '备份导出' }] as const).map((tab) => <button type="button" key={tab.id} role="tab" id={`settings-tab-${tab.id}`} aria-controls={`settings-panel-${tab.id}`} tabIndex={settingsTab === tab.id ? 0 : -1} aria-selected={settingsTab === tab.id} onClick={() => chooseSettingsTab(tab.id)}>{tab.label}</button>)}
+            {([{ id: 'connection', label: 'Chrome 连接' }, { id: 'ai', label: 'AI' }, { id: 'semantic', label: '语义检索' }, { id: 'export', label: '备份导出' }] as const).map((tab) => <button type="button" key={tab.id} role="tab" id={`settings-tab-${tab.id}`} aria-controls={`settings-panel-${tab.id}`} tabIndex={settingsTab === tab.id ? 0 : -1} aria-selected={settingsTab === tab.id} onClick={() => chooseSettingsTab(tab.id)}>{tab.label}</button>)}
           </div>
           <div className="settings-scroll" hidden={!onboarding && settingsTab === 'export'}>
             {!native && <p className="preview-note">浏览器预览 · 仅显示界面。当前预览不能读取书签，请在桌面应用中连接。</p>}
             <div role="tabpanel" id="settings-panel-connection" aria-labelledby="settings-tab-connection" hidden={!onboarding && settingsTab !== 'connection'}>{(visitedSettings || onboarding) && <ConnectionSettings state={state} error={error} native={native} accept={accept} onboarding={onboarding} onBrowseSource={browseSource} />}</div>
             <div role="tabpanel" id="settings-panel-ai" aria-labelledby="settings-tab-ai" hidden={onboarding || settingsTab !== 'ai'}>{visitedAi && <AiSettings native={native} />}</div>
+            <div role="tabpanel" id="settings-panel-semantic" aria-labelledby="settings-tab-semantic" hidden={onboarding || settingsTab !== 'semantic'}>{visitedSemantic && <SemanticSettings native={native} active={section === 'settings' && settingsTab === 'semantic'} />}</div>
           </div>
         </section>
       </>}

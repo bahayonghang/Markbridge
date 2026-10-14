@@ -20,6 +20,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Some("operation-detail") => schemars::schema_for!(markbridge_protocol::OperationDetail),
         Some("undo-preview") => schemars::schema_for!(markbridge_protocol::UndoPreview),
         Some("export-save-result") => schemars::schema_for!(markbridge_protocol::ExportSaveResult),
+        Some("diagnostic-report") => schemars::schema_for!(markbridge_protocol::DiagnosticReport),
+        Some("diagnostic-save-result") => {
+            schemars::schema_for!(markbridge_protocol::DiagnosticSaveResult)
+        }
         Some("edit-document") => schemars::schema_for!(markbridge_protocol::EditDocument),
         Some("tag-catalog") => schemars::schema_for!(markbridge_protocol::TagCatalog),
         Some("title-encoding") => schemars::schema_for!(markbridge_protocol::TitleEncodingPreview),
@@ -31,6 +35,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Some("ai-apply") => schemars::schema_for!(markbridge_protocol::AiApplyResult),
         Some("organization-plan") => schemars::schema_for!(markbridge_protocol::OrganizationPlan),
         Some("maintenance-report") => schemars::schema_for!(markbridge_protocol::MaintenanceReport),
+        Some("semantic-settings") => schemars::schema_for!(markbridge_protocol::SemanticSettings),
+        Some("semantic-config") => schemars::schema_for!(markbridge_protocol::SemanticConfig),
+        Some("semantic-scope") => schemars::schema_for!(markbridge_protocol::SemanticScope),
+        Some("semantic-review") => schemars::schema_for!(markbridge_protocol::SemanticScopeReview),
+        Some("semantic-status") => schemars::schema_for!(markbridge_protocol::SemanticStatus),
+        Some("semantic-query") => schemars::schema_for!(markbridge_protocol::SemanticQuery),
+        Some("semantic-result") => schemars::schema_for!(markbridge_protocol::SemanticQueryResult),
+        Some("semantic-model-check") => {
+            schemars::schema_for!(markbridge_protocol::SemanticModelCheck)
+        }
         Some("text-search") => schemars::schema_for!(markbridge_protocol::TextSearchPage),
         _ => schemars::schema_for!(markbridge_protocol::StartupState),
     };

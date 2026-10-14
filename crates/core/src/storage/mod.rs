@@ -14,6 +14,7 @@ mod library;
 pub(crate) mod maintenance;
 mod operations;
 pub(crate) mod preview;
+pub(crate) mod semantic;
 mod tags;
 pub(crate) use operations::{
     AfterBody, BatchProgress, BeforeBody, EncodingBody, IdMapBody, OperationRecord, OrderBody,
@@ -28,6 +29,7 @@ const MIGRATIONS: &[&str] = &[
     include_str!("migrations/005_preview.sql"),
     include_str!("migrations/006_organization.sql"),
     include_str!("migrations/007_maintenance.sql"),
+    include_str!("migrations/008_semantic.sql"),
 ];
 pub const SCHEMA_VERSION: u32 = MIGRATIONS.len() as u32;
 type Result<T> = std::result::Result<T, ErrorCode>;
@@ -205,6 +207,12 @@ impl Storage {
             transaction
                 .execute(
                     "DELETE FROM source_cursors WHERE profile_id=?1",
+                    [profile_id.as_str()],
+                )
+                .map_err(storage_error)?;
+            transaction
+                .execute(
+                    "DELETE FROM semantic_indexes WHERE profile_id=?1",
                     [profile_id.as_str()],
                 )
                 .map_err(storage_error)?;
@@ -439,6 +447,7 @@ fn commit_tree(
             params![profile_id.as_str(), now],
         )
         .map_err(storage_error)?;
+    semantic::invalidate_final_tree(&transaction, profile_id, snapshot.source_epoch)?;
     before_commit()?;
     transaction.commit().map_err(storage_error)
 }

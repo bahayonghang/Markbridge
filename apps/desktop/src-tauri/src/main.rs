@@ -1,4 +1,4 @@
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+#![cfg_attr(all(not(debug_assertions), windows), windows_subsystem = "windows")]
 
 use markbridge_core::bridge::{Bridge, CacheTreeNode, credentials::OsCredentialStore};
 use markbridge_protocol::{
@@ -22,6 +22,116 @@ fn trusted(window: &tauri::WebviewWindow) -> Result<(), ErrorCode> {
     } else {
         Err(ErrorCode::ReadOnly)
     }
+}
+
+use markbridge_protocol::{
+    SemanticConfig, SemanticModelCheck, SemanticQuery, SemanticQueryResult, SemanticScope,
+    SemanticScopeReview, SemanticSettings, SemanticStatus,
+};
+
+#[tauri::command]
+async fn semantic_settings(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+) -> Result<SemanticSettings, ErrorCode> {
+    trusted(&window)?;
+    bridge.semantic_settings().await
+}
+#[tauri::command]
+async fn save_semantic_config(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    config: SemanticConfig,
+) -> Result<SemanticSettings, ErrorCode> {
+    trusted(&window)?;
+    bridge.save_semantic_config(config).await
+}
+#[tauri::command]
+async fn semantic_model_check(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    endpoint: String,
+    model: String,
+) -> Result<SemanticModelCheck, ErrorCode> {
+    trusted(&window)?;
+    bridge.semantic_model_check(endpoint, model).await
+}
+#[tauri::command]
+async fn semantic_review_scope(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    scope: SemanticScope,
+) -> Result<SemanticScopeReview, ErrorCode> {
+    trusted(&window)?;
+    bridge.semantic_review_scope(scope).await
+}
+#[tauri::command]
+async fn semantic_start_index(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    review_id: Id,
+) -> Result<SemanticStatus, ErrorCode> {
+    trusted(&window)?;
+    bridge.semantic_start_index(review_id).await
+}
+#[tauri::command]
+async fn semantic_status(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    profile_id: Id,
+    source_epoch: SourceEpoch,
+) -> Result<SemanticStatus, ErrorCode> {
+    trusted(&window)?;
+    bridge.semantic_status(profile_id, source_epoch).await
+}
+#[tauri::command]
+async fn semantic_pause(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    profile_id: Id,
+    source_epoch: SourceEpoch,
+) -> Result<SemanticStatus, ErrorCode> {
+    trusted(&window)?;
+    bridge.semantic_pause(profile_id, source_epoch).await
+}
+#[tauri::command]
+async fn semantic_resume(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    profile_id: Id,
+    source_epoch: SourceEpoch,
+) -> Result<SemanticStatus, ErrorCode> {
+    trusted(&window)?;
+    bridge.semantic_resume(profile_id, source_epoch).await
+}
+#[tauri::command]
+async fn semantic_delete_index(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    profile_id: Id,
+    source_epoch: SourceEpoch,
+) -> Result<SemanticStatus, ErrorCode> {
+    trusted(&window)?;
+    bridge.semantic_delete_index(profile_id, source_epoch).await
+}
+#[tauri::command]
+async fn semantic_query(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    query: SemanticQuery,
+) -> Result<SemanticQueryResult, ErrorCode> {
+    trusted(&window)?;
+    bridge.semantic_query(query).await
+}
+#[tauri::command]
+async fn semantic_cancel_query(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    profile_id: Id,
+    request_id: Id,
+) -> Result<(), ErrorCode> {
+    trusted(&window)?;
+    bridge.semantic_cancel_query(profile_id, request_id).await
 }
 
 #[tauri::command]
@@ -190,13 +300,17 @@ fn validate_http_url(url: &str) -> Result<(), ErrorCode> {
     Ok(())
 }
 
+#[cfg(windows)]
 const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+#[cfg(windows)]
 const CREATE_SUSPENDED: u32 = 0x0000_0004;
 
+#[cfg(windows)]
 fn suspend_requested(value: Option<&str>) -> bool {
     value == Some("1")
 }
 
+#[cfg(windows)]
 fn open_http_creation_flags(suspend: bool) -> u32 {
     if suspend {
         CREATE_NO_WINDOW | CREATE_SUSPENDED
@@ -205,6 +319,7 @@ fn open_http_creation_flags(suspend: bool) -> u32 {
     }
 }
 
+#[cfg(windows)]
 fn absolute_pidfile(value: Option<&str>) -> Option<PathBuf> {
     let path = PathBuf::from(value?);
     path.is_absolute().then_some(path)
@@ -246,11 +361,37 @@ fn open_http(url: &str) -> Result<(), ErrorCode> {
         }
         Ok(())
     }
-    #[cfg(not(windows))]
+    #[cfg(any(target_os = "macos", target_os = "linux"))]
+    {
+        let mut child = posix_open_command(std::env::consts::OS, url)?
+            .spawn()
+            .map_err(|_| ErrorCode::InvalidMessage)?;
+        tauri::async_runtime::spawn_blocking(move || {
+            let _ = child.wait();
+        });
+        Ok(())
+    }
+    #[cfg(not(any(windows, target_os = "macos", target_os = "linux")))]
     {
         let _ = url;
         Err(ErrorCode::ReadOnly)
     }
+}
+
+#[cfg(any(target_os = "macos", target_os = "linux", test))]
+fn posix_open_command(platform: &str, url: &str) -> Result<std::process::Command, ErrorCode> {
+    validate_http_url(url)?;
+    let mut command = match platform {
+        "macos" => {
+            let mut command = std::process::Command::new("/usr/bin/open");
+            command.arg("--");
+            command
+        }
+        "linux" => std::process::Command::new("xdg-open"),
+        _ => return Err(ErrorCode::ReadOnly),
+    };
+    command.arg(url);
+    Ok(command)
 }
 
 #[tauri::command]
@@ -470,6 +611,17 @@ async fn save_export(
             error_code: markbridge_protocol::RequiredNullable(Some(error)),
         }),
     }
+}
+
+#[tauri::command]
+async fn save_diagnostics(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+) -> Result<markbridge_protocol::DiagnosticSaveResult, ErrorCode> {
+    trusted(&window)?;
+    let _guard = export::SaveGuard::acquire()?;
+    let state = bridge.subscribe().borrow().clone();
+    Ok(export::save_diagnostic(&window, markbridge_core::diagnostics::report(&state)).await)
 }
 
 #[tauri::command]
@@ -953,16 +1105,21 @@ fn configure_data_directory(
     config: &mut tauri::Config,
     directory: Option<PathBuf>,
 ) -> Result<Option<PathBuf>, &'static str> {
-    if let Some(directory) = &directory {
-        if !directory.is_absolute() {
-            return Err("invalid acceptance data directory");
-        }
-        // A global WebView2 data-folder override would also merge preview sessions.
-        for window in &mut config.app.windows {
-            if window.label == "main" {
-                window.data_directory = Some(directory.join("main-webview"));
-            }
-        }
+    if directory
+        .as_ref()
+        .is_some_and(|directory| !directory.is_absolute())
+    {
+        return Err("invalid acceptance data directory");
+    }
+    if directory.is_some() || cfg!(any(target_os = "macos", target_os = "linux")) {
+        // Config conversion drops data_directory in this SDK. Build main explicitly in setup.
+        let main = config
+            .app
+            .windows
+            .iter_mut()
+            .find(|window| window.label == "main")
+            .ok_or("missing main window configuration")?;
+        main.create = false;
     }
     Ok(directory)
 }
@@ -997,6 +1154,11 @@ fn on_run_event(event: &tauri::RunEvent, bridge: Option<&Bridge>) {
 }
 
 fn main() {
+    #[cfg(target_os = "macos")]
+    if preview::ensure_native_store_supported().is_err() {
+        eprintln!("STARTUP_FAILED: Unable to start Markbridge.");
+        std::process::exit(1);
+    }
     let mut context = tauri::generate_context!();
     let Ok(override_directory) = configure_data_directory(
         context.config_mut(),
@@ -1007,7 +1169,7 @@ fn main() {
     };
     let app = tauri::Builder::default()
         .setup(move |app| {
-            let directory = database_directory(app, override_directory)?;
+            let directory = database_directory(app, override_directory.clone())?;
             app.manage(preview::PreviewHost::new(directory.clone())?);
             let namespace = credential_namespace()?;
             // A failed open must leave the window up. Do not forward the cause.
@@ -1033,6 +1195,23 @@ fn main() {
                 Err(_) => false,
             };
             app.manage(StorageReady(storage_ready));
+            if override_directory.is_some() || cfg!(any(target_os = "macos", target_os = "linux")) {
+                let main = app
+                    .config()
+                    .app
+                    .windows
+                    .iter()
+                    .find(|window| window.label == "main")
+                    .ok_or("missing main window configuration")?;
+                // An explicit per-webview directory keeps preview Profile sessions separate.
+                let builder = tauri::WebviewWindowBuilder::from_config(app, main)?
+                    .data_directory(directory.join("main-webview"));
+                #[cfg(target_os = "macos")]
+                let builder = builder.data_store_identifier(preview::native_store_identifier(
+                    &directory, "main", None,
+                )?);
+                builder.build()?;
+            }
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -1066,6 +1245,7 @@ fn main() {
             operation_detail,
             preview_undo,
             save_export,
+            save_diagnostics,
             review_operation,
             refresh_operations,
             export_html,
@@ -1076,6 +1256,17 @@ fn main() {
             apply_title_encoding,
             ai_settings,
             save_ai_config,
+            semantic_settings,
+            save_semantic_config,
+            semantic_model_check,
+            semantic_review_scope,
+            semantic_start_index,
+            semantic_status,
+            semantic_pause,
+            semantic_resume,
+            semantic_delete_index,
+            semantic_query,
+            semantic_cancel_query,
             set_ai_credential,
             clear_ai_credential,
             test_ai_connection,
@@ -1118,10 +1309,46 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
+    #[cfg(windows)]
     use super::{
-        CREATE_NO_WINDOW, CREATE_SUSPENDED, absolute_pidfile, credential_namespace, flatten_cache,
-        open_http_creation_flags, startup_response, suspend_requested, validate_http_url,
+        CREATE_NO_WINDOW, CREATE_SUSPENDED, absolute_pidfile, open_http_creation_flags,
+        suspend_requested,
     };
+    use super::{credential_namespace, flatten_cache, startup_response, validate_http_url};
+
+    #[test]
+    fn acceptance_override_disables_automatic_main_creation_before_sdk_conversion() {
+        let mut config = tauri::Config::default();
+        config.app.windows = vec![tauri::utils::config::WindowConfig {
+            label: "main".into(),
+            ..Default::default()
+        }];
+        let isolated = std::env::temp_dir().join("mb-main-config-regression");
+        super::configure_data_directory(&mut config, Some(isolated)).unwrap();
+        assert!(
+            !config.app.windows[0].create,
+            "automatic from_config creation drops the isolation override"
+        );
+    }
+
+    #[test]
+    fn sdk_config_conversion_drops_data_directory_but_explicit_attributes_retain_it() {
+        use tauri_runtime::webview::WebviewAttributes;
+        let isolated = std::env::temp_dir().join("mb-main-sdk-regression");
+        let config = tauri::utils::config::WindowConfig {
+            label: "main".into(),
+            data_directory: Some(isolated.clone()),
+            ..Default::default()
+        };
+        // The actual installed SDK conversion explains why config-only tests passed.
+        assert!(WebviewAttributes::from(&config).data_directory.is_none());
+        assert_eq!(
+            WebviewAttributes::from(&config)
+                .data_directory(isolated.clone())
+                .data_directory,
+            Some(isolated)
+        );
+    }
 
     #[test]
     fn acceptance_data_directory_isolates_only_the_main_webview() {
@@ -1138,19 +1365,38 @@ mod tests {
                 ..Default::default()
             },
         ];
+        let original_main = serde_json::to_value(&config.app.windows[1]).unwrap();
         assert_eq!(super::configure_data_directory(&mut config, None), Ok(None));
         assert!(config.app.windows[1].data_directory.is_none());
+        let expected_automatic = !cfg!(any(target_os = "macos", target_os = "linux"));
+        assert_eq!(config.app.windows[1].create, expected_automatic);
         assert!(super::configure_data_directory(&mut config, Some("relative".into())).is_err());
         assert!(config.app.windows[1].data_directory.is_none());
+        assert_eq!(config.app.windows[1].create, expected_automatic);
         let isolated = std::env::temp_dir().join("mb-main-config-test");
         assert_eq!(
             super::configure_data_directory(&mut config, Some(isolated.clone())),
             Ok(Some(isolated.clone()))
         );
         assert_eq!(config.app.windows[0].data_directory, Some(preview_dir));
-        assert_eq!(
-            config.app.windows[1].data_directory,
-            Some(isolated.join("main-webview"))
+        assert!(config.app.windows[0].create);
+        assert!(!config.app.windows[1].create);
+        assert!(config.app.windows[1].data_directory.is_none());
+        let mut isolated_main = config.app.windows[1].clone();
+        isolated_main.create = true;
+        assert_eq!(serde_json::to_value(isolated_main).unwrap(), original_main);
+    }
+
+    #[test]
+    fn acceptance_override_requires_the_main_configuration_before_runtime_build() {
+        let mut config = tauri::Config::default();
+        config.app.windows.clear();
+        assert!(
+            super::configure_data_directory(
+                &mut config,
+                Some(std::env::temp_dir().join("mb-missing-main-config"))
+            )
+            .is_err()
         );
     }
 
@@ -1238,6 +1484,7 @@ mod tests {
         assert_eq!(flat[1].parent_id.as_ref().unwrap().as_str(), "root");
     }
 
+    #[cfg(windows)]
     #[test]
     fn suspended_handoff_is_opt_in_and_uses_an_absolute_pidfile() {
         assert!(!suspend_requested(None));
@@ -1256,6 +1503,20 @@ mod tests {
             absolute_pidfile(Some(absolute.to_str().unwrap())),
             Some(absolute)
         );
+    }
+
+    #[test]
+    fn posix_handoff_uses_fixed_executables_and_one_validated_url_argument() {
+        let url = "https://example.com/a?value=one&next=two";
+        let mac = super::posix_open_command("macos", url).unwrap();
+        assert_eq!(mac.get_program(), "/usr/bin/open");
+        assert_eq!(mac.get_args().collect::<Vec<_>>(), vec!["--", url]);
+        let linux = super::posix_open_command("linux", url).unwrap();
+        assert_eq!(linux.get_program(), "xdg-open");
+        assert_eq!(linux.get_args().collect::<Vec<_>>(), vec![url]);
+        assert!(super::posix_open_command("linux", "file:///etc/passwd").is_err());
+        assert!(super::posix_open_command("linux", "https://user:secret@example.com").is_err());
+        assert!(super::posix_open_command("other", url).is_err());
     }
 
     #[cfg(windows)]

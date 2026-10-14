@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SemanticQueryResult",
+  "type": "object",
+  "properties": {
+    "failure": {
+      "$ref": "#/$defs/RequiredNullable"
+    },
+    "failureMessage": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 120
+    },
+    "generation": {
+      "$ref": "#/$defs/Counter"
+    },
+    "hits": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/SemanticHit"
+      },
+      "maxItems": 50
+    },
+    "indexId": {
+      "$ref": "#/$defs/Id"
+    },
+    "profileId": {
+      "$ref": "#/$defs/Id"
+    },
+    "requestId": {
+      "$ref": "#/$defs/Id"
+    },
+    "sourceEpoch": {
+      "$ref": "#/$defs/SourceEpoch"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "requestId",
+    "profileId",
+    "sourceEpoch",
+    "indexId",
+    "generation",
+    "hits",
+    "failure",
+    "failureMessage"
+  ],
+  "$defs": {
+    "Counter": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 9007199254740991,
+      "minimum": 0
+    },
+    "Id": {
+      "type": "string",
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*(?![\\s\\S])"
+    },
+    "RequiredNullable": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SemanticFailure"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "SemanticFailure": {
+      "type": "string",
+      "enum": [
+        "DISABLED",
+        "ENDPOINT_DENIED",
+        "MISSING_MODEL",
+        "REMOTE_MODEL",
+        "DIMENSION_MISMATCH",
+        "INVALID_VECTOR",
+        "MODEL_CHANGED",
+        "STALE_INDEX",
+        "CANCELLED",
+        "TIMED_OUT",
+        "UNREACHABLE",
+        "INVALID_RESPONSE",
+        "LIMIT_EXCEEDED",
+        "STORAGE_ERROR"
+      ]
+    },
+    "SemanticHit": {
+      "type": "object",
+      "properties": {
+        "bookmarkId": {
+          "$ref": "#/$defs/Id"
+        },
+        "chromeId": {
+          "$ref": "#/$defs/Id"
+        },
+        "score": {
+          "type": "number",
+          "maximum": 1,
+          "minimum": -1
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 4096
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "bookmarkId",
+        "chromeId",
+        "title",
+        "score"
+      ]
+    },
+    "SourceEpoch": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 9007199254740991,
+      "minimum": 1
+    }
+  }
+}

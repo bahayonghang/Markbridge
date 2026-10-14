@@ -15,3 +15,6 @@ export * from './organization';
 export * from './maintenance';
 export * from './batch-edit';
 export * from './history';
+export * from './diagnostics';
+
+export * from './semantic';

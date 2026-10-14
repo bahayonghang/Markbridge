@@ -1,6 +1,11 @@
 import { invoke, isTauri } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import {
+  parseSemanticSettings, parseSemanticConfig, parseSemanticScope, parseSemanticScopeReview, parseSemanticStatus,
+  parseSemanticQuery, parseSemanticQueryResult, parseSemanticModelCheck,
+  type SemanticSettings, type SemanticConfig, type SemanticScope, type SemanticScopeReview, type SemanticStatus,
+  type SemanticQuery, type SemanticQueryResult, type SemanticModelCheck,
+  parseDiagnosticSaveResult, type DiagnosticSaveResult,
   parseOperationDetail, parseUndoPreview, parseExportSaveResult, type OperationDetail, type UndoPreview, type ExportSaveResult, type ExportSource,
   parseBatchEditPreview, parseBatchEditStatus, type BatchEditPreview, type BatchEditStatus,
   parseApplyResult, parseBridgeState, parseChromeProfileList, parseEditDocument, parseEditPreview,
@@ -11,6 +16,51 @@ import {
   type LibraryCount, type LibraryDetail, type LibraryNodes, type LibraryPage, type LibrarySearch,
   type MaintenanceReport, type MirrorTree, type OperationList, type OrganizationFolder, type OrganizationPlan, type PairingOffer, type StartupState, type TagCatalog, type TextSearchPage, type TitleEncodingPreview, type WebPreviewState,
 } from '@markbridge/protocol';
+
+export async function semanticSettings(): Promise<SemanticSettings> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseSemanticSettings(await invoke<unknown>('semantic_settings'));
+}
+export async function saveSemanticConfig(config: SemanticConfig): Promise<SemanticSettings> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseSemanticSettings(await invoke<unknown>('save_semantic_config', { config: parseSemanticConfig(config) }));
+}
+export async function checkSemanticModel(endpoint: string, model: string): Promise<SemanticModelCheck> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseSemanticModelCheck(await invoke<unknown>('semantic_model_check', { endpoint, model }));
+}
+export async function reviewSemanticScope(scope: SemanticScope): Promise<SemanticScopeReview> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseSemanticScopeReview(await invoke<unknown>('semantic_review_scope', { scope: parseSemanticScope(scope) }));
+}
+export async function startSemanticIndex(reviewId: string): Promise<SemanticStatus> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseSemanticStatus(await invoke<unknown>('semantic_start_index', { reviewId }));
+}
+export async function semanticStatus(profileId: string, sourceEpoch: number): Promise<SemanticStatus> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseSemanticStatus(await invoke<unknown>('semantic_status', { profileId, sourceEpoch }));
+}
+export async function pauseSemanticIndex(profileId: string, sourceEpoch: number): Promise<SemanticStatus> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseSemanticStatus(await invoke<unknown>('semantic_pause', { profileId, sourceEpoch }));
+}
+export async function resumeSemanticIndex(profileId: string, sourceEpoch: number): Promise<SemanticStatus> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseSemanticStatus(await invoke<unknown>('semantic_resume', { profileId, sourceEpoch }));
+}
+export async function deleteSemanticIndex(profileId: string, sourceEpoch: number): Promise<SemanticStatus> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseSemanticStatus(await invoke<unknown>('semantic_delete_index', { profileId, sourceEpoch }));
+}
+export async function querySemantic(query: SemanticQuery): Promise<SemanticQueryResult> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseSemanticQueryResult(await invoke<unknown>('semantic_query', { query: parseSemanticQuery(query) }));
+}
+export async function cancelSemanticQuery(profileId: string, requestId: string): Promise<void> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  await invoke('semantic_cancel_query', { profileId, requestId });
+}
 
 export type EditAction =
   | { kind: 'create'; parentId: string; position: number; title: string; url?: string | null }
@@ -178,6 +228,10 @@ export async function previewUndo(profileId: string, operationId: string, expect
 }
 export async function saveExport(source: ExportSource, format: 'html' | 'sidecar'): Promise<ExportSaveResult> {
   return parseExportSaveResult(await invoke<unknown>('save_export', { source, format }));
+}
+export async function saveDiagnostics(): Promise<DiagnosticSaveResult> {
+  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
+  return parseDiagnosticSaveResult(await invoke<unknown>('save_diagnostics'));
 }
 
 export async function reviewOperation(profileId: string, operationId: string): Promise<OperationList> {

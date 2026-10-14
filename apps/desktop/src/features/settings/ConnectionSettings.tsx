@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import type { BridgeState, ChromeProfileList, PairingOffer } from '@markbridge/protocol';
+import { DiagnosticExport } from './DiagnosticExport';
 import {
   associateFileMirror, attachFileMirror, beginPairing, cancelPairing, confirmPairing,
   detachFileMirror, enumerateChromeUserData,
@@ -23,7 +24,7 @@ function mirrorProblem(code: string | null): string | null {
 function safeError(code: string | null): string | null {
   if (!code) return null;
   if (code === 'CONFLICT') return '连接状态发生冲突。请检查端口和扩展后重试。';
-  if (code === 'STORAGE_ERROR') return '无法读取本机缓存。请重新打开应用。';
+  if (code === 'STORAGE_ERROR') return '本机存储不可用。请检查缓存权限及系统凭据服务是否已解锁，再重试。';
   return '连接不可用。请检查扩展状态后重试。';
 }
 
@@ -75,9 +76,9 @@ export function ConnectionSettings({ state, error, native, accept, onBrowseSourc
     const generation = ++actionGeneration.current;
     setBusy(true);
     setMessage(null);
-    try { await work(); } catch {
+    try { await work(); } catch (code) {
       if (mounted.current && generation === actionGeneration.current) {
-        setMessage(failure);
+        setMessage(code === 'STORAGE_ERROR' ? safeError(code) : failure);
       }
     } finally {
       if (mounted.current && generation === actionGeneration.current) setBusy(false);
@@ -225,6 +226,7 @@ export function ConnectionSettings({ state, error, native, accept, onBrowseSourc
                 </form>}
               </article>)}
             </section>
+    <DiagnosticExport native={native} />
     {revoke && <ConfirmDialog title={`吊销“${revoke.displayName}”的配对？`} confirmLabel="确认吊销配对" onCancel={() => setRevoke(null)} onConfirm={() => {
       const id = revoke.profileId;
       setRevoke(null);

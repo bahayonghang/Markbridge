@@ -1,6 +1,7 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import { invoke, isTauri } from '@tauri-apps/api/core';
 import { listen, type Event } from '@tauri-apps/api/event';
+import { saveDiagnostics } from './backend';
 import { aiSettings, applyAi, applyEdit, applyTitleEncoding, beginPairing, cancelAi, clearAiCredential, clearWebPreviewSession, enumerateChromeUserData, exportHtml, getBridgeState, getMirrorTree, openHttpUrl, openWebPreview, previewEdit, previewTitleEncoding, readCacheCount, readCacheList, readCacheNode, readCacheSearch, readCacheTree, readTagState, saveAiConfig, setAiCredential, startBridge, subscribeBridgeState, subscribeWebPreview, suggestAi, tagCommand, testAiConnection, webPreviewAction, webPreviewState } from './backend';
 
 vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn(), isTauri: vi.fn() }));
@@ -10,6 +11,7 @@ const state = { protocolVersion: 1, revision: 1, port: null, errorCode: null, pr
 
 it('browser preview never invokes or subscribes to native endpoints', async () => {
   vi.mocked(isTauri).mockReturnValue(false);
+  await expect(saveDiagnostics()).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
   expect(await getBridgeState()).toMatchObject({ profiles: [], port: null });
   await subscribeBridgeState(vi.fn(), vi.fn());
   await expect(startBridge(49153)).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
@@ -66,6 +68,15 @@ it('rejects a cache page that is not the list contract', async () => {
   vi.mocked(invoke).mockResolvedValue({ phase: 'ready', token: 'secret' });
   await expect(webPreviewState()).rejects.toThrow('INVALID_WEB_PREVIEW');
   expect(invoke).toHaveBeenCalledWith('preview_edit', { profileId: 'profile-a', expectedRevision: 4, action: { kind: 'update', chromeId: '10', title: 'Alpha 2' } });
+});
+
+it('diagnostics passes no identity, file path or body to IPC and rejects extra response data', async () => {
+  vi.mocked(isTauri).mockReturnValue(true);
+  vi.mocked(invoke).mockResolvedValue({ status: 'saved', errorCode: null });
+  expect(await saveDiagnostics()).toEqual({ status: 'saved', errorCode: null });
+  expect(invoke).toHaveBeenCalledWith('save_diagnostics');
+  vi.mocked(invoke).mockResolvedValue({ status: 'saved', errorCode: null, path: 'C:/private' });
+  await expect(saveDiagnostics()).rejects.toThrow('INVALID_DIAGNOSTIC_SAVE_RESULT');
 });
 
 it('validates event payloads and retains a safe invalid-data path', async () => {

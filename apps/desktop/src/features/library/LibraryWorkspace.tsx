@@ -6,6 +6,7 @@ import {
   type EditAction,
 } from '../../backend';
 import { OrganizeWorkspace } from '../organization/OrganizeWorkspace';
+import { SemanticWorkspace } from '../semantic/SemanticWorkspace';
 import { ContentPreviewPanel } from '../preview/ContentPreview';
 import { WebPreviewPanel } from '../preview/WebPreview';
 import { EditDesk } from './EditDesk';
@@ -84,12 +85,12 @@ function neighbor(ids: string[], current: string | null, delta: number): string 
   return ids[next] ?? null;
 }
 
-export function LibraryWorkspace({ state, invalid, native, focusMirrorId, section = 'library', active = true, sidebarHost, onSettings, onLibrary, onExport, onOrganize, onAiSettings, onHistory, sourceRequest, onCurrentSource }: {
+export function LibraryWorkspace({ state, invalid, native, focusMirrorId, section = 'library', active = true, sidebarHost, onSettings, onLibrary, onExport, onOrganize, onAiSettings, onSemanticSettings, onHistory, sourceRequest, onCurrentSource }: {
   state: BridgeState | null;
   invalid: boolean;
   native: boolean;
   focusMirrorId: string | null;
-  section?: 'library' | 'organize' | 'history' | 'export';
+  section?: 'library' | 'organize' | 'semantic' | 'history' | 'export';
   active?: boolean;
   sidebarHost?: HTMLDivElement | null;
   onSettings?: () => void;
@@ -97,6 +98,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
   onExport?: () => void;
   onOrganize?: () => void;
   onAiSettings?: () => void;
+  onSemanticSettings?: () => void;
   onHistory?: () => void;
   sourceRequest?: SourceRequest | null;
   onCurrentSource?: (source: SourceTarget | null) => void;
@@ -581,7 +583,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
       <p>切换会关闭当前详情，清除详情中的输入和未确认预览。已保存的内容会保留。</p><p>要继续编辑当前输入，请留在当前页面。</p>
     </ConfirmDialog>}
     {sidebarHost && createPortal(folderPane, sidebarHost)}
-    <section className={`library ${sidebarHost ? 'in-shell' : 'standalone'} ${detailOpen ? 'has-detail' : ''}`} hidden={!active} id={section === 'export' ? 'settings-panel-export' : undefined} role={section === 'export' ? 'tabpanel' : undefined} aria-labelledby={section === 'export' ? 'settings-tab-export' : undefined} aria-busy={(source && native && phase === 'loading') || undefined} aria-label={section === 'library' ? '书签工作区' : section === 'organize' ? '整理工作区' : section === 'history' ? '历史工作区' : '导出工作区'}>
+    <section className={`library ${sidebarHost ? 'in-shell' : 'standalone'} ${detailOpen ? 'has-detail' : ''}`} hidden={!active} id={section === 'export' ? 'settings-panel-export' : undefined} role={section === 'export' ? 'tabpanel' : undefined} aria-labelledby={section === 'export' ? 'settings-tab-export' : undefined} aria-busy={(source && native && phase === 'loading') || undefined} aria-label={section === 'library' ? '书签工作区' : section === 'organize' ? '整理工作区' : section === 'semantic' ? '语义工作区' : section === 'history' ? '历史工作区' : '导出工作区'}>
       <div className="library-toolbar">
         {state && (profiles.length > 0 || mirrors.length > 0) && <div className="library-controls">
           <label htmlFor="library-source">书签来源
@@ -743,6 +745,23 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
         <div className="workspace-page" hidden={section !== 'history'}>
           {section === 'history' && profile && <HistoryWorkspace profileId={profile.profileId} profileName={profile.displayName} revision={profile.revision} refreshToken={state?.revision} live={profile.connection === 'live'} nodes={nodes} onExport={onExport} />}
           {!profile && <><h2>操作历史</h2><p>此文件来源没有浏览器操作记录。请切换到 Chrome 资料查看历史。</p></>}
+        </div>
+        <div className="workspace-page" hidden={section !== 'semantic'}>
+          {section === 'semantic' && profile && epochRef.current.epoch !== null && <SemanticWorkspace
+            key={`semantic:${sourceKey}:${epochRef.current.epoch}:${sourceVisit}`}
+            profileId={profile.profileId} profileName={profile.displayName} sourceEpoch={epochRef.current.epoch}
+            revision={profile.revision} visit={sourceVisit} refreshVersion={state?.revision ?? 0}
+            active={active && section === 'semantic'} nodes={nodes} selected={pickedBookmarks} folderId={folderId}
+            onLibrary={onLibrary} onSettings={onSemanticSettings} onSelect={(chromeId) => {
+              const node = activeIndex.nodes.get(chromeId);
+              if (!node || node.kind !== 'bookmark') return false;
+              leaveMetadata(() => {
+                setFolderId(node.parentId ?? folderId); setQuery(''); setFilterTagId(null);
+                selectBookmark(chromeId); onLibrary?.();
+              }, [chromeId]);
+              return true;
+            }} />}
+          {section === 'semantic' && (!profile || epochRef.current.epoch === null) && <><h2>本地语义检索</h2><p>{profile ? '正在确认此资料的缓存身份。完成后可选择索引范围。' : '请选择 Chrome 资料。只读文件来源不建立语义索引。'}</p><button type="button" onClick={onLibrary}>返回普通搜索</button></>}
         </div>
         <div className="workspace-page" hidden={section !== 'export'}>
           <div className="page-intro"><h2>备份与导出</h2><p>保存本地缓存，保留一份可检查的文件。</p></div>

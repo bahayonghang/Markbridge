@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SemanticScope",
+  "type": "object",
+  "properties": {
+    "expectedRevision": {
+      "$ref": "#/$defs/Counter"
+    },
+    "folderId": {
+      "$ref": "#/$defs/RequiredNullable"
+    },
+    "profileId": {
+      "$ref": "#/$defs/Id"
+    },
+    "selectedChromeIds": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Id"
+      },
+      "maxItems": 10000
+    },
+    "sourceEpoch": {
+      "$ref": "#/$defs/SourceEpoch"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "profileId",
+    "sourceEpoch",
+    "expectedRevision",
+    "selectedChromeIds",
+    "folderId"
+  ],
+  "$defs": {
+    "Counter": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 9007199254740991,
+      "minimum": 0
+    },
+    "Id": {
+      "type": "string",
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*(?![\\s\\S])"
+    },
+    "RequiredNullable": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Id"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "SourceEpoch": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 9007199254740991,
+      "minimum": 1
+    }
+  }
+}
