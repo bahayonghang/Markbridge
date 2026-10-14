@@ -1,0 +1,5 @@
+{"file":".trellis/spec/project-baseline.md","reason":"产品、安全、授权及验收证据边界"}
+{"file":".trellis/spec/frontend/index.md","reason":"前端规范入口"}
+{"file":".trellis/spec/extension/index.md","reason":"图标清单变化不扩展Chrome权限或协议"}
+{"file":".trellis/tasks/archive/2026-10/10-13-mb-settings-brand-refresh/research/current-state.md","reason":"截图及源码诊断和已核对的一手资料"}
+{"file":".trellis/tasks/archive/2026-10/10-13-mb-settings-brand-refresh/visual-design.md","reason":"蓝色品牌、设置几何与主题字体设计提案"}

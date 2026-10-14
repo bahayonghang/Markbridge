@@ -46,6 +46,6 @@ expected = {str(size): f"icons/{size}.png" for size in (16, 32, 48, 128)}
 assert manifest["icons"] == expected and manifest["action"]["default_icon"] == expected
 assert manifest["permissions"] == ["bookmarks", "storage", "alarms", "scripting", "activeTab"]
 assert "host_permissions" not in manifest
-assert (REPO / "assets/brand/markbridge-master.png").read_bytes() == (REPO / ".trellis/tasks/10-13-mb-s01-brand-icon/assets/selected-a.png").read_bytes()
+assert (REPO / "assets/brand/markbridge-master.png").read_bytes() == (REPO / ".trellis/tasks/archive/2026-10/10-13-mb-s01-brand-icon/assets/selected-a.png").read_bytes()
 (EVIDENCE / "asset-inspection.json").write_text(json.dumps({"status": "PASS", "assets": report}, indent=2) + "\n", encoding="utf-8")
 print("PASS: RGBA dimensions/transparency, ICO frames, same master, manifest mappings and unchanged permissions.")

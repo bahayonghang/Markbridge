@@ -6,6 +6,8 @@ Desktop source is in `apps/desktop`, the MV3 extension in `apps/extension`, Rust
 
 JSON examples remain documentation fixtures unless linked to an existing fixture. Runtime results and remaining gates belong in task evidence. Never report planned checks as executed or a historical result as a fresh run.
 
+On2026-10-14 the separate brand/settings parent andS01-S03 completed acceptance, followed by explicit user authorization to commit all current changes and archive completed tasks. They now live under `.trellis/tasks/archive/2026-10/`, parent `10-13-mb-settings-brand-refresh`; see `docs/implementation-status-2026-10-14.md`. This closes that incremental UI scope only. Original13/V12, original15/V18 and the original parent remain unfinished; no installation, push, signing, publication or missing-model waiver is implied.
+
 ## Product boundaries
 
 - Markbridge is a Tauri 2 desktop bookmark workspace with a Chrome Manifest V3 extension.
