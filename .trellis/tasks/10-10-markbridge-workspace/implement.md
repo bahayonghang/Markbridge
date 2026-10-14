@@ -83,3 +83,12 @@ Windows 首版要求 01–13 通过其正式验收及 verification.md 的 Window
 ## 2026-10-13 提交归档审计
 
 上一轮用户明确要求提交改动并归档已完成任务，授权适用于上一轮且已执行。03/04 的其余 AC 已通过，同一真实睡眠项按既有用户决定 WAIVED 后完成；原始 V04 UNVERIFIED / 实际 NOT_RUN 保留。本轮继续实施未新增提交/归档授权，13/14/15 和本父任务仍未完成。前述“旧状态不改写”是当时阶段决定，现以本节及 execution-status.md 的证据映射为准。
+
+## 2026-10-14 通用字体与 Claude 工作台验收入口
+
+独立 [C01–C04 父任务](../archive/2026-10/10-14-mb-claude-workspace-optimization/prd.md) 新增可信主窗口只读 `list_installed_fonts` 命令及受检 DTO，现有 `pnpm protocol:check` 覆盖生成链。远程预览命令清单随 `generate_handler!` 动态枚举；新的当前程序应拒绝包含字体命令在内的全部81项。该字体命令不修改扩展协议、数据库或浏览器写入合同。
+
+- `node .trellis/tasks/archive/2026-10/10-14-mb-c04-visual-acceptance/evidence/native-integration.mjs`：复用现有进程归属驱动，在新建临时应用根验证字体、实际监视器 DPI、新 PID 重启、预览权限与保存取消；不打开日常 Chrome，不安装程序或字体。运行前需标准 `pnpm build:native` 与该任务源码指纹收据。
+- `node .trellis/tasks/archive/2026-10/10-14-mb-c04-visual-acceptance/evidence/current-performance-probe.mjs`：复制原普通搜索 B10K 方法，保留30个正式样本、原 p95≤200ms 门槛和原始计时边界，收据写入新 C04；不覆盖旧13性能记录。
+
+当前结果见 [C04 原生收据](../archive/2026-10/10-14-mb-c04-visual-acceptance/evidence/native-validation.md) 和 [新父验证矩阵](../archive/2026-10/10-14-mb-claude-workspace-optimization/verification.md)。本补充只同步新增命令和验收入口；旧13/V12、15/V18、本父完成状态及历史证据保持不变。
