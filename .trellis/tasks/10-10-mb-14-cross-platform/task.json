@@ -3,7 +3,7 @@
   "name": "mb-14-cross-platform",
   "title": "macOS 与 Linux 原生适配",
   "description": "macOS 与 Linux 原生适配；属于 Markbridge 父规划，独立验收并记录失败与恢复边界",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": "fullstack",
   "scope": "markbridge",
   "package": null,
@@ -12,7 +12,7 @@
   "assignee": "lyh",
   "createdAt": "2026-10-10",
   "completedAt": null,
-  "branch": null,
+  "branch": "main",
   "base_branch": "main",
   "worktree_path": null,
   "commit": null,
@@ -21,13 +21,23 @@
   "children": [],
   "parent": "10-10-markbridge-workspace",
   "relatedFiles": [
-    "OS profile paths",
-    "secret storage",
-    "preview session isolation",
-    "Tauri bundle",
-    "跨平台 CI/文档和原生 evidence"
+    "crates/core/src/bridge/credentials.rs",
+    "crates/core/Cargo.toml",
+    "apps/desktop/src-tauri/src/main.rs",
+    "apps/desktop/src-tauri/src/preview.rs",
+    "apps/desktop/src-tauri/src/export.rs",
+    "apps/desktop/src-tauri/Cargo.toml",
+    "apps/desktop/src-tauri/tauri.conf.json",
+    "scripts/native-build.mjs",
+    "scripts/native-package.mjs",
+    "scripts/native-artifact.test.mjs",
+    ".github/workflows/ci.yml",
+    "apps/desktop/src/features/settings/ConnectionSettings.tsx",
+    "apps/desktop/src/features/ai/AiSettings.tsx",
+    "tests/e2e/secure-storage.spec.ts",
+    "docs/native-platforms.md"
   ],
-  "notes": "Planning only. Dependency order is documented and is not enforced automatically by Trellis. No product implementation or runtime validation has started.",
+  "notes": "Executable macOS/Linux source adaptation and Windows regression passed their recorded checks, including later 4fc/284478 package, 3ee4/eee73 install and 6c7e B10K evidence owned by 13/15. AC14-4 PASS. On 2026-10-13 the user said the default is Windows and to leave other platforms aside, so this task leaves the active queue. AC14-1/2/3 and V17 stay NOT_RUN, not PASS, and macOS/Linux are not supported. No publish claim.",
   "meta": {
     "sequence": "14",
     "milestone": "M5",
@@ -40,6 +50,12 @@
     "implementation_approval": "granted",
     "planning_status": "approved",
     "delivery_scope": "follow_up",
-    "approval_evidence": "Parent approval_evidence; dependencies and per-child acceptance remain required"
+    "approval_evidence": "Parent approval_evidence; dependencies and per-child acceptance remain required",
+    "startup_gate_exception": "User approved 2026-10-13: current13 Windows install/diagnostics/affected automated checks permit14/15 start;13 actual-model V12/full acceptance incomplete. No model/platform acceptance waiver.",
+    "latest_gate_decision": "../10-10-markbridge-workspace/gate-proposal-2026-10-13-model.md",
+    "platform_scope": "deferred_windows_default",
+    "v17_execution": "NOT_RUN",
+    "support_claim": false,
+    "archive_branch_note": "Local main-branch work with no PR; user authorized local commit and archive. Used --skip-branch-validation rather than inventing a feature branch."
   }
 }

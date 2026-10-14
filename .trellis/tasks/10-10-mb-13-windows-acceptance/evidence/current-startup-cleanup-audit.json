@@ -1,0 +1,38 @@
+{
+  "kind": "independent_failed_startup_cleanup_audit",
+  "at": "2026-10-13T17:08:00.4414037Z",
+  "facts": [
+    {
+      "pid": 56088,
+      "absent": true,
+      "listeningCount": 0
+    },
+    {
+      "pid": 141860,
+      "absent": true,
+      "listeningCount": 0
+    },
+    {
+      "pid": 142756,
+      "absent": true,
+      "listeningCount": 0
+    },
+    {
+      "pid": 77748,
+      "absent": true,
+      "listeningCount": 0
+    },
+    {
+      "pid": 113248,
+      "absent": true,
+      "listeningCount": 0
+    },
+    {
+      "pid": 117724,
+      "absent": true,
+      "listeningCount": 0
+    }
+  ],
+  "cleanupGuardCorrection": "The root cleanup command Get-NetTCPConnection was unavailable in PowerShell7; its listenersBefore values are UNVERIFIED and superseded by this native netstat/CIM audit. No data/registry removal occurred.",
+  "originalNativeStatus": "FAIL"
+}

@@ -1,0 +1,20 @@
+{
+  "runId": "b9e7a249-9f31-4493-ba67-10c97be01e32",
+  "cleanupId": "8a5f95ee-5c73-41e2-8631-09afed748969",
+  "startedAt": "2026-10-13T16:13:24.708Z",
+  "operation": "restore_only_run_created_install_location",
+  "plan": "current-installer-b9e7a249-9f31-4493-ba67-10c97be01e32-plan.json",
+  "completedRunReceipt": "current-installer-b9e7a249-9f31-4493-ba67-10c97be01e32-48f99d32-349d-4e26-8ab5-9c604f35ad10-receipt.json",
+  "planFacts": {
+    "bytes": 3415,
+    "sha256": "53d41bfe633accf48ecf317f0b066522a7ce4b4dfec161d036b2b19142e69cb7"
+  },
+  "completedRunFacts": {
+    "bytes": 10280,
+    "sha256": "8c227fcdcca7dc24d226057776ee824ba9168a6ec0ce46dc47d3a2d64ee9f4ab"
+  },
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-xSU5vU",
+  "status": "FAIL",
+  "code": "RESTORE_NORMAL_UNINSTALL_RECEIPT_MISSING",
+  "finishedAt": "2026-10-13T16:13:25.811Z"
+}

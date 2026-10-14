@@ -2,13 +2,15 @@
 
 ## 目标与状态
 
-建立本地优先的 Tauri 桌面应用，连接 Chrome 书签，提供实时查看、编辑、标签、网页预览和 AI 整理。2026-10-10 用户已批准按当前规划开始实施。父任务负责协调；子任务按依赖和验收门槛依次启动，01 为首个目标。
+建立本地优先的 Tauri 桌面应用，连接 Chrome 书签，提供实时查看、编辑、标签、网页预览和 AI 整理。2026-10-10 用户已批准按当前规划开始实施。父任务负责协调；子任务按依赖和验收门槛依次启动，当前从既有 13 继续，不重新创建任务。
 
 用户已授权完成 bootstrap、创建父子任务，并批准当前规划的实施。用户另已确认：两种预览都需要；标签默认本地保存，可选写入标题；Windows 首版，macOS／Linux 后续适配。提交、归档、发布和日常环境安装仍需单独授权。
 
 ## 当前事实
 
-规划建立时仓库只有 Trellis 脚手架和参考文档。`00-bootstrap-guidelines` 已完成；01 已创建工程基础源码，原生交互保持 UNVERIFIED。02 的共享协议与 SQLite 模块已通过本地验收，桌面尚未接入数据库。尚无配对或书签功能。当前结论见 [实施状态](execution-status.md)。`ref/Markbridge-实施方案.md` 是设计输入且被 Git 忽略，本文保留独立执行所需需求。技术纠错和来源见 [research/technical-findings.md](research/technical-findings.md)。
+2026-10-13：原 01–12、新版 R01–R08 及改版父任务已经完成并归档。当前源码已有配对同步、只读镜像、编辑与条件撤销、标签备注、双预览、历史导出、可选 AI、库维护和默认关闭的本地语义检索。13 当前 Windows 安装/诊断/集成条件已经通过。14 的可执行适配及 Windows 回归已独立批准；同日用户明确目前默认 Windows、其他平台先不管，14 离开活动队列，V17 仍为 NOT_RUN。15 的真实模型验收未完成。13、15 与原父任务保持未完成。当前结论见 [实施状态](execution-status.md)、[需求覆盖](current-integration.md) 及 [13 当前集成证据](../10-10-mb-13-windows-acceptance/evidence/current-integration-2026-10-13.md)，历史产物证据不冒充新二进制重测。`ref/Markbridge-实施方案.md` 是设计输入且被 Git 忽略，本文保留独立执行所需需求。技术纠错和来源见 [research/technical-findings.md](research/technical-findings.md)。
+
+用户已批准 [13→14/15 启动例外](gate-proposal-2026-10-13-model.md)：当前 Windows 安装闭环、诊断导出及受影响自动检查通过即可继续后续实施；缺实际模型的 V12/13 完整验收和缺 embedding 模型的 V18 仍未完成。随后用户把其他平台移出当前范围，V17 保持 NOT_RUN，不是通过。真实 OS 休眠为 WAIVED，实际 NOT_RUN、历史 V04 UNVERIFIED 均保留。这些调整不能用来宣布 M4 或父任务整体完成。
 
 ## 需求与验收
 

@@ -1,0 +1,422 @@
+{
+  "kind": "copied_release_synthetic_preview_persistence_probe",
+  "runId": "bf020d91-c3e2-4be2-beab-62b8ab7c7498",
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-huhf7E",
+  "executableSha256": "4b0708b102c638a8d45eb9ae526aae62dce7641d22eb58ecbbfdef033b9938d1",
+  "startedAt": "2026-10-13T17:34:58.575Z",
+  "installation": "NOT_RUN",
+  "chrome": "NOT_RUN",
+  "model": "NOT_RUN",
+  "diagnosticLifetimeObserver": false,
+  "identityVariant": "production-length-synthetic",
+  "profileIdLength": 66,
+  "snapshots": [
+    {
+      "stage": "A-store",
+      "kind": "job",
+      "id": 1,
+      "path": "/a",
+      "pageId": "f09ff049-03c9-427e-830a-1f6f57d97a10",
+      "local": "MB13-preview-A",
+      "cookie": "r08=MB13-preview-A",
+      "main": null
+    },
+    {
+      "stage": "A-same-window-reload",
+      "kind": "job",
+      "id": 2,
+      "path": "/a",
+      "pageId": "a3562361-ee72-4125-a63f-0856fc243f3d",
+      "local": "MB13-preview-A",
+      "cookie": "r08=MB13-preview-A",
+      "main": null
+    },
+    {
+      "stage": "A-immediate-reopen",
+      "kind": "job",
+      "id": 3,
+      "path": "/a",
+      "pageId": "87a22263-9400-4177-9836-606b3f61f906",
+      "local": null,
+      "cookie": "",
+      "main": null
+    },
+    {
+      "stage": "B-store",
+      "kind": "job",
+      "id": 4,
+      "path": "/b",
+      "pageId": "3e3bc7eb-8d0b-4cc6-8aa2-85b70054982c",
+      "local": "MB13-preview-B",
+      "cookie": "r08=MB13-preview-B",
+      "main": null
+    },
+    {
+      "stage": "A-after-B-reopen",
+      "kind": "job",
+      "id": 5,
+      "path": "/a",
+      "pageId": "61c20fee-e1cd-47cd-9ec6-5724900da077",
+      "local": null,
+      "cookie": "",
+      "main": null
+    }
+  ],
+  "openings": [
+    {
+      "profile": "p:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "page": {
+        "kind": "hello",
+        "path": "/a",
+        "pageId": "f09ff049-03c9-427e-830a-1f6f57d97a10",
+        "local": null,
+        "cookie": "",
+        "main": null
+      },
+      "os": {
+        "mainDirectoryExists": true,
+        "observations": [
+          {
+            "observedDirectoryExists": true,
+            "expectedMain": true,
+            "insideFixture": true,
+            "pid": 139472,
+            "relativeDirectory": "app-data/main-webview/EBWebView",
+            "parent": 145676,
+            "expectedPreview": false
+          },
+          {
+            "observedDirectoryExists": true,
+            "expectedMain": false,
+            "insideFixture": true,
+            "pid": 146588,
+            "relativeDirectory": "app-data/preview-sessions/703a61616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161/EBWebView",
+            "parent": 145676,
+            "expectedPreview": true
+          }
+        ],
+        "previewDirectoryExists": true,
+        "owner": 145676
+      }
+    },
+    {
+      "profile": "p:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "page": {
+        "kind": "hello",
+        "path": "/a",
+        "pageId": "87a22263-9400-4177-9836-606b3f61f906",
+        "local": null,
+        "cookie": "",
+        "main": null
+      },
+      "os": {
+        "mainDirectoryExists": true,
+        "observations": [
+          {
+            "observedDirectoryExists": true,
+            "expectedMain": true,
+            "insideFixture": true,
+            "pid": 139472,
+            "relativeDirectory": "app-data/main-webview/EBWebView",
+            "parent": 145676,
+            "expectedPreview": false
+          },
+          {
+            "observedDirectoryExists": true,
+            "expectedMain": false,
+            "insideFixture": true,
+            "pid": 148224,
+            "relativeDirectory": "app-data/preview-sessions/703a61616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161/EBWebView",
+            "parent": 145676,
+            "expectedPreview": true
+          }
+        ],
+        "previewDirectoryExists": true,
+        "owner": 145676
+      }
+    },
+    {
+      "profile": "p:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "page": {
+        "kind": "hello",
+        "path": "/b",
+        "pageId": "3e3bc7eb-8d0b-4cc6-8aa2-85b70054982c",
+        "local": null,
+        "cookie": "",
+        "main": null
+      },
+      "os": {
+        "mainDirectoryExists": true,
+        "observations": [
+          {
+            "observedDirectoryExists": true,
+            "expectedMain": true,
+            "insideFixture": true,
+            "pid": 139472,
+            "relativeDirectory": "app-data/main-webview/EBWebView",
+            "parent": 145676,
+            "expectedPreview": false
+          },
+          {
+            "observedDirectoryExists": true,
+            "expectedMain": false,
+            "insideFixture": true,
+            "pid": 147728,
+            "relativeDirectory": "app-data/preview-sessions/703a62626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262/EBWebView",
+            "parent": 145676,
+            "expectedPreview": true
+          }
+        ],
+        "previewDirectoryExists": true,
+        "owner": 145676
+      }
+    },
+    {
+      "profile": "p:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "page": {
+        "kind": "hello",
+        "path": "/a",
+        "pageId": "61c20fee-e1cd-47cd-9ec6-5724900da077",
+        "local": null,
+        "cookie": "",
+        "main": null
+      },
+      "os": {
+        "mainDirectoryExists": true,
+        "observations": [
+          {
+            "observedDirectoryExists": true,
+            "expectedMain": true,
+            "insideFixture": true,
+            "pid": 139472,
+            "relativeDirectory": "app-data/main-webview/EBWebView",
+            "parent": 145676,
+            "expectedPreview": false
+          },
+          {
+            "observedDirectoryExists": true,
+            "expectedMain": false,
+            "insideFixture": true,
+            "pid": 85792,
+            "relativeDirectory": "app-data/preview-sessions/703a61616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161/EBWebView",
+            "parent": 145676,
+            "expectedPreview": true
+          }
+        ],
+        "previewDirectoryExists": true,
+        "owner": 145676
+      }
+    }
+  ],
+  "closures": [
+    {
+      "profile": "p:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "knownBrowserPids": [
+        146588
+      ],
+      "absence": {
+        "presentPids": []
+      }
+    },
+    {
+      "profile": "p:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "knownBrowserPids": [
+        148224
+      ],
+      "absence": {
+        "presentPids": []
+      }
+    },
+    {
+      "profile": "p:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "knownBrowserPids": [
+        147728
+      ],
+      "absence": {
+        "presentPids": []
+      }
+    },
+    {
+      "profile": "p:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "knownBrowserPids": [
+        85792
+      ],
+      "absence": {
+        "presentPids": []
+      }
+    }
+  ],
+  "errors": [
+    "PROFILE_A_PREVIEW_SESSION_NOT_RESTORED"
+  ],
+  "status": "FAIL",
+  "mainDataEvidence": {
+    "mainDirectoryExists": true,
+    "observations": [
+      {
+        "observedDirectoryExists": true,
+        "expectedMain": true,
+        "insideFixture": true,
+        "pid": 139472,
+        "relativeDirectory": "app-data/main-webview/EBWebView",
+        "parent": 145676,
+        "expectedPreview": false
+      }
+    ],
+    "previewDirectoryExists": false,
+    "owner": 145676
+  },
+  "immediateReopenRestored": false,
+  "afterBRestored": false,
+  "failedStage": "last-preview-close",
+  "normalExit": {
+    "pid": 145676,
+    "exitCode": 0,
+    "signal": null,
+    "method": "verified_main_and_preview_windows_WM_CLOSE",
+    "phase": "known-webview-exit",
+    "windowPosts": [
+      {
+        "action": "close",
+        "posted": 1,
+        "pid": 145676,
+        "windows": [
+          {
+            "emptyTitle": false,
+            "handle": "3450EE4",
+            "messageOnly": false,
+            "visible": true,
+            "closeEligible": true,
+            "className": "UNREPORTED_CLASS",
+            "role": "main",
+            "threadId": 147152
+          },
+          {
+            "emptyTitle": true,
+            "handle": "1111E24",
+            "messageOnly": false,
+            "visible": true,
+            "closeEligible": false,
+            "className": "TAO_THREAD_EVENT_TARGET",
+            "role": "other",
+            "threadId": 147152
+          },
+          {
+            "emptyTitle": false,
+            "handle": "1A41B0C",
+            "messageOnly": false,
+            "visible": false,
+            "closeEligible": false,
+            "className": "UNREPORTED_CLASS",
+            "role": "other",
+            "threadId": 147152
+          },
+          {
+            "emptyTitle": false,
+            "handle": "2B41E5A",
+            "messageOnly": false,
+            "visible": false,
+            "closeEligible": false,
+            "className": "IME",
+            "role": "other",
+            "threadId": 147152
+          },
+          {
+            "emptyTitle": true,
+            "handle": "14C1BB6",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "Chrome_MessageWindow",
+            "role": "other",
+            "threadId": 64536
+          },
+          {
+            "emptyTitle": true,
+            "handle": "7E042E",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "Chrome_MessageWindow",
+            "role": "other",
+            "threadId": 147152
+          },
+          {
+            "emptyTitle": true,
+            "handle": "1331FCC",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "wetype.renderer.window",
+            "role": "other",
+            "threadId": 147152
+          },
+          {
+            "emptyTitle": true,
+            "handle": "3C51C6C",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "UNREPORTED_CLASS",
+            "role": "other",
+            "threadId": 147152
+          },
+          {
+            "emptyTitle": true,
+            "handle": "1FE1812",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "SystemUserAdapterWindowClass",
+            "role": "other",
+            "threadId": 147152
+          },
+          {
+            "emptyTitle": false,
+            "handle": "2240F98",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "CicMarshalWndClass",
+            "role": "other",
+            "threadId": 147152
+          },
+          {
+            "emptyTitle": false,
+            "handle": "12E0C10",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "OleMainThreadWndClass",
+            "role": "other",
+            "threadId": 147152
+          }
+        ],
+        "ownedWindows": 11,
+        "processAbsent": false
+      }
+    ],
+    "knownWebviewPids": [
+      139472,
+      146588,
+      148224,
+      147728,
+      85792
+    ],
+    "nativeStageOrder": [],
+    "previewProbeEvents": [],
+    "knownWebviewAbsence": {
+      "presentPids": []
+    }
+  },
+  "previewProbeEvents": [],
+  "lastProcesses": {
+    "processes": [],
+    "listeners": []
+  },
+  "finalProcesses": {
+    "processes": [],
+    "listeners": []
+  },
+  "finishedAt": "2026-10-13T17:36:59.725Z"
+}

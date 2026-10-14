@@ -1,0 +1,44 @@
+{
+  "runId": "7accfee5-259b-4733-8d77-60c71b7dda75",
+  "cleanupId": "d785c2d6-bdf9-4b60-88ba-087c2bdd7fd9",
+  "startedAt": "2026-10-13T19:43:22.465Z",
+  "operation": "restore_only_run_created_install_location",
+  "plan": "current-installer-7accfee5-259b-4733-8d77-60c71b7dda75-plan.json",
+  "completedRunReceipt": "current-installer-7accfee5-259b-4733-8d77-60c71b7dda75-de4114d5-d8fc-4d7f-be8c-76e46cee781b-receipt.json",
+  "planFacts": {
+    "bytes": 3415,
+    "sha256": "c7d5d1eef6976e83f0f995cc8e405385ef3a4c5baf1e2558cb0ac4d7ca0f6d6a"
+  },
+  "completedRunFacts": {
+    "bytes": 20377,
+    "sha256": "47a561a9b3e8be8dc82f7a092547880856a905c2f9c52078434204950cc2184b"
+  },
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-jgfydj",
+  "registry": {
+    "status": "restored",
+    "removedDefaultValue": true,
+    "removedEmptyProductKey": true
+  },
+  "finalRegistration": {
+    "registration": null,
+    "shortcutCount": 0,
+    "runPresent": false,
+    "keys": [],
+    "webview2Versions": [
+      "155.0.4283.45"
+    ]
+  },
+  "data": {
+    "files": 611,
+    "bytes": 48743156,
+    "manifestSha256": "25d00e7821e3a11acc1cf6344659c0fa358ad2320c6c95953dd2a6a434ce96e7",
+    "sqlite": {
+      "bytes": 221184,
+      "sha256": "b3d6e14b3fd49aba66941cb50b7a23388173c92bf6576611db07cb93cffc85a8"
+    },
+    "mainWebviewPresent": true,
+    "previewDirectoryCount": 2
+  },
+  "status": "PASS",
+  "finishedAt": "2026-10-13T19:43:27.185Z"
+}

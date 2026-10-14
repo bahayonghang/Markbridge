@@ -29,7 +29,7 @@
     "evidence/",
     "本地构建产物清单"
   ],
-  "notes": "Current audit: historical AC13-2/3/4 and V06/V15 passed on the old installer; prior FAIL receipts remain historical, not current blockers by themselves. Current redesigned installer has not been built/accepted. AC13-1 needs current gate reconciliation; diagnostic export in the approved PRD/design remains to verify and implement. V16 stays UNVERIFIED without a dedicated environment. Actual OS sleep is waived by user, execution NOT_RUN. See evidence/closeout-audit-2026-10-13.md. Task remains in_progress, not archived.",
+  "notes": "Final Windows 14/15 integrated release and packed/installed exe 4fcf7fcd, setup 2844783f. New 3ee4f8c0/eee73eda isolated lifecycle PASS 11/errors 0 with schema8 diagnostics, 80 remote command denials, default semantic OFF, P2/CRUD/local metadata/preview/normal restart/exact no replay/credential revocation/uninstall 630-file and SQLite retention; strict 2f88 registration restoration PASS. Current 6c7edb60 V06 B10K 3 cold/30 warm PASS (788.3896/633.5898/728.6094ms; warm p95 106.6, max 110ms), source-linked independent review approved. Historical 4f/3a/early failures retained. AC13-1/real-model V12 missing; Floccus V16 UNVERIFIED; 13/M4 remains in_progress, not completed. The later Windows-default decision archives only 14 and does not close this task. Actual sleep WAIVED/NOT_RUN. No push, signing, publication or daily installation.",
   "meta": {
     "sequence": "13",
     "milestone": "M4",
@@ -45,6 +45,8 @@
     "planning_status": "approved",
     "delivery_scope": "windows_v1",
     "approval_evidence": "Parent approval_evidence; dependencies and per-child acceptance remain required",
-    "latest_audit": "evidence/closeout-audit-2026-10-13.md"
+    "latest_audit": "evidence/current-integration-2026-10-13.md",
+    "startup_gate_exception": "User approved 2026-10-13: current13 Windows install/diagnostics/affected automated checks permit14/15 start;13 actual-model V12/full acceptance incomplete. No model/platform acceptance waiver.",
+    "latest_gate_decision": "../10-10-markbridge-workspace/gate-proposal-2026-10-13-model.md"
   }
 }

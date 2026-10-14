@@ -1,5 +1,15 @@
 # 13 Windows 验收收据
 
+## 当前记录入口（2026-10-13）
+
+下文是 2026-10-11/12 的历史原始记录，包含当时的 FAIL、旧 hash 和当时未纠正的 V12 模型判定；不能作为当前源码结论。当前结果见 [集成矩阵](current-integration-2026-10-13.md) 与 [独立复核](current-independent-check.md)。
+
+当前14/15实施后的exe为`4fcf7fcd506ad60eac1798c2a4c0ed9f80888648f7a5050ec41e6d47c67ff707`，setup为`2844783f1660d3708412b1bcbd602f8a2bc1c85369623cdf996d52368932b183`。3ee4f8c0/eee73eda完整隔离安装PASS11控制/0错误，2f88注册恢复PASS；schema8诊断/默认语义关闭、全部80command拒绝、P2、管理/预览、正常重启/零回放和卸载630文件/SQLite保留均通过。旧4f/269c/722a启动基线仍PASS，实际sole-root日期证明与B/history严格比较分别保留，不冒充新hash。
+
+最新4fc B10K `6c7edb60`三冷788.3896/633.5898/728.6094ms、30暖p95 106.6/max110ms PASS；完整自动检查与80E2E通过。旧dbfa/4f及所有首次FAIL保留，原生语义合成功能73edf独立记录。已按启动例外完成14/15全部可执行实施及父集成；V12/V17/V18仍NOT_RUN，13/M4和父任务未完成，V16 UNVERIFIED、睡眠WAIVED/NOT_RUN、历史V04 UNVERIFIED。
+
+## 历史记录（保留原文）
+
 日期：2026-10-11 23:05 至 2026-10-12 03:18（-04:00）。平台记录来自注册表：`Windows 10 Pro`，DisplayVersion `26H2`，build `26300`。`OSVersion` 为 `10.0.26300.0`。本收据不把该字符串改写成 Windows 11。
 
 HEAD `1f101ead77e832cec2e52893168bfb148d02cb85`。工作树在本任务开始前已有未提交改动。本任务没有提交。

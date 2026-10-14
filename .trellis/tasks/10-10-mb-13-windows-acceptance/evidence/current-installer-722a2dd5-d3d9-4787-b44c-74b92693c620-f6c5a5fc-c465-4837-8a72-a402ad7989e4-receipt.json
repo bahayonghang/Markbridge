@@ -1,0 +1,1352 @@
+{
+  "runId": "722a2dd5-d3d9-4787-b44c-74b92693c620",
+  "attemptId": "f6c5a5fc-c465-4837-8a72-a402ad7989e4",
+  "startedAt": "2026-10-13T20:34:42.041Z",
+  "plan": "current-installer-722a2dd5-d3d9-4787-b44c-74b92693c620-plan.json",
+  "installerFacts": {
+    "bytes": 5852262,
+    "sha256": "269c747e4a8eee5cf147a97241f639ef7d832eb165844cb339a5579418d7ccb0"
+  },
+  "executableFacts": {
+    "bytes": 24394240,
+    "sha256": "4f5833328131a7cd629ca10fa2953a88202fb343585072944e6e592709908f6f"
+  },
+  "extensionSha256": "f35adea6f8a31f5ac4fe9090ae6bcf3284a19707a6e54314c8797756a516211d",
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-hSyMkh",
+  "scope": {
+    "installMode": "currentUser",
+    "installerArguments": "/S /NS /D=<fresh root>\\install (last, unquoted)",
+    "registryWrites": [
+      "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Markbridge",
+      "HKCU\\Software\\markbridge\\Markbridge"
+    ],
+    "shortcuts": "Suppressed with /NS; existing named shortcuts block preflight",
+    "credentials": "Only generated Markbridge.Task06.<runId> targets; revoke via trusted app; exact-target existence check only",
+    "uninstall": "Normal installed uninstall.exe /S; retain app-data; remove test registration; restore only this run-created default install-location value and now-empty product key",
+    "nativeShellCleanup": "Standard NSIS uninstall may clear com.markbridge.desktop jump-list destinations and Markbridge Run value (preflight requires Run value absent)",
+    "runtime": "Requires existing WebView2; no bootstrapper installation authorized",
+    "browser": "Two fresh temporary Chrome profiles; unpacked extension loaded only into them",
+    "externalNetwork": "One selected synthetic public bookmark at https://example.com/ for actual installed content preview; no model calls",
+    "data": "MARKBRIDGE_APP_DATA/app-data with main-webview and independent preview-sessions; no global WebView data override",
+    "cleanup": "No recursive removal; retain isolated data, extraction, exports and screenshots; exact guarded registry residue restored from completed-run proof only"
+  },
+  "controls": [
+    {
+      "control": "current_installer_installed_exact_release_and_packed_executable",
+      "status": "PASS",
+      "installedVersions": {
+        "fileVersion": "0.1.0",
+        "productVersion": "0.1.0"
+      }
+    },
+    {
+      "control": "actual_main_webview_process_directory_is_exact_isolated_main",
+      "status": "PASS"
+    },
+    {
+      "control": "two_disposable_chrome_profiles_pair_live_with_equal_ids",
+      "status": "PASS"
+    },
+    {
+      "control": "real_ui_create_cancel_confirm_edit_receipts_and_local_metadata",
+      "status": "PASS"
+    },
+    {
+      "control": "installed_public_content_preview_renders_actual_fetch",
+      "status": "PASS"
+    },
+    {
+      "control": "actual_independent_preview_profile_sessions_and_all_command_denials",
+      "status": "PASS"
+    },
+    {
+      "control": "native_diagnostic_cancel_and_save_with_private_canary_exclusion",
+      "status": "PASS"
+    },
+    {
+      "control": "actual_nonlive_visible_selection_and_folder_write_actions_disabled",
+      "status": "PASS"
+    },
+    {
+      "control": "installed_normal_exit_restart_reconnect_retains_metadata_without_replay",
+      "status": "PASS"
+    },
+    {
+      "control": "exact_test_os_credentials_revoked",
+      "status": "PASS"
+    },
+    {
+      "control": "normal_uninstall_preserves_database_and_all_isolated_data_with_no_owned_process_or_listener",
+      "status": "PASS"
+    }
+  ],
+  "errors": [],
+  "realModel": {
+    "status": "NOT_RUN",
+    "reason": "No real model is configured by this installer harness; scripted replies are not real-model evidence"
+  },
+  "floccus": {
+    "status": "UNVERIFIED",
+    "reason": "No dedicated Floccus library or second client in this run"
+  },
+  "sleep": {
+    "acceptance": "WAIVED",
+    "execution": "NOT_RUN"
+  },
+  "chromeCloseMethodVersion": 2,
+  "chromeCloseObservationBudgetMs": 180000,
+  "environment": {
+    "os": "Windows 11 Pro",
+    "release": "10.0.26300",
+    "cpu": "Intel(R) Core(TM) Ultra 9 275HX",
+    "logicalCpus": 24,
+    "memoryBytes": 68143853568,
+    "node": "v26.7.0"
+  },
+  "ports": [
+    1349,
+    5154,
+    8516,
+    8516,
+    5917
+  ],
+  "preflight": {
+    "registration": null,
+    "shortcutCount": 0,
+    "runPresent": false,
+    "keys": [],
+    "webview2Versions": [
+      "155.0.4283.45"
+    ]
+  },
+  "install": {
+    "pid": 148976,
+    "exitCode": 0,
+    "signal": null
+  },
+  "installedVersions": {
+    "fileVersion": "0.1.0",
+    "productVersion": "0.1.0"
+  },
+  "registration": {
+    "registration": {
+      "displayVersion": "0.1.0",
+      "uninstallString": "\"C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-hSyMkh\\install\\uninstall.exe\"",
+      "installLocation": "\"C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-hSyMkh\\install\"",
+      "mainBinaryName": "markbridge-desktop.exe"
+    },
+    "shortcutCount": 0,
+    "runPresent": false,
+    "keys": [
+      "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Markbridge",
+      "HKCU:\\Software\\markbridge\\Markbridge"
+    ],
+    "webview2Versions": [
+      "155.0.4283.45"
+    ]
+  },
+  "webview": "Edg/155.0.4283.45",
+  "mainDataEvidence": {
+    "mainDirectoryExists": true,
+    "observations": [
+      {
+        "pid": 143988,
+        "observedDirectoryExists": true,
+        "relativeDirectory": "app-data/main-webview/EBWebView",
+        "parent": 128044,
+        "insideFixture": true,
+        "creationUtcTicks": "639275204858733060",
+        "expectedMain": true,
+        "expectedPreview": false
+      }
+    ],
+    "previewDirectoryExists": false,
+    "owner": 128044
+  },
+  "chrome": "Chrome/155.0.8059.39",
+  "previewOsDirectories": [
+    {
+      "mainDirectoryExists": true,
+      "observations": [
+        {
+          "pid": 143988,
+          "observedDirectoryExists": true,
+          "relativeDirectory": "app-data/main-webview/EBWebView",
+          "parent": 128044,
+          "insideFixture": true,
+          "creationUtcTicks": "639275204858733060",
+          "expectedMain": true,
+          "expectedPreview": false
+        },
+        {
+          "pid": 125280,
+          "observedDirectoryExists": true,
+          "relativeDirectory": "app-data/preview-sessions/v1-69d86802b3bd6df3a5164973388cfab6c3b9c6c02a05758e51a8135a274c47ca/EBWebView",
+          "parent": 128044,
+          "insideFixture": true,
+          "creationUtcTicks": "639275204995477480",
+          "expectedMain": false,
+          "expectedPreview": true
+        }
+      ],
+      "previewDirectoryExists": true,
+      "owner": 128044
+    },
+    {
+      "mainDirectoryExists": true,
+      "observations": [
+        {
+          "pid": 143988,
+          "observedDirectoryExists": true,
+          "relativeDirectory": "app-data/main-webview/EBWebView",
+          "parent": 128044,
+          "insideFixture": true,
+          "creationUtcTicks": "639275204858733060",
+          "expectedMain": true,
+          "expectedPreview": false
+        },
+        {
+          "pid": 139676,
+          "observedDirectoryExists": true,
+          "relativeDirectory": "app-data/preview-sessions/v1-72342aaaa824cb94e89f803ef403b23bc4854b246819ac015965303af5f3626b/EBWebView",
+          "parent": 128044,
+          "insideFixture": true,
+          "creationUtcTicks": "639275205065010140",
+          "expectedMain": false,
+          "expectedPreview": true
+        }
+      ],
+      "previewDirectoryExists": true,
+      "owner": 128044
+    },
+    {
+      "mainDirectoryExists": true,
+      "observations": [
+        {
+          "pid": 143988,
+          "observedDirectoryExists": true,
+          "relativeDirectory": "app-data/main-webview/EBWebView",
+          "parent": 128044,
+          "insideFixture": true,
+          "creationUtcTicks": "639275204858733060",
+          "expectedMain": true,
+          "expectedPreview": false
+        },
+        {
+          "pid": 134616,
+          "observedDirectoryExists": true,
+          "relativeDirectory": "app-data/preview-sessions/v1-69d86802b3bd6df3a5164973388cfab6c3b9c6c02a05758e51a8135a274c47ca/EBWebView",
+          "parent": 128044,
+          "insideFixture": true,
+          "creationUtcTicks": "639275205131102130",
+          "expectedMain": false,
+          "expectedPreview": true
+        }
+      ],
+      "previewDirectoryExists": true,
+      "owner": 128044
+    }
+  ],
+  "previewSyntheticSnapshots": [
+    {
+      "kind": "hello",
+      "path": "/a",
+      "pageId": "502f149a-1a9f-4960-8521-13e47844be10",
+      "local": null,
+      "cookie": "",
+      "main": null
+    },
+    {
+      "kind": "job",
+      "id": 1,
+      "path": "/a",
+      "pageId": "502f149a-1a9f-4960-8521-13e47844be10",
+      "local": "MB13-preview-A",
+      "cookie": "r08=MB13-preview-A",
+      "main": null
+    },
+    {
+      "kind": "hello",
+      "path": "/b",
+      "pageId": "e2893de0-f816-4e49-9146-000eb6237806",
+      "local": null,
+      "cookie": "",
+      "main": null
+    },
+    {
+      "kind": "job",
+      "id": 3,
+      "path": "/b",
+      "pageId": "e2893de0-f816-4e49-9146-000eb6237806",
+      "local": "MB13-preview-B",
+      "cookie": "r08=MB13-preview-B",
+      "main": null
+    },
+    {
+      "kind": "hello",
+      "path": "/a",
+      "pageId": "7dfb3d8b-38c7-4add-88f9-07603b8bd497",
+      "local": "MB13-preview-A",
+      "cookie": "r08=MB13-preview-A",
+      "main": null
+    },
+    {
+      "kind": "job",
+      "id": 4,
+      "path": "/a",
+      "pageId": "7dfb3d8b-38c7-4add-88f9-07603b8bd497",
+      "local": "MB13-preview-A",
+      "cookie": "r08=MB13-preview-A",
+      "main": null
+    }
+  ],
+  "previewCommandDenials": [
+    {
+      "name": "get_startup_state",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "get_bridge_state",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "start_bridge",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "begin_pairing",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "confirm_pairing",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "cancel_pairing",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "revoke_pairing",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "reconnect_profile",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "enumerate_chrome_user_data",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "attach_file_mirror",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "rescan_file_mirrors",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "detach_file_mirror",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "associate_file_mirror",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "get_mirror_tree",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "cache_tree",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "cache_list",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "cache_search",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "cache_query",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "cache_get",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "cache_count",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "preview_batch_edit",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "apply_batch_edit",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "get_batch_edit",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "cancel_batch_edit",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "preview_edit",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "apply_edit",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "list_operations",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "operation_detail",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "preview_undo",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "save_export",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "save_diagnostics",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "review_operation",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "refresh_operations",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "export_html",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "export_sidecar",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "tag_state",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "tag_command",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "preview_title_encoding",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "apply_title_encoding",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "ai_settings",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "save_ai_config",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "set_ai_credential",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "clear_ai_credential",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "test_ai_connection",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "suggest_ai",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "cancel_ai",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "apply_ai",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "propose_organization",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "review_organization",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "assign_organization",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "edit_organization",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "apply_organization",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "pause_organization",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "cancel_organization",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "cleanup_organization",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "organization_plan",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "content_preview",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "cancel_content_preview",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "inspect_library",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "check_links",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "cancel_link_check",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "preview_cleanup",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "confirm_cleanup",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "search_library_text",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "open_http_url",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "open_web_preview",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "web_preview_action",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "clear_web_preview_session",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "web_preview_state",
+      "outcome": "DENIED"
+    }
+  ],
+  "helperEvents": [
+    {
+      "event": "expected_source_switch_discard_confirmed"
+    }
+  ],
+  "diagnostics": {
+    "formatVersion": 1,
+    "appVersion": "0.1.0",
+    "protocolVersion": 1,
+    "schemaVersion": 7,
+    "platform": "windows",
+    "architecture": "x86_64",
+    "bridgeListening": true,
+    "bridgeErrorCode": null,
+    "connections": {
+      "unpaired": 0,
+      "connecting": 0,
+      "reconciling": 0,
+      "live": 2,
+      "cachedReadOnly": 0,
+      "error": 0
+    },
+    "mirrors": {
+      "current": 0,
+      "stale": 0,
+      "unavailable": 0
+    }
+  },
+  "restartComparison": {
+    "comparisonMethodVersion": 2,
+    "criterion": "restarted_A_exact_or_proven_sole_synthetic_root_dateAdded; B_raw_and_full_history_exact",
+    "before": {
+      "rawA": {
+        "sha256": "ccf07cddd28e3b9e51fcd7b3af4643b9936ff4a8a011a700cb70b757d27f1bfd",
+        "rootCount": 1,
+        "nodeCount": 7
+      },
+      "rawB": {
+        "sha256": "b4dd2d9f332bfd42f47bea0c27257ac5f49dae392366593ddb4618a960cdee2d",
+        "rootCount": 1,
+        "nodeCount": 5
+      },
+      "fullHistory": {
+        "sha256": "17b6fc7a28482719af0cf40c8b5656a8240137f075fe762eee0b34e93ab9f736",
+        "count": 2
+      }
+    },
+    "afterAppRestart": {
+      "fullHistoryEqual": true,
+      "fullHistory": {
+        "sha256": "17b6fc7a28482719af0cf40c8b5656a8240137f075fe762eee0b34e93ab9f736",
+        "count": 2
+      },
+      "differences": {
+        "addedRows": 0,
+        "removedRows": 0,
+        "keyOrderChangedRows": 0,
+        "rowOrderChanged": false,
+        "changedFields": {
+          "operationId": 0,
+          "createdAt": 0,
+          "kind": 0,
+          "reviewed": 0,
+          "isBatch": 0,
+          "state": 0,
+          "affected": 0,
+          "errorCode": 0,
+          "conflicts": 0,
+          "other": 0
+        }
+      }
+    },
+    "afterReconnect": {
+      "rawA": {
+        "sha256": "22e1f151b1db5f206b70b7e25989d9fbb54496ad1821c05ba935018136b308a8",
+        "rootCount": 1,
+        "nodeCount": 7
+      },
+      "rawB": {
+        "sha256": "b4dd2d9f332bfd42f47bea0c27257ac5f49dae392366593ddb4618a960cdee2d",
+        "rootCount": 1,
+        "nodeCount": 5
+      },
+      "fullHistory": {
+        "sha256": "17b6fc7a28482719af0cf40c8b5656a8240137f075fe762eee0b34e93ab9f736",
+        "count": 2
+      },
+      "rawAEqual": false,
+      "rawBEqual": true,
+      "fullHistoryEqual": true,
+      "rootDateAddedProof": {
+        "validRootShape": true,
+        "ownFiniteDateAdded": true,
+        "dateAddedChanged": true,
+        "exactFullJsonAfterOnlyRootDateAddedReplacement": true,
+        "onlySyntheticRootDateAddedChanged": true
+      },
+      "semanticAEqual": true,
+      "noReplayEqual": true,
+      "differences": {
+        "rawA": {
+          "allNodes": {
+            "addedRows": 0,
+            "removedRows": 0,
+            "keyOrderChangedRows": 0,
+            "rowOrderChanged": false,
+            "changedFields": {
+              "id": 0,
+              "parentId": 0,
+              "index": 0,
+              "title": 0,
+              "url": 0,
+              "dateAdded": 1,
+              "dateGroupModified": 0,
+              "dateLastUsed": 0,
+              "folderType": 0,
+              "unmodifiable": 0,
+              "syncing": 0,
+              "children": 0,
+              "other": 0
+            }
+          },
+          "syntheticRoot": {
+            "addedRows": 0,
+            "removedRows": 0,
+            "keyOrderChangedRows": 0,
+            "rowOrderChanged": false,
+            "changedFields": {
+              "id": 0,
+              "parentId": 0,
+              "index": 0,
+              "title": 0,
+              "url": 0,
+              "dateAdded": 1,
+              "dateGroupModified": 0,
+              "dateLastUsed": 0,
+              "folderType": 0,
+              "unmodifiable": 0,
+              "syncing": 0,
+              "children": 0,
+              "other": 0
+            }
+          },
+          "remainingNodes": {
+            "addedRows": 0,
+            "removedRows": 0,
+            "keyOrderChangedRows": 0,
+            "rowOrderChanged": false,
+            "changedFields": {
+              "id": 0,
+              "parentId": 0,
+              "index": 0,
+              "title": 0,
+              "url": 0,
+              "dateAdded": 0,
+              "dateGroupModified": 0,
+              "dateLastUsed": 0,
+              "folderType": 0,
+              "unmodifiable": 0,
+              "syncing": 0,
+              "children": 0,
+              "other": 0
+            }
+          }
+        },
+        "rawB": {
+          "allNodes": {
+            "addedRows": 0,
+            "removedRows": 0,
+            "keyOrderChangedRows": 0,
+            "rowOrderChanged": false,
+            "changedFields": {
+              "id": 0,
+              "parentId": 0,
+              "index": 0,
+              "title": 0,
+              "url": 0,
+              "dateAdded": 0,
+              "dateGroupModified": 0,
+              "dateLastUsed": 0,
+              "folderType": 0,
+              "unmodifiable": 0,
+              "syncing": 0,
+              "children": 0,
+              "other": 0
+            }
+          },
+          "syntheticRoot": {
+            "addedRows": 0,
+            "removedRows": 0,
+            "keyOrderChangedRows": 0,
+            "rowOrderChanged": false,
+            "changedFields": {
+              "id": 0,
+              "parentId": 0,
+              "index": 0,
+              "title": 0,
+              "url": 0,
+              "dateAdded": 0,
+              "dateGroupModified": 0,
+              "dateLastUsed": 0,
+              "folderType": 0,
+              "unmodifiable": 0,
+              "syncing": 0,
+              "children": 0,
+              "other": 0
+            }
+          },
+          "remainingNodes": {
+            "addedRows": 0,
+            "removedRows": 0,
+            "keyOrderChangedRows": 0,
+            "rowOrderChanged": false,
+            "changedFields": {
+              "id": 0,
+              "parentId": 0,
+              "index": 0,
+              "title": 0,
+              "url": 0,
+              "dateAdded": 0,
+              "dateGroupModified": 0,
+              "dateLastUsed": 0,
+              "folderType": 0,
+              "unmodifiable": 0,
+              "syncing": 0,
+              "children": 0,
+              "other": 0
+            }
+          }
+        },
+        "fullHistory": {
+          "addedRows": 0,
+          "removedRows": 0,
+          "keyOrderChangedRows": 0,
+          "rowOrderChanged": false,
+          "changedFields": {
+            "operationId": 0,
+            "createdAt": 0,
+            "kind": 0,
+            "reviewed": 0,
+            "isBatch": 0,
+            "state": 0,
+            "affected": 0,
+            "errorCode": 0,
+            "conflicts": 0,
+            "other": 0
+          }
+        }
+      }
+    }
+  },
+  "chromeClose": {
+    "kind": "owned_chrome_close",
+    "pid": 136428,
+    "method": "Browser.close",
+    "pipeEofMode": "immediate",
+    "methodVersion": 2,
+    "observationBudgetMs": 180000,
+    "startedAtMs": 1791923724368,
+    "phase": "exit-verified",
+    "acknowledged": true,
+    "childExitObserved": true,
+    "exitCode": 0,
+    "signal": null,
+    "events": [
+      {
+        "event": "close_frame_queued",
+        "elapsedMs": 0
+      },
+      {
+        "event": "pipe_eof_requested",
+        "elapsedMs": 0
+      },
+      {
+        "event": "close_frame_write_callback",
+        "elapsedMs": 0
+      },
+      {
+        "event": "close_acknowledged",
+        "elapsedMs": 0
+      },
+      {
+        "event": "pipe_eof_flushed",
+        "elapsedMs": 0
+      },
+      {
+        "event": "pipe_write_closed",
+        "elapsedMs": 33
+      },
+      {
+        "event": "pipe_read_closed",
+        "elapsedMs": 33
+      },
+      {
+        "event": "child_exit_observed",
+        "elapsedMs": 111040
+      }
+    ],
+    "frameQueued": true,
+    "pipeEofRequested": true,
+    "frameWriteCallback": true,
+    "pipeEofFlushed": true,
+    "pipeWriteClosed": true,
+    "pipeReadClosed": true,
+    "elapsedMs": 111071
+  },
+  "offlineUiCheckStep": "verified",
+  "firstExit": {
+    "pid": 128044,
+    "exitCode": 0,
+    "signal": null,
+    "method": "verified_main_and_preview_windows_WM_CLOSE",
+    "phase": "known-webview-exit",
+    "windowPosts": [
+      {
+        "action": "close",
+        "posted": 1,
+        "pid": 128044,
+        "windows": [
+          {
+            "emptyTitle": false,
+            "handle": "39B16B2",
+            "messageOnly": false,
+            "visible": true,
+            "closeEligible": true,
+            "className": "UNREPORTED_CLASS",
+            "role": "main",
+            "threadId": 134592
+          },
+          {
+            "emptyTitle": true,
+            "handle": "34F1518",
+            "messageOnly": false,
+            "visible": true,
+            "closeEligible": false,
+            "className": "TAO_THREAD_EVENT_TARGET",
+            "role": "other",
+            "threadId": 134592
+          },
+          {
+            "emptyTitle": false,
+            "handle": "3BD2186",
+            "messageOnly": false,
+            "visible": false,
+            "closeEligible": false,
+            "className": "UNREPORTED_CLASS",
+            "role": "other",
+            "threadId": 134592
+          },
+          {
+            "emptyTitle": false,
+            "handle": "34515DE",
+            "messageOnly": false,
+            "visible": false,
+            "closeEligible": false,
+            "className": "IME",
+            "role": "other",
+            "threadId": 134592
+          },
+          {
+            "emptyTitle": true,
+            "handle": "2500AE8",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "wetype.renderer.window",
+            "role": "other",
+            "threadId": 134592
+          },
+          {
+            "emptyTitle": true,
+            "handle": "4770440",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "UNREPORTED_CLASS",
+            "role": "other",
+            "threadId": 134592
+          },
+          {
+            "emptyTitle": true,
+            "handle": "2A41B14",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "SystemUserAdapterWindowClass",
+            "role": "other",
+            "threadId": 134592
+          },
+          {
+            "emptyTitle": true,
+            "handle": "20A20FC",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "Chrome_MessageWindow",
+            "role": "other",
+            "threadId": 150600
+          },
+          {
+            "emptyTitle": true,
+            "handle": "38E17D8",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "Chrome_MessageWindow",
+            "role": "other",
+            "threadId": 134592
+          },
+          {
+            "emptyTitle": false,
+            "handle": "18C1E8A",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "CicMarshalWndClass",
+            "role": "other",
+            "threadId": 134592
+          },
+          {
+            "emptyTitle": false,
+            "handle": "2631BB6",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "OleMainThreadWndClass",
+            "role": "other",
+            "threadId": 134592
+          }
+        ],
+        "ownedWindows": 11,
+        "processAbsent": false
+      }
+    ],
+    "knownWebviewPids": [
+      143988,
+      125280,
+      139676,
+      134616
+    ],
+    "knownWebviewIdentities": [
+      {
+        "pid": 143988,
+        "creationUtcTicks": "639275204858733060"
+      },
+      {
+        "pid": 125280,
+        "creationUtcTicks": "639275204995477480"
+      },
+      {
+        "pid": 139676,
+        "creationUtcTicks": "639275205065010140"
+      },
+      {
+        "pid": 134616,
+        "creationUtcTicks": "639275205131102130"
+      }
+    ],
+    "nativeStageOrder": [],
+    "knownWebviewAbsence": {
+      "observations": [
+        {
+          "creationUtcTicks": "639275204858733060",
+          "pid": 143988,
+          "state": "absent"
+        },
+        {
+          "creationUtcTicks": "639275204995477480",
+          "pid": 125280,
+          "state": "absent"
+        },
+        {
+          "creationUtcTicks": "639275205065010140",
+          "pid": 139676,
+          "state": "absent"
+        },
+        {
+          "creationUtcTicks": "639275205131102130",
+          "pid": 134616,
+          "state": "absent"
+        }
+      ],
+      "presentPids": [],
+      "reusedPids": []
+    }
+  },
+  "status": "PASS",
+  "finalChromeExits": [
+    {
+      "kind": "owned_chrome_close",
+      "pid": 101784,
+      "method": "Browser.close",
+      "pipeEofMode": "immediate",
+      "methodVersion": 2,
+      "observationBudgetMs": 180000,
+      "startedAtMs": 1791923869122,
+      "phase": "exit-verified",
+      "acknowledged": true,
+      "childExitObserved": true,
+      "exitCode": 0,
+      "signal": null,
+      "events": [
+        {
+          "event": "close_frame_queued",
+          "elapsedMs": 0
+        },
+        {
+          "event": "pipe_eof_requested",
+          "elapsedMs": 0
+        },
+        {
+          "event": "close_frame_write_callback",
+          "elapsedMs": 0
+        },
+        {
+          "event": "close_acknowledged",
+          "elapsedMs": 0
+        },
+        {
+          "event": "pipe_eof_flushed",
+          "elapsedMs": 0
+        },
+        {
+          "event": "pipe_write_closed",
+          "elapsedMs": 36
+        },
+        {
+          "event": "pipe_read_closed",
+          "elapsedMs": 36
+        },
+        {
+          "event": "child_exit_observed",
+          "elapsedMs": 132
+        }
+      ],
+      "frameQueued": true,
+      "pipeEofRequested": true,
+      "frameWriteCallback": true,
+      "pipeEofFlushed": true,
+      "pipeWriteClosed": true,
+      "pipeReadClosed": true,
+      "elapsedMs": 132
+    },
+    {
+      "kind": "owned_chrome_close",
+      "pid": 137548,
+      "method": "Browser.close",
+      "pipeEofMode": "immediate",
+      "methodVersion": 2,
+      "observationBudgetMs": 180000,
+      "startedAtMs": 1791923869254,
+      "phase": "exit-verified",
+      "acknowledged": true,
+      "childExitObserved": true,
+      "exitCode": 0,
+      "signal": null,
+      "events": [
+        {
+          "event": "close_frame_queued",
+          "elapsedMs": 0
+        },
+        {
+          "event": "pipe_eof_requested",
+          "elapsedMs": 0
+        },
+        {
+          "event": "close_frame_write_callback",
+          "elapsedMs": 0
+        },
+        {
+          "event": "pipe_eof_flushed",
+          "elapsedMs": 0
+        },
+        {
+          "event": "close_acknowledged",
+          "elapsedMs": 0
+        },
+        {
+          "event": "pipe_write_closed",
+          "elapsedMs": 38
+        },
+        {
+          "event": "pipe_read_closed",
+          "elapsedMs": 38
+        },
+        {
+          "event": "child_exit_observed",
+          "elapsedMs": 130
+        }
+      ],
+      "frameQueued": true,
+      "pipeEofRequested": true,
+      "frameWriteCallback": true,
+      "pipeEofFlushed": true,
+      "pipeWriteClosed": true,
+      "pipeReadClosed": true,
+      "elapsedMs": 144
+    }
+  ],
+  "finalExit": {
+    "pid": 22784,
+    "exitCode": 0,
+    "signal": null,
+    "method": "verified_main_and_preview_windows_WM_CLOSE",
+    "phase": "known-webview-exit",
+    "windowPosts": [
+      {
+        "action": "close",
+        "posted": 1,
+        "pid": 22784,
+        "windows": [
+          {
+            "emptyTitle": false,
+            "handle": "101046E",
+            "messageOnly": false,
+            "visible": true,
+            "closeEligible": true,
+            "className": "UNREPORTED_CLASS",
+            "role": "main",
+            "threadId": 148044
+          },
+          {
+            "emptyTitle": true,
+            "handle": "C01500",
+            "messageOnly": false,
+            "visible": true,
+            "closeEligible": false,
+            "className": "TAO_THREAD_EVENT_TARGET",
+            "role": "other",
+            "threadId": 148044
+          },
+          {
+            "emptyTitle": false,
+            "handle": "3AA197A",
+            "messageOnly": false,
+            "visible": false,
+            "closeEligible": false,
+            "className": "IME",
+            "role": "other",
+            "threadId": 148044
+          },
+          {
+            "emptyTitle": false,
+            "handle": "24E0B8A",
+            "messageOnly": false,
+            "visible": false,
+            "closeEligible": false,
+            "className": "UNREPORTED_CLASS",
+            "role": "other",
+            "threadId": 148044
+          },
+          {
+            "emptyTitle": true,
+            "handle": "1741F68",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "Chrome_MessageWindow",
+            "role": "other",
+            "threadId": 82204
+          },
+          {
+            "emptyTitle": true,
+            "handle": "3C40306",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "Chrome_MessageWindow",
+            "role": "other",
+            "threadId": 148044
+          },
+          {
+            "emptyTitle": false,
+            "handle": "1CD1D4E",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "CicMarshalWndClass",
+            "role": "other",
+            "threadId": 148044
+          },
+          {
+            "emptyTitle": false,
+            "handle": "1EE1FAE",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "OleMainThreadWndClass",
+            "role": "other",
+            "threadId": 148044
+          }
+        ],
+        "ownedWindows": 8,
+        "processAbsent": false
+      }
+    ],
+    "knownWebviewPids": [
+      77868
+    ],
+    "knownWebviewIdentities": [
+      {
+        "pid": 77868,
+        "creationUtcTicks": "639275206529781600"
+      }
+    ],
+    "nativeStageOrder": [],
+    "knownWebviewAbsence": {
+      "observations": [
+        {
+          "creationUtcTicks": "639275206529781600",
+          "pid": 77868,
+          "state": "absent"
+        }
+      ],
+      "presentPids": [],
+      "reusedPids": []
+    }
+  },
+  "beforeUninstallProcesses": {
+    "processes": [],
+    "listeners": []
+  },
+  "retainedBeforeUninstall": {
+    "files": 630,
+    "bytes": 47711905,
+    "manifestSha256": "5e3add4d7bff6f43f81fc6448d1e42f2c0a58518e9b68927cb05f7ad6cb8d3f0",
+    "sqlite": {
+      "bytes": 221184,
+      "sha256": "24841da429893ded102258bffbc101f25738fb10cb0f140644e6b01551f52455"
+    },
+    "mainWebviewPresent": true,
+    "previewDirectoryCount": 2
+  },
+  "uninstall": {
+    "pid": 16916,
+    "exitCode": 0,
+    "signal": null
+  },
+  "retainedAfterUninstall": {
+    "files": 630,
+    "bytes": 47711905,
+    "manifestSha256": "5e3add4d7bff6f43f81fc6448d1e42f2c0a58518e9b68927cb05f7ad6cb8d3f0",
+    "sqlite": {
+      "bytes": 221184,
+      "sha256": "24841da429893ded102258bffbc101f25738fb10cb0f140644e6b01551f52455"
+    },
+    "mainWebviewPresent": true,
+    "previewDirectoryCount": 2
+  },
+  "finalRegistration": {
+    "registration": null,
+    "shortcutCount": 0,
+    "runPresent": false,
+    "keys": [
+      "HKCU:\\Software\\markbridge\\Markbridge"
+    ],
+    "webview2Versions": [
+      "155.0.4283.45"
+    ]
+  },
+  "finalProcesses": {
+    "processes": [],
+    "listeners": []
+  },
+  "closedPorts": [
+    1349,
+    5154,
+    8516,
+    5917
+  ],
+  "finishedAt": "2026-10-13T20:38:08.534Z"
+}

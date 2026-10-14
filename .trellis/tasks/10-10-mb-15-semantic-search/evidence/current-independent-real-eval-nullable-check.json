@@ -1,0 +1,9 @@
+{
+  "executedAt": "2026-10-13T22:53:05.3802411Z",
+  "scope": "future evaluation tool only; no model/native execution",
+  "syntaxExitCode": 0,
+  "syntaxStdoutEmpty": true,
+  "directEslintExitCode": 0,
+  "noArgsExitCode": 0,
+  "noArgsOutput": "V18 NOT_RUN: requires an explicitly authorized local model and human-reviewed 20-query labels."
+}

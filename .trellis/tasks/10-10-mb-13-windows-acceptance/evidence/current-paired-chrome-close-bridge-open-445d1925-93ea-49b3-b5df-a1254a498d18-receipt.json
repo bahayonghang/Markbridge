@@ -1,0 +1,300 @@
+{
+  "kind": "paired_disposable_chrome_socket_order_probe_only",
+  "runId": "445d1925-93ea-49b3-b5df-a1254a498d18",
+  "mode": "bridge-open",
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-hNu0dO",
+  "startedAt": "2026-10-13T17:36:16.774Z",
+  "executableSha256": "4b0708b102c638a8d45eb9ae526aae62dce7641d22eb58ecbbfdef033b9938d1",
+  "extensionSha256": "f35adea6f8a31f5ac4fe9090ae6bcf3284a19707a6e54314c8797756a516211d",
+  "installation": "NOT_RUN",
+  "noBookmarkWriteCommands": true,
+  "errors": [],
+  "chromeCloseResults": [
+    {
+      "index": 0,
+      "appAliveBeforeClose": true,
+      "bridgeBeforeClose": {
+        "listening": true,
+        "profileCount": 2,
+        "liveProfileCount": 0,
+        "pendingPairCount": 0
+      },
+      "normalExit": {
+        "kind": "owned_chrome_close",
+        "pid": 149732,
+        "method": "Browser.close",
+        "pipeEofMode": "immediate",
+        "startedAtMs": 1791912990710,
+        "phase": "exit-verified",
+        "acknowledged": true,
+        "childExitObserved": true,
+        "exitCode": 0,
+        "signal": null,
+        "events": [
+          {
+            "event": "close_frame_queued",
+            "elapsedMs": 0
+          },
+          {
+            "event": "pipe_eof_requested",
+            "elapsedMs": 0
+          },
+          {
+            "event": "close_frame_write_callback",
+            "elapsedMs": 0
+          },
+          {
+            "event": "close_acknowledged",
+            "elapsedMs": 0
+          },
+          {
+            "event": "pipe_eof_flushed",
+            "elapsedMs": 0
+          },
+          {
+            "event": "pipe_write_closed",
+            "elapsedMs": 47
+          },
+          {
+            "event": "pipe_read_closed",
+            "elapsedMs": 47
+          },
+          {
+            "event": "child_exit_observed",
+            "elapsedMs": 428
+          }
+        ],
+        "frameQueued": true,
+        "pipeEofRequested": true,
+        "frameWriteCallback": true,
+        "pipeEofFlushed": true,
+        "pipeWriteClosed": true,
+        "pipeReadClosed": true
+      },
+      "elapsedMs": 471
+    },
+    {
+      "index": 1,
+      "appAliveBeforeClose": true,
+      "bridgeBeforeClose": {
+        "listening": true,
+        "profileCount": 2,
+        "liveProfileCount": 0,
+        "pendingPairCount": 0
+      },
+      "normalExit": {
+        "kind": "owned_chrome_close",
+        "pid": 151380,
+        "method": "Browser.close",
+        "pipeEofMode": "immediate",
+        "startedAtMs": 1791912991181,
+        "phase": "exit-verified",
+        "acknowledged": true,
+        "childExitObserved": true,
+        "exitCode": 0,
+        "signal": null,
+        "events": [
+          {
+            "event": "close_frame_queued",
+            "elapsedMs": 0
+          },
+          {
+            "event": "pipe_eof_requested",
+            "elapsedMs": 0
+          },
+          {
+            "event": "close_frame_write_callback",
+            "elapsedMs": 0
+          },
+          {
+            "event": "pipe_eof_flushed",
+            "elapsedMs": 0
+          },
+          {
+            "event": "close_acknowledged",
+            "elapsedMs": 0
+          },
+          {
+            "event": "pipe_write_closed",
+            "elapsedMs": 43
+          },
+          {
+            "event": "pipe_read_closed",
+            "elapsedMs": 44
+          },
+          {
+            "event": "child_exit_observed",
+            "elapsedMs": 159
+          }
+        ],
+        "frameQueued": true,
+        "pipeEofRequested": true,
+        "frameWriteCallback": true,
+        "pipeEofFlushed": true,
+        "pipeWriteClosed": true,
+        "pipeReadClosed": true
+      },
+      "elapsedMs": 185
+    }
+  ],
+  "mainDataEvidence": {
+    "mainDirectoryExists": true,
+    "observations": [
+      {
+        "observedDirectoryExists": true,
+        "expectedMain": true,
+        "insideFixture": true,
+        "pid": 134132,
+        "relativeDirectory": "app-data/main-webview/EBWebView",
+        "parent": 126600,
+        "expectedPreview": false
+      }
+    ],
+    "previewDirectoryExists": false,
+    "owner": 126600
+  },
+  "pairedBridge": {
+    "listening": true,
+    "profileCount": 2,
+    "liveProfileCount": 2,
+    "pendingPairCount": 0
+  },
+  "credentialRevocation": {
+    "count": 2,
+    "allExactTargetsAbsent": true
+  },
+  "afterRevocationBridge": {
+    "listening": true,
+    "profileCount": 2,
+    "liveProfileCount": 0,
+    "pendingPairCount": 0
+  },
+  "status": "PASS",
+  "normalAppExit": {
+    "pid": 126600,
+    "exitCode": 0,
+    "signal": null,
+    "method": "verified_main_and_preview_windows_WM_CLOSE",
+    "phase": "known-webview-exit",
+    "windowPosts": [
+      {
+        "action": "close",
+        "posted": 1,
+        "pid": 126600,
+        "windows": [
+          {
+            "emptyTitle": false,
+            "handle": "17605E0",
+            "messageOnly": false,
+            "visible": true,
+            "closeEligible": true,
+            "className": "UNREPORTED_CLASS",
+            "role": "main",
+            "threadId": 133092
+          },
+          {
+            "emptyTitle": true,
+            "handle": "2B51A2E",
+            "messageOnly": false,
+            "visible": true,
+            "closeEligible": false,
+            "className": "TAO_THREAD_EVENT_TARGET",
+            "role": "other",
+            "threadId": 133092
+          },
+          {
+            "emptyTitle": false,
+            "handle": "4A00A64",
+            "messageOnly": false,
+            "visible": false,
+            "closeEligible": false,
+            "className": "IME",
+            "role": "other",
+            "threadId": 133092
+          },
+          {
+            "emptyTitle": false,
+            "handle": "2D81984",
+            "messageOnly": false,
+            "visible": false,
+            "closeEligible": false,
+            "className": "UNREPORTED_CLASS",
+            "role": "other",
+            "threadId": 133092
+          },
+          {
+            "emptyTitle": true,
+            "handle": "1E61D36",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "Chrome_MessageWindow",
+            "role": "other",
+            "threadId": 148248
+          },
+          {
+            "emptyTitle": true,
+            "handle": "6B02A8",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "Chrome_MessageWindow",
+            "role": "other",
+            "threadId": 133092
+          },
+          {
+            "emptyTitle": false,
+            "handle": "17B18F4",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "CicMarshalWndClass",
+            "role": "other",
+            "threadId": 133092
+          },
+          {
+            "emptyTitle": false,
+            "handle": "2B31F40",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "OleMainThreadWndClass",
+            "role": "other",
+            "threadId": 133092
+          }
+        ],
+        "ownedWindows": 8,
+        "processAbsent": false
+      }
+    ],
+    "knownWebviewPids": [
+      134132
+    ],
+    "nativeStageOrder": [],
+    "previewProbeEvents": [],
+    "knownWebviewAbsence": {
+      "presentPids": []
+    }
+  },
+  "lastProcesses": {
+    "processes": [],
+    "listeners": []
+  },
+  "finalProcesses": {
+    "processes": [],
+    "listeners": []
+  },
+  "lastObservedChromeChildren": [
+    {
+      "pid": 149732,
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "pid": 151380,
+      "exitCode": 0,
+      "signal": null
+    }
+  ],
+  "finishedAt": "2026-10-13T17:36:47.577Z"
+}

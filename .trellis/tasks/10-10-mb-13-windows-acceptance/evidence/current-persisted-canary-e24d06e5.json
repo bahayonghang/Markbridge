@@ -1,0 +1,81 @@
+{
+  "kind": "readonly_owned_fixture_synthetic_canary_metadata",
+  "runId": "e24d06e5-faa8-4d88-a6f9-34fec68054ac",
+  "originalNativeStatus": "FAIL",
+  "containmentVerified": true,
+  "appDataWrites": false,
+  "defaultStoreInspected": false,
+  "limitation": "Raw byte occurrence counts do not decode live LevelDB records, decrypted cookies, or prove restored web API state.",
+  "profiles": [
+    {
+      "profile": "A",
+      "selectedFiles": [
+        {
+          "relativeWithinUdf": "Default/Cookies",
+          "bytes": 20480,
+          "sha256": "ef759446fa7f3a4ea7cf0b168028908a2e3dcc11329956538294017fa363d600",
+          "counts": {
+            "A_utf8": 0,
+            "A_utf16le": 0,
+            "B_utf8": 0,
+            "B_utf16le": 0,
+            "cookieName_utf8": 0,
+            "cookieName_utf16le": 0,
+            "probeOrigin_utf8": 0,
+            "probeOrigin_utf16le": 0
+          }
+        },
+        {
+          "relativeWithinUdf": "Default/Cookies-journal",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "counts": {
+            "A_utf8": 0,
+            "A_utf16le": 0,
+            "B_utf8": 0,
+            "B_utf16le": 0,
+            "cookieName_utf8": 0,
+            "cookieName_utf16le": 0,
+            "probeOrigin_utf8": 0,
+            "probeOrigin_utf16le": 0
+          }
+        }
+      ]
+    },
+    {
+      "profile": "B",
+      "selectedFiles": [
+        {
+          "relativeWithinUdf": "Default/Cookies",
+          "bytes": 20480,
+          "sha256": "ca14ce88a4af3ee5f00faea1bff5cc1beadc71770c105a652f2c97128d61d472",
+          "counts": {
+            "A_utf8": 0,
+            "A_utf16le": 0,
+            "B_utf8": 0,
+            "B_utf16le": 0,
+            "cookieName_utf8": 2,
+            "cookieName_utf16le": 0,
+            "probeOrigin_utf8": 0,
+            "probeOrigin_utf16le": 0
+          }
+        },
+        {
+          "relativeWithinUdf": "Default/Cookies-journal",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "counts": {
+            "A_utf8": 0,
+            "A_utf16le": 0,
+            "B_utf8": 0,
+            "B_utf16le": 0,
+            "cookieName_utf8": 0,
+            "cookieName_utf16le": 0,
+            "probeOrigin_utf8": 0,
+            "probeOrigin_utf16le": 0
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,404 @@
+{
+  "kind": "copied_release_startup_os_isolation_probe_only",
+  "runId": "4eab32c3-e67e-4187-8c1a-167bd94c91b3",
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-5YHmYH",
+  "startedAt": "2026-10-13T17:01:50.843Z",
+  "executableSha256": "1a93d343c2736c059c396e4f5807a7eaf7428b4d0591f2d6bdf3696d0515895d",
+  "noPairingOrUiActions": true,
+  "installation": "NOT_RUN",
+  "errors": [
+    "NORMAL_APP_CLOSE_TIMEOUT",
+    "STARTUP_PROCESS_OR_LISTENER_REMAINED"
+  ],
+  "osDataEvidence": {
+    "mainDirectoryExists": true,
+    "observations": [
+      {
+        "observedDirectoryExists": true,
+        "expectedMain": true,
+        "insideFixture": true,
+        "pid": 117724,
+        "relativeDirectory": "app-data/main-webview/EBWebView",
+        "parent": 142756,
+        "expectedPreview": false
+      }
+    ],
+    "previewDirectoryExists": false,
+    "owner": 142756
+  },
+  "status": "FAIL",
+  "normalCloseErrorCode": "NORMAL_APP_CLOSE_TIMEOUT",
+  "normalCloseEvidence": {
+    "pid": 142756,
+    "exitCode": null,
+    "signal": null,
+    "method": "all_verified_owned_windows_WM_CLOSE",
+    "phase": "owned-window-close",
+    "windowPosts": [
+      {
+        "action": "close",
+        "posted": 2,
+        "pid": 142756,
+        "windows": [
+          {
+            "handle": "4360506",
+            "threadId": 137604,
+            "closeEligible": true,
+            "messageOnly": false,
+            "role": "main",
+            "visible": true
+          },
+          {
+            "handle": "2D51F8E",
+            "threadId": 137604,
+            "closeEligible": true,
+            "messageOnly": false,
+            "role": "other",
+            "visible": true
+          },
+          {
+            "handle": "13214D0",
+            "threadId": 137604,
+            "closeEligible": false,
+            "messageOnly": false,
+            "role": "other",
+            "visible": false
+          },
+          {
+            "handle": "FC0CFE",
+            "threadId": 137604,
+            "closeEligible": false,
+            "messageOnly": false,
+            "role": "other",
+            "visible": false
+          },
+          {
+            "handle": "5231780",
+            "threadId": 113104,
+            "closeEligible": false,
+            "messageOnly": true,
+            "role": "other",
+            "visible": false
+          },
+          {
+            "handle": "12611FC",
+            "threadId": 137604,
+            "closeEligible": false,
+            "messageOnly": true,
+            "role": "other",
+            "visible": false
+          },
+          {
+            "handle": "13E0422",
+            "threadId": 137604,
+            "closeEligible": false,
+            "messageOnly": true,
+            "role": "other",
+            "visible": false
+          },
+          {
+            "handle": "23A1BCE",
+            "threadId": 137604,
+            "closeEligible": false,
+            "messageOnly": true,
+            "role": "other",
+            "visible": false
+          },
+          {
+            "handle": "13318FE",
+            "threadId": 137604,
+            "closeEligible": false,
+            "messageOnly": true,
+            "role": "other",
+            "visible": false
+          },
+          {
+            "handle": "B7018C",
+            "threadId": 137604,
+            "closeEligible": false,
+            "messageOnly": true,
+            "role": "other",
+            "visible": false
+          },
+          {
+            "handle": "43B13BC",
+            "threadId": 137604,
+            "closeEligible": false,
+            "messageOnly": true,
+            "role": "other",
+            "visible": false
+          }
+        ],
+        "ownedWindows": 11,
+        "processAbsent": false
+      },
+      {
+        "action": "close",
+        "posted": 0,
+        "pid": 142756,
+        "windows": [
+          {
+            "handle": "13318FE",
+            "threadId": 137604,
+            "closeEligible": false,
+            "messageOnly": true,
+            "role": "other",
+            "visible": false
+          },
+          {
+            "handle": "43B13BC",
+            "threadId": 137604,
+            "closeEligible": false,
+            "messageOnly": true,
+            "role": "other",
+            "visible": false
+          }
+        ],
+        "ownedWindows": 2,
+        "processAbsent": false
+      },
+      {
+        "action": "close",
+        "posted": 0,
+        "pid": 142756,
+        "windows": [
+          {
+            "handle": "13318FE",
+            "threadId": 137604,
+            "closeEligible": false,
+            "messageOnly": true,
+            "role": "other",
+            "visible": false
+          },
+          {
+            "handle": "43B13BC",
+            "threadId": 137604,
+            "closeEligible": false,
+            "messageOnly": true,
+            "role": "other",
+            "visible": false
+          }
+        ],
+        "ownedWindows": 2,
+        "processAbsent": false
+      },
+      {
+        "action": "close",
+        "posted": 0,
+        "pid": 142756,
+        "windows": [
+          {
+            "handle": "13318FE",
+            "threadId": 137604,
+            "closeEligible": false,
+            "messageOnly": true,
+            "role": "other",
+            "visible": false
+          },
+          {
+            "handle": "43B13BC",
+            "threadId": 137604,
+            "closeEligible": false,
+            "messageOnly": true,
+            "role": "other",
+            "visible": false
+          }
+        ],
+        "ownedWindows": 2,
+        "processAbsent": false
+      },
+      {
+        "action": "close",
+        "posted": 0,
+        "pid": 142756,
+        "windows": [
+          {
+            "handle": "13318FE",
+            "threadId": 137604,
+            "closeEligible": false,
+            "messageOnly": true,
+            "role": "other",
+            "visible": false
+          },
+          {
+            "handle": "43B13BC",
+            "threadId": 137604,
+            "closeEligible": false,
+            "messageOnly": true,
+            "role": "other",
+            "visible": false
+          }
+        ],
+        "ownedWindows": 2,
+        "processAbsent": false
+      },
+      {
+        "action": "close",
+        "posted": 0,
+        "pid": 142756,
+        "windows": [
+          {
+            "handle": "13318FE",
+            "threadId": 137604,
+            "closeEligible": false,
+            "messageOnly": true,
+            "role": "other",
+            "visible": false
+          },
+          {
+            "handle": "43B13BC",
+            "threadId": 137604,
+            "closeEligible": false,
+            "messageOnly": true,
+            "role": "other",
+            "visible": false
+          }
+        ],
+        "ownedWindows": 2,
+        "processAbsent": false
+      },
+      {
+        "action": "close",
+        "posted": 0,
+        "pid": 142756,
+        "windows": [
+          {
+            "handle": "13318FE",
+            "threadId": 137604,
+            "closeEligible": false,
+            "messageOnly": true,
+            "role": "other",
+            "visible": false
+          },
+          {
+            "handle": "43B13BC",
+            "threadId": 137604,
+            "closeEligible": false,
+            "messageOnly": true,
+            "role": "other",
+            "visible": false
+          }
+        ],
+        "ownedWindows": 2,
+        "processAbsent": false
+      },
+      {
+        "action": "close",
+        "posted": 0,
+        "pid": 142756,
+        "windows": [
+          {
+            "handle": "13318FE",
+            "threadId": 137604,
+            "closeEligible": false,
+            "messageOnly": true,
+            "role": "other",
+            "visible": false
+          },
+          {
+            "handle": "43B13BC",
+            "threadId": 137604,
+            "closeEligible": false,
+            "messageOnly": true,
+            "role": "other",
+            "visible": false
+          }
+        ],
+        "ownedWindows": 2,
+        "processAbsent": false
+      },
+      {
+        "action": "close",
+        "posted": 0,
+        "pid": 142756,
+        "windows": [
+          {
+            "handle": "13318FE",
+            "threadId": 137604,
+            "closeEligible": false,
+            "messageOnly": true,
+            "role": "other",
+            "visible": false
+          },
+          {
+            "handle": "43B13BC",
+            "threadId": 137604,
+            "closeEligible": false,
+            "messageOnly": true,
+            "role": "other",
+            "visible": false
+          }
+        ],
+        "ownedWindows": 2,
+        "processAbsent": false
+      }
+    ],
+    "knownWebviewPids": [
+      117724
+    ],
+    "nativeStageOrder": [
+      "ENTRY",
+      "CONFIG_ACCEPTED",
+      "TAURI_BUILD_RETURNED",
+      "SETUP_ENTER",
+      "SERVICES_READY",
+      "MAIN_BUILD_BEGIN",
+      "MAIN_BUILD_RETURNED",
+      "SETUP_COMPLETED",
+      "RUN_READY",
+      "RUN_EXIT_REQUESTED"
+    ],
+    "closeErrorCode": "NORMAL_APP_CLOSE_TIMEOUT",
+    "finalWindowState": {
+      "action": "inspect",
+      "posted": 0,
+      "pid": 142756,
+      "windows": [
+        {
+          "handle": "13318FE",
+          "threadId": 137604,
+          "closeEligible": false,
+          "messageOnly": true,
+          "role": "other",
+          "visible": false
+        },
+        {
+          "handle": "43B13BC",
+          "threadId": 137604,
+          "closeEligible": false,
+          "messageOnly": true,
+          "role": "other",
+          "visible": false
+        }
+      ],
+      "ownedWindows": 2,
+      "processAbsent": false
+    },
+    "knownWebviewPresence": {
+      "presentPids": []
+    }
+  },
+  "lastProcesses": {
+    "processes": [
+      {
+        "parent": 75712,
+        "pid": 142756,
+        "name": "markbridge-desktop.exe"
+      }
+    ],
+    "listeners": []
+  },
+  "nativeStageOrder": [
+    "ENTRY",
+    "CONFIG_ACCEPTED",
+    "TAURI_BUILD_RETURNED",
+    "SETUP_ENTER",
+    "SERVICES_READY",
+    "MAIN_BUILD_BEGIN",
+    "MAIN_BUILD_RETURNED",
+    "SETUP_COMPLETED",
+    "RUN_READY",
+    "RUN_EXIT_REQUESTED"
+  ],
+  "finishedAt": "2026-10-13T17:03:07.386Z"
+}

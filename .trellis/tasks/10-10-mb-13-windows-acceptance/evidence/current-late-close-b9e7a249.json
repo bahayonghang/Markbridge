@@ -1,0 +1,14 @@
+{
+  "kind": "late_owned_normal_close_observation",
+  "runId": "b9e7a249-9f31-4493-ba67-10c97be01e32",
+  "observedAt": "2026-10-13T16:29:35.2422280Z",
+  "appPid": 113572,
+  "webviewPid": 127724,
+  "normalWmClosePosted": true,
+  "appProcessAbsent": true,
+  "webviewProcessAbsent": true,
+  "observedExitCode": null,
+  "originalNativeRunStatus": "FAIL",
+  "forcedTermination": false,
+  "defaultDirectoryFilesReadOrDeleted": false
+}

@@ -1,0 +1,239 @@
+{
+  "formatVersion": 1,
+  "annotationStatus": "DEVELOPER_CANDIDATE_NOT_HUMAN_REVIEWED",
+  "humanReview": {
+    "reviewed": false,
+    "reviewer": null,
+    "reviewedAt": null
+  },
+  "fixtureSha256": "bca64cce81391d3f1fea52c3d63119e8dd405b3d89e2dfecf59e50f9f05427eb",
+  "fixtureShape": {
+    "seed": 20261010,
+    "bookmarks": 10000,
+    "folders": 1000,
+    "maxDepth": 20
+  },
+  "topK": 5,
+  "queries": [
+    {
+      "id": "q1",
+      "text": "怎样用 Rust 并发执行任务并安全取消？",
+      "relevantChromeIds": [
+        "b1",
+        "b2",
+        "b3",
+        "b4",
+        "b5"
+      ]
+    },
+    {
+      "id": "q2",
+      "text": "Prevent old asynchronous responses from replacing current React state",
+      "relevantChromeIds": [
+        "b6",
+        "b7",
+        "b8",
+        "b9",
+        "b10"
+      ]
+    },
+    {
+      "id": "q3",
+      "text": "数据库开着 WAL 时如何备份而不丢失未 checkpoint 的数据？",
+      "relevantChromeIds": [
+        "b11",
+        "b12",
+        "b13",
+        "b14",
+        "b15"
+      ]
+    },
+    {
+      "id": "q4",
+      "text": "Build a dialog that works without a mouse",
+      "relevantChromeIds": [
+        "b16",
+        "b17",
+        "b18",
+        "b19",
+        "b20"
+      ]
+    },
+    {
+      "id": "q5",
+      "text": "撤销旧操作但保留其他人在之后加入的内容",
+      "relevantChromeIds": [
+        "b21",
+        "b22",
+        "b23",
+        "b24",
+        "b25"
+      ]
+    },
+    {
+      "id": "q6",
+      "text": "Stop redirects from fetching private network addresses",
+      "relevantChromeIds": [
+        "b26",
+        "b27",
+        "b28",
+        "b29",
+        "b30"
+      ]
+    },
+    {
+      "id": "q7",
+      "text": "本机如何把文本变成向量并按语义查找？",
+      "relevantChromeIds": [
+        "b31",
+        "b32",
+        "b33",
+        "b34",
+        "b35"
+      ]
+    },
+    {
+      "id": "q8",
+      "text": "Recover a Chrome extension after its background worker restarts",
+      "relevantChromeIds": [
+        "b36",
+        "b37",
+        "b38",
+        "b39",
+        "b40"
+      ]
+    },
+    {
+      "id": "q9",
+      "text": "两个 Chrome 资料都有相同书签编号时怎么防止串数据？",
+      "relevantChromeIds": [
+        "b41",
+        "b42",
+        "b43",
+        "b44",
+        "b45"
+      ]
+    },
+    {
+      "id": "q10",
+      "text": "Store an API key securely without plaintext fallback",
+      "relevantChromeIds": [
+        "b46",
+        "b47",
+        "b48",
+        "b49",
+        "b50"
+      ]
+    },
+    {
+      "id": "q11",
+      "text": "不同资料的应用内网页登录状态不能混在一起",
+      "relevantChromeIds": [
+        "b51",
+        "b52",
+        "b53",
+        "b54",
+        "b55"
+      ]
+    },
+    {
+      "id": "q12",
+      "text": "Bound multilingual input by both characters and encoded bytes",
+      "relevantChromeIds": [
+        "b56",
+        "b57",
+        "b58",
+        "b59",
+        "b60"
+      ]
+    },
+    {
+      "id": "q13",
+      "text": "暂停计算后晚到的响应不能重新创建已删除索引",
+      "relevantChromeIds": [
+        "b61",
+        "b62",
+        "b63",
+        "b64",
+        "b65"
+      ]
+    },
+    {
+      "id": "q14",
+      "text": "Keep selection stable while loading and scrolling a large list",
+      "relevantChromeIds": [
+        "b66",
+        "b67",
+        "b68",
+        "b69",
+        "b70"
+      ]
+    },
+    {
+      "id": "q15",
+      "text": "换了模型或向量维度后为什么需要重新建索引？",
+      "relevantChromeIds": [
+        "b71",
+        "b72",
+        "b73",
+        "b74",
+        "b75"
+      ]
+    },
+    {
+      "id": "q16",
+      "text": "Restore bookmark order after deletion creates new browser IDs",
+      "relevantChromeIds": [
+        "b76",
+        "b77",
+        "b78",
+        "b79",
+        "b80"
+      ]
+    },
+    {
+      "id": "q17",
+      "text": "只抽取公开网页的可见正文并限制响应体大小",
+      "relevantChromeIds": [
+        "b81",
+        "b82",
+        "b83",
+        "b84",
+        "b85"
+      ]
+    },
+    {
+      "id": "q18",
+      "text": "Keep local tags independent from the browser title",
+      "relevantChromeIds": [
+        "b86",
+        "b87",
+        "b88",
+        "b89",
+        "b90"
+      ]
+    },
+    {
+      "id": "q19",
+      "text": "切换 A 到 B 再回 A 时防止旧结果显示在当前界面",
+      "relevantChromeIds": [
+        "b91",
+        "b92",
+        "b93",
+        "b94",
+        "b95"
+      ]
+    },
+    {
+      "id": "q20",
+      "text": "Reject a release binary that exposes build machine paths",
+      "relevantChromeIds": [
+        "b96",
+        "b97",
+        "b98",
+        "b99",
+        "b100"
+      ]
+    }
+  ]
+}

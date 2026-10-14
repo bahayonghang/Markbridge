@@ -1,0 +1,28 @@
+{
+  "kind": "readonly_immutable_synthetic_cookie_row_counts",
+  "runId": "e24d06e5-faa8-4d88-a6f9-34fec68054ac",
+  "originalNativeStatus": "FAIL",
+  "appDataWrites": false,
+  "defaultStoreInspected": false,
+  "valuesOrDecryptionRead": false,
+  "profiles": [
+    {
+      "profile": "A",
+      "allCookieRows": 0,
+      "syntheticR08Rows": 0,
+      "syntheticPersistentR08Rows": 0,
+      "bytes": 20480,
+      "sha256": "ef759446fa7f3a4ea7cf0b168028908a2e3dcc11329956538294017fa363d600",
+      "contentUnchanged": true
+    },
+    {
+      "profile": "B",
+      "allCookieRows": 1,
+      "syntheticR08Rows": 1,
+      "syntheticPersistentR08Rows": 1,
+      "bytes": 20480,
+      "sha256": "ca14ce88a4af3ee5f00faea1bff5cc1beadc71770c105a652f2c97128d61d472",
+      "contentUnchanged": true
+    }
+  ]
+}

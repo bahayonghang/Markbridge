@@ -1,0 +1,108 @@
+{
+  "kind": "authorized_failed_fixture_cleanup",
+  "runId": "e83a7a57-8d07-4858-aa32-101766cf94c0",
+  "attemptId": "f0299d32-90d2-47a5-a373-e3912cb8dbc4",
+  "startedAt": "2026-10-13T16:08:53.113Z",
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-36a2iM",
+  "plan": "current-installer-e83a7a57-8d07-4858-aa32-101766cf94c0-plan.json",
+  "sourceRunReceipt": "current-installer-e83a7a57-8d07-4858-aa32-101766cf94c0-de773d3a-c137-4839-b6e9-6b966e6b12f1-receipt.json",
+  "sourceRunFacts": {
+    "bytes": 10104,
+    "sha256": "9f2a2f09a5cff6819fdc067e9fa3627a2704ca029a42ca1379f3951c24ad003f"
+  },
+  "originalRunStatus": "FAIL",
+  "install": {
+    "pid": 135056,
+    "exitCode": 0,
+    "signal": null
+  },
+  "preflight": {
+    "registration": null,
+    "shortcutCount": 0,
+    "runPresent": false,
+    "keys": [],
+    "webview2Versions": [
+      "155.0.4283.45"
+    ]
+  },
+  "registration": {
+    "registration": {
+      "displayVersion": "0.1.0",
+      "uninstallString": "\"C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-36a2iM\\install\\uninstall.exe\"",
+      "installLocation": "\"C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-36a2iM\\install\"",
+      "mainBinaryName": "markbridge-desktop.exe"
+    },
+    "shortcutCount": 0,
+    "runPresent": false,
+    "keys": [
+      "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Markbridge",
+      "HKCU:\\Software\\markbridge\\Markbridge"
+    ],
+    "webview2Versions": [
+      "155.0.4283.45"
+    ]
+  },
+  "finalExit": {
+    "pid": 78944,
+    "exitCode": 0,
+    "signal": null,
+    "method": "owned_window_WM_CLOSE"
+  },
+  "controls": [
+    {
+      "control": "exact_test_os_credentials_revoked",
+      "status": "PASS"
+    }
+  ],
+  "ports": [
+    9037,
+    9038
+  ],
+  "ownership": {
+    "attemptId": "de773d3a-c137-4839-b6e9-6b966e6b12f1",
+    "proof": "completed_owned_fixture_run",
+    "runId": "e83a7a57-8d07-4858-aa32-101766cf94c0",
+    "guardedInstall": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-36a2iM\\install"
+  },
+  "stoppedProcesses": {
+    "processes": [],
+    "listeners": []
+  },
+  "retainedBeforeUninstall": {
+    "files": 35,
+    "bytes": 6155873,
+    "manifestSha256": "c384624aeca6031ae25c3c14d1fd59cc396986e7410da8c43428fa2ae0582465",
+    "sqlite": {
+      "bytes": 221184,
+      "sha256": "1dc3125fd30a4f59ab75d2dafae0f25bf1d16e5659aa1c44508c32caa43d587a"
+    },
+    "mainWebviewPresent": false,
+    "previewDirectoryCount": 1
+  },
+  "uninstall": {
+    "pid": 112344,
+    "exitCode": 0,
+    "signal": null
+  },
+  "retainedAfterUninstall": {
+    "files": 35,
+    "bytes": 6155873,
+    "manifestSha256": "c384624aeca6031ae25c3c14d1fd59cc396986e7410da8c43428fa2ae0582465",
+    "sqlite": {
+      "bytes": 221184,
+      "sha256": "1dc3125fd30a4f59ab75d2dafae0f25bf1d16e5659aa1c44508c32caa43d587a"
+    },
+    "mainWebviewPresent": false,
+    "previewDirectoryCount": 1
+  },
+  "finalProcesses": {
+    "processes": [],
+    "listeners": []
+  },
+  "closedPorts": [
+    9037,
+    9038
+  ],
+  "status": "PASS",
+  "finishedAt": "2026-10-13T16:09:09.267Z"
+}

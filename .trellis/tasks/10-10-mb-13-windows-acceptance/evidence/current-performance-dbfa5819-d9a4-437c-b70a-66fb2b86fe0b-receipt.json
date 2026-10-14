@@ -1,0 +1,761 @@
+{
+  "kind": "current_release_native_b10k_performance",
+  "runId": "dbfa5819-d9a4-437c-b70a-66fb2b86fe0b",
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-g003qK",
+  "executableSha256": "4f5833328131a7cd629ca10fa2953a88202fb343585072944e6e592709908f6f",
+  "measurementMethodVersion": 2,
+  "startedAt": "2026-10-13T19:23:30.667Z",
+  "status": "PASS",
+  "installation": "NOT_RUN",
+  "chrome": "NOT_RUN",
+  "model": "NOT_RUN",
+  "environment": {
+    "os": "Windows 11 Pro",
+    "release": "10.0.26300",
+    "cpu": "Intel(R) Core(TM) Ultra 9 275HX",
+    "logicalCpus": 24,
+    "memoryBytes": 68143853568,
+    "node": "v26.7.0",
+    "executableBytes": 24394240
+  },
+  "coldDefinition": "monotonic immediately before child spawn to first observed readonly B10K tree, correct loaded list, enabled search and next frame; candidate accepted only after exact main OS guard and owned CDP listener/page verification pass",
+  "observationBoundary": "read-only DOM/CDP observation runs concurrently with main OS guard; CDP discovery and polling overhead included; no subtraction; new app/WebView processes; OS disk caches not purged",
+  "beforeGuardPolicy": "only static DOM fixture comparisons and animation-frame recheck; no IPC, input, click, model, pairing, screenshot or text output",
+  "searchDefinition": "browser performance.now before input event to exact marker result, loaded 1/1, no loading state, rechecked on animation frame",
+  "percentile": "sorted[ceil(n * ratio)-1]; first search recorded as excluded warmup, then 30 measured samples",
+  "machineQuiet": "operator precondition; not inferred by this probe",
+  "coldMs": [
+    878.8729999999999,
+    724.786799999998,
+    1911.1388000000006
+  ],
+  "searchMs": [
+    90,
+    116.89999999850988,
+    108.30000000447035,
+    167.30000000447035,
+    114.80000000447035,
+    102.39999999850988,
+    98.5,
+    89.29999999701977,
+    114.39999999850988,
+    130.40000000596046,
+    108.60000000149012,
+    101.5,
+    120.5,
+    116.89999999850988,
+    119.89999999850988,
+    98.60000000149012,
+    107.39999999850988,
+    92.20000000298023,
+    103.80000000447035,
+    105,
+    112.5,
+    78.40000000596046,
+    89.89999999850988,
+    97.29999999701977,
+    101,
+    67.39999999850988,
+    80.10000000149012,
+    82.69999999552965,
+    101.70000000298023,
+    87.39999999850988
+  ],
+  "launches": [
+    {
+      "pid": 69384,
+      "observedOperableMs": 878.8729999999999,
+      "mainDataEvidence": {
+        "mainDirectoryExists": true,
+        "observations": [
+          {
+            "observedDirectoryExists": true,
+            "expectedMain": true,
+            "insideFixture": true,
+            "pid": 151808,
+            "relativeDirectory": "app-data/main-webview/EBWebView",
+            "parent": 69384,
+            "expectedPreview": false
+          }
+        ],
+        "previewDirectoryExists": false,
+        "owner": 69384
+      },
+      "preSpawnMonotonicMs": 775.1682,
+      "readonlyStartupCandidateMonotonicMs": 1654.0412,
+      "mainOsGuardVerifiedMs": 6500.3919,
+      "allStartupChecksReturnedMs": 10270.0498,
+      "startupMilestonesMonotonicMs": {
+        "cdpTargetSeen": 1337.5809,
+        "cdpConnectStarted": 1339.7972,
+        "cdpConnected": 1364.1511,
+        "headingSeen": 1529.6568,
+        "domReady": 1654.0412
+      },
+      "startupMilestonesElapsedMs": {
+        "cdpTargetSeen": 562.4127,
+        "cdpConnectStarted": 564.629,
+        "cdpConnected": 588.9829000000001,
+        "headingSeen": 754.4886,
+        "domReady": 878.8729999999999
+      },
+      "acceptedAfterOsGuard": true,
+      "readonlyStartupOwnershipProof": {
+        "appPid": 69384,
+        "webviewPid": 151808,
+        "debugPort": 5171,
+        "listenerOwned": true,
+        "appExecutableMatched": true,
+        "directWebviewChild": true,
+        "pageOriginTrusted": true,
+        "exactMainDirectoryVerified": true
+      },
+      "webview": "Edg/155.0.4283.45",
+      "dimensions": {
+        "width": 1100,
+        "height": 760,
+        "devicePixelRatio": 1.25
+      }
+    },
+    {
+      "pid": 38440,
+      "observedOperableMs": 724.786799999998,
+      "mainDataEvidence": {
+        "mainDirectoryExists": true,
+        "observations": [
+          {
+            "observedDirectoryExists": true,
+            "expectedMain": true,
+            "insideFixture": true,
+            "pid": 148508,
+            "relativeDirectory": "app-data/main-webview/EBWebView",
+            "parent": 38440,
+            "expectedPreview": false
+          }
+        ],
+        "previewDirectoryExists": false,
+        "owner": 38440
+      },
+      "preSpawnMonotonicMs": 24310.6457,
+      "readonlyStartupCandidateMonotonicMs": 25035.4325,
+      "mainOsGuardVerifiedMs": 6460.3465,
+      "allStartupChecksReturnedMs": 10123.498500000002,
+      "startupMilestonesMonotonicMs": {
+        "cdpTargetSeen": 24831.432,
+        "cdpConnectStarted": 24833.471,
+        "cdpConnected": 24840.9747,
+        "headingSeen": 24915.8413,
+        "domReady": 25035.4325
+      },
+      "startupMilestonesElapsedMs": {
+        "cdpTargetSeen": 520.7862999999998,
+        "cdpConnectStarted": 522.8253000000004,
+        "cdpConnected": 530.3289999999979,
+        "headingSeen": 605.1955999999991,
+        "domReady": 724.786799999998
+      },
+      "acceptedAfterOsGuard": true,
+      "readonlyStartupOwnershipProof": {
+        "appPid": 38440,
+        "webviewPid": 148508,
+        "debugPort": 4469,
+        "listenerOwned": true,
+        "appExecutableMatched": true,
+        "directWebviewChild": true,
+        "pageOriginTrusted": true,
+        "exactMainDirectoryVerified": true
+      },
+      "webview": "Edg/155.0.4283.45",
+      "dimensions": {
+        "width": 1100,
+        "height": 760,
+        "devicePixelRatio": 1.25
+      }
+    },
+    {
+      "pid": 145580,
+      "observedOperableMs": 1911.1388000000006,
+      "mainDataEvidence": {
+        "mainDirectoryExists": true,
+        "observations": [
+          {
+            "observedDirectoryExists": true,
+            "expectedMain": true,
+            "insideFixture": true,
+            "pid": 103404,
+            "relativeDirectory": "app-data/main-webview/EBWebView",
+            "parent": 145580,
+            "expectedPreview": false
+          }
+        ],
+        "previewDirectoryExists": false,
+        "owner": 145580
+      },
+      "preSpawnMonotonicMs": 48605.8347,
+      "readonlyStartupCandidateMonotonicMs": 50516.9735,
+      "mainOsGuardVerifiedMs": 6227.037600000003,
+      "allStartupChecksReturnedMs": 11187.304000000004,
+      "startupMilestonesMonotonicMs": {
+        "cdpTargetSeen": 49639.4486,
+        "cdpConnectStarted": 49641.2024,
+        "cdpConnected": 50447.8958,
+        "headingSeen": 50480.4026,
+        "domReady": 50516.9735
+      },
+      "startupMilestonesElapsedMs": {
+        "cdpTargetSeen": 1033.613900000004,
+        "cdpConnectStarted": 1035.3677000000025,
+        "cdpConnected": 1842.061099999999,
+        "headingSeen": 1874.5679000000018,
+        "domReady": 1911.1388000000006
+      },
+      "acceptedAfterOsGuard": true,
+      "readonlyStartupOwnershipProof": {
+        "appPid": 145580,
+        "webviewPid": 103404,
+        "debugPort": 5624,
+        "listenerOwned": true,
+        "appExecutableMatched": true,
+        "directWebviewChild": true,
+        "pageOriginTrusted": true,
+        "exactMainDirectoryVerified": true
+      },
+      "webview": "Edg/155.0.4283.45",
+      "dimensions": {
+        "width": 1100,
+        "height": 760,
+        "devicePixelRatio": 1.25
+      }
+    },
+    {
+      "pid": 56836,
+      "observedOperableMs": 758.6536000000051,
+      "mainDataEvidence": {
+        "mainDirectoryExists": true,
+        "observations": [
+          {
+            "observedDirectoryExists": true,
+            "expectedMain": true,
+            "insideFixture": true,
+            "pid": 141712,
+            "relativeDirectory": "app-data/main-webview/EBWebView",
+            "parent": 56836,
+            "expectedPreview": false
+          }
+        ],
+        "previewDirectoryExists": false,
+        "owner": 56836
+      },
+      "preSpawnMonotonicMs": 73248.6071,
+      "readonlyStartupCandidateMonotonicMs": 74007.2607,
+      "mainOsGuardVerifiedMs": 5442.062000000005,
+      "allStartupChecksReturnedMs": 8759.340000000011,
+      "startupMilestonesMonotonicMs": {
+        "cdpTargetSeen": 73774.0403,
+        "cdpConnectStarted": 73775.7033,
+        "cdpConnected": 73785.3348,
+        "headingSeen": 73865.343,
+        "domReady": 74007.2607
+      },
+      "startupMilestonesElapsedMs": {
+        "cdpTargetSeen": 525.4331999999995,
+        "cdpConnectStarted": 527.0962,
+        "cdpConnected": 536.7277000000031,
+        "headingSeen": 616.7358999999997,
+        "domReady": 758.6536000000051
+      },
+      "acceptedAfterOsGuard": true,
+      "readonlyStartupOwnershipProof": {
+        "appPid": 56836,
+        "webviewPid": 141712,
+        "debugPort": 5216,
+        "listenerOwned": true,
+        "appExecutableMatched": true,
+        "directWebviewChild": true,
+        "pageOriginTrusted": true,
+        "exactMainDirectoryVerified": true
+      },
+      "webview": "Edg/155.0.4283.45",
+      "dimensions": {
+        "width": 1100,
+        "height": 760,
+        "devicePixelRatio": 1.25
+      }
+    }
+  ],
+  "closes": [
+    {
+      "normalExit": {
+        "pid": 69384,
+        "exitCode": 0,
+        "signal": null,
+        "method": "verified_main_and_preview_windows_WM_CLOSE",
+        "phase": "known-webview-exit",
+        "windowPosts": [
+          {
+            "action": "close",
+            "posted": 1,
+            "pid": 69384,
+            "windows": [
+              {
+                "emptyTitle": false,
+                "handle": "4E4185E",
+                "messageOnly": false,
+                "visible": true,
+                "closeEligible": true,
+                "className": "UNREPORTED_CLASS",
+                "role": "main",
+                "threadId": 151788
+              },
+              {
+                "emptyTitle": true,
+                "handle": "344169C",
+                "messageOnly": false,
+                "visible": true,
+                "closeEligible": false,
+                "className": "TAO_THREAD_EVENT_TARGET",
+                "role": "other",
+                "threadId": 151788
+              },
+              {
+                "emptyTitle": false,
+                "handle": "36F2186",
+                "messageOnly": false,
+                "visible": false,
+                "closeEligible": false,
+                "className": "IME",
+                "role": "other",
+                "threadId": 151788
+              },
+              {
+                "emptyTitle": false,
+                "handle": "1AC1FDA",
+                "messageOnly": false,
+                "visible": false,
+                "closeEligible": false,
+                "className": "UNREPORTED_CLASS",
+                "role": "other",
+                "threadId": 151788
+              },
+              {
+                "emptyTitle": true,
+                "handle": "7D80F58",
+                "messageOnly": true,
+                "visible": false,
+                "closeEligible": false,
+                "className": "Chrome_MessageWindow",
+                "role": "other",
+                "threadId": 121176
+              },
+              {
+                "emptyTitle": true,
+                "handle": "2EB1518",
+                "messageOnly": true,
+                "visible": false,
+                "closeEligible": false,
+                "className": "Chrome_MessageWindow",
+                "role": "other",
+                "threadId": 151788
+              },
+              {
+                "emptyTitle": false,
+                "handle": "3361F34",
+                "messageOnly": true,
+                "visible": false,
+                "closeEligible": false,
+                "className": "CicMarshalWndClass",
+                "role": "other",
+                "threadId": 151788
+              },
+              {
+                "emptyTitle": false,
+                "handle": "5181C92",
+                "messageOnly": true,
+                "visible": false,
+                "closeEligible": false,
+                "className": "OleMainThreadWndClass",
+                "role": "other",
+                "threadId": 151788
+              }
+            ],
+            "ownedWindows": 8,
+            "processAbsent": false
+          }
+        ],
+        "knownWebviewPids": [
+          151808
+        ],
+        "nativeStageOrder": [],
+        "knownWebviewAbsence": {
+          "presentPids": []
+        }
+      },
+      "processes": {
+        "processes": [],
+        "listeners": []
+      }
+    },
+    {
+      "normalExit": {
+        "pid": 38440,
+        "exitCode": 0,
+        "signal": null,
+        "method": "verified_main_and_preview_windows_WM_CLOSE",
+        "phase": "known-webview-exit",
+        "windowPosts": [
+          {
+            "action": "close",
+            "posted": 1,
+            "pid": 38440,
+            "windows": [
+              {
+                "emptyTitle": false,
+                "handle": "31B1F9C",
+                "messageOnly": false,
+                "visible": true,
+                "closeEligible": true,
+                "className": "UNREPORTED_CLASS",
+                "role": "main",
+                "threadId": 40428
+              },
+              {
+                "emptyTitle": true,
+                "handle": "2611FF2",
+                "messageOnly": false,
+                "visible": true,
+                "closeEligible": false,
+                "className": "TAO_THREAD_EVENT_TARGET",
+                "role": "other",
+                "threadId": 40428
+              },
+              {
+                "emptyTitle": false,
+                "handle": "298052C",
+                "messageOnly": false,
+                "visible": false,
+                "closeEligible": false,
+                "className": "IME",
+                "role": "other",
+                "threadId": 40428
+              },
+              {
+                "emptyTitle": false,
+                "handle": "1DB1362",
+                "messageOnly": false,
+                "visible": false,
+                "closeEligible": false,
+                "className": "UNREPORTED_CLASS",
+                "role": "other",
+                "threadId": 40428
+              },
+              {
+                "emptyTitle": true,
+                "handle": "345169C",
+                "messageOnly": true,
+                "visible": false,
+                "closeEligible": false,
+                "className": "Chrome_MessageWindow",
+                "role": "other",
+                "threadId": 16856
+              },
+              {
+                "emptyTitle": true,
+                "handle": "2031946",
+                "messageOnly": true,
+                "visible": false,
+                "closeEligible": false,
+                "className": "Chrome_MessageWindow",
+                "role": "other",
+                "threadId": 40428
+              },
+              {
+                "emptyTitle": false,
+                "handle": "3AA135C",
+                "messageOnly": true,
+                "visible": false,
+                "closeEligible": false,
+                "className": "CicMarshalWndClass",
+                "role": "other",
+                "threadId": 40428
+              },
+              {
+                "emptyTitle": false,
+                "handle": "59C0902",
+                "messageOnly": true,
+                "visible": false,
+                "closeEligible": false,
+                "className": "OleMainThreadWndClass",
+                "role": "other",
+                "threadId": 40428
+              }
+            ],
+            "ownedWindows": 8,
+            "processAbsent": false
+          }
+        ],
+        "knownWebviewPids": [
+          148508
+        ],
+        "nativeStageOrder": [],
+        "knownWebviewAbsence": {
+          "presentPids": []
+        }
+      },
+      "processes": {
+        "processes": [],
+        "listeners": []
+      }
+    },
+    {
+      "normalExit": {
+        "pid": 145580,
+        "exitCode": 0,
+        "signal": null,
+        "method": "verified_main_and_preview_windows_WM_CLOSE",
+        "phase": "known-webview-exit",
+        "windowPosts": [
+          {
+            "action": "close",
+            "posted": 1,
+            "pid": 145580,
+            "windows": [
+              {
+                "emptyTitle": false,
+                "handle": "30216AA",
+                "messageOnly": false,
+                "visible": true,
+                "closeEligible": true,
+                "className": "UNREPORTED_CLASS",
+                "role": "main",
+                "threadId": 115220
+              },
+              {
+                "emptyTitle": true,
+                "handle": "1351EF0",
+                "messageOnly": false,
+                "visible": true,
+                "closeEligible": false,
+                "className": "TAO_THREAD_EVENT_TARGET",
+                "role": "other",
+                "threadId": 115220
+              },
+              {
+                "emptyTitle": false,
+                "handle": "2F41F60",
+                "messageOnly": false,
+                "visible": false,
+                "closeEligible": false,
+                "className": "IME",
+                "role": "other",
+                "threadId": 115220
+              },
+              {
+                "emptyTitle": false,
+                "handle": "3150F78",
+                "messageOnly": false,
+                "visible": false,
+                "closeEligible": false,
+                "className": "UNREPORTED_CLASS",
+                "role": "other",
+                "threadId": 115220
+              },
+              {
+                "emptyTitle": true,
+                "handle": "3C90BBE",
+                "messageOnly": true,
+                "visible": false,
+                "closeEligible": false,
+                "className": "Chrome_MessageWindow",
+                "role": "other",
+                "threadId": 127184
+              },
+              {
+                "emptyTitle": true,
+                "handle": "2B01936",
+                "messageOnly": true,
+                "visible": false,
+                "closeEligible": false,
+                "className": "Chrome_MessageWindow",
+                "role": "other",
+                "threadId": 115220
+              },
+              {
+                "emptyTitle": false,
+                "handle": "2A31BEE",
+                "messageOnly": true,
+                "visible": false,
+                "closeEligible": false,
+                "className": "CicMarshalWndClass",
+                "role": "other",
+                "threadId": 115220
+              },
+              {
+                "emptyTitle": false,
+                "handle": "31E1BD2",
+                "messageOnly": true,
+                "visible": false,
+                "closeEligible": false,
+                "className": "OleMainThreadWndClass",
+                "role": "other",
+                "threadId": 115220
+              }
+            ],
+            "ownedWindows": 8,
+            "processAbsent": false
+          }
+        ],
+        "knownWebviewPids": [
+          103404
+        ],
+        "nativeStageOrder": [],
+        "knownWebviewAbsence": {
+          "presentPids": []
+        }
+      },
+      "processes": {
+        "processes": [],
+        "listeners": []
+      }
+    },
+    {
+      "normalExit": {
+        "pid": 56836,
+        "exitCode": 0,
+        "signal": null,
+        "method": "verified_main_and_preview_windows_WM_CLOSE",
+        "phase": "known-webview-exit",
+        "windowPosts": [
+          {
+            "action": "close",
+            "posted": 1,
+            "pid": 56836,
+            "windows": [
+              {
+                "emptyTitle": false,
+                "handle": "3BF217E",
+                "messageOnly": false,
+                "visible": true,
+                "closeEligible": true,
+                "className": "UNREPORTED_CLASS",
+                "role": "main",
+                "threadId": 147996
+              },
+              {
+                "emptyTitle": true,
+                "handle": "2B916FE",
+                "messageOnly": false,
+                "visible": true,
+                "closeEligible": false,
+                "className": "TAO_THREAD_EVENT_TARGET",
+                "role": "other",
+                "threadId": 147996
+              },
+              {
+                "emptyTitle": false,
+                "handle": "2B516E8",
+                "messageOnly": false,
+                "visible": false,
+                "closeEligible": false,
+                "className": "IME",
+                "role": "other",
+                "threadId": 147996
+              },
+              {
+                "emptyTitle": false,
+                "handle": "2E410FA",
+                "messageOnly": false,
+                "visible": false,
+                "closeEligible": false,
+                "className": "UNREPORTED_CLASS",
+                "role": "other",
+                "threadId": 147996
+              },
+              {
+                "emptyTitle": true,
+                "handle": "1D51E86",
+                "messageOnly": true,
+                "visible": false,
+                "closeEligible": false,
+                "className": "Chrome_MessageWindow",
+                "role": "other",
+                "threadId": 15348
+              },
+              {
+                "emptyTitle": true,
+                "handle": "33A1EF8",
+                "messageOnly": true,
+                "visible": false,
+                "closeEligible": false,
+                "className": "Chrome_MessageWindow",
+                "role": "other",
+                "threadId": 147996
+              },
+              {
+                "emptyTitle": false,
+                "handle": "31210F6",
+                "messageOnly": true,
+                "visible": false,
+                "closeEligible": false,
+                "className": "CicMarshalWndClass",
+                "role": "other",
+                "threadId": 147996
+              },
+              {
+                "emptyTitle": false,
+                "handle": "183035A",
+                "messageOnly": true,
+                "visible": false,
+                "closeEligible": false,
+                "className": "OleMainThreadWndClass",
+                "role": "other",
+                "threadId": 147996
+              }
+            ],
+            "ownedWindows": 8,
+            "processAbsent": false
+          }
+        ],
+        "knownWebviewPids": [
+          141712
+        ],
+        "nativeStageOrder": [],
+        "knownWebviewAbsence": {
+          "presentPids": []
+        }
+      },
+      "processes": {
+        "processes": [],
+        "listeners": []
+      }
+    }
+  ],
+  "errors": [],
+  "pageErrorCount": 0,
+  "fixture": {
+    "seed": 20261010,
+    "bookmarks": 10000,
+    "folders": 1000,
+    "maxDepth": 20,
+    "nodes": 11004,
+    "initialFolderId": "0",
+    "rootChildren": 3
+  },
+  "seederSha256": "5002c10f2d17afeafb01de7479794b52b8b9f10ae859b370c73e8a24674c889c",
+  "seed": {
+    "exitCode": 0,
+    "nodesSha256": "7740d8916bebb36f5bd6d527cf380b4bd83c54c166b6625d56877658e9941392",
+    "credentialStore": "NOT_OPENED_BY_SEEDER"
+  },
+  "warmupMs": 97.20000000298023,
+  "cold": {
+    "p50": 878.8729999999999,
+    "p95": 1911.1388000000006,
+    "max": 1911.1388000000006
+  },
+  "warm": {
+    "p50": 101.70000000298023,
+    "p95": 130.40000000596046,
+    "max": 167.30000000447035
+  },
+  "finishedAt": "2026-10-13T19:25:18.839Z"
+}

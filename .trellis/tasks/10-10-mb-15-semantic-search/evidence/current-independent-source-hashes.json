@@ -1,0 +1,372 @@
+[
+  {
+    "file": ".trellis/tasks/10-10-mb-15-semantic-search/evidence/current-independent-final-evidence.mjs",
+    "bytes": 9755,
+    "sha256": "fb3dbff6ac0d21a62a26760f3afd3fcff22ba518b2957481d1774bfdea0f66da"
+  },
+  {
+    "file": ".trellis/tasks/10-10-mb-15-semantic-search/evidence/current-semantic-native-11449493-source.mjs",
+    "bytes": 15453,
+    "sha256": "75dbe7cbb618e3e9de57523c03e895743d04b818449536ba3fcc7571b05f01fa"
+  },
+  {
+    "file": ".trellis/tasks/10-10-mb-15-semantic-search/evidence/current-semantic-native.mjs",
+    "bytes": 16754,
+    "sha256": "311ef8732b7907abec48aa692f651dd0fd52b29f52198d42be23e1b0e4712c6b"
+  },
+  {
+    "file": ".trellis/tasks/10-10-mb-15-semantic-search/evidence/evaluate-real-model.mjs",
+    "bytes": 9579,
+    "sha256": "7ec10d254af690c9f6c6184f1586b6dfce1c7cf9a9e7d5fef475835bef80c7b6"
+  },
+  {
+    "file": ".trellis/tasks/10-10-mb-15-semantic-search/evidence/relevance-candidates.json",
+    "bytes": 4799,
+    "sha256": "41b617f3aefdcb95df97a30fa907ac3fdaa772cffe0f854fcc5f3f6bd32e1c1e"
+  },
+  {
+    "file": ".trellis/tasks/10-10-mb-15-semantic-search/evidence/semantic-fixture.mjs",
+    "bytes": 5713,
+    "sha256": "46a755abad4bb6f1836ff05f4876e907b72d286e7f3c2c2767c6aa6dbffd8f90"
+  },
+  {
+    "file": ".trellis/tasks/10-10-mb-15-semantic-search/evidence/semantic-metrics.mjs",
+    "bytes": 3102,
+    "sha256": "e3a302ed6f5f0b91bc33f182c07f802bb4188570415856a5f5cddb9b714194fc"
+  },
+  {
+    "file": ".trellis/tasks/10-10-mb-15-semantic-search/evidence/semantic-metrics.test.mjs",
+    "bytes": 2509,
+    "sha256": "bd6fd5985cb729d006b4923a34bc026e5e7addf930da82900123741440064625"
+  },
+  {
+    "file": "apps/desktop/src-tauri/src/main.rs",
+    "bytes": 57017,
+    "sha256": "21c06533ed5613b942f5c8521d32b5834073d9de08d506b28f02e7367524fb57"
+  },
+  {
+    "file": "apps/desktop/src/App.tsx",
+    "bytes": 8548,
+    "sha256": "ae428b6ab37b7cec9841783b2235751ab33e102d0c691667ae08ef8b823317f5"
+  },
+  {
+    "file": "apps/desktop/src/backend-semantic.test.tsx",
+    "bytes": 4778,
+    "sha256": "d552ddeca64f1d4e2503166bc452248290116f8ef5d3b3f611699b21f50d5eea"
+  },
+  {
+    "file": "apps/desktop/src/backend.ts",
+    "bytes": 25114,
+    "sha256": "29eef35fb054d17cdce22c43ade86936695457e5611a15a3b2149b9a24aef89a"
+  },
+  {
+    "file": "apps/desktop/src/features/library/LibraryWorkspace.tsx",
+    "bytes": 53808,
+    "sha256": "7b9e860b8e55f3693b92dc3f3ed62b8b31f27c3eb838002c7eb5957eae941687"
+  },
+  {
+    "file": "apps/desktop/src/features/library/WorkspaceIcon.tsx",
+    "bytes": 975,
+    "sha256": "8660456cc539d580a49d0ff6fb58baae3eeb1c252bd881206eed86390968f53f"
+  },
+  {
+    "file": "apps/desktop/src/features/semantic/model.ts",
+    "bytes": 1571,
+    "sha256": "b3f34edec2cfa630f7af2134d36e93872366f735b67e6548a096c26fb86d7e84"
+  },
+  {
+    "file": "apps/desktop/src/features/semantic/semantic.test.tsx",
+    "bytes": 18927,
+    "sha256": "bfa3d1b11ddbf6c1ec185333d46078c31a4364e99dd740e09978eed1b22549a9"
+  },
+  {
+    "file": "apps/desktop/src/features/semantic/SemanticQueryPanel.tsx",
+    "bytes": 5284,
+    "sha256": "606b7fac743aaa0a12c88636898192c8c7294f983eaa8226ae603612fca26a7e"
+  },
+  {
+    "file": "apps/desktop/src/features/semantic/SemanticSettings.tsx",
+    "bytes": 5838,
+    "sha256": "0939f1539573624a1b49f2ad9fcde8361ce058938718fc3c3e115832071e7279"
+  },
+  {
+    "file": "apps/desktop/src/features/semantic/SemanticWorkspace.tsx",
+    "bytes": 14410,
+    "sha256": "26503875b76fdd3a45de3ecb2a65af027f6383c08eace1163a31ac57b3941629"
+  },
+  {
+    "file": "apps/desktop/src/styles.css",
+    "bytes": 30127,
+    "sha256": "578d0802d366477eebe9097101ffd453ee649c8b696781ab5f6e6c543c45aee6"
+  },
+  {
+    "file": "Cargo.lock",
+    "bytes": 146497,
+    "sha256": "1b6a002ab38eec147b8b5152e1ce023b02e61e166019b8230dfdd63e790f6530"
+  },
+  {
+    "file": "crates/core/examples/semantic_fixture_seed.rs",
+    "bytes": 6981,
+    "sha256": "dbee741b6a2f450deacbf7ea9e8e78451ae12719385e714809c18c2cd7dc5103"
+  },
+  {
+    "file": "crates/core/src/bridge/mod.rs",
+    "bytes": 40533,
+    "sha256": "0aabf169dbf99a8f06727dd0c14a43c46c84f166c30858c5811a9e48b0a3c970"
+  },
+  {
+    "file": "crates/core/src/bridge/semantic.rs",
+    "bytes": 22553,
+    "sha256": "7337481b69ca0c0e3995f5a3c7a8a2ff50c163c26f38697e3283ad14b1e8c382"
+  },
+  {
+    "file": "crates/core/src/bridge/semantic/tests.rs",
+    "bytes": 25610,
+    "sha256": "11942c71e453c12d1e1ddfee7eb71402ee4d0d175d75ec2af8852b307e69966e"
+  },
+  {
+    "file": "crates/core/src/lib.rs",
+    "bytes": 824,
+    "sha256": "f37212101580f381eaccffdae4494328267b4d3768f8bec9a3e374f79475fc73"
+  },
+  {
+    "file": "crates/core/src/semantic/mod.rs",
+    "bytes": 4354,
+    "sha256": "ce0e9c051e75484d53385eb349933efdfb668d7ae28bc8fb900723df4d70c67f"
+  },
+  {
+    "file": "crates/core/src/semantic/tests.rs",
+    "bytes": 9924,
+    "sha256": "bab5595440449d2df8142c20c12f36c9c55cc9c402d022fe25a84c15558219c8"
+  },
+  {
+    "file": "crates/core/src/semantic/transport.rs",
+    "bytes": 7891,
+    "sha256": "b3775f7e6b6b90b832902d250287a4a2509fcbcb4ef2afe05d75ba3c8261dbfa"
+  },
+  {
+    "file": "crates/core/src/storage/migrations/008_semantic.sql",
+    "bytes": 2700,
+    "sha256": "e7e720f7a7e21711f0c5fddd5a5563d365c3b106b7ea3f68bd62eaaa84373a69"
+  },
+  {
+    "file": "crates/core/src/storage/mod.rs",
+    "bytes": 28162,
+    "sha256": "0a21bccb96cb84e9d78206a0f7406cecb2fda299cdcdf3a968b9aee8db7bc670"
+  },
+  {
+    "file": "crates/core/src/storage/semantic.rs",
+    "bytes": 22538,
+    "sha256": "89617d1c24bb0b28a6123f057e6bdc557e10a44f0aeb742fab014ae136f0bc39"
+  },
+  {
+    "file": "crates/core/src/storage/semantic/tests.rs",
+    "bytes": 19349,
+    "sha256": "2b4bafd4f7b7d2b9ee9c1d44e38b33db9d622520549edf4a28c1bfc86c0a1b25"
+  },
+  {
+    "file": "crates/protocol/src/bin/export-schema.rs",
+    "bytes": 4246,
+    "sha256": "67e794e3376781e73eb04d235d8e10ee01651e88572a7bfaaaa72e9dc004e5b8"
+  },
+  {
+    "file": "crates/protocol/src/lib.rs",
+    "bytes": 1887,
+    "sha256": "3f15810129badb93f798943fe71ad186e29a21c55bd40f2eddfd731ca45222cc"
+  },
+  {
+    "file": "crates/protocol/src/semantic.rs",
+    "bytes": 7658,
+    "sha256": "5b5b82902810717f94d06ad808eeff818c3cc08594d41b81367142ad874e3577"
+  },
+  {
+    "file": "packages/protocol/src/generated/semantic-config.d.ts",
+    "bytes": 174,
+    "sha256": "457062fbae2e366b9241e650cd94dd6db6423762c6191838846543f8ac577233"
+  },
+  {
+    "file": "packages/protocol/src/generated/semantic-config.schema.json",
+    "bytes": 489,
+    "sha256": "e6c9e5128d82e17fcbb368a1e487105c534566919595b537e5ab03c66c4de9bd"
+  },
+  {
+    "file": "packages/protocol/src/generated/semantic-config.validator.d.ts",
+    "bytes": 198,
+    "sha256": "737d2d6cf4d5068ffa9e5498e4ee6d7823306e1749df1c60825e8b681b7ed225"
+  },
+  {
+    "file": "packages/protocol/src/generated/semantic-config.validator.js",
+    "bytes": 3805,
+    "sha256": "d84c034e97961f538e27cbbc575e4cdb70f6636c1ffcae204aae09c2d20ec08d"
+  },
+  {
+    "file": "packages/protocol/src/generated/semantic-model-check.d.ts",
+    "bytes": 889,
+    "sha256": "869bbcd1ed85e91b177d11c20ea3878df5e261596ab7cb894e989a20942e5fc0"
+  },
+  {
+    "file": "packages/protocol/src/generated/semantic-model-check.schema.json",
+    "bytes": 1939,
+    "sha256": "a158e9cf96ce63a133b5656905ca0bdcbc967449ec5781f75fd3e13c9c6b7a0f"
+  },
+  {
+    "file": "packages/protocol/src/generated/semantic-model-check.validator.d.ts",
+    "bytes": 211,
+    "sha256": "87a19569a9465d46b8197a50dc6139a8449f23896aa203fb9e5221e433404cab"
+  },
+  {
+    "file": "packages/protocol/src/generated/semantic-model-check.validator.js",
+    "bytes": 12041,
+    "sha256": "1f5f4422b13520d9917b178dae96dac79bca950e9f1f300a1445aaefb555fee1"
+  },
+  {
+    "file": "packages/protocol/src/generated/semantic-query.d.ts",
+    "bytes": 324,
+    "sha256": "cda56f60a88a65ebe177768bbbc1a3d676ad38d49c81fe349d3b2d045db3e7ba"
+  },
+  {
+    "file": "packages/protocol/src/generated/semantic-query.schema.json",
+    "bytes": 1207,
+    "sha256": "d2fbd52b36590f34879d4af0b2b56641fb726bd6cf4be4cad95d707ea6d9c709"
+  },
+  {
+    "file": "packages/protocol/src/generated/semantic-query.validator.d.ts",
+    "bytes": 195,
+    "sha256": "0a655de18d317bdf8f888d90c8f6f86508eb8b3a5f137477b6b380274adab78f"
+  },
+  {
+    "file": "packages/protocol/src/generated/semantic-query.validator.js",
+    "bytes": 11892,
+    "sha256": "b6a30b399f30140cc5ccc78d264c86c461726af4aca84d0d95827563122c75c3"
+  },
+  {
+    "file": "packages/protocol/src/generated/semantic-result.d.ts",
+    "bytes": 968,
+    "sha256": "07f1bea3bff620dd1b9bee37f671d8ce5ee979615adbda368cdb6c27feb9db9d"
+  },
+  {
+    "file": "packages/protocol/src/generated/semantic-result.schema.json",
+    "bytes": 2584,
+    "sha256": "00572f0691182421405721229b39f1ffc30f07d053df07e174d2afb95ae03cfb"
+  },
+  {
+    "file": "packages/protocol/src/generated/semantic-result.validator.d.ts",
+    "bytes": 208,
+    "sha256": "9c50630ee044c2f3ea7eca0b1bd3928ce68c2093fe47128ec7d1045d68ad8fb4"
+  },
+  {
+    "file": "packages/protocol/src/generated/semantic-result.validator.js",
+    "bytes": 20727,
+    "sha256": "1ff92310da8b9740f309d8951c9c8cbf7e491d1befeaee9330f2f6fa533c8ebf"
+  },
+  {
+    "file": "packages/protocol/src/generated/semantic-review.d.ts",
+    "bytes": 449,
+    "sha256": "746777ddcda1af68d2f0d3a0afc0369f1841e3a20953c0f324e3451f25717b35"
+  },
+  {
+    "file": "packages/protocol/src/generated/semantic-review.schema.json",
+    "bytes": 1826,
+    "sha256": "74b30c2648df0e33410df5ad15045d446ea83243da2a17bde3885f4c193b2c40"
+  },
+  {
+    "file": "packages/protocol/src/generated/semantic-review.validator.d.ts",
+    "bytes": 208,
+    "sha256": "a1869350252637961e89475a28d506cec0fc98eb7de81ec3026599b7f2b580eb"
+  },
+  {
+    "file": "packages/protocol/src/generated/semantic-review.validator.js",
+    "bytes": 18112,
+    "sha256": "f8c92c5a7dfa39f63cd03f00288ba88296dd5058453a63f11afe1e1a3c310555"
+  },
+  {
+    "file": "packages/protocol/src/generated/semantic-scope.d.ts",
+    "bytes": 492,
+    "sha256": "fa3987ba3e45627f30eba96a8799f64a32f2e0f6341be9a67cfe0bf8c6856e4d"
+  },
+  {
+    "file": "packages/protocol/src/generated/semantic-scope.schema.json",
+    "bytes": 1362,
+    "sha256": "fc89932bc1cb09c7881ceb80b132772a38575c2d9cb2eeb729f337bc71ced188"
+  },
+  {
+    "file": "packages/protocol/src/generated/semantic-scope.validator.d.ts",
+    "bytes": 195,
+    "sha256": "bec801b116820e88cfb5e51231d58c7e31c35cd65721531f339bf9b71fc49e09"
+  },
+  {
+    "file": "packages/protocol/src/generated/semantic-scope.validator.js",
+    "bytes": 12085,
+    "sha256": "633f023b232c42c4361788191cfca5ce9e5b95b5ed9499bac48811c6309edadf"
+  },
+  {
+    "file": "packages/protocol/src/generated/semantic-settings.d.ts",
+    "bytes": 261,
+    "sha256": "fefd30b80f01200c09b80b090b88162ae3fb6fa13a87484e0ba095b590417762"
+  },
+  {
+    "file": "packages/protocol/src/generated/semantic-settings.schema.json",
+    "bytes": 943,
+    "sha256": "ca2ad15549d23bb4483987e5a56bf572f24dcaaedeb4abd4dbd91ac916190fab"
+  },
+  {
+    "file": "packages/protocol/src/generated/semantic-settings.validator.d.ts",
+    "bytes": 204,
+    "sha256": "9a33f7514b4ff2bb80b1eb84960b14eaf38cf9258425a0d03157a169c6c852de"
+  },
+  {
+    "file": "packages/protocol/src/generated/semantic-settings.validator.js",
+    "bytes": 8892,
+    "sha256": "7ea9602220f1ff85bc1c2813c68b243bb185fb33ad454df3606df871963223fb"
+  },
+  {
+    "file": "packages/protocol/src/generated/semantic-status.d.ts",
+    "bytes": 1620,
+    "sha256": "82982021311042c50ff96380e4d5070995a2c2a6dc8cff9f8633a559d4786c3a"
+  },
+  {
+    "file": "packages/protocol/src/generated/semantic-status.schema.json",
+    "bytes": 5076,
+    "sha256": "363d580452327689702966de8aef170b97074bb5c72ff7bf9941124ae586d31a"
+  },
+  {
+    "file": "packages/protocol/src/generated/semantic-status.validator.d.ts",
+    "bytes": 198,
+    "sha256": "bf3b624e4b9834e1c2aacc8d1eba0f92878558c05f78938698e9f9480d3cca3b"
+  },
+  {
+    "file": "packages/protocol/src/generated/semantic-status.validator.js",
+    "bytes": 38121,
+    "sha256": "3dcc0184c277279795890617cd3a20b1e02c0ba3387145ccfd877903c554fc32"
+  },
+  {
+    "file": "packages/protocol/src/index.ts",
+    "bytes": 614,
+    "sha256": "8da2afd859aa20c29fcfc6a5139bcc4e0d9664a6a96b1faefeaec09bdef425e2"
+  },
+  {
+    "file": "packages/protocol/src/semantic.test.ts",
+    "bytes": 4772,
+    "sha256": "c3694b2c9f5ab18739d002cc6f70d83a9b1f4ef24a9a8a58e75a5aef48a61fd5"
+  },
+  {
+    "file": "packages/protocol/src/semantic.ts",
+    "bytes": 6425,
+    "sha256": "8f84fa02add1a266e7350d0d2534c9c089b06566b5948dd327efba78a7091e6f"
+  },
+  {
+    "file": "scripts/protocol.mjs",
+    "bytes": 6914,
+    "sha256": "4403db16c5f87151f0aefda84f104282ccac68e8f92a83200165f219f92bb4ce"
+  },
+  {
+    "file": "tests/e2e/mock-bridge.ts",
+    "bytes": 24851,
+    "sha256": "a487589d699efca64e9a8f29fb84e763977c83296f4d6a3989fa6a53187e9886"
+  },
+  {
+    "file": "tests/e2e/semantic.spec.ts",
+    "bytes": 12436,
+    "sha256": "d3219f39a9432c6e32dc5bad94efcf75d65b55bf742fad5254ab97bd982bdf9c"
+  }
+]

@@ -1,0 +1,64 @@
+{
+  "kind": "authorized_failed_fixture_cleanup",
+  "runId": "b9e7a249-9f31-4493-ba67-10c97be01e32",
+  "attemptId": "63ea00ff-7e5b-4166-80cf-e8011602f15b",
+  "startedAt": "2026-10-13T16:30:47.676Z",
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-xSU5vU",
+  "plan": "current-installer-b9e7a249-9f31-4493-ba67-10c97be01e32-plan.json",
+  "sourceRunReceipt": "current-installer-b9e7a249-9f31-4493-ba67-10c97be01e32-48f99d32-349d-4e26-8ab5-9c604f35ad10-receipt.json",
+  "sourceRunFacts": {
+    "bytes": 10280,
+    "sha256": "8c227fcdcca7dc24d226057776ee824ba9168a6ec0ce46dc47d3a2d64ee9f4ab"
+  },
+  "originalRunStatus": "FAIL",
+  "originalMainExitStatus": "UNVERIFIED",
+  "outsideFixtureMainStore": {
+    "status": "UNVERIFIED",
+    "reason": "Prior main-store isolation was not established for this raw run. Recovery hashes only guarded temporary app-data; no outside files are inspected or removed, and no absence of prior main-page writes is claimed."
+  },
+  "install": {
+    "pid": 35068,
+    "exitCode": 0,
+    "signal": null
+  },
+  "preflight": {
+    "registration": null,
+    "shortcutCount": 0,
+    "runPresent": false,
+    "keys": [],
+    "webview2Versions": [
+      "155.0.4283.45"
+    ]
+  },
+  "registration": {
+    "registration": {
+      "displayVersion": "0.1.0",
+      "uninstallString": "\"C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-xSU5vU\\install\\uninstall.exe\"",
+      "installLocation": "\"C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-xSU5vU\\install\"",
+      "mainBinaryName": "markbridge-desktop.exe"
+    },
+    "shortcutCount": 0,
+    "runPresent": false,
+    "keys": [
+      "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Markbridge",
+      "HKCU:\\Software\\markbridge\\Markbridge"
+    ],
+    "webview2Versions": [
+      "155.0.4283.45"
+    ]
+  },
+  "controls": [
+    {
+      "control": "exact_test_os_credentials_revoked",
+      "status": "PASS"
+    }
+  ],
+  "ports": [
+    7244,
+    7245,
+    7817
+  ],
+  "status": "FAIL",
+  "code": "RECOVERY_REQUIRES_EXACT_LATE_OWNED_PID_ABSENCE",
+  "finishedAt": "2026-10-13T16:30:50.674Z"
+}

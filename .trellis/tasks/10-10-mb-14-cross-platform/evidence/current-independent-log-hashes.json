@@ -1,0 +1,47 @@
+[
+  {
+    "name": "lint",
+    "sha256": "7eab56b2b2e933b13d3eb4cc019ae4f182f3e26e5a4b88d67f03a89500697b89",
+    "bytes": 110
+  },
+  {
+    "name": "typecheck",
+    "sha256": "e1d529d161b137b122bb90015185dd1edbeff57b003c3e3ad4940d7b9e184ae0",
+    "bytes": 293
+  },
+  {
+    "name": "test",
+    "sha256": "04c6e2077822604a0937daf6c911448cd5df2f3595480cc8810f5583c706b726",
+    "bytes": 2355
+  },
+  {
+    "name": "build",
+    "sha256": "fbccadbd7074a9a78f3c14e8cf84136174d4b32b8cf0c398d7b78a2c3fb6c19d",
+    "bytes": 2703
+  },
+  {
+    "name": "rust-fmt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  {
+    "name": "rust-clippy",
+    "sha256": "4a4c0557cacaf646f825ec2ef884632632e1632d228e23583e088a657e3bc922",
+    "bytes": 73
+  },
+  {
+    "name": "rust-test",
+    "sha256": "2134be2df31c17880508831a17206c3be733386da304b618fb6ef23cb7615e11",
+    "bytes": 16531
+  },
+  {
+    "name": "protocol-check",
+    "sha256": "c00987b97402eadbdae6934638591d6d6acd916b63642bf77cb65192477872fc",
+    "bytes": 83
+  },
+  {
+    "name": "lint-first-tool",
+    "sha256": "0b8e3b8509de4547e36a95ad25eeeaa86c6705b9000c445250f48de98d0939bc",
+    "bytes": 2443
+  }
+]

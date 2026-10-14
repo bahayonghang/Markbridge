@@ -1,0 +1,621 @@
+{
+  "kind": "copied_release_synthetic_preview_persistence_probe",
+  "runId": "f81cc8f7-36f8-4120-83fd-f4c3fe4c450a",
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-F1oFvU",
+  "executableSha256": "2c31f83c9124aa61a2b9651320663a423bba5b52b9a173aa238d7e73e587068c",
+  "startedAt": "2026-10-13T21:29:27.850Z",
+  "installation": "NOT_RUN",
+  "chrome": "NOT_RUN",
+  "model": "NOT_RUN",
+  "diagnosticLifetimeObserver": false,
+  "identityVariant": "production-length-synthetic",
+  "profileIdLength": 66,
+  "legacyRoundtrip": true,
+  "snapshots": [
+    {
+      "stage": "A-store",
+      "kind": "job",
+      "id": 1,
+      "path": "/a",
+      "pageId": "714eef05-3ff7-4db6-b61b-446add858261",
+      "local": "MB13-preview-A",
+      "cookie": "r08=MB13-preview-A",
+      "main": null
+    },
+    {
+      "stage": "A-same-window-reload",
+      "kind": "job",
+      "id": 2,
+      "path": "/a",
+      "pageId": "3d7d7cb5-07bf-4911-8bbc-78542293b53e",
+      "local": "MB13-preview-A",
+      "cookie": "r08=MB13-preview-A",
+      "main": null
+    },
+    {
+      "stage": "A-immediate-reopen",
+      "kind": "job",
+      "id": 3,
+      "path": "/a",
+      "pageId": "6d3d469e-b876-4f03-8d5c-586577e179d3",
+      "local": "MB13-preview-A",
+      "cookie": "r08=MB13-preview-A",
+      "main": null
+    },
+    {
+      "stage": "B-store",
+      "kind": "job",
+      "id": 4,
+      "path": "/b",
+      "pageId": "cc8dc93d-cd20-4f5f-8359-bd9c2aa7617e",
+      "local": "MB13-preview-B",
+      "cookie": "r08=MB13-preview-B",
+      "main": null
+    },
+    {
+      "stage": "A-after-B-reopen",
+      "kind": "job",
+      "id": 5,
+      "path": "/a",
+      "pageId": "bdbbce92-8eed-4f71-bb10-033792aeab40",
+      "local": "MB13-preview-A",
+      "cookie": "r08=MB13-preview-A",
+      "main": null
+    },
+    {
+      "stage": "A-legacy-migration-reopen",
+      "kind": "job",
+      "id": 6,
+      "path": "/a",
+      "pageId": "88a67335-c742-4f1e-8ad0-791fc83270aa",
+      "local": "MB13-preview-A",
+      "cookie": "r08=MB13-preview-A",
+      "main": null
+    }
+  ],
+  "openings": [
+    {
+      "profile": "p:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "page": {
+        "kind": "hello",
+        "path": "/a",
+        "pageId": "714eef05-3ff7-4db6-b61b-446add858261",
+        "local": null,
+        "cookie": "",
+        "main": null
+      },
+      "os": {
+        "mainDirectoryExists": true,
+        "observations": [
+          {
+            "pid": 134008,
+            "observedDirectoryExists": true,
+            "relativeDirectory": "app-data/main-webview/EBWebView",
+            "parent": 153068,
+            "insideFixture": true,
+            "creationUtcTicks": "639275237679763770",
+            "expectedMain": true,
+            "expectedPreview": false
+          },
+          {
+            "pid": 90356,
+            "observedDirectoryExists": true,
+            "relativeDirectory": "app-data/preview-sessions/v1-1e8b1719ad8820ff052aad43fffc0161b789f8e67db43ed3d05c94dd40b345f7/EBWebView",
+            "parent": 153068,
+            "insideFixture": true,
+            "creationUtcTicks": "639275237744343460",
+            "expectedMain": false,
+            "expectedPreview": true
+          }
+        ],
+        "previewDirectoryExists": true,
+        "owner": 153068
+      }
+    },
+    {
+      "profile": "p:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "page": {
+        "kind": "hello",
+        "path": "/a",
+        "pageId": "6d3d469e-b876-4f03-8d5c-586577e179d3",
+        "local": "MB13-preview-A",
+        "cookie": "r08=MB13-preview-A",
+        "main": null
+      },
+      "os": {
+        "mainDirectoryExists": true,
+        "observations": [
+          {
+            "pid": 134008,
+            "observedDirectoryExists": true,
+            "relativeDirectory": "app-data/main-webview/EBWebView",
+            "parent": 153068,
+            "insideFixture": true,
+            "creationUtcTicks": "639275237679763770",
+            "expectedMain": true,
+            "expectedPreview": false
+          },
+          {
+            "pid": 138876,
+            "observedDirectoryExists": true,
+            "relativeDirectory": "app-data/preview-sessions/v1-1e8b1719ad8820ff052aad43fffc0161b789f8e67db43ed3d05c94dd40b345f7/EBWebView",
+            "parent": 153068,
+            "insideFixture": true,
+            "creationUtcTicks": "639275237902039780",
+            "expectedMain": false,
+            "expectedPreview": true
+          }
+        ],
+        "previewDirectoryExists": true,
+        "owner": 153068
+      }
+    },
+    {
+      "profile": "p:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "page": {
+        "kind": "hello",
+        "path": "/b",
+        "pageId": "cc8dc93d-cd20-4f5f-8359-bd9c2aa7617e",
+        "local": null,
+        "cookie": "",
+        "main": null
+      },
+      "os": {
+        "mainDirectoryExists": true,
+        "observations": [
+          {
+            "pid": 134008,
+            "observedDirectoryExists": true,
+            "relativeDirectory": "app-data/main-webview/EBWebView",
+            "parent": 153068,
+            "insideFixture": true,
+            "creationUtcTicks": "639275237679763770",
+            "expectedMain": true,
+            "expectedPreview": false
+          },
+          {
+            "pid": 154352,
+            "observedDirectoryExists": true,
+            "relativeDirectory": "app-data/preview-sessions/v1-f5cc904063daf55c130e5a899391969984ddff4e8c486d586399a05aca69eeca/EBWebView",
+            "parent": 153068,
+            "insideFixture": true,
+            "creationUtcTicks": "639275238049481360",
+            "expectedMain": false,
+            "expectedPreview": true
+          }
+        ],
+        "previewDirectoryExists": true,
+        "owner": 153068
+      }
+    },
+    {
+      "profile": "p:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "page": {
+        "kind": "hello",
+        "path": "/a",
+        "pageId": "bdbbce92-8eed-4f71-bb10-033792aeab40",
+        "local": "MB13-preview-A",
+        "cookie": "r08=MB13-preview-A",
+        "main": null
+      },
+      "os": {
+        "mainDirectoryExists": true,
+        "observations": [
+          {
+            "pid": 134008,
+            "observedDirectoryExists": true,
+            "relativeDirectory": "app-data/main-webview/EBWebView",
+            "parent": 153068,
+            "insideFixture": true,
+            "creationUtcTicks": "639275237679763770",
+            "expectedMain": true,
+            "expectedPreview": false
+          },
+          {
+            "pid": 144988,
+            "observedDirectoryExists": true,
+            "relativeDirectory": "app-data/preview-sessions/v1-1e8b1719ad8820ff052aad43fffc0161b789f8e67db43ed3d05c94dd40b345f7/EBWebView",
+            "parent": 153068,
+            "insideFixture": true,
+            "creationUtcTicks": "639275238204343810",
+            "expectedMain": false,
+            "expectedPreview": true
+          }
+        ],
+        "previewDirectoryExists": true,
+        "owner": 153068
+      }
+    },
+    {
+      "profile": "p:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "page": {
+        "kind": "hello",
+        "path": "/a",
+        "pageId": "88a67335-c742-4f1e-8ad0-791fc83270aa",
+        "local": "MB13-preview-A",
+        "cookie": "r08=MB13-preview-A",
+        "main": null
+      },
+      "os": {
+        "mainDirectoryExists": true,
+        "observations": [
+          {
+            "pid": 134008,
+            "observedDirectoryExists": true,
+            "relativeDirectory": "app-data/main-webview/EBWebView",
+            "parent": 153068,
+            "insideFixture": true,
+            "creationUtcTicks": "639275237679763770",
+            "expectedMain": true,
+            "expectedPreview": false
+          },
+          {
+            "pid": 148452,
+            "observedDirectoryExists": true,
+            "relativeDirectory": "app-data/preview-sessions/v1-1e8b1719ad8820ff052aad43fffc0161b789f8e67db43ed3d05c94dd40b345f7/EBWebView",
+            "parent": 153068,
+            "insideFixture": true,
+            "creationUtcTicks": "639275238427178310",
+            "expectedMain": false,
+            "expectedPreview": true
+          }
+        ],
+        "previewDirectoryExists": true,
+        "owner": 153068
+      }
+    }
+  ],
+  "closures": [
+    {
+      "profile": "p:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "knownBrowserPids": [
+        90356
+      ],
+      "knownBrowserIdentities": [
+        {
+          "pid": 90356,
+          "creationUtcTicks": "639275237744343460"
+        }
+      ],
+      "absence": {
+        "observations": [
+          {
+            "creationUtcTicks": "639275237744343460",
+            "pid": 90356,
+            "state": "absent"
+          }
+        ],
+        "presentPids": [],
+        "reusedPids": []
+      }
+    },
+    {
+      "profile": "p:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "knownBrowserPids": [
+        138876
+      ],
+      "knownBrowserIdentities": [
+        {
+          "pid": 138876,
+          "creationUtcTicks": "639275237902039780"
+        }
+      ],
+      "absence": {
+        "observations": [
+          {
+            "creationUtcTicks": "639275237902039780",
+            "pid": 138876,
+            "state": "absent"
+          }
+        ],
+        "presentPids": [],
+        "reusedPids": []
+      }
+    },
+    {
+      "profile": "p:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "knownBrowserPids": [
+        154352
+      ],
+      "knownBrowserIdentities": [
+        {
+          "pid": 154352,
+          "creationUtcTicks": "639275238049481360"
+        }
+      ],
+      "absence": {
+        "observations": [
+          {
+            "creationUtcTicks": "639275238049481360",
+            "pid": 154352,
+            "state": "absent"
+          }
+        ],
+        "presentPids": [],
+        "reusedPids": []
+      }
+    },
+    {
+      "profile": "p:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "knownBrowserPids": [
+        144988
+      ],
+      "knownBrowserIdentities": [
+        {
+          "pid": 144988,
+          "creationUtcTicks": "639275238204343810"
+        }
+      ],
+      "absence": {
+        "observations": [
+          {
+            "creationUtcTicks": "639275238204343810",
+            "pid": 144988,
+            "state": "absent"
+          }
+        ],
+        "presentPids": [],
+        "reusedPids": []
+      }
+    },
+    {
+      "profile": "p:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "knownBrowserPids": [
+        148452
+      ],
+      "knownBrowserIdentities": [
+        {
+          "pid": 148452,
+          "creationUtcTicks": "639275238427178310"
+        }
+      ],
+      "absence": {
+        "observations": [
+          {
+            "creationUtcTicks": "639275238427178310",
+            "pid": 148452,
+            "state": "absent"
+          }
+        ],
+        "presentPids": [],
+        "reusedPids": []
+      }
+    }
+  ],
+  "errors": [],
+  "status": "PASS",
+  "mainDataEvidence": {
+    "mainDirectoryExists": true,
+    "observations": [
+      {
+        "pid": 134008,
+        "observedDirectoryExists": true,
+        "relativeDirectory": "app-data/main-webview/EBWebView",
+        "parent": 153068,
+        "insideFixture": true,
+        "creationUtcTicks": "639275237679763770",
+        "expectedMain": true,
+        "expectedPreview": false
+      }
+    ],
+    "previewDirectoryExists": false,
+    "owner": 153068
+  },
+  "immediateReopenRestored": true,
+  "afterBRestored": true,
+  "legacySeed": {
+    "sourceAbsent": true,
+    "legacyPresent": true,
+    "seeded": true
+  },
+  "legacyMigrationRestored": true,
+  "normalExit": {
+    "pid": 153068,
+    "exitCode": 0,
+    "signal": null,
+    "method": "verified_main_and_preview_windows_WM_CLOSE",
+    "phase": "known-webview-exit",
+    "windowPosts": [
+      {
+        "action": "close",
+        "posted": 1,
+        "pid": 153068,
+        "windows": [
+          {
+            "emptyTitle": false,
+            "handle": "1DC045A",
+            "messageOnly": false,
+            "visible": true,
+            "closeEligible": true,
+            "className": "UNREPORTED_CLASS",
+            "role": "main",
+            "threadId": 42068
+          },
+          {
+            "emptyTitle": true,
+            "handle": "3D91EE8",
+            "messageOnly": false,
+            "visible": true,
+            "closeEligible": false,
+            "className": "TAO_THREAD_EVENT_TARGET",
+            "role": "other",
+            "threadId": 42068
+          },
+          {
+            "emptyTitle": false,
+            "handle": "35D1B14",
+            "messageOnly": false,
+            "visible": false,
+            "closeEligible": false,
+            "className": "UNREPORTED_CLASS",
+            "role": "other",
+            "threadId": 42068
+          },
+          {
+            "emptyTitle": false,
+            "handle": "1E701E4",
+            "messageOnly": false,
+            "visible": false,
+            "closeEligible": false,
+            "className": "IME",
+            "role": "other",
+            "threadId": 42068
+          },
+          {
+            "emptyTitle": true,
+            "handle": "2372100",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "wetype.renderer.window",
+            "role": "other",
+            "threadId": 42068
+          },
+          {
+            "emptyTitle": true,
+            "handle": "159042E",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "UNREPORTED_CLASS",
+            "role": "other",
+            "threadId": 42068
+          },
+          {
+            "emptyTitle": true,
+            "handle": "3590BC8",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "SystemUserAdapterWindowClass",
+            "role": "other",
+            "threadId": 42068
+          },
+          {
+            "emptyTitle": true,
+            "handle": "4100306",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "Chrome_MessageWindow",
+            "role": "other",
+            "threadId": 149736
+          },
+          {
+            "emptyTitle": true,
+            "handle": "1EE1D84",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "Chrome_MessageWindow",
+            "role": "other",
+            "threadId": 42068
+          },
+          {
+            "emptyTitle": false,
+            "handle": "3D41A78",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "CicMarshalWndClass",
+            "role": "other",
+            "threadId": 42068
+          },
+          {
+            "emptyTitle": false,
+            "handle": "2720B8A",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "OleMainThreadWndClass",
+            "role": "other",
+            "threadId": 42068
+          }
+        ],
+        "ownedWindows": 11,
+        "processAbsent": false
+      }
+    ],
+    "knownWebviewPids": [
+      134008,
+      90356,
+      138876,
+      154352,
+      144988,
+      148452
+    ],
+    "knownWebviewIdentities": [
+      {
+        "pid": 134008,
+        "creationUtcTicks": "639275237679763770"
+      },
+      {
+        "pid": 90356,
+        "creationUtcTicks": "639275237744343460"
+      },
+      {
+        "pid": 138876,
+        "creationUtcTicks": "639275237902039780"
+      },
+      {
+        "pid": 154352,
+        "creationUtcTicks": "639275238049481360"
+      },
+      {
+        "pid": 144988,
+        "creationUtcTicks": "639275238204343810"
+      },
+      {
+        "pid": 148452,
+        "creationUtcTicks": "639275238427178310"
+      }
+    ],
+    "nativeStageOrder": [],
+    "knownWebviewAbsence": {
+      "observations": [
+        {
+          "creationUtcTicks": "639275237679763770",
+          "pid": 134008,
+          "state": "absent"
+        },
+        {
+          "creationUtcTicks": "639275237744343460",
+          "pid": 90356,
+          "state": "absent"
+        },
+        {
+          "creationUtcTicks": "639275237902039780",
+          "pid": 138876,
+          "state": "absent"
+        },
+        {
+          "creationUtcTicks": "639275238049481360",
+          "pid": 154352,
+          "state": "absent"
+        },
+        {
+          "creationUtcTicks": "639275238204343810",
+          "pid": 144988,
+          "state": "absent"
+        },
+        {
+          "creationUtcTicks": "639275238427178310",
+          "pid": 148452,
+          "state": "absent"
+        }
+      ],
+      "presentPids": [],
+      "reusedPids": []
+    }
+  },
+  "previewProbeEvents": [],
+  "lastProcesses": {
+    "processes": [],
+    "listeners": []
+  },
+  "finalProcesses": {
+    "processes": [],
+    "listeners": []
+  },
+  "finishedAt": "2026-10-13T21:31:21.157Z"
+}

@@ -1,0 +1,6 @@
+{
+  "apps/desktop/src-tauri/src/main.rs": "474652936bde10b8456748ae927e61252efe68d1510aebadf4340dc060644511",
+  "apps/desktop/src-tauri/src/preview.rs": "40db99a854fc46c6a059a87f9fe28f9c25c4a3a5a5acc980fab4feed9058d7d7",
+  "apps/desktop/src-tauri/Cargo.toml": "b40417bd6b9ea08d35c7855967c9bac1901296545ea8d396af0b0feeed1379da",
+  "Cargo.lock": "b1cfb80027e552994689d9ef6b50ccd0d2c667fddc8202030dddd51bef223f36"
+}

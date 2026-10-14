@@ -1,0 +1,181 @@
+{
+  "kind": "disposable_chrome_close_order_probe_only",
+  "runId": "be88bcc1-69ca-4bf4-af2b-4ebc321ba117",
+  "mode": "after-ack",
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-81c3HR",
+  "startedAt": "2026-10-13T17:26:37.162Z",
+  "installation": "NOT_RUN",
+  "noApplicationOrPairingOrBookmarkWrites": true,
+  "extensionSha256": "f35adea6f8a31f5ac4fe9090ae6bcf3284a19707a6e54314c8797756a516211d",
+  "errors": [],
+  "chromeVersion": "Chrome/155.0.8059.39",
+  "beforeCloseProcesses": {
+    "processes": [
+      {
+        "parent": 120836,
+        "pid": 85948,
+        "name": "chrome.exe"
+      },
+      {
+        "parent": 85948,
+        "pid": 141828,
+        "name": "chrome.exe"
+      },
+      {
+        "parent": 85948,
+        "pid": 129700,
+        "name": "chrome.exe"
+      },
+      {
+        "parent": 85948,
+        "pid": 146288,
+        "name": "chrome.exe"
+      },
+      {
+        "parent": 85948,
+        "pid": 144140,
+        "name": "chrome.exe"
+      },
+      {
+        "parent": 85948,
+        "pid": 144844,
+        "name": "chrome.exe"
+      },
+      {
+        "parent": 85948,
+        "pid": 133664,
+        "name": "chrome.exe"
+      },
+      {
+        "parent": 85948,
+        "pid": 145232,
+        "name": "chrome.exe"
+      },
+      {
+        "parent": 85948,
+        "pid": 112884,
+        "name": "chrome.exe"
+      },
+      {
+        "parent": 85948,
+        "pid": 137336,
+        "name": "chrome.exe"
+      },
+      {
+        "parent": 85948,
+        "pid": 142772,
+        "name": "chrome.exe"
+      }
+    ],
+    "listeners": []
+  },
+  "normalExit": {
+    "kind": "owned_chrome_close",
+    "pid": 85948,
+    "method": "Browser.close",
+    "pipeEofMode": "after-ack",
+    "startedAtMs": 1791912404797,
+    "phase": "exit-verified",
+    "acknowledged": true,
+    "childExitObserved": true,
+    "exitCode": 0,
+    "signal": null,
+    "events": [
+      {
+        "event": "close_frame_queued",
+        "elapsedMs": 1
+      },
+      {
+        "event": "close_frame_write_callback",
+        "elapsedMs": 1
+      },
+      {
+        "event": "close_acknowledged",
+        "elapsedMs": 1
+      },
+      {
+        "event": "pipe_eof_flushed",
+        "elapsedMs": 38
+      },
+      {
+        "event": "pipe_write_closed",
+        "elapsedMs": 38
+      },
+      {
+        "event": "pipe_read_closed",
+        "elapsedMs": 38
+      },
+      {
+        "event": "child_exit_observed",
+        "elapsedMs": 145
+      }
+    ],
+    "frameQueued": true,
+    "frameWriteCallback": true,
+    "pipeEofFlushed": true,
+    "pipeWriteClosed": true,
+    "pipeReadClosed": true
+  },
+  "status": "PASS",
+  "lastProcesses": {
+    "processes": [],
+    "listeners": []
+  },
+  "finalProcesses": {
+    "processes": [],
+    "listeners": []
+  },
+  "lastObservedChild": {
+    "pid": 85948,
+    "exitCode": 0,
+    "signal": null
+  },
+  "closeEvidence": {
+    "kind": "owned_chrome_close",
+    "pid": 85948,
+    "method": "Browser.close",
+    "pipeEofMode": "after-ack",
+    "startedAtMs": 1791912404797,
+    "phase": "exit-verified",
+    "acknowledged": true,
+    "childExitObserved": true,
+    "exitCode": 0,
+    "signal": null,
+    "events": [
+      {
+        "event": "close_frame_queued",
+        "elapsedMs": 1
+      },
+      {
+        "event": "close_frame_write_callback",
+        "elapsedMs": 1
+      },
+      {
+        "event": "close_acknowledged",
+        "elapsedMs": 1
+      },
+      {
+        "event": "pipe_eof_flushed",
+        "elapsedMs": 38
+      },
+      {
+        "event": "pipe_write_closed",
+        "elapsedMs": 38
+      },
+      {
+        "event": "pipe_read_closed",
+        "elapsedMs": 38
+      },
+      {
+        "event": "child_exit_observed",
+        "elapsedMs": 145
+      }
+    ],
+    "frameQueued": true,
+    "frameWriteCallback": true,
+    "pipeEofFlushed": true,
+    "pipeWriteClosed": true,
+    "pipeReadClosed": true
+  },
+  "finishedAt": "2026-10-13T17:26:50.838Z"
+}

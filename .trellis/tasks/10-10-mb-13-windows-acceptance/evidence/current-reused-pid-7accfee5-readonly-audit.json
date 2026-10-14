@@ -1,0 +1,17 @@
+{
+  "kind": "exact_failed_pid_readonly_identity_audit",
+  "observedAtUtc": "2026-10-13T19:46:16.1750931Z",
+  "originalReceipt": "current-installer-7accfee5-259b-4733-8d77-60c71b7dda75-de4114d5-d8fc-4d7f-be8c-76e46cee781b-receipt.json",
+  "originalReceiptSha256": "47a561a9b3e8be8dc82f7a092547880856a905c2f9c52078434204950cc2184b",
+  "pid": 131548,
+  "present": true,
+  "originalStatus": "FAIL",
+  "restart": "NOT_RUN",
+  "processActions": "NONE",
+  "rawCommandLineRetained": false,
+  "originalWebviewExitCode": "UNVERIFIED",
+  "currentExecutableIsOriginalWebview": false,
+  "currentExecutableRole": "command_shell",
+  "currentCreationUtc": "2026-10-13T19:40:46.1613410Z",
+  "currentCommandContainsExactTestRoot": false
+}

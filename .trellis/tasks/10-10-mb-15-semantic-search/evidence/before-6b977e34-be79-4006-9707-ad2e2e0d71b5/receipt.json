@@ -1,0 +1,95 @@
+{
+  "method": "browser-mock-before",
+  "status": "PASS",
+  "tests": 5,
+  "nativeIpc": false,
+  "actualModel": false,
+  "command": "node node_modules/@playwright/test/cli.js test tests/e2e/shell.spec.ts --grep R01 shell and settings --workers 1",
+  "sizes": [
+    "1440x900",
+    "1100x760",
+    "640x760",
+    "1100x480",
+    "640x480"
+  ],
+  "source": [
+    {
+      "file": "apps/desktop/src/App.tsx",
+      "sha256": "2053a07ee76dedbf734c8f6351f3b4769d46b2f749ff1ba907749e59f3c5bcd0"
+    },
+    {
+      "file": "apps/desktop/src/features/library/LibraryWorkspace.tsx",
+      "sha256": "e3ab8a8fe5222b4629d7ddd58aadaf22f264020888e2c888d27aa161d1f0ad1c"
+    },
+    {
+      "file": "apps/desktop/src/features/ai/AiSettings.tsx",
+      "sha256": "5253f6b39bb1be4c15fcba68cf36e930c3e9dda18f03ba84fdaa4a120fa996e5"
+    },
+    {
+      "file": "apps/desktop/src/styles.css",
+      "sha256": "bc8db06c267c9b7cacfc73516974ebbba9973cf72bb32e9ce3276f3c2ad9b7c4"
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "shell-ai-1100x480.png",
+      "sha256": "b62156062822bbfe77fa281949a403dd18dd4dd33ea6e7ffd4d00bdc6126504d"
+    },
+    {
+      "file": "shell-ai-1100x760.png",
+      "sha256": "ee6ca891dfbebf6c2b04cb26c6fc916c0e0afe4ed7cd70d1faa785dce4cd4d15"
+    },
+    {
+      "file": "shell-ai-1440x900.png",
+      "sha256": "6bdc14d3a008e367786856dffb9873a957c31333653411af59843c708debc49f"
+    },
+    {
+      "file": "shell-ai-640x480.png",
+      "sha256": "91ae27390147c7f696a9dd2b7936c3b289f61b35030ce7200885fb44ff7da3aa"
+    },
+    {
+      "file": "shell-ai-640x760.png",
+      "sha256": "2463b13c39ce18e25269d0ccbe801e17ec6217cd502ff0b4465f10545ee723ae"
+    },
+    {
+      "file": "shell-detail-1100x480.png",
+      "sha256": "bd33c2e4e2f4211ef3e89b4c6100b6f5b51a2a7a384ad63500cee653ccddf012"
+    },
+    {
+      "file": "shell-detail-1100x760.png",
+      "sha256": "676a17b013d9129f10848e36773ccbba5c6e3c973d9d7d6aa84f015d65847195"
+    },
+    {
+      "file": "shell-detail-1440x900.png",
+      "sha256": "94d05c7627ee6808cf29f632c207e8e2efe3c4d5724757e39fe5c68c68ac9e5f"
+    },
+    {
+      "file": "shell-detail-640x480.png",
+      "sha256": "ae58bd36f383fa6cf6504352b4635b2c26dbd511d90f8b3fefc1436548c3f525"
+    },
+    {
+      "file": "shell-detail-640x760.png",
+      "sha256": "40fa0a57b7f51adcd6b4ae165623625bfa5984a8ca17294e2db94d9b0c572fb1"
+    },
+    {
+      "file": "shell-library-1100x480.png",
+      "sha256": "ea373f89fe186fba16606fb653e3bed09d59a503e6b1ad4a17ab21c96ebc6c3f"
+    },
+    {
+      "file": "shell-library-1100x760.png",
+      "sha256": "ed20afae919242ea233d504f17ae6d317acb147bdb8aa0cd68ec29f023af553d"
+    },
+    {
+      "file": "shell-library-1440x900.png",
+      "sha256": "8c6b4a51a1cbaf5bd7e71adc442c579280710430031dac911a0a9c0e6712dd77"
+    },
+    {
+      "file": "shell-library-640x480.png",
+      "sha256": "973004381ea8a637d2744f69dc42b0e7023e6c10df2e0a336314faef20d81749"
+    },
+    {
+      "file": "shell-library-640x760.png",
+      "sha256": "105646715f093b2a39319db885a248f2c6e451370194661898acba744801c373"
+    }
+  ]
+}

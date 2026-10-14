@@ -1,0 +1,11 @@
+{
+  "kind": "authorized_failed_fixture_cleanup",
+  "runId": "b9e7a249-9f31-4493-ba67-10c97be01e32",
+  "attemptId": "63ea00ff-7e5b-4166-80cf-e8011602f15b",
+  "status": "FAIL",
+  "originalRunStatus": "FAIL",
+  "originalRunReceipt": "current-installer-b9e7a249-9f31-4493-ba67-10c97be01e32-48f99d32-349d-4e26-8ab5-9c604f35ad10-receipt.json",
+  "recoveryReceipt": "D:\\Documents\\Code\\Tauri\\Markbridge\\.trellis\\tasks\\10-10-mb-13-windows-acceptance\\evidence\\current-installer-b9e7a249-9f31-4493-ba67-10c97be01e32-63ea00ff-7e5b-4166-80cf-e8011602f15b-receipt.json",
+  "registryRestoreReceipt": null,
+  "finishedAt": "2026-10-13T16:30:50.675Z"
+}

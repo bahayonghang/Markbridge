@@ -1,0 +1,67 @@
+{
+  "formatVersion": 1,
+  "runId": "3ee4f8c0-0010-4ecf-a83c-627a3397746d",
+  "preparedAt": "2026-10-13T22:26:14.065Z",
+  "state": "PREPARED",
+  "installation": "NOT_RUN",
+  "scope": {
+    "installMode": "currentUser",
+    "installerArguments": "/S /NS /D=<fresh root>\\install (last, unquoted)",
+    "registryWrites": [
+      "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Markbridge",
+      "HKCU\\Software\\markbridge\\Markbridge"
+    ],
+    "shortcuts": "Suppressed with /NS; existing named shortcuts block preflight",
+    "credentials": "Only generated Markbridge.Task06.<runId> targets; revoke via trusted app; exact-target existence check only",
+    "uninstall": "Normal installed uninstall.exe /S; retain app-data; remove test registration; restore only this run-created default install-location value and now-empty product key",
+    "nativeShellCleanup": "Standard NSIS uninstall may clear com.markbridge.desktop jump-list destinations and Markbridge Run value (preflight requires Run value absent)",
+    "runtime": "Requires existing WebView2; no bootstrapper installation authorized",
+    "browser": "Two fresh temporary Chrome profiles; unpacked extension loaded only into them",
+    "externalNetwork": "One selected synthetic public bookmark at https://example.com/ for actual installed content preview; no model calls",
+    "data": "MARKBRIDGE_APP_DATA/app-data with main-webview and independent preview-sessions; no global WebView data override",
+    "cleanup": "No recursive removal; retain isolated data, extraction, exports and screenshots; exact guarded registry residue restored from completed-run proof only"
+  },
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-WRGRKp",
+  "installDirectory": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-WRGRKp\\install",
+  "appData": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-WRGRKp\\app-data",
+  "executable": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-WRGRKp\\install\\markbridge-desktop.exe",
+  "namespace": "Markbridge.Task06.mb13-3ee4f8c0-0010-4ecf-a83c-627a3397746d",
+  "installer": "D:\\Documents\\Code\\Tauri\\Markbridge\\target\\x86_64-pc-windows-msvc\\release\\bundle\\nsis\\Markbridge_0.1.0_x64-setup.exe",
+  "releaseExecutable": "D:\\Documents\\Code\\Tauri\\Markbridge\\target\\x86_64-pc-windows-msvc\\release\\markbridge-desktop.exe",
+  "packedExecutable": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-WRGRKp\\packed\\markbridge-desktop.exe",
+  "chromeExecutable": "C:/Program Files/Google/Chrome/Application/chrome.exe",
+  "appVersion": "0.1.0",
+  "schemaVersion": 8,
+  "storageSourcePath": "D:\\Documents\\Code\\Tauri\\Markbridge\\crates\\core\\src\\storage\\mod.rs",
+  "storageSourceFacts": {
+    "bytes": 28162,
+    "sha256": "0a21bccb96cb84e9d78206a0f7406cecb2fda299cdcdf3a968b9aee8db7bc670"
+  },
+  "installerFacts": {
+    "bytes": 6044252,
+    "sha256": "2844783f1660d3708412b1bcbd602f8a2bc1c85369623cdf996d52368932b183"
+  },
+  "executableFacts": {
+    "bytes": 25301504,
+    "sha256": "4fcf7fcd506ad60eac1798c2a4c0ed9f80888648f7a5050ec41e6d47c67ff707"
+  },
+  "nsiPath": "D:\\Documents\\Code\\Tauri\\Markbridge\\target\\x86_64-pc-windows-msvc\\release\\nsis\\x64\\installer.nsi",
+  "nsiFacts": {
+    "bytes": 31181,
+    "sha256": "91104d8dc9b39148c83ab3a551e44f0d31538a1f26ad4bcd7a443dbad2715f3a"
+  },
+  "extensionSha256": "03a429ac0026dc4e95c3527c95439563b8e43c78c2a7691366e84aab2dad80ec",
+  "packedVersions": {
+    "fileVersion": "0.1.0",
+    "productVersion": "0.1.0"
+  },
+  "preflight": {
+    "registration": null,
+    "shortcutCount": 0,
+    "runPresent": false,
+    "keys": [],
+    "webview2Versions": [
+      "155.0.4283.45"
+    ]
+  }
+}

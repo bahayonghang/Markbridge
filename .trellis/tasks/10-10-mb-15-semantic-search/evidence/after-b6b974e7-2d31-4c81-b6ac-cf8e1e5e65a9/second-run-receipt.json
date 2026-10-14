@@ -1,0 +1,9 @@
+{
+  "status": "FAIL",
+  "tests": 8,
+  "passed": 7,
+  "failed": 1,
+  "cause": "Test locator used nonexistent tag-name label; actual label is 添加标签",
+  "nativeIpc": false,
+  "actualModel": false
+}

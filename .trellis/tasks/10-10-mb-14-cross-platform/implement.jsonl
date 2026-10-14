@@ -7,3 +7,5 @@
 {"file":".trellis/tasks/10-10-markbridge-workspace/research/environment.md","reason":"Observed tooling and unverified native prerequisites"}
 {"file":".trellis/tasks/10-10-markbridge-workspace/design.md","reason":"Shared approved-on-review architecture and cross-task contracts"}
 {"file":".trellis/tasks/10-10-markbridge-workspace/verification.md","reason":"Formal parent acceptance matrix and evidence boundaries"}
+{"file": ".trellis/tasks/10-10-mb-13-windows-acceptance/research/platform-preflight.md", "reason": "Locked native APIs, exact target security contracts and host evidence boundary"}
+{"file": ".trellis/tasks/10-10-mb-13-windows-acceptance/design.md", "reason": "Current hashed preview path, preservation and Windows-only no-replace migration to extend safely"}

@@ -1,0 +1,474 @@
+{
+  "kind": "paired_disposable_chrome_socket_order_probe_only",
+  "runId": "1f5a0af6-f7fc-494b-b8bd-85cddefd2ad1",
+  "mode": "live-aged",
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-lem8Xh",
+  "startedAt": "2026-10-13T18:30:17.933Z",
+  "executableSha256": "4f5833328131a7cd629ca10fa2953a88202fb343585072944e6e592709908f6f",
+  "extensionSha256": "f35adea6f8a31f5ac4fe9090ae6bcf3284a19707a6e54314c8797756a516211d",
+  "installation": "NOT_RUN",
+  "noBookmarkWriteCommands": true,
+  "errors": [
+    {
+      "phase": "chrome-0-close",
+      "code": "NORMAL_CHROME_CLOSE_TIMEOUT"
+    },
+    {
+      "phase": "chrome-1-close",
+      "code": "NORMAL_CHROME_CLOSE_TIMEOUT"
+    }
+  ],
+  "chromeCloseResults": [
+    {
+      "index": 0,
+      "appAliveBeforeClose": true,
+      "bridgeBeforeClose": {
+        "listening": true,
+        "profileCount": 2,
+        "liveProfileCount": 2,
+        "pendingPairCount": 0
+      },
+      "targetProfileLiveBeforeClose": true,
+      "closeEvidence": {
+        "kind": "owned_chrome_close",
+        "pid": 51816,
+        "method": "Browser.close",
+        "pipeEofMode": "immediate",
+        "startedAtMs": 1791916267958,
+        "phase": "actual-child-exit",
+        "acknowledged": true,
+        "childExitObserved": true,
+        "exitCode": 0,
+        "signal": null,
+        "events": [
+          {
+            "event": "close_frame_queued",
+            "elapsedMs": 0
+          },
+          {
+            "event": "pipe_eof_requested",
+            "elapsedMs": 0
+          },
+          {
+            "event": "close_frame_write_callback",
+            "elapsedMs": 0
+          },
+          {
+            "event": "close_acknowledged",
+            "elapsedMs": 0
+          },
+          {
+            "event": "pipe_eof_flushed",
+            "elapsedMs": 0
+          },
+          {
+            "event": "pipe_write_closed",
+            "elapsedMs": 34
+          },
+          {
+            "event": "pipe_read_closed",
+            "elapsedMs": 34
+          },
+          {
+            "event": "child_exit_observed",
+            "elapsedMs": 100236
+          }
+        ],
+        "frameQueued": true,
+        "pipeEofRequested": true,
+        "frameWriteCallback": true,
+        "pipeEofFlushed": true,
+        "pipeWriteClosed": true,
+        "pipeReadClosed": true,
+        "closeErrorCode": "NORMAL_CHROME_CLOSE_TIMEOUT",
+        "ownedProcessState": {
+          "processes": [
+            {
+              "parent": 150944,
+              "pid": 149772,
+              "name": "markbridge-desktop.exe"
+            },
+            {
+              "parent": 149772,
+              "pid": 118892,
+              "name": "msedgewebview2.exe"
+            },
+            {
+              "parent": 118892,
+              "pid": 108524,
+              "name": "msedgewebview2.exe"
+            },
+            {
+              "parent": 118892,
+              "pid": 65928,
+              "name": "msedgewebview2.exe"
+            },
+            {
+              "parent": 118892,
+              "pid": 151364,
+              "name": "msedgewebview2.exe"
+            },
+            {
+              "parent": 118892,
+              "pid": 77604,
+              "name": "msedgewebview2.exe"
+            },
+            {
+              "parent": 118892,
+              "pid": 145436,
+              "name": "msedgewebview2.exe"
+            },
+            {
+              "parent": 150944,
+              "pid": 51816,
+              "name": "chrome.exe"
+            },
+            {
+              "parent": 51816,
+              "pid": 142388,
+              "name": "chrome.exe"
+            },
+            {
+              "parent": 150944,
+              "pid": 106376,
+              "name": "chrome.exe"
+            },
+            {
+              "parent": 106376,
+              "pid": 144532,
+              "name": "chrome.exe"
+            },
+            {
+              "parent": 106376,
+              "pid": 75680,
+              "name": "chrome.exe"
+            },
+            {
+              "parent": 106376,
+              "pid": 150728,
+              "name": "chrome.exe"
+            },
+            {
+              "parent": 106376,
+              "pid": 125268,
+              "name": "chrome.exe"
+            },
+            {
+              "parent": 106376,
+              "pid": 138380,
+              "name": "chrome.exe"
+            },
+            {
+              "parent": 106376,
+              "pid": 146412,
+              "name": "chrome.exe"
+            },
+            {
+              "parent": 106376,
+              "pid": 144572,
+              "name": "chrome.exe"
+            },
+            {
+              "parent": 106376,
+              "pid": 144132,
+              "name": "chrome.exe"
+            },
+            {
+              "parent": 106376,
+              "pid": 115980,
+              "name": "chrome.exe"
+            }
+          ],
+          "listeners": [
+            {
+              "port": 14683,
+              "pid": 118892,
+              "address": "127.0.0.1"
+            },
+            {
+              "port": 11881,
+              "pid": 149772,
+              "address": "127.0.0.1"
+            }
+          ]
+        }
+      },
+      "elapsedMs": 53015
+    },
+    {
+      "index": 1,
+      "appAliveBeforeClose": true,
+      "bridgeBeforeClose": {
+        "listening": true,
+        "profileCount": 2,
+        "liveProfileCount": 1,
+        "pendingPairCount": 0
+      },
+      "targetProfileLiveBeforeClose": true,
+      "closeEvidence": {
+        "kind": "owned_chrome_close",
+        "pid": 106376,
+        "method": "Browser.close",
+        "pipeEofMode": "immediate",
+        "startedAtMs": 1791916320972,
+        "phase": "actual-child-exit",
+        "acknowledged": true,
+        "childExitObserved": true,
+        "exitCode": 0,
+        "signal": null,
+        "events": [
+          {
+            "event": "close_frame_queued",
+            "elapsedMs": 0
+          },
+          {
+            "event": "pipe_eof_requested",
+            "elapsedMs": 1
+          },
+          {
+            "event": "close_frame_write_callback",
+            "elapsedMs": 1
+          },
+          {
+            "event": "close_acknowledged",
+            "elapsedMs": 1
+          },
+          {
+            "event": "pipe_eof_flushed",
+            "elapsedMs": 1
+          },
+          {
+            "event": "pipe_write_closed",
+            "elapsedMs": 42
+          },
+          {
+            "event": "pipe_read_closed",
+            "elapsedMs": 42
+          },
+          {
+            "event": "child_exit_observed",
+            "elapsedMs": 47222
+          }
+        ],
+        "frameQueued": true,
+        "pipeEofRequested": true,
+        "frameWriteCallback": true,
+        "pipeEofFlushed": true,
+        "pipeWriteClosed": true,
+        "pipeReadClosed": true,
+        "closeErrorCode": "NORMAL_CHROME_CLOSE_TIMEOUT",
+        "ownedProcessState": {
+          "processes": [
+            {
+              "parent": 150944,
+              "pid": 149772,
+              "name": "markbridge-desktop.exe"
+            },
+            {
+              "parent": 149772,
+              "pid": 118892,
+              "name": "msedgewebview2.exe"
+            },
+            {
+              "parent": 118892,
+              "pid": 108524,
+              "name": "msedgewebview2.exe"
+            },
+            {
+              "parent": 118892,
+              "pid": 65928,
+              "name": "msedgewebview2.exe"
+            },
+            {
+              "parent": 118892,
+              "pid": 151364,
+              "name": "msedgewebview2.exe"
+            },
+            {
+              "parent": 118892,
+              "pid": 77604,
+              "name": "msedgewebview2.exe"
+            },
+            {
+              "parent": 118892,
+              "pid": 145436,
+              "name": "msedgewebview2.exe"
+            }
+          ],
+          "listeners": [
+            {
+              "port": 14683,
+              "pid": 118892,
+              "address": "127.0.0.1"
+            },
+            {
+              "port": 11881,
+              "pid": 149772,
+              "address": "127.0.0.1"
+            }
+          ]
+        }
+      },
+      "elapsedMs": 52276
+    }
+  ],
+  "mainDataEvidence": {
+    "mainDirectoryExists": true,
+    "observations": [
+      {
+        "observedDirectoryExists": true,
+        "expectedMain": true,
+        "insideFixture": true,
+        "pid": 118892,
+        "relativeDirectory": "app-data/main-webview/EBWebView",
+        "parent": 149772,
+        "expectedPreview": false
+      }
+    ],
+    "previewDirectoryExists": false,
+    "owner": 149772
+  },
+  "pairedBridge": {
+    "listening": true,
+    "profileCount": 2,
+    "liveProfileCount": 2,
+    "pendingPairCount": 0
+  },
+  "credentialRevocationOrder": "after_chrome_close_attempts",
+  "liveAgeDelta": {
+    "targetWaitMs": 40000,
+    "timerTickMs": 1000,
+    "observedWaitMs": 40264.5289
+  },
+  "status": "FAIL",
+  "credentialRevocation": {
+    "count": 2,
+    "allExactTargetsAbsent": true
+  },
+  "normalAppExit": {
+    "pid": 149772,
+    "exitCode": 0,
+    "signal": null,
+    "method": "verified_main_and_preview_windows_WM_CLOSE",
+    "phase": "known-webview-exit",
+    "windowPosts": [
+      {
+        "action": "close",
+        "posted": 1,
+        "pid": 149772,
+        "windows": [
+          {
+            "emptyTitle": false,
+            "handle": "79042A",
+            "messageOnly": false,
+            "visible": true,
+            "closeEligible": true,
+            "className": "UNREPORTED_CLASS",
+            "role": "main",
+            "threadId": 148348
+          },
+          {
+            "emptyTitle": true,
+            "handle": "9302C6",
+            "messageOnly": false,
+            "visible": true,
+            "closeEligible": false,
+            "className": "TAO_THREAD_EVENT_TARGET",
+            "role": "other",
+            "threadId": 148348
+          },
+          {
+            "emptyTitle": false,
+            "handle": "27D0698",
+            "messageOnly": false,
+            "visible": false,
+            "closeEligible": false,
+            "className": "IME",
+            "role": "other",
+            "threadId": 148348
+          },
+          {
+            "emptyTitle": false,
+            "handle": "243052C",
+            "messageOnly": false,
+            "visible": false,
+            "closeEligible": false,
+            "className": "UNREPORTED_CLASS",
+            "role": "other",
+            "threadId": 148348
+          },
+          {
+            "emptyTitle": true,
+            "handle": "5100DF6",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "Chrome_MessageWindow",
+            "role": "other",
+            "threadId": 50224
+          },
+          {
+            "emptyTitle": true,
+            "handle": "2741740",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "Chrome_MessageWindow",
+            "role": "other",
+            "threadId": 148348
+          },
+          {
+            "emptyTitle": false,
+            "handle": "1700CA8",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "CicMarshalWndClass",
+            "role": "other",
+            "threadId": 148348
+          },
+          {
+            "emptyTitle": false,
+            "handle": "4960D88",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "OleMainThreadWndClass",
+            "role": "other",
+            "threadId": 148348
+          }
+        ],
+        "ownedWindows": 8,
+        "processAbsent": false
+      }
+    ],
+    "knownWebviewPids": [
+      118892
+    ],
+    "nativeStageOrder": [],
+    "knownWebviewAbsence": {
+      "presentPids": []
+    }
+  },
+  "lastProcesses": {
+    "processes": [],
+    "listeners": []
+  },
+  "finalProcesses": {
+    "processes": [],
+    "listeners": []
+  },
+  "lastObservedChromeChildren": [
+    {
+      "pid": 51816,
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "pid": 106376,
+      "exitCode": 0,
+      "signal": null
+    }
+  ],
+  "finishedAt": "2026-10-13T18:33:08.990Z"
+}

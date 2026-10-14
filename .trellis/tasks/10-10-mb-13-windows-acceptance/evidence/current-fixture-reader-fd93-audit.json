@@ -1,0 +1,39 @@
+{
+  "kind": "exact_stopped_fixture_reader_auxiliary_audit",
+  "runId": "7accfee5-259b-4733-8d77-60c71b7dda75",
+  "observedAtUtc": "2026-10-13T20:09:27.648Z",
+  "originalNativeStatus": "FAIL",
+  "readerAttemptStatus": "FAIL",
+  "nativeApplication": "NOT_RUN",
+  "credentialRevocation": "NOT_RUN",
+  "originalReaderReceiptSha256": "1607d3e69368abd96d453a3ebb32bcfaebcb13e0dc1c9d251557019cad7285c9",
+  "processes": {
+    "processes": [],
+    "listeners": []
+  },
+  "currentManifest": {
+    "files": 613,
+    "bytes": 48775924,
+    "manifestSha256": "bbde8d662f95e82d1d50a8e923718f7d6028b9817d85a163f246c41d02707a11"
+  },
+  "withoutAuxiliary": {
+    "files": 611,
+    "bytes": 48743156,
+    "manifestSha256": "25d00e7821e3a11acc1cf6344659c0fa358ad2320c6c95953dd2a6a434ce96e7"
+  },
+  "auxiliary": [
+    {
+      "name": "markbridge.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb"
+    },
+    {
+      "name": "markbridge.sqlite-wal",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "onlyAuxiliaryAdditions": true,
+  "originalDatabaseUnchanged": true,
+  "policy": "metadata/hash reads only; no SQLite connection, copy, launch, deletion, credential or registry action"
+}

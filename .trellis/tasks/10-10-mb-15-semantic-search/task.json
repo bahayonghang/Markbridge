@@ -3,7 +3,7 @@
   "name": "mb-15-semantic-search",
   "title": "可选本地向量检索",
   "description": "可选本地向量检索；属于 Markbridge 父规划，独立验收并记录失败与恢复边界",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": "fullstack",
   "scope": "markbridge",
   "package": null,
@@ -12,7 +12,7 @@
   "assignee": "lyh",
   "createdAt": "2026-10-10",
   "completedAt": null,
-  "branch": null,
+  "branch": "main",
   "base_branch": "main",
   "worktree_path": null,
   "commit": null,
@@ -21,12 +21,26 @@
   "children": [],
   "parent": "10-10-markbridge-workspace",
   "relatedFiles": [
-    "crates/core semantic search",
-    "apps/desktop/src-tauri local embedding adapter/SQLite vectors",
-    "搜索设置 UI",
-    "relevance fixtures"
+    "crates/protocol/src/semantic.rs",
+    "crates/core/src/semantic",
+    "crates/core/src/bridge/semantic.rs",
+    "crates/core/src/bridge/semantic/tests.rs",
+    "crates/core/src/storage/semantic.rs",
+    "crates/core/src/storage/semantic/tests.rs",
+    "crates/core/src/storage/migrations/008_semantic.sql",
+    "crates/core/examples/semantic_fixture_seed.rs",
+    "apps/desktop/src-tauri/src/main.rs",
+    "apps/desktop/src/features/semantic",
+    "apps/desktop/src/features/library/LibraryWorkspace.tsx",
+    "apps/desktop/src/App.tsx",
+    "apps/desktop/src/backend.ts",
+    "apps/desktop/src/styles.css",
+    "packages/protocol/src/semantic.ts",
+    "packages/protocol/src/semantic.test.ts",
+    "tests/e2e/semantic.spec.ts",
+    ".trellis/tasks/10-10-mb-15-semantic-search/evidence"
   ],
-  "notes": "Planning only. Dependency order is documented and is not enforced automatically by Trellis. No product implementation or runtime validation has started.",
+  "notes": "Implemented existing 15 after the approved 13 startup gate and the 14 executable checkpoint. Independent final 192 Rust (3 existing ignored), 217 Vitest + 20 Node, metrics 3, 80 E2E and lint/typecheck/build/fmt/clippy/protocol PASS. Default-OFF/frozen scopes/SQLite 008/cancel-before-registration 128/global serial build/sticky model Stale/10k exact ranking/UI implemented. Final 4fc release/packed/installed equal; 73edf605 native synthetic-model 9 controls PASS with pause/resume/restart zero-request preservation, identity isolation, digest-rebuild rule, late delete cancellation and actual SQLite notes/tags/summaries/FTS retained. Final 3ee4 Windows installation 11 controls PASS and 6c7e lexical B10K PASS. Strict human-label/full-path real-model eval tooling and developer candidate corpus prepared; actual embedding model/human-reviewed 20-query Recall@5/B10K semantic p95 V18 NOT_RUN. AC15-1/2/4 PASS; AC15-3, this task and the original parent remain unfinished. The Windows-default decision archives only 14 and does not close this task. No real model installation, cloud call, push or publication.",
   "meta": {
     "sequence": "15",
     "milestone": "M5",
@@ -40,6 +54,8 @@
     "implementation_approval": "granted",
     "planning_status": "approved",
     "delivery_scope": "follow_up",
-    "approval_evidence": "Parent approval_evidence; dependencies and per-child acceptance remain required"
+    "approval_evidence": "Parent approval_evidence; dependencies and per-child acceptance remain required",
+    "startup_gate_exception": "User approved 2026-10-13: current13 Windows install/diagnostics/affected automated checks permit14/15 start;13 actual-model V12/full acceptance incomplete. No model/platform acceptance waiver.",
+    "latest_gate_decision": "../10-10-markbridge-workspace/gate-proposal-2026-10-13-model.md"
   }
 }

@@ -6,7 +6,7 @@
 
 ## 归属、状态与依赖
 
-父任务：[Markbridge 工作台](../10-10-markbridge-workspace/prd.md)。需求：R01,R14。里程碑：M4。状态：planning，未开始产品实现。
+父任务：[Markbridge 工作台](../10-10-markbridge-workspace/prd.md)。需求：R01,R14。里程碑：M4。状态：实施与当前原生验收中，实际状态以 `task.json` 为准；旧安装通过不代表当前完整验收。
 
 前置：[09](../archive/2026-10/10-10-mb-09-webpage-preview/prd.md)、[12](../archive/2026-10/10-10-mb-12-library-maintenance/prd.md)。依赖代表前置验收通过，不能仅凭目录存在或任务已创建启动。该任务属于 Windows 首版。
 
@@ -23,6 +23,8 @@
 - [ ] AC13-5：Floccus 在专用库有实际人工传播证据才声明已验证；缺少环境单独标 UNVERIFIED，不阻塞基础本地功能结论。
 
 对应父级 [验证矩阵](../10-10-markbridge-workspace/verification.md)：V01–V15；V16 独立外部证据。未运行环境明确保留 NOT_RUN，不能以源码检查代替原生证据。
+
+当前批准结论见 [current-integration-2026-10-13.md](evidence/current-integration-2026-10-13.md)。AC13-2/4当前对应14/15实施后的4fc/284478包及3ee4f8c0/eee73eda真实安装闭环、2f88注册恢复PASS，包含schema8诊断、80command拒绝、只读、正常退出/重启/live2、持久化、严格零回放和卸载保留。条件AI步骤无实际模型NOT_RUN，AC13-1不勾选。AC13-3当前6c7edb60的3冷/30暖普通搜索PASS；method2 sole-root日期现场证明、旧4f/dbfa/722a分层结果及743/3c/7acc/fd93/9cf原始FAIL全部保留。用户启动例外已满足，但真实V12/AC13-1、13/M4与原父任务未完成。
 
 ## 完成条件
 

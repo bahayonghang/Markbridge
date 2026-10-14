@@ -1,0 +1,17 @@
+{
+  "kind": "readonly_owned_chrome_role_observation_during_run",
+  "runId": "7346e130-c09c-4625-bb7a-fcdf5a0197ef",
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-SNNNuS",
+  "observedAt": "During the running headful comparator; exact observation timestamp was not recorded by the command",
+  "method": "One fresh non-reparse task13 root with the exact live-aged-headful marker; Win32_Process rows selected by chrome.exe and command-line containment of that root; only fixed type classifications emitted",
+  "roles": [
+    { "pid": 132204, "parentPid": 107112, "role": "browser", "utility": "none" },
+    { "pid": 143664, "parentPid": 132204, "role": "crashpad-handler", "utility": "none" },
+    { "pid": 150104, "parentPid": 107112, "role": "browser", "utility": "none" },
+    { "pid": 142060, "parentPid": 150104, "role": "crashpad-handler", "utility": "none" }
+  ],
+  "rawCommandLinesRetained": false,
+  "processMessagesOrTermination": false,
+  "nativeAcceptance": "FAIL",
+  "inference": "Outstanding children are Crashpad handlers; this observation alone does not establish why the browser processes have not exited"
+}

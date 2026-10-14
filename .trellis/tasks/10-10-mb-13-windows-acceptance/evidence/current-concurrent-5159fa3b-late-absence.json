@@ -1,0 +1,22 @@
+{
+  "kind": "readonly_late_owned_fixture_absence_only",
+  "runId": "5159fa3b-a12d-493e-97ab-1c6fde5493fd",
+  "observedAt": "2026-10-13T18:47:14.9817786Z",
+  "originalReceiptSha256": "063ee2ebe0ec24d14ccdf389db54659f72a039deb311aeac12b197717fc31db5",
+  "originalNativeStatus": "FAIL",
+  "normalChromeExit": "UNVERIFIED",
+  "forcedTerminationUsed": false,
+  "knownChromePids": [
+    143432,
+    79584,
+    152092,
+    152656
+  ],
+  "presentPids": [],
+  "ownedState": {
+    "processes": [],
+    "listeners": []
+  },
+  "absenceStatus": "PASS",
+  "scope": "No process messages, termination, registry or file deletion; original failure unchanged"
+}

@@ -1,6 +1,6 @@
 # 实施状态
 
-更新：2026-10-13。当前用户授权本地提交及归档已完成任务；未授权 push、发布、签名或日常安装。父任务只协调集成，不执行 task.py start。
+更新：2026-10-13。用户随后授权拆分提交当前改动，并明确目前默认 Windows、其他平台先不管。14 因此离开活动队列；V17 仍为 NOT_RUN，不是 PASS，不声明 macOS/Linux 支持。13 的 V12 与 15 的 V18 未豁免。未授权 push、发布、签名或日常安装。父任务只协调集成，不执行 task.py start。
 
 ## 当前结论
 
@@ -8,12 +8,12 @@
 |---|---|---|
 | 原子任务 01–12 | completed | 已有各自验收证据；03/04 的同一真实睡眠项按用户明确豁免结案，历史 V04 UNVERIFIED、实际 NOT_RUN 保留 |
 | 改版父任务及 R01–R08 | completed | 书签优先的蓝色工作台、完整日常流程、自动与原生集成证据；本轮提交前补条件撤销外部子节点保护 |
-| 13 Windows 交付 | in_progress | 旧包的安装/性能 PASS 保留；当前版诊断导出与 NSIS 安装验收仍需完成 |
-| 14 macOS / Linux | planning | 依赖 13；需平台实现及各自真实原生机器，缺环境不得称支持 |
-| 15 可选本地语义检索 | planning | 依赖 12、13，不依赖 14；需实现和真实模型质量/性能 |
-| 原父任务 | in_progress | 13/14/15 未完，不把 Windows 里程碑当全部完成 |
+| 13 Windows 交付 | in_progress | 当前最终4fc/284478包、3ee4/eee73安装闭环、schema8诊断/80command拒绝、6c7e B10K通过；V12缺实际模型，13/M4未完成 |
+| 14 macOS / Linux | 已移出活动队列 | 用户明确其他平台先不管。可执行适配已保留；V17 为 NOT_RUN，不是 PASS，不声明支持 |
+| 15 可选本地语义检索 | in_progress | 实现和192Rust/217Vitest/20Node/80E2E完整检查、当前4fc原生合成模型73edf功能9控制通过；实际模型/人工标签V18 NOT_RUN |
+| 原父任务 | in_progress | 14 已按 Windows 默认范围移出；13/15 的真实模型未完成，父任务不关闭 |
 
-下一轮从既有 13 恢复。见 [本轮审计](../../../docs/implementation-status-2026-10-13.md)、[完整后续 Prompt](../../../docs/next-session-prompt.md) 和 [R08 最终复核](../archive/2026-10/10-12-mb-r08-acceptance/evidence/precommit-closeout.md)。下面是原始历史记录，不能用其中旧状态推断当前实现或重复实施。
+当前15可执行实现及Windows最终集成已完成，父需求/证据/指南同步。用户随后把其他平台移出当前范围，14 不再作为活动任务；V17 仍为 NOT_RUN。13 与 15 仍因 V12/V18 未正式完成，15 保留当前上下文以便后续真实验收；不重复源码实施。见 [本轮审计](../../../docs/implementation-status-2026-10-13.md)、[完整后续 Prompt](../../../docs/next-session-prompt.md)、[13 当前矩阵](../10-10-mb-13-windows-acceptance/evidence/current-integration-2026-10-13.md) 和 [启动例外](gate-proposal-2026-10-13-model.md)。下面是原始历史记录，不能用旧状态推断当前实现。
 
 # 2026-10-11 历史实施状态
 

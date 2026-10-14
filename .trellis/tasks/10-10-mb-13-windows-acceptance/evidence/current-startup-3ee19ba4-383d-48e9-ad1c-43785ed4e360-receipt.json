@@ -1,0 +1,170 @@
+{
+  "kind": "copied_release_startup_os_isolation_probe_only",
+  "runId": "3ee19ba4-383d-48e9-ad1c-43785ed4e360",
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-nVc5TT",
+  "startedAt": "2026-10-13T17:07:34.020Z",
+  "executableSha256": "1a93d343c2736c059c396e4f5807a7eaf7428b4d0591f2d6bdf3696d0515895d",
+  "noPairingOrUiActions": true,
+  "installation": "NOT_RUN",
+  "errors": [],
+  "osDataEvidence": {
+    "mainDirectoryExists": true,
+    "observations": [
+      {
+        "observedDirectoryExists": true,
+        "expectedMain": true,
+        "insideFixture": true,
+        "pid": 126368,
+        "relativeDirectory": "app-data/main-webview/EBWebView",
+        "parent": 65280,
+        "expectedPreview": false
+      }
+    ],
+    "previewDirectoryExists": false,
+    "owner": 65280
+  },
+  "status": "PASS",
+  "normalExit": {
+    "pid": 65280,
+    "exitCode": 0,
+    "signal": null,
+    "method": "verified_main_and_preview_windows_WM_CLOSE",
+    "phase": "known-webview-exit",
+    "windowPosts": [
+      {
+        "action": "close",
+        "posted": 1,
+        "pid": 65280,
+        "windows": [
+          {
+            "emptyTitle": false,
+            "handle": "1DA1740",
+            "messageOnly": false,
+            "visible": true,
+            "closeEligible": true,
+            "className": "UNREPORTED_CLASS",
+            "role": "main",
+            "threadId": 111992
+          },
+          {
+            "emptyTitle": true,
+            "handle": "2DE0DDE",
+            "messageOnly": false,
+            "visible": true,
+            "closeEligible": false,
+            "className": "UNREPORTED_CLASS",
+            "role": "other",
+            "threadId": 111992
+          },
+          {
+            "emptyTitle": false,
+            "handle": "37B12C0",
+            "messageOnly": false,
+            "visible": false,
+            "closeEligible": false,
+            "className": "IME",
+            "role": "other",
+            "threadId": 111992
+          },
+          {
+            "emptyTitle": false,
+            "handle": "4FC1878",
+            "messageOnly": false,
+            "visible": false,
+            "closeEligible": false,
+            "className": "UNREPORTED_CLASS",
+            "role": "other",
+            "threadId": 111992
+          },
+          {
+            "emptyTitle": true,
+            "handle": "2B41860",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "Chrome_MessageWindow",
+            "role": "other",
+            "threadId": 108600
+          },
+          {
+            "emptyTitle": true,
+            "handle": "2B11F3E",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "Chrome_MessageWindow",
+            "role": "other",
+            "threadId": 111992
+          },
+          {
+            "emptyTitle": false,
+            "handle": "24C1762",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "CicMarshalWndClass",
+            "role": "other",
+            "threadId": 111992
+          },
+          {
+            "emptyTitle": false,
+            "handle": "22C175E",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "OleMainThreadWndClass",
+            "role": "other",
+            "threadId": 111992
+          }
+        ],
+        "ownedWindows": 8,
+        "processAbsent": false
+      }
+    ],
+    "knownWebviewPids": [
+      126368
+    ],
+    "nativeStageOrder": [
+      "ENTRY",
+      "CONFIG_ACCEPTED",
+      "TAURI_BUILD_RETURNED",
+      "SETUP_ENTER",
+      "SERVICES_READY",
+      "MAIN_BUILD_BEGIN",
+      "MAIN_BUILD_RETURNED",
+      "SETUP_COMPLETED",
+      "RUN_READY",
+      "RUN_EXIT_REQUESTED",
+      "RUN_EXIT",
+      "BRIDGE_SHUTDOWN_BEGIN",
+      "BRIDGE_SHUTDOWN_END"
+    ],
+    "knownWebviewAbsence": {
+      "presentPids": []
+    }
+  },
+  "lastProcesses": {
+    "processes": [],
+    "listeners": []
+  },
+  "finalProcesses": {
+    "processes": [],
+    "listeners": []
+  },
+  "nativeStageOrder": [
+    "ENTRY",
+    "CONFIG_ACCEPTED",
+    "TAURI_BUILD_RETURNED",
+    "SETUP_ENTER",
+    "SERVICES_READY",
+    "MAIN_BUILD_BEGIN",
+    "MAIN_BUILD_RETURNED",
+    "SETUP_COMPLETED",
+    "RUN_READY",
+    "RUN_EXIT_REQUESTED",
+    "RUN_EXIT",
+    "BRIDGE_SHUTDOWN_BEGIN",
+    "BRIDGE_SHUTDOWN_END"
+  ],
+  "finishedAt": "2026-10-13T17:07:53.545Z"
+}

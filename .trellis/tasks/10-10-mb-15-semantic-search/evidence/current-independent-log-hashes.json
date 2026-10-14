@@ -1,0 +1,77 @@
+[
+  {
+    "file": ".trellis/tasks/10-10-mb-15-semantic-search/evidence/current-independent-build.log",
+    "bytes": 2704,
+    "sha256": "c61be762b9becf105637dca6d36c5cdac25b549b4be39415abba40ce2d833213"
+  },
+  {
+    "file": ".trellis/tasks/10-10-mb-15-semantic-search/evidence/current-independent-diff-check.log",
+    "bytes": 23298,
+    "sha256": "768b2463323194a694c85d7e4343b42601722bf401aa49de25130104c9999e93"
+  },
+  {
+    "file": ".trellis/tasks/10-10-mb-15-semantic-search/evidence/current-independent-e2e.log",
+    "bytes": 11203,
+    "sha256": "1167b8484fe1bd0adc3f1f4877686cda4f1f24fc46efb6f1c27bd8b6e9212e44"
+  },
+  {
+    "file": ".trellis/tasks/10-10-mb-15-semantic-search/evidence/current-independent-final-evidence.log",
+    "bytes": 719,
+    "sha256": "db976e0d355656def58d1775069191e50fa4c85653ca1d7c39998736ee645a0a"
+  },
+  {
+    "file": ".trellis/tasks/10-10-mb-15-semantic-search/evidence/current-independent-lint.log",
+    "bytes": 110,
+    "sha256": "7eab56b2b2e933b13d3eb4cc019ae4f182f3e26e5a4b88d67f03a89500697b89"
+  },
+  {
+    "file": ".trellis/tasks/10-10-mb-15-semantic-search/evidence/current-independent-metrics-test.log",
+    "bytes": 389,
+    "sha256": "7b15fe65b0e6257d3f56339ae8f755f921c58e8c6ad2cd3c7f373748ffe4372c"
+  },
+  {
+    "file": ".trellis/tasks/10-10-mb-15-semantic-search/evidence/current-independent-native-final-assertions.log",
+    "bytes": 644,
+    "sha256": "de2578b4c37f67dba0efc74d4b96577af68c49f3ff797697bd7ec2513230b830"
+  },
+  {
+    "file": ".trellis/tasks/10-10-mb-15-semantic-search/evidence/current-independent-native-first-assertions.log",
+    "bytes": 661,
+    "sha256": "a7b30ae3dba4588fe32334afb49dc669289757a7dd3b5423e5a8eac560f747bc"
+  },
+  {
+    "file": ".trellis/tasks/10-10-mb-15-semantic-search/evidence/current-independent-protocol-check.log",
+    "bytes": 83,
+    "sha256": "c00987b97402eadbdae6934638591d6d6acd916b63642bf77cb65192477872fc"
+  },
+  {
+    "file": ".trellis/tasks/10-10-mb-15-semantic-search/evidence/current-independent-real-eval-not-run.log",
+    "bytes": 95,
+    "sha256": "50ffa0f9942735fcbef376a3239bd3c0095f164952cc976a5f40242df22645d3"
+  },
+  {
+    "file": ".trellis/tasks/10-10-mb-15-semantic-search/evidence/current-independent-rust-clippy.log",
+    "bytes": 259,
+    "sha256": "1893c5824508ab5c844429a322469161f93c17a6f22b599aec1676fbab7969c5"
+  },
+  {
+    "file": ".trellis/tasks/10-10-mb-15-semantic-search/evidence/current-independent-rust-fmt.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "file": ".trellis/tasks/10-10-mb-15-semantic-search/evidence/current-independent-rust-test.log",
+    "bytes": 20505,
+    "sha256": "5d3069f718a2333a0ac628b34ceb01e078917a7f00f4ce8466b4b0189a916f0d"
+  },
+  {
+    "file": ".trellis/tasks/10-10-mb-15-semantic-search/evidence/current-independent-test.log",
+    "bytes": 2352,
+    "sha256": "5a97b1b4a6ebc9044227dc82796d519119a070a07e3e413671f7c69af29b5c94"
+  },
+  {
+    "file": ".trellis/tasks/10-10-mb-15-semantic-search/evidence/current-independent-typecheck.log",
+    "bytes": 293,
+    "sha256": "0997abce7e0877cd0f355a85f331e0fbc7ffc953223b70c4b53012b539d6566f"
+  }
+]

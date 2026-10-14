@@ -1,0 +1,191 @@
+{
+  "kind": "disposable_chrome_close_order_probe_only",
+  "runId": "7bef2971-4b40-447c-b0b0-ea08c15206fd",
+  "mode": "baseline",
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-t2gsDq",
+  "startedAt": "2026-10-13T17:26:40.544Z",
+  "installation": "NOT_RUN",
+  "noApplicationOrPairingOrBookmarkWrites": true,
+  "extensionSha256": "f35adea6f8a31f5ac4fe9090ae6bcf3284a19707a6e54314c8797756a516211d",
+  "errors": [],
+  "chromeVersion": "Chrome/155.0.8059.39",
+  "beforeCloseProcesses": {
+    "processes": [
+      {
+        "parent": 117428,
+        "pid": 28804,
+        "name": "chrome.exe"
+      },
+      {
+        "parent": 28804,
+        "pid": 114464,
+        "name": "chrome.exe"
+      },
+      {
+        "parent": 28804,
+        "pid": 145968,
+        "name": "chrome.exe"
+      },
+      {
+        "parent": 28804,
+        "pid": 145732,
+        "name": "chrome.exe"
+      },
+      {
+        "parent": 28804,
+        "pid": 134008,
+        "name": "chrome.exe"
+      },
+      {
+        "parent": 28804,
+        "pid": 58852,
+        "name": "chrome.exe"
+      },
+      {
+        "parent": 28804,
+        "pid": 126876,
+        "name": "chrome.exe"
+      },
+      {
+        "parent": 28804,
+        "pid": 131276,
+        "name": "chrome.exe"
+      },
+      {
+        "parent": 28804,
+        "pid": 117472,
+        "name": "chrome.exe"
+      },
+      {
+        "parent": 28804,
+        "pid": 79820,
+        "name": "chrome.exe"
+      },
+      {
+        "parent": 28804,
+        "pid": 105448,
+        "name": "chrome.exe"
+      }
+    ],
+    "listeners": []
+  },
+  "normalExit": {
+    "kind": "owned_chrome_close",
+    "pid": 28804,
+    "method": "Browser.close",
+    "pipeEofMode": "immediate",
+    "startedAtMs": 1791912407666,
+    "phase": "exit-verified",
+    "acknowledged": true,
+    "childExitObserved": true,
+    "exitCode": 0,
+    "signal": null,
+    "events": [
+      {
+        "event": "close_frame_queued",
+        "elapsedMs": 1
+      },
+      {
+        "event": "pipe_eof_requested",
+        "elapsedMs": 1
+      },
+      {
+        "event": "close_frame_write_callback",
+        "elapsedMs": 1
+      },
+      {
+        "event": "close_acknowledged",
+        "elapsedMs": 1
+      },
+      {
+        "event": "pipe_eof_flushed",
+        "elapsedMs": 1
+      },
+      {
+        "event": "pipe_write_closed",
+        "elapsedMs": 37
+      },
+      {
+        "event": "pipe_read_closed",
+        "elapsedMs": 37
+      },
+      {
+        "event": "child_exit_observed",
+        "elapsedMs": 127
+      }
+    ],
+    "frameQueued": true,
+    "pipeEofRequested": true,
+    "frameWriteCallback": true,
+    "pipeEofFlushed": true,
+    "pipeWriteClosed": true,
+    "pipeReadClosed": true
+  },
+  "status": "PASS",
+  "lastProcesses": {
+    "processes": [],
+    "listeners": []
+  },
+  "finalProcesses": {
+    "processes": [],
+    "listeners": []
+  },
+  "lastObservedChild": {
+    "pid": 28804,
+    "exitCode": 0,
+    "signal": null
+  },
+  "closeEvidence": {
+    "kind": "owned_chrome_close",
+    "pid": 28804,
+    "method": "Browser.close",
+    "pipeEofMode": "immediate",
+    "startedAtMs": 1791912407666,
+    "phase": "exit-verified",
+    "acknowledged": true,
+    "childExitObserved": true,
+    "exitCode": 0,
+    "signal": null,
+    "events": [
+      {
+        "event": "close_frame_queued",
+        "elapsedMs": 1
+      },
+      {
+        "event": "pipe_eof_requested",
+        "elapsedMs": 1
+      },
+      {
+        "event": "close_frame_write_callback",
+        "elapsedMs": 1
+      },
+      {
+        "event": "close_acknowledged",
+        "elapsedMs": 1
+      },
+      {
+        "event": "pipe_eof_flushed",
+        "elapsedMs": 1
+      },
+      {
+        "event": "pipe_write_closed",
+        "elapsedMs": 37
+      },
+      {
+        "event": "pipe_read_closed",
+        "elapsedMs": 37
+      },
+      {
+        "event": "child_exit_observed",
+        "elapsedMs": 127
+      }
+    ],
+    "frameQueued": true,
+    "pipeEofRequested": true,
+    "frameWriteCallback": true,
+    "pipeEofFlushed": true,
+    "pipeWriteClosed": true,
+    "pipeReadClosed": true
+  },
+  "finishedAt": "2026-10-13T17:26:53.829Z"
+}

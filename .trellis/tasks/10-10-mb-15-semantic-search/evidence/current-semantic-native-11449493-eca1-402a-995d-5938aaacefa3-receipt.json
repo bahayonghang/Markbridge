@@ -1,0 +1,590 @@
+{
+  "runId": "11449493-eca1-402a-995d-5938aaacefa3",
+  "status": "PASS",
+  "scope": "isolated Windows native synthetic-model functional test",
+  "actualModelV18": "NOT_RUN",
+  "installation": "NOT_RUN (copied current release)",
+  "chrome": "NOT_RUN",
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-7yddn1",
+  "controls": {
+    "default_off_zero_requests": "PASS",
+    "explicit_metadata_only_check": "PASS",
+    "pause_late_response_resume": "PASS",
+    "query_and_profile_isolation": "PASS",
+    "native_ui_explicit_query": "PASS",
+    "normal_restart_retains_paused_index_without_requests": "PASS",
+    "digest_change_requires_explicit_rebuild": "PASS",
+    "delete_cancels_query_preserves_lexical_data": "PASS",
+    "disable_zero_requests": "PASS"
+  },
+  "errors": [],
+  "fixtureSha256": "b8addfaeb8afc53c95eb072d0350c454384154af09468d2b7cf2f5d01fdeeed3",
+  "executable": {
+    "bytes": 25301504,
+    "sha256": "3a283fa596cfcba487ac4070f0b080de0fd3a1040f6c7b6fb5053d83718bef14"
+  },
+  "copiedExecutable": {
+    "bytes": 25301504,
+    "sha256": "3a283fa596cfcba487ac4070f0b080de0fd3a1040f6c7b6fb5053d83718bef14"
+  },
+  "seedExecutableSha256": "22b79295d519381c9966597ba77a79ec4b1af797e184733229f44cd2fae123d1",
+  "helperHashes": {
+    "crates/core/examples/semantic_fixture_seed.rs": "dbee741b6a2f450deacbf7ea9e8e78451ae12719385e714809c18c2cd7dc5103",
+    ".trellis/tasks/10-10-mb-15-semantic-search/evidence/current-semantic-native.mjs": "75dbe7cbb618e3e9de57523c03e895743d04b818449536ba3fcc7571b05f01fa",
+    ".trellis/tasks/10-10-mb-15-semantic-search/evidence/semantic-fixture.mjs": "46a755abad4bb6f1836ff05f4876e907b72d286e7f3c2c2767c6aa6dbffd8f90",
+    ".trellis/tasks/10-10-mb-13-windows-acceptance/evidence/current-native-driver.mjs": "8150639d545b98e0956e52b3b93ae360ccdbc3b3586f2846a1efd46e45009ba3",
+    ".trellis/tasks/10-10-mb-13-windows-acceptance/evidence/current-native-system.ps1": "722711f4f60547bf9f33209fbfa8d86b932c53473398988ab36755582bc87e7f",
+    ".trellis/tasks/10-10-mb-13-windows-acceptance/evidence/current-native-window.ps1": "abf40f270ce63905e72e3c8e1b7b98d3e9216900dacd08600ea49cd65cb7eb74"
+  },
+  "mainDataEvidence": {
+    "mainDirectoryExists": true,
+    "observations": [
+      {
+        "pid": 154860,
+        "observedDirectoryExists": true,
+        "relativeDirectory": "app-data/main-webview/EBWebView",
+        "parent": 126088,
+        "insideFixture": true,
+        "creationUtcTicks": "639275269727046550",
+        "expectedMain": true,
+        "expectedPreview": false
+      }
+    ],
+    "previewDirectoryExists": false,
+    "owner": 126088
+  },
+  "scopeReview": {
+    "reviewId": "sr:1ee4a62a12193c99c87934ad28e7c4a13d5ad925601200ac779606ed13e55805",
+    "profileId": "semantic-fixture-a",
+    "sourceEpoch": 1,
+    "expectedRevision": 1,
+    "count": 3,
+    "clippedCount": 0,
+    "upperBytes": 49152,
+    "model": "mb15-mock:latest",
+    "inputRecipeVersion": 1,
+    "maxInputChars": 8192,
+    "maxInputBytes": 32768
+  },
+  "readyIndex": {
+    "indexId": "si:d8623d5b25ec931fcad0b5debb987cd2d07fea8ad6568acfd0e4f482dba5ab1a",
+    "profileId": "semantic-fixture-a",
+    "sourceEpoch": 1,
+    "generation": 3,
+    "phase": "ready",
+    "model": "mb15-mock:latest",
+    "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "dimension": 4,
+    "total": 3,
+    "ready": 3,
+    "pending": 0,
+    "storedBytes": 48,
+    "failure": null,
+    "failureMessage": null
+  },
+  "query": {
+    "count": 3,
+    "topChromeId": "b1",
+    "score": 1
+  },
+  "firstClose": {
+    "pid": 126088,
+    "exitCode": 0,
+    "signal": null,
+    "method": "verified_main_and_preview_windows_WM_CLOSE",
+    "phase": "known-webview-exit",
+    "windowPosts": [
+      {
+        "action": "close",
+        "posted": 1,
+        "pid": 126088,
+        "windows": [
+          {
+            "emptyTitle": false,
+            "handle": "1921508",
+            "messageOnly": false,
+            "visible": true,
+            "closeEligible": true,
+            "className": "UNREPORTED_CLASS",
+            "role": "main",
+            "threadId": 95244
+          },
+          {
+            "emptyTitle": true,
+            "handle": "3950AC8",
+            "messageOnly": false,
+            "visible": true,
+            "closeEligible": false,
+            "className": "TAO_THREAD_EVENT_TARGET",
+            "role": "other",
+            "threadId": 95244
+          },
+          {
+            "emptyTitle": false,
+            "handle": "2401F68",
+            "messageOnly": false,
+            "visible": false,
+            "closeEligible": false,
+            "className": "IME",
+            "role": "other",
+            "threadId": 95244
+          },
+          {
+            "emptyTitle": false,
+            "handle": "463147A",
+            "messageOnly": false,
+            "visible": false,
+            "closeEligible": false,
+            "className": "UNREPORTED_CLASS",
+            "role": "other",
+            "threadId": 95244
+          },
+          {
+            "emptyTitle": true,
+            "handle": "2A72100",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "Chrome_MessageWindow",
+            "role": "other",
+            "threadId": 154576
+          },
+          {
+            "emptyTitle": true,
+            "handle": "3AE1D18",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "Chrome_MessageWindow",
+            "role": "other",
+            "threadId": 95244
+          },
+          {
+            "emptyTitle": false,
+            "handle": "41510B0",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "CicMarshalWndClass",
+            "role": "other",
+            "threadId": 95244
+          },
+          {
+            "emptyTitle": false,
+            "handle": "6481A40",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "OleMainThreadWndClass",
+            "role": "other",
+            "threadId": 95244
+          }
+        ],
+        "ownedWindows": 8,
+        "processAbsent": false
+      }
+    ],
+    "knownWebviewPids": [
+      154860
+    ],
+    "knownWebviewIdentities": [
+      {
+        "pid": 154860,
+        "creationUtcTicks": "639275269727046550"
+      }
+    ],
+    "nativeStageOrder": [],
+    "knownWebviewAbsence": {
+      "observations": [
+        {
+          "creationUtcTicks": "639275269727046550",
+          "pid": 154860,
+          "state": "absent"
+        }
+      ],
+      "presentPids": [],
+      "reusedPids": []
+    }
+  },
+  "restartMainDataEvidence": {
+    "mainDirectoryExists": true,
+    "observations": [
+      {
+        "pid": 159596,
+        "observedDirectoryExists": true,
+        "relativeDirectory": "app-data/main-webview/EBWebView",
+        "parent": 155728,
+        "insideFixture": true,
+        "creationUtcTicks": "639275269881211560",
+        "expectedMain": true,
+        "expectedPreview": false
+      }
+    ],
+    "previewDirectoryExists": false,
+    "owner": 155728
+  },
+  "lexicalPreserved": true,
+  "mock": {
+    "requests": [
+      {
+        "route": "/api/tags",
+        "method": "GET",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "route": "/api/show",
+        "method": "POST",
+        "bytes": 28,
+        "sha256": "e130fa5e67a530ed4ce45f608617be31fa58ccdde80dfb19df1aa95704e74bb6"
+      },
+      {
+        "route": "/api/tags",
+        "method": "GET",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "route": "/api/tags",
+        "method": "GET",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "route": "/api/show",
+        "method": "POST",
+        "bytes": 28,
+        "sha256": "e130fa5e67a530ed4ce45f608617be31fa58ccdde80dfb19df1aa95704e74bb6"
+      },
+      {
+        "route": "/api/embed",
+        "method": "POST",
+        "bytes": 164,
+        "sha256": "9a5abbc03834aadbb11369851544eb0baa00721ad5a66ea9252c5aa6917a16b4"
+      },
+      {
+        "route": "/api/tags",
+        "method": "GET",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "route": "/api/show",
+        "method": "POST",
+        "bytes": 28,
+        "sha256": "e130fa5e67a530ed4ce45f608617be31fa58ccdde80dfb19df1aa95704e74bb6"
+      },
+      {
+        "route": "/api/embed",
+        "method": "POST",
+        "bytes": 164,
+        "sha256": "9a5abbc03834aadbb11369851544eb0baa00721ad5a66ea9252c5aa6917a16b4"
+      },
+      {
+        "route": "/api/embed",
+        "method": "POST",
+        "bytes": 168,
+        "sha256": "c647808639c771d894b52e370b748beb0da84a2aa2af78f87101f069361e9ab7"
+      },
+      {
+        "route": "/api/embed",
+        "method": "POST",
+        "bytes": 160,
+        "sha256": "4fa807b0eeecd95e7b491ec35006b6a24ff6aa9b32e827af3c3d24962109151e"
+      },
+      {
+        "route": "/api/tags",
+        "method": "GET",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "route": "/api/show",
+        "method": "POST",
+        "bytes": 28,
+        "sha256": "e130fa5e67a530ed4ce45f608617be31fa58ccdde80dfb19df1aa95704e74bb6"
+      },
+      {
+        "route": "/api/tags",
+        "method": "GET",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "route": "/api/show",
+        "method": "POST",
+        "bytes": 28,
+        "sha256": "e130fa5e67a530ed4ce45f608617be31fa58ccdde80dfb19df1aa95704e74bb6"
+      },
+      {
+        "route": "/api/embed",
+        "method": "POST",
+        "bytes": 69,
+        "sha256": "1c38432a71b10ae6b0286d1bff4e7dc934f691b843dbda16931628227ae40faf"
+      },
+      {
+        "route": "/api/tags",
+        "method": "GET",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "route": "/api/show",
+        "method": "POST",
+        "bytes": 28,
+        "sha256": "e130fa5e67a530ed4ce45f608617be31fa58ccdde80dfb19df1aa95704e74bb6"
+      },
+      {
+        "route": "/api/tags",
+        "method": "GET",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "route": "/api/show",
+        "method": "POST",
+        "bytes": 28,
+        "sha256": "e130fa5e67a530ed4ce45f608617be31fa58ccdde80dfb19df1aa95704e74bb6"
+      },
+      {
+        "route": "/api/embed",
+        "method": "POST",
+        "bytes": 69,
+        "sha256": "1c38432a71b10ae6b0286d1bff4e7dc934f691b843dbda16931628227ae40faf"
+      },
+      {
+        "route": "/api/tags",
+        "method": "GET",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "route": "/api/show",
+        "method": "POST",
+        "bytes": 28,
+        "sha256": "e130fa5e67a530ed4ce45f608617be31fa58ccdde80dfb19df1aa95704e74bb6"
+      },
+      {
+        "route": "/api/tags",
+        "method": "GET",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "route": "/api/show",
+        "method": "POST",
+        "bytes": 28,
+        "sha256": "e130fa5e67a530ed4ce45f608617be31fa58ccdde80dfb19df1aa95704e74bb6"
+      },
+      {
+        "route": "/api/tags",
+        "method": "GET",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "route": "/api/show",
+        "method": "POST",
+        "bytes": 28,
+        "sha256": "e130fa5e67a530ed4ce45f608617be31fa58ccdde80dfb19df1aa95704e74bb6"
+      },
+      {
+        "route": "/api/tags",
+        "method": "GET",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "route": "/api/show",
+        "method": "POST",
+        "bytes": 28,
+        "sha256": "e130fa5e67a530ed4ce45f608617be31fa58ccdde80dfb19df1aa95704e74bb6"
+      },
+      {
+        "route": "/api/tags",
+        "method": "GET",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "route": "/api/show",
+        "method": "POST",
+        "bytes": 28,
+        "sha256": "e130fa5e67a530ed4ce45f608617be31fa58ccdde80dfb19df1aa95704e74bb6"
+      },
+      {
+        "route": "/api/embed",
+        "method": "POST",
+        "bytes": 164,
+        "sha256": "9a5abbc03834aadbb11369851544eb0baa00721ad5a66ea9252c5aa6917a16b4"
+      },
+      {
+        "route": "/api/embed",
+        "method": "POST",
+        "bytes": 168,
+        "sha256": "c647808639c771d894b52e370b748beb0da84a2aa2af78f87101f069361e9ab7"
+      },
+      {
+        "route": "/api/embed",
+        "method": "POST",
+        "bytes": 160,
+        "sha256": "4fa807b0eeecd95e7b491ec35006b6a24ff6aa9b32e827af3c3d24962109151e"
+      },
+      {
+        "route": "/api/tags",
+        "method": "GET",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "route": "/api/show",
+        "method": "POST",
+        "bytes": 28,
+        "sha256": "e130fa5e67a530ed4ce45f608617be31fa58ccdde80dfb19df1aa95704e74bb6"
+      },
+      {
+        "route": "/api/tags",
+        "method": "GET",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "route": "/api/show",
+        "method": "POST",
+        "bytes": 28,
+        "sha256": "e130fa5e67a530ed4ce45f608617be31fa58ccdde80dfb19df1aa95704e74bb6"
+      },
+      {
+        "route": "/api/embed",
+        "method": "POST",
+        "bytes": 69,
+        "sha256": "1c38432a71b10ae6b0286d1bff4e7dc934f691b843dbda16931628227ae40faf"
+      }
+    ],
+    "embedCount": 10,
+    "privateFieldsAbsent": true
+  },
+  "close": {
+    "pid": 155728,
+    "exitCode": 0,
+    "signal": null,
+    "method": "verified_main_and_preview_windows_WM_CLOSE",
+    "phase": "known-webview-exit",
+    "windowPosts": [
+      {
+        "action": "close",
+        "posted": 1,
+        "pid": 155728,
+        "windows": [
+          {
+            "emptyTitle": false,
+            "handle": "2621128",
+            "messageOnly": false,
+            "visible": true,
+            "closeEligible": true,
+            "className": "UNREPORTED_CLASS",
+            "role": "main",
+            "threadId": 155740
+          },
+          {
+            "emptyTitle": true,
+            "handle": "65516F8",
+            "messageOnly": false,
+            "visible": true,
+            "closeEligible": false,
+            "className": "TAO_THREAD_EVENT_TARGET",
+            "role": "other",
+            "threadId": 155740
+          },
+          {
+            "emptyTitle": false,
+            "handle": "24F1BE4",
+            "messageOnly": false,
+            "visible": false,
+            "closeEligible": false,
+            "className": "IME",
+            "role": "other",
+            "threadId": 155740
+          },
+          {
+            "emptyTitle": false,
+            "handle": "5650C90",
+            "messageOnly": false,
+            "visible": false,
+            "closeEligible": false,
+            "className": "UNREPORTED_CLASS",
+            "role": "other",
+            "threadId": 155740
+          },
+          {
+            "emptyTitle": true,
+            "handle": "27A044E",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "Chrome_MessageWindow",
+            "role": "other",
+            "threadId": 160476
+          },
+          {
+            "emptyTitle": true,
+            "handle": "4650B4E",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "Chrome_MessageWindow",
+            "role": "other",
+            "threadId": 155740
+          },
+          {
+            "emptyTitle": false,
+            "handle": "9120DE",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "CicMarshalWndClass",
+            "role": "other",
+            "threadId": 155740
+          },
+          {
+            "emptyTitle": false,
+            "handle": "46915CA",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "OleMainThreadWndClass",
+            "role": "other",
+            "threadId": 155740
+          }
+        ],
+        "ownedWindows": 8,
+        "processAbsent": false
+      }
+    ],
+    "knownWebviewPids": [
+      159596
+    ],
+    "knownWebviewIdentities": [
+      {
+        "pid": 159596,
+        "creationUtcTicks": "639275269881211560"
+      }
+    ],
+    "nativeStageOrder": [],
+    "knownWebviewAbsence": {
+      "observations": [
+        {
+          "creationUtcTicks": "639275269881211560",
+          "pid": 159596,
+          "state": "absent"
+        }
+      ],
+      "presentPids": [],
+      "reusedPids": []
+    }
+  },
+  "finalProcesses": {
+    "processes": [],
+    "listeners": []
+  }
+}

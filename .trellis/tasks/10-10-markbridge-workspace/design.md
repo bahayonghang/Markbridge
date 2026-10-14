@@ -110,6 +110,8 @@ foreign_keys 开启，WAL，参数化 SQL，编号 migration。批量写事务�
 
 ## 8. 两种预览
 
+2026-10-13 当前13集成发现并修复长身份预览目录持久化问题；私有Profile目录改用 `v1-` +全SHA256（域 `markbridge:preview-session:v1\0`），受保护的旧hex目录迁移与Windows已知存储路径预算见 [13设计](../10-10-mb-13-windows-acceptance/design.md)。隔离身份、远程无IPC、显式会话清除及数据保留边界不变；14负责非Windows不覆盖迁移与原生store适配。
+
 内容预览在用户选中后去抖 200 ms 请求，只处理当前选中项；默认不批量访问全部站点。使用 Rust reqwest 抓公开 HTTP(S) 页面、解析可见正文和 Open Graph/description 元信息；选用 Rust 解析库，避免额外 Python 服务。缩略图为来源站点的 og:image 等元图，标明来源，不声称是实时截图。无图显示站点图标或空态。
 
 每次请求与重定向校验 scheme、userinfo、解析后的 IP；拒绝 loopback、私网、链路本地、组播与云元数据地址。绑定本次已校验解析结果，防止 DNS 重绑定；最多 5 次跳转、10 秒总超时、5 MiB 解压后正文、2 MiB 图像。预览图片同样经过后台代理限制。Ollama loopback 是独立用户配置端点通路，不复用公共网页抓取权限。
@@ -137,6 +139,8 @@ AI 默认关闭；端点、模型和凭据由用户配置。支持 Ollama /api/c
 重复项首版按严格 URL 等价分组：仅解析器标准化 scheme/host/默认端口，不删 query/fragment、不改路径。死链使用受限 fetch，HEAD 失败可尝试小体积 GET；403、429、超时和登录要求为 unknown。404/410 复查后才列为候选，绝不自动删除。摘要搜索采用 SQLite FTS5 并验证中文子串检索；trigram tokenizer 不足 3 字符的查询用普通子串查询补充，标签检索使用关联表。
 
 向量检索在 15 显式启用：只用用户选择的本地 embedding 模型，记录模型名/维度/版本；索引可重建和删除，模型变更不混用向量。首版不引入向量服务。
+
+2026-10-13 实施细化见 [15 设计](../10-10-mb-15-semantic-search/design.md)：独立默认关闭设置、本地 Ollama loopback 通路、冻结授权标题/摘要范围、实际 digest/generation 守卫、migration008 与最多 10,000 行有界精确 cosine。聊天启用不授权 embedding，删除派生索引不删除侧车与普通搜索。当前实现与确定性/原生功能证据分别记录，实际模型 V18 仍 NOT_RUN。
 
 ## 11. 失败与撤回
 

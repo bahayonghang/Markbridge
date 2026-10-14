@@ -1,0 +1,9 @@
+{
+  "platform": "win32",
+  "arch": "x64",
+  "target": "x86_64-pc-windows-msvc",
+  "artifact": "D:\\Documents\\Code\\Tauri\\Markbridge\\target\\x86_64-pc-windows-msvc\\release\\markbridge-desktop.exe",
+  "bytes": 25301504,
+  "sha256": "4fcf7fcd506ad60eac1798c2a4c0ed9f80888648f7a5050ec41e6d47c67ff707",
+  "staticScan": "PASS"
+}

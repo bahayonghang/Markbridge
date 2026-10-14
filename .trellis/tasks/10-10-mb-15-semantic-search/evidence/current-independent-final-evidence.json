@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "executableSha256": "4fcf7fcd506ad60eac1798c2a4c0ed9f80888648f7a5050ec41e6d47c67ff707",
+  "installerSha256": "2844783f1660d3708412b1bcbd602f8a2bc1c85369623cdf996d52368932b183",
+  "rawSha256": "791b27f86b2b8aa3c4cbbf039ebfc92f6b5697256d6bf70c99bfc77e3cff5a28",
+  "completionSha256": "fa9feb3dd13deed1003720a1744245ea532f254af764e830422227bf611c480c",
+  "restoreSha256": "2dab489abfa0974645e63ea5d00ee5ed943134f1fec0c207a158257e73d5ad0c",
+  "performanceSha256": "520d5c884a88e118da21116629590d509a9eb4fa84c022cbfc1ba194d20265fe",
+  "remoteDeniedCommands": 80,
+  "coldMs": [
+    788.3896,
+    633.5897999999979,
+    728.6094000000012
+  ],
+  "warm": {
+    "p50": 95,
+    "p95": 106.59999999403954,
+    "max": 110
+  },
+  "modelQuality": "NOT_RUN",
+  "platforms": "macOS/Linux NOT_RUN"
+}

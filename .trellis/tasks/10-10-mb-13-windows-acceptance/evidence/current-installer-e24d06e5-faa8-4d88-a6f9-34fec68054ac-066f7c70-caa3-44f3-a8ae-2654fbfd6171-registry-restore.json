@@ -1,0 +1,44 @@
+{
+  "runId": "e24d06e5-faa8-4d88-a6f9-34fec68054ac",
+  "cleanupId": "066f7c70-caa3-44f3-a8ae-2654fbfd6171",
+  "startedAt": "2026-10-13T17:16:22.071Z",
+  "operation": "restore_only_run_created_install_location",
+  "plan": "current-installer-e24d06e5-faa8-4d88-a6f9-34fec68054ac-plan.json",
+  "completedRunReceipt": "current-installer-e24d06e5-faa8-4d88-a6f9-34fec68054ac-4220ef2d-e67e-49b7-b1f4-90400cb65427-receipt.json",
+  "planFacts": {
+    "bytes": 3415,
+    "sha256": "445a21a488f077fb00c4dcd1c25c7564935b16ab0db51a2d0fd2590e7a0f2c67"
+  },
+  "completedRunFacts": {
+    "bytes": 20631,
+    "sha256": "c9fb23396c6a2c3344a6b3a22680e8ac545230e03f16cea5d5d3638d265a8ba9"
+  },
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-tz1Bwl",
+  "registry": {
+    "status": "restored",
+    "removedDefaultValue": true,
+    "removedEmptyProductKey": true
+  },
+  "finalRegistration": {
+    "registration": null,
+    "shortcutCount": 0,
+    "runPresent": false,
+    "keys": [],
+    "webview2Versions": [
+      "155.0.4283.45"
+    ]
+  },
+  "data": {
+    "files": 255,
+    "bytes": 25846524,
+    "manifestSha256": "210ea5eed24ad0af5da50e454dd609c2180ba80aa8bd825718354ad274d4a196",
+    "sqlite": {
+      "bytes": 221184,
+      "sha256": "40bfb97806a95b8ae5fb174cbb10e37bc8aac43759d91719cbd99338ec03d132"
+    },
+    "mainWebviewPresent": true,
+    "previewDirectoryCount": 2
+  },
+  "status": "PASS",
+  "finishedAt": "2026-10-13T17:16:27.192Z"
+}

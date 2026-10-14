@@ -7,3 +7,5 @@
 {"file":".trellis/tasks/10-10-markbridge-workspace/research/environment.md","reason":"Observed tooling and unverified native prerequisites"}
 {"file":".trellis/tasks/10-10-markbridge-workspace/design.md","reason":"Shared approved-on-review architecture and cross-task contracts"}
 {"file":".trellis/tasks/10-10-markbridge-workspace/verification.md","reason":"Formal parent acceptance matrix and evidence boundaries"}
+{"file": ".trellis/tasks/10-10-mb-13-windows-acceptance/research/platform-preflight.md", "reason": "Independently review platform branches without claiming native PASS"}
+{"file": ".trellis/tasks/10-10-mb-13-windows-acceptance/design.md", "reason": "Cross-platform review must preserve fixed directory identity and atomic legacy migration"}

@@ -1,0 +1,427 @@
+{
+  "runId": "e83a7a57-8d07-4858-aa32-101766cf94c0",
+  "attemptId": "de773d3a-c137-4839-b6e9-6b966e6b12f1",
+  "startedAt": "2026-10-13T15:54:40.736Z",
+  "plan": "current-installer-e83a7a57-8d07-4858-aa32-101766cf94c0-plan.json",
+  "installerFacts": {
+    "bytes": 5810494,
+    "sha256": "b281dd16306b34c8a827fb4c5c798dc5bd918fde58d4df97641ac22903debcd8"
+  },
+  "executableFacts": {
+    "bytes": 24099328,
+    "sha256": "4ec9bdfedb7fa1d402011717a8f8ca89d9673e061a764c5cba9e4a4c47986784"
+  },
+  "extensionSha256": "365f16a030afb78d83cbe914bc42784b7f086bb846ab035ba2f4a8a30ed331a5",
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-36a2iM",
+  "scope": {
+    "installMode": "currentUser",
+    "installerArguments": "/S /NS /D=<fresh root>\\install (last, unquoted)",
+    "registryWrites": [
+      "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Markbridge",
+      "HKCU\\Software\\markbridge\\Markbridge"
+    ],
+    "shortcuts": "Suppressed with /NS; existing named shortcuts block preflight",
+    "credentials": "Only generated Markbridge.Task06.<runId> targets; revoke via trusted app; exact-target existence check only",
+    "uninstall": "Normal installed uninstall.exe /S; retain app-data; remove test registration; manufacturer install-location key may remain",
+    "nativeShellCleanup": "Standard NSIS uninstall may clear com.markbridge.desktop jump-list destinations and Markbridge Run value (preflight requires Run value absent)",
+    "runtime": "Requires existing WebView2; no bootstrapper installation authorized",
+    "browser": "Two fresh temporary Chrome profiles; unpacked extension loaded only into them",
+    "externalNetwork": "One selected synthetic public bookmark at https://example.com/ for actual installed content preview; no model calls",
+    "data": "MARKBRIDGE_APP_DATA/app-data with main-webview and independent preview-sessions; no global WebView data override",
+    "cleanup": "No recursive removal; retain isolated data, extraction, exports and screenshots for review"
+  },
+  "controls": [
+    {
+      "control": "current_installer_installed_exact_release_and_packed_executable",
+      "status": "PASS",
+      "installedVersions": {
+        "fileVersion": "0.1.0",
+        "productVersion": "0.1.0"
+      }
+    },
+    {
+      "control": "two_disposable_chrome_profiles_pair_live_with_equal_ids",
+      "status": "PASS"
+    },
+    {
+      "control": "real_ui_create_cancel_confirm_edit_receipts_and_local_metadata",
+      "status": "PASS"
+    },
+    {
+      "control": "installed_public_content_preview_renders_actual_fetch",
+      "status": "PASS"
+    },
+    {
+      "control": "exact_test_os_credentials_revoked",
+      "status": "PASS"
+    }
+  ],
+  "errors": [
+    {
+      "phase": "preview-isolation",
+      "code": "NATIVE_ACTION_OR_ASSERTION_FAILED"
+    },
+    {
+      "phase": "chrome-close",
+      "code": "NORMAL_CHROME_CLOSE_TIMEOUT"
+    },
+    {
+      "phase": "chrome-close",
+      "code": "NORMAL_CHROME_CLOSE_TIMEOUT"
+    },
+    {
+      "phase": "uninstall-retention-cleanup",
+      "code": "OWNED_PROCESSES_OR_LISTENERS_REMAINED"
+    }
+  ],
+  "realModel": {
+    "status": "NOT_RUN",
+    "reason": "No real model is configured by this installer harness; scripted replies are not real-model evidence"
+  },
+  "floccus": {
+    "status": "UNVERIFIED",
+    "reason": "No dedicated Floccus library or second client in this run"
+  },
+  "sleep": {
+    "acceptance": "WAIVED",
+    "execution": "NOT_RUN"
+  },
+  "environment": {
+    "os": "Windows 11 Pro",
+    "release": "10.0.26300",
+    "cpu": "Intel(R) Core(TM) Ultra 9 275HX",
+    "logicalCpus": 24,
+    "memoryBytes": 68143853568,
+    "node": "v26.7.0"
+  },
+  "ports": [
+    9037,
+    9038
+  ],
+  "preflight": {
+    "registration": null,
+    "shortcutCount": 0,
+    "runPresent": false,
+    "keys": [],
+    "webview2Versions": [
+      "155.0.4283.45"
+    ]
+  },
+  "install": {
+    "pid": 135056,
+    "exitCode": 0,
+    "signal": null
+  },
+  "installedVersions": {
+    "fileVersion": "0.1.0",
+    "productVersion": "0.1.0"
+  },
+  "registration": {
+    "registration": {
+      "displayVersion": "0.1.0",
+      "uninstallString": "\"C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-36a2iM\\install\\uninstall.exe\"",
+      "installLocation": "\"C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-36a2iM\\install\"",
+      "mainBinaryName": "markbridge-desktop.exe"
+    },
+    "shortcutCount": 0,
+    "runPresent": false,
+    "keys": [
+      "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Markbridge",
+      "HKCU:\\Software\\markbridge\\Markbridge"
+    ],
+    "webview2Versions": [
+      "155.0.4283.45"
+    ]
+  },
+  "webview": "Edg/155.0.4283.45",
+  "chrome": "Chrome/155.0.8059.39",
+  "previewCommandDenials": [
+    {
+      "name": "get_startup_state",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "get_bridge_state",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "start_bridge",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "begin_pairing",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "confirm_pairing",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "cancel_pairing",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "revoke_pairing",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "reconnect_profile",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "enumerate_chrome_user_data",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "attach_file_mirror",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "rescan_file_mirrors",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "detach_file_mirror",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "associate_file_mirror",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "get_mirror_tree",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "cache_tree",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "cache_list",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "cache_search",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "cache_query",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "cache_get",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "cache_count",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "preview_batch_edit",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "apply_batch_edit",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "get_batch_edit",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "cancel_batch_edit",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "preview_edit",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "apply_edit",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "list_operations",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "operation_detail",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "preview_undo",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "save_export",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "save_diagnostics",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "review_operation",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "refresh_operations",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "export_html",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "export_sidecar",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "tag_state",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "tag_command",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "preview_title_encoding",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "apply_title_encoding",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "ai_settings",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "save_ai_config",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "set_ai_credential",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "clear_ai_credential",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "test_ai_connection",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "suggest_ai",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "cancel_ai",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "apply_ai",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "propose_organization",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "review_organization",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "assign_organization",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "edit_organization",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "apply_organization",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "pause_organization",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "cancel_organization",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "cleanup_organization",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "organization_plan",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "content_preview",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "cancel_content_preview",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "inspect_library",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "check_links",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "cancel_link_check",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "preview_cleanup",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "confirm_cleanup",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "search_library_text",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "open_http_url",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "open_web_preview",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "web_preview_action",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "clear_web_preview_session",
+      "outcome": "DENIED"
+    },
+    {
+      "name": "web_preview_state",
+      "outcome": "DENIED"
+    }
+  ],
+  "failureClassification": "HARNESS_OR_PRODUCT_FAILURE_REQUIRES_TRIAGE",
+  "failedStage": "preview-isolation",
+  "status": "FAIL",
+  "finalChromeExits": [],
+  "finalExit": {
+    "pid": 78944,
+    "exitCode": 0,
+    "signal": null,
+    "method": "owned_window_WM_CLOSE"
+  },
+  "finishedAt": "2026-10-13T15:56:15.394Z"
+}

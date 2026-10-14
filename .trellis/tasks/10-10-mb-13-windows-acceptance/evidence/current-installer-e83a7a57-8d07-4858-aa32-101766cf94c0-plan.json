@@ -1,0 +1,61 @@
+{
+  "formatVersion": 1,
+  "runId": "e83a7a57-8d07-4858-aa32-101766cf94c0",
+  "preparedAt": "2026-10-13T15:50:50.437Z",
+  "state": "PREPARED",
+  "installation": "NOT_RUN",
+  "scope": {
+    "installMode": "currentUser",
+    "installerArguments": "/S /NS /D=<fresh root>\\install (last, unquoted)",
+    "registryWrites": [
+      "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Markbridge",
+      "HKCU\\Software\\markbridge\\Markbridge"
+    ],
+    "shortcuts": "Suppressed with /NS; existing named shortcuts block preflight",
+    "credentials": "Only generated Markbridge.Task06.<runId> targets; revoke via trusted app; exact-target existence check only",
+    "uninstall": "Normal installed uninstall.exe /S; retain app-data; remove test registration; manufacturer install-location key may remain",
+    "nativeShellCleanup": "Standard NSIS uninstall may clear com.markbridge.desktop jump-list destinations and Markbridge Run value (preflight requires Run value absent)",
+    "runtime": "Requires existing WebView2; no bootstrapper installation authorized",
+    "browser": "Two fresh temporary Chrome profiles; unpacked extension loaded only into them",
+    "externalNetwork": "One selected synthetic public bookmark at https://example.com/ for actual installed content preview; no model calls",
+    "data": "MARKBRIDGE_APP_DATA/app-data with main-webview and independent preview-sessions; no global WebView data override",
+    "cleanup": "No recursive removal; retain isolated data, extraction, exports and screenshots for review"
+  },
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-36a2iM",
+  "installDirectory": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-36a2iM\\install",
+  "appData": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-36a2iM\\app-data",
+  "executable": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-36a2iM\\install\\markbridge-desktop.exe",
+  "namespace": "Markbridge.Task06.mb13-e83a7a57-8d07-4858-aa32-101766cf94c0",
+  "installer": "D:\\Documents\\Code\\Tauri\\Markbridge\\target\\release\\bundle\\nsis\\Markbridge_0.1.0_x64-setup.exe",
+  "releaseExecutable": "D:\\Documents\\Code\\Tauri\\Markbridge\\target\\release\\markbridge-desktop.exe",
+  "packedExecutable": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-36a2iM\\packed\\markbridge-desktop.exe",
+  "chromeExecutable": "C:/Program Files/Google/Chrome/Application/chrome.exe",
+  "appVersion": "0.1.0",
+  "installerFacts": {
+    "bytes": 5810494,
+    "sha256": "b281dd16306b34c8a827fb4c5c798dc5bd918fde58d4df97641ac22903debcd8"
+  },
+  "executableFacts": {
+    "bytes": 24099328,
+    "sha256": "4ec9bdfedb7fa1d402011717a8f8ca89d9673e061a764c5cba9e4a4c47986784"
+  },
+  "nsiPath": "D:\\Documents\\Code\\Tauri\\Markbridge\\target\\release\\nsis\\x64\\installer.nsi",
+  "nsiFacts": {
+    "bytes": 31135,
+    "sha256": "1a1c30acdb7764df9735f1228fc472e78597726baa76dcdad65aef85ec35a0e2"
+  },
+  "extensionSha256": "365f16a030afb78d83cbe914bc42784b7f086bb846ab035ba2f4a8a30ed331a5",
+  "packedVersions": {
+    "fileVersion": "0.1.0",
+    "productVersion": "0.1.0"
+  },
+  "preflight": {
+    "registration": null,
+    "shortcutCount": 0,
+    "runPresent": false,
+    "keys": [],
+    "webview2Versions": [
+      "155.0.4283.45"
+    ]
+  }
+}

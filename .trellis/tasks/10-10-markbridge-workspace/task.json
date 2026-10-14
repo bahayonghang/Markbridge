@@ -43,7 +43,7 @@
     ".trellis/tasks/10-10-markbridge-workspace/task-map.md",
     ".trellis/tasks/10-10-markbridge-workspace/verification.md"
   ],
-  "notes": "Implementation remains approved. Original children 01-12 are completed; 03/04 closeout applies the explicit user waiver to actual OS sleep only, preserving NOT_RUN/UNVERIFIED raw evidence. Redesign R01-R08 and parent are completed. Remaining children are 13,14,15. This parent coordinates integration and must not be started as an implementation task. Current turn authorizes local commits and archival of completed tasks; no push/publication/daily installation.",
+  "notes": "Legacy01-12 and archived redesign complete. Executable 13/14/15 source, independent checks, final 4fc/284478 Windows package, 3ee4/eee73 install, schema8 diagnostics, 80 command denials, 73edf synthetic semantic controls and 6c7e ordinary-search B10K PASS. On 2026-10-13 the user set Windows as the default and deferred other platforms: 14 leaves the active queue, V17 stays NOT_RUN and is not a support claim. V12 and V18 are not waived, so 13, 15 and this parent stay in_progress. Sleep remains WAIVED/NOT_RUN and historic V04 UNVERIFIED; V16 Floccus UNVERIFIED. Current context stays on 15 for a future real-model run. No push, publish, signing or daily installation.",
   "meta": {
     "implementation_approval": "granted",
     "planning_status": "approved",
@@ -72,13 +72,15 @@
       "platform": "windows_first_macos_linux_follow_up"
     },
     "approval_evidence": "2026-10-10 user request: 请根据当前trellis任务规划开始实施trellis父任务以及对应的子任务",
-    "execution_status": "children_01_12_complete_13_14_15_remaining",
-    "active_child": null,
-    "next_child": "10-10-mb-13-windows-acceptance",
+    "execution_status": "executable_source_windows_integration_complete_actual_model_platform_acceptance_pending",
+    "active_child": "10-10-mb-15-semantic-search",
+    "next_child": "10-10-mb-15-semantic-search",
     "execution_evidence": "execution-status.md",
     "dependency_exception": "2026-10-10 user explicitly approved starting02 with01 native acceptance UNVERIFIED; complete01 native acceptance before Windows delivery. Other prerequisite gates unchanged.",
     "latest_audit": "docs/implementation-status-2026-10-13.md",
     "sleep_gate_status": "waived_by_user",
-    "sleep_gate_execution": "NOT_RUN"
+    "sleep_gate_execution": "NOT_RUN",
+    "model_start_gate_exception": "2026-10-13 explicit user approval: current13 Windows installer/diagnostics/affected automated checks permit14/15 start while13 actual-model V12/full acceptance remains incomplete; no model/platform waiver. gate-proposal-2026-10-13-model.md",
+    "isolated_install_authorization": "2026-10-13 user authorized pinned current task13 temporary install/uninstall and necessary fresh-temp reruns; disclosed exact current-user keys, no shortcuts, standard NSIS shell cleanup, retained isolated data"
   }
 }

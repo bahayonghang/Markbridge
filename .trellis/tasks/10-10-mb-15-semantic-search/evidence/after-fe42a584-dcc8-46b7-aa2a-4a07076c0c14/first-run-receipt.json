@@ -1,0 +1,9 @@
+{
+  "status": "FAIL",
+  "tests": 8,
+  "passed": 1,
+  "failed": 7,
+  "cause": "Review div had accessible label but lacked explicit region role",
+  "nativeIpc": false,
+  "actualModel": false
+}

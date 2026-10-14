@@ -1,0 +1,417 @@
+{
+  "kind": "copied_release_synthetic_preview_persistence_probe",
+  "runId": "49d47ea3-fff3-4fcc-b23d-97e6505fe0b0",
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-Ikpzj0",
+  "executableSha256": "4b0708b102c638a8d45eb9ae526aae62dce7641d22eb58ecbbfdef033b9938d1",
+  "startedAt": "2026-10-13T17:30:49.995Z",
+  "installation": "NOT_RUN",
+  "chrome": "NOT_RUN",
+  "model": "NOT_RUN",
+  "diagnosticLifetimeObserver": false,
+  "snapshots": [
+    {
+      "stage": "A-store",
+      "kind": "job",
+      "id": 1,
+      "path": "/a",
+      "pageId": "75ac2aab-40d6-4401-a866-b7d35068c9a4",
+      "local": "MB13-preview-A",
+      "cookie": "r08=MB13-preview-A",
+      "main": null
+    },
+    {
+      "stage": "A-same-window-reload",
+      "kind": "job",
+      "id": 2,
+      "path": "/a",
+      "pageId": "2f9d484a-bdb5-4e22-8651-630e123df780",
+      "local": "MB13-preview-A",
+      "cookie": "r08=MB13-preview-A",
+      "main": null
+    },
+    {
+      "stage": "A-immediate-reopen",
+      "kind": "job",
+      "id": 3,
+      "path": "/a",
+      "pageId": "bf0d94aa-deb5-4706-9d23-0b6e99ac2842",
+      "local": "MB13-preview-A",
+      "cookie": "r08=MB13-preview-A",
+      "main": null
+    },
+    {
+      "stage": "B-store",
+      "kind": "job",
+      "id": 4,
+      "path": "/b",
+      "pageId": "847e3d06-accb-4813-9361-17dd4644396e",
+      "local": "MB13-preview-B",
+      "cookie": "r08=MB13-preview-B",
+      "main": null
+    },
+    {
+      "stage": "A-after-B-reopen",
+      "kind": "job",
+      "id": 5,
+      "path": "/a",
+      "pageId": "31bd3ae6-25cc-42a2-87bb-ffb64841ecd6",
+      "local": "MB13-preview-A",
+      "cookie": "r08=MB13-preview-A",
+      "main": null
+    }
+  ],
+  "openings": [
+    {
+      "profile": "task13-preview-A",
+      "page": {
+        "kind": "hello",
+        "path": "/a",
+        "pageId": "75ac2aab-40d6-4401-a866-b7d35068c9a4",
+        "local": null,
+        "cookie": "",
+        "main": null
+      },
+      "os": {
+        "mainDirectoryExists": true,
+        "observations": [
+          {
+            "observedDirectoryExists": true,
+            "expectedMain": true,
+            "insideFixture": true,
+            "pid": 114448,
+            "relativeDirectory": "app-data/main-webview/EBWebView",
+            "parent": 145696,
+            "expectedPreview": false
+          },
+          {
+            "observedDirectoryExists": true,
+            "expectedMain": false,
+            "insideFixture": true,
+            "pid": 128768,
+            "relativeDirectory": "app-data/preview-sessions/7461736b31332d707265766965772d41/EBWebView",
+            "parent": 145696,
+            "expectedPreview": true
+          }
+        ],
+        "previewDirectoryExists": true,
+        "owner": 145696
+      }
+    },
+    {
+      "profile": "task13-preview-A",
+      "page": {
+        "kind": "hello",
+        "path": "/a",
+        "pageId": "bf0d94aa-deb5-4706-9d23-0b6e99ac2842",
+        "local": "MB13-preview-A",
+        "cookie": "r08=MB13-preview-A",
+        "main": null
+      },
+      "os": {
+        "mainDirectoryExists": true,
+        "observations": [
+          {
+            "observedDirectoryExists": true,
+            "expectedMain": true,
+            "insideFixture": true,
+            "pid": 114448,
+            "relativeDirectory": "app-data/main-webview/EBWebView",
+            "parent": 145696,
+            "expectedPreview": false
+          },
+          {
+            "observedDirectoryExists": true,
+            "expectedMain": false,
+            "insideFixture": true,
+            "pid": 98668,
+            "relativeDirectory": "app-data/preview-sessions/7461736b31332d707265766965772d41/EBWebView",
+            "parent": 145696,
+            "expectedPreview": true
+          }
+        ],
+        "previewDirectoryExists": true,
+        "owner": 145696
+      }
+    },
+    {
+      "profile": "task13-preview-B",
+      "page": {
+        "kind": "hello",
+        "path": "/b",
+        "pageId": "847e3d06-accb-4813-9361-17dd4644396e",
+        "local": null,
+        "cookie": "",
+        "main": null
+      },
+      "os": {
+        "mainDirectoryExists": true,
+        "observations": [
+          {
+            "observedDirectoryExists": true,
+            "expectedMain": true,
+            "insideFixture": true,
+            "pid": 114448,
+            "relativeDirectory": "app-data/main-webview/EBWebView",
+            "parent": 145696,
+            "expectedPreview": false
+          },
+          {
+            "observedDirectoryExists": true,
+            "expectedMain": false,
+            "insideFixture": true,
+            "pid": 123588,
+            "relativeDirectory": "app-data/preview-sessions/7461736b31332d707265766965772d42/EBWebView",
+            "parent": 145696,
+            "expectedPreview": true
+          }
+        ],
+        "previewDirectoryExists": true,
+        "owner": 145696
+      }
+    },
+    {
+      "profile": "task13-preview-A",
+      "page": {
+        "kind": "hello",
+        "path": "/a",
+        "pageId": "31bd3ae6-25cc-42a2-87bb-ffb64841ecd6",
+        "local": "MB13-preview-A",
+        "cookie": "r08=MB13-preview-A",
+        "main": null
+      },
+      "os": {
+        "mainDirectoryExists": true,
+        "observations": [
+          {
+            "observedDirectoryExists": true,
+            "expectedMain": true,
+            "insideFixture": true,
+            "pid": 114448,
+            "relativeDirectory": "app-data/main-webview/EBWebView",
+            "parent": 145696,
+            "expectedPreview": false
+          },
+          {
+            "observedDirectoryExists": true,
+            "expectedMain": false,
+            "insideFixture": true,
+            "pid": 145924,
+            "relativeDirectory": "app-data/preview-sessions/7461736b31332d707265766965772d41/EBWebView",
+            "parent": 145696,
+            "expectedPreview": true
+          }
+        ],
+        "previewDirectoryExists": true,
+        "owner": 145696
+      }
+    }
+  ],
+  "closures": [
+    {
+      "profile": "task13-preview-A",
+      "knownBrowserPids": [
+        128768
+      ],
+      "absence": {
+        "presentPids": []
+      }
+    },
+    {
+      "profile": "task13-preview-A",
+      "knownBrowserPids": [
+        98668
+      ],
+      "absence": {
+        "presentPids": []
+      }
+    },
+    {
+      "profile": "task13-preview-B",
+      "knownBrowserPids": [
+        123588
+      ],
+      "absence": {
+        "presentPids": []
+      }
+    },
+    {
+      "profile": "task13-preview-A",
+      "knownBrowserPids": [
+        145924
+      ],
+      "absence": {
+        "presentPids": []
+      }
+    }
+  ],
+  "errors": [],
+  "status": "PASS",
+  "mainDataEvidence": {
+    "mainDirectoryExists": true,
+    "observations": [
+      {
+        "observedDirectoryExists": true,
+        "expectedMain": true,
+        "insideFixture": true,
+        "pid": 114448,
+        "relativeDirectory": "app-data/main-webview/EBWebView",
+        "parent": 145696,
+        "expectedPreview": false
+      }
+    ],
+    "previewDirectoryExists": false,
+    "owner": 145696
+  },
+  "immediateReopenRestored": true,
+  "afterBRestored": true,
+  "normalExit": {
+    "pid": 145696,
+    "exitCode": 0,
+    "signal": null,
+    "method": "verified_main_and_preview_windows_WM_CLOSE",
+    "phase": "known-webview-exit",
+    "windowPosts": [
+      {
+        "action": "close",
+        "posted": 1,
+        "pid": 145696,
+        "windows": [
+          {
+            "emptyTitle": false,
+            "handle": "1C41574",
+            "messageOnly": false,
+            "visible": true,
+            "closeEligible": true,
+            "className": "UNREPORTED_CLASS",
+            "role": "main",
+            "threadId": 35132
+          },
+          {
+            "emptyTitle": true,
+            "handle": "59F13F2",
+            "messageOnly": false,
+            "visible": true,
+            "closeEligible": false,
+            "className": "TAO_THREAD_EVENT_TARGET",
+            "role": "other",
+            "threadId": 35132
+          },
+          {
+            "emptyTitle": false,
+            "handle": "65400EE",
+            "messageOnly": false,
+            "visible": false,
+            "closeEligible": false,
+            "className": "UNREPORTED_CLASS",
+            "role": "other",
+            "threadId": 35132
+          },
+          {
+            "emptyTitle": false,
+            "handle": "5231D4C",
+            "messageOnly": false,
+            "visible": false,
+            "closeEligible": false,
+            "className": "IME",
+            "role": "other",
+            "threadId": 35132
+          },
+          {
+            "emptyTitle": true,
+            "handle": "4EF182C",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "wetype.renderer.window",
+            "role": "other",
+            "threadId": 35132
+          },
+          {
+            "emptyTitle": true,
+            "handle": "26D1794",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "UNREPORTED_CLASS",
+            "role": "other",
+            "threadId": 35132
+          },
+          {
+            "emptyTitle": true,
+            "handle": "3391170",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "SystemUserAdapterWindowClass",
+            "role": "other",
+            "threadId": 35132
+          },
+          {
+            "emptyTitle": true,
+            "handle": "2511E2E",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "Chrome_MessageWindow",
+            "role": "other",
+            "threadId": 135908
+          },
+          {
+            "emptyTitle": true,
+            "handle": "17A2162",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "Chrome_MessageWindow",
+            "role": "other",
+            "threadId": 35132
+          },
+          {
+            "emptyTitle": false,
+            "handle": "19A1A7A",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "CicMarshalWndClass",
+            "role": "other",
+            "threadId": 35132
+          },
+          {
+            "emptyTitle": false,
+            "handle": "F70B78",
+            "messageOnly": true,
+            "visible": false,
+            "closeEligible": false,
+            "className": "OleMainThreadWndClass",
+            "role": "other",
+            "threadId": 35132
+          }
+        ],
+        "ownedWindows": 11,
+        "processAbsent": false
+      }
+    ],
+    "knownWebviewPids": [
+      114448,
+      128768,
+      98668,
+      123588,
+      145924
+    ],
+    "nativeStageOrder": [],
+    "previewProbeEvents": [],
+    "knownWebviewAbsence": {
+      "presentPids": []
+    }
+  },
+  "previewProbeEvents": [],
+  "lastProcesses": {
+    "processes": [],
+    "listeners": []
+  },
+  "finalProcesses": {
+    "processes": [],
+    "listeners": []
+  },
+  "finishedAt": "2026-10-13T17:32:25.200Z"
+}

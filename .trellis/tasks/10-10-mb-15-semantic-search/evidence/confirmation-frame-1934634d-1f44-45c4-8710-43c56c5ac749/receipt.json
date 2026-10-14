@@ -1,0 +1,33 @@
+{
+  "method": "browser-mock-confirmation-framing",
+  "status": "PASS",
+  "tests": 1,
+  "viewport": "640x480",
+  "confirmButtonEntirelyInViewport": true,
+  "confirmationAndCancelControlsVisuallyReviewed": true,
+  "productSourceChanged": false,
+  "nativeIpc": false,
+  "actualModel": false,
+  "qualityAcceptance": "NOT_RUN",
+  "priorEvidence": "after-e72b4faa-6137-4803-9da3-dd1ce7c2aa9f",
+  "priorEvidencePreserved": true,
+  "testSourceSha256": "d3219f39a9432c6e32dc5bad94efcf75d65b55bf742fad5254ab97bd982bdf9c",
+  "screenshots": [
+    {
+      "file": "semantic-confirm-controls-640x480.png",
+      "sha256": "8576b8fc218cfaed1db8144fcac55c8810f9a8dbd723c9c67c58d861c610f926"
+    },
+    {
+      "file": "semantic-query-640x480.png",
+      "sha256": "cb38fae77cc27f4010abb253f6b46a15044d3c943bee8f3a36afa5acda8b3e4b"
+    },
+    {
+      "file": "semantic-review-640x480.png",
+      "sha256": "66b1dce1aab1422ea8cbd93d06cacbcaca068131ddbe98b40e1466423c995182"
+    },
+    {
+      "file": "semantic-settings-640x480.png",
+      "sha256": "eee1cabfdff19e294a281a2052b08f93b94ed0a5f507d07bf6b06a7f9f96e76e"
+    }
+  ]
+}

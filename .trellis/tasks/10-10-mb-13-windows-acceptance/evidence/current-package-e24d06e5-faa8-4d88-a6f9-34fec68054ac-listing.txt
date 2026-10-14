@@ -1,0 +1,30 @@
+
+7-Zip 26.04 (x64) : Copyright (c) 1999-2026 Igor Pavlov : 2026-10-05
+
+Scanning the drive for archives:
+1 file, 5797127 bytes (5662 KiB)
+
+Listing archive: D:\Documents\Code\Tauri\Markbridge\target\release\bundle\nsis\Markbridge_0.1.0_x64-setup.exe
+
+--
+Path = D:\Documents\Code\Tauri\Markbridge\target\release\bundle\nsis\Markbridge_0.1.0_x64-setup.exe
+Type = Nsis
+Physical Size = 5797127
+Method = LZMA:23
+Solid = +
+Headers Size = 73350
+Embedded Stub Size = 52736
+SubType = NSIS-3 Unicode
+
+   Date      Time    Attr         Size   Compressed  Name
+------------------- ----- ------------ ------------  ------------------------
+                    .....        12288      5744387  $PLUGINSDIR\System.dll
+2025-12-01 10:27:58 .....        26494               $PLUGINSDIR\modern-wizard.bmp
+                    .....         9728               $PLUGINSDIR\nsDialogs.dll
+                    .....        34304               $PLUGINSDIR\nsis_tauri_utils.dll
+                    .....        13316               $PLUGINSDIR\StartMenu.dll
+                    .....        15360               $PLUGINSDIR\NSISdl.dll
+2026-10-13 13:11:32 .....     24063488               markbridge-desktop.exe
+                    .....                            uninstall.exe
+------------------- ----- ------------ ------------  ------------------------
+2026-10-13 13:11:32           24174978      5744387  8 files

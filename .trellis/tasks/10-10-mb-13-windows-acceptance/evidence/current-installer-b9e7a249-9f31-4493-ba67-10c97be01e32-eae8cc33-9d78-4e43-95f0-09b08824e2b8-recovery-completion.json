@@ -1,0 +1,11 @@
+{
+  "kind": "authorized_failed_fixture_cleanup",
+  "runId": "b9e7a249-9f31-4493-ba67-10c97be01e32",
+  "attemptId": "eae8cc33-9d78-4e43-95f0-09b08824e2b8",
+  "status": "PASS",
+  "originalRunStatus": "FAIL",
+  "originalRunReceipt": "current-installer-b9e7a249-9f31-4493-ba67-10c97be01e32-48f99d32-349d-4e26-8ab5-9c604f35ad10-receipt.json",
+  "recoveryReceipt": "D:\\Documents\\Code\\Tauri\\Markbridge\\.trellis\\tasks\\10-10-mb-13-windows-acceptance\\evidence\\current-installer-b9e7a249-9f31-4493-ba67-10c97be01e32-eae8cc33-9d78-4e43-95f0-09b08824e2b8-receipt.json",
+  "registryRestoreReceipt": "D:\\Documents\\Code\\Tauri\\Markbridge\\.trellis\\tasks\\10-10-mb-13-windows-acceptance\\evidence\\current-installer-b9e7a249-9f31-4493-ba67-10c97be01e32-84776fce-7476-4a2f-8309-6d1fb29c7e5a-registry-restore.json",
+  "finishedAt": "2026-10-13T16:32:22.677Z"
+}

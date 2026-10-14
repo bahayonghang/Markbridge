@@ -1,0 +1,43 @@
+{
+  "at": "2026-10-13T17:06:47.2663232Z",
+  "rows": [
+    {
+      "originalNativeStatus": "FAIL",
+      "processAbsentAfter": true,
+      "pid": 56088,
+      "filesOrRegistryRemoved": false,
+      "childrenBefore": 0,
+      "eligibleWindowsBefore": 0,
+      "normalExit": "UNVERIFIED",
+      "listenersBefore": 0,
+      "forcedCleanup": true,
+      "runId": "0313d5ea-4cd7-4cb8-98bb-9346e2f31ab2"
+    },
+    {
+      "originalNativeStatus": "FAIL",
+      "processAbsentAfter": true,
+      "pid": 141860,
+      "filesOrRegistryRemoved": false,
+      "childrenBefore": 0,
+      "eligibleWindowsBefore": 0,
+      "normalExit": "UNVERIFIED",
+      "listenersBefore": 0,
+      "forcedCleanup": true,
+      "runId": "829cc45a-8c9d-4fc7-a53c-52fc14451277"
+    },
+    {
+      "originalNativeStatus": "FAIL",
+      "processAbsentAfter": true,
+      "pid": 142756,
+      "filesOrRegistryRemoved": false,
+      "childrenBefore": 0,
+      "eligibleWindowsBefore": 0,
+      "normalExit": "UNVERIFIED",
+      "listenersBefore": 0,
+      "forcedCleanup": true,
+      "runId": "4eab32c3-e67e-4187-8c1a-167bd94c91b3"
+    }
+  ],
+  "kind": "failed_copied_startup_cleanup_only",
+  "originalReceiptsUnchanged": true
+}

@@ -1,0 +1,8 @@
+{
+  "runId": "264864e0-95a0-4db6-9549-73885557e3cc",
+  "attemptId": "07398115-9ff4-442b-8dcb-1e7c928d762b",
+  "status": "FAIL",
+  "nativeRunReceipt": "D:\\Documents\\Code\\Tauri\\Markbridge\\.trellis\\tasks\\10-10-mb-13-windows-acceptance\\evidence\\current-installer-264864e0-95a0-4db6-9549-73885557e3cc-07398115-9ff4-442b-8dcb-1e7c928d762b-receipt.json",
+  "registryRestoreReceipt": "D:\\Documents\\Code\\Tauri\\Markbridge\\.trellis\\tasks\\10-10-mb-13-windows-acceptance\\evidence\\current-installer-264864e0-95a0-4db6-9549-73885557e3cc-6dda9a5f-a0b0-49e1-98ca-08918eadb5ee-registry-restore.json",
+  "finishedAt": "2026-10-13T19:30:32.973Z"
+}

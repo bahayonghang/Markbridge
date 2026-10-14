@@ -1,0 +1,31 @@
+{
+  "kind": "copied_release_startup_os_isolation_probe_only",
+  "runId": "829cc45a-8c9d-4fc7-a53c-52fc14451277",
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-kq1yy3",
+  "startedAt": "2026-10-13T16:51:42.129Z",
+  "executableSha256": "7ecf1580ef5d72c886dbef4f8c132134a8e6a4c118dc78e4efd062e4ece01f1c",
+  "noPairingOrUiActions": true,
+  "installation": "NOT_RUN",
+  "errors": [
+    "STARTUP_NORMAL_CLOSE_FAILED",
+    "STARTUP_PROCESS_OR_LISTENER_REMAINED"
+  ],
+  "osDataEvidence": {
+    "mainDirectoryExists": true,
+    "observations": [
+      {
+        "observedDirectoryExists": true,
+        "expectedMain": true,
+        "insideFixture": true,
+        "pid": 113248,
+        "relativeDirectory": "app-data/main-webview/EBWebView",
+        "parent": 141860,
+        "expectedPreview": false
+      }
+    ],
+    "previewDirectoryExists": false,
+    "owner": 141860
+  },
+  "status": "FAIL",
+  "finishedAt": "2026-10-13T16:52:54.512Z"
+}

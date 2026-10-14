@@ -1,0 +1,44 @@
+{
+  "runId": "722a2dd5-d3d9-4787-b44c-74b92693c620",
+  "cleanupId": "d4ccd4fd-b78a-461a-9e6e-67223a64e6dd",
+  "startedAt": "2026-10-13T20:38:08.536Z",
+  "operation": "restore_only_run_created_install_location",
+  "plan": "current-installer-722a2dd5-d3d9-4787-b44c-74b92693c620-plan.json",
+  "completedRunReceipt": "current-installer-722a2dd5-d3d9-4787-b44c-74b92693c620-f6c5a5fc-c465-4837-8a72-a402ad7989e4-receipt.json",
+  "planFacts": {
+    "bytes": 3415,
+    "sha256": "bcb4a8e78a46c6623ad02b161c950ef6378f7e51b624e03f230cf346c0591349"
+  },
+  "completedRunFacts": {
+    "bytes": 34741,
+    "sha256": "ad2e4e914f8781e1e9070320d89fe6d86745129dc8a494b22a3fbcee63ee5f58"
+  },
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-hSyMkh",
+  "registry": {
+    "status": "restored",
+    "removedDefaultValue": true,
+    "removedEmptyProductKey": true
+  },
+  "finalRegistration": {
+    "registration": null,
+    "shortcutCount": 0,
+    "runPresent": false,
+    "keys": [],
+    "webview2Versions": [
+      "155.0.4283.45"
+    ]
+  },
+  "data": {
+    "files": 630,
+    "bytes": 47711905,
+    "manifestSha256": "5e3add4d7bff6f43f81fc6448d1e42f2c0a58518e9b68927cb05f7ad6cb8d3f0",
+    "sqlite": {
+      "bytes": 221184,
+      "sha256": "24841da429893ded102258bffbc101f25738fb10cb0f140644e6b01551f52455"
+    },
+    "mainWebviewPresent": true,
+    "previewDirectoryCount": 2
+  },
+  "status": "PASS",
+  "finishedAt": "2026-10-13T20:38:13.289Z"
+}

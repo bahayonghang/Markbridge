@@ -1,0 +1,144 @@
+{
+  "kind": "authorized_failed_fixture_cleanup",
+  "runId": "b9e7a249-9f31-4493-ba67-10c97be01e32",
+  "attemptId": "eae8cc33-9d78-4e43-95f0-09b08824e2b8",
+  "startedAt": "2026-10-13T16:31:56.489Z",
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-xSU5vU",
+  "plan": "current-installer-b9e7a249-9f31-4493-ba67-10c97be01e32-plan.json",
+  "sourceRunReceipt": "current-installer-b9e7a249-9f31-4493-ba67-10c97be01e32-48f99d32-349d-4e26-8ab5-9c604f35ad10-receipt.json",
+  "sourceRunFacts": {
+    "bytes": 10280,
+    "sha256": "8c227fcdcca7dc24d226057776ee824ba9168a6ec0ce46dc47d3a2d64ee9f4ab"
+  },
+  "originalRunStatus": "FAIL",
+  "originalMainExitStatus": "UNVERIFIED",
+  "outsideFixtureMainStore": {
+    "status": "UNVERIFIED",
+    "reason": "Prior main-store isolation was not established for this raw run. Recovery hashes only guarded temporary app-data; no outside files are inspected or removed, and no absence of prior main-page writes is claimed."
+  },
+  "install": {
+    "pid": 35068,
+    "exitCode": 0,
+    "signal": null
+  },
+  "preflight": {
+    "registration": null,
+    "shortcutCount": 0,
+    "runPresent": false,
+    "keys": [],
+    "webview2Versions": [
+      "155.0.4283.45"
+    ]
+  },
+  "registration": {
+    "registration": {
+      "displayVersion": "0.1.0",
+      "uninstallString": "\"C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-xSU5vU\\install\\uninstall.exe\"",
+      "installLocation": "\"C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-xSU5vU\\install\"",
+      "mainBinaryName": "markbridge-desktop.exe"
+    },
+    "shortcutCount": 0,
+    "runPresent": false,
+    "keys": [
+      "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Markbridge",
+      "HKCU:\\Software\\markbridge\\Markbridge"
+    ],
+    "webview2Versions": [
+      "155.0.4283.45"
+    ]
+  },
+  "controls": [
+    {
+      "control": "exact_test_os_credentials_revoked",
+      "status": "PASS"
+    }
+  ],
+  "ports": [
+    7244,
+    7245,
+    7817
+  ],
+  "lateCloseProof": {
+    "file": "current-late-close-b9e7a249.json",
+    "facts": {
+      "bytes": 442,
+      "sha256": "abf3cb12fc7cbb5797db10975814777e70747f52848fa392a24b7e6fc34ada59"
+    }
+  },
+  "ownership": {
+    "runId": "b9e7a249-9f31-4493-ba67-10c97be01e32",
+    "guardedInstall": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-xSU5vU\\install",
+    "attemptId": "48f99d32-349d-4e26-8ab5-9c604f35ad10",
+    "originalNormalExitRecorded": false,
+    "knownPidSource": "adjacent_main_session_owned_process_observation",
+    "currentFixtureProcessesAbsent": true,
+    "lateCloseObservation": {
+      "kind": "late_owned_normal_close_observation",
+      "runId": "b9e7a249-9f31-4493-ba67-10c97be01e32",
+      "observedAt": "2026-10-13T16:29:35.2422280Z",
+      "appPid": 113572,
+      "webviewPid": 127724,
+      "normalWmClosePosted": true,
+      "appProcessAbsent": true,
+      "webviewProcessAbsent": true,
+      "observedExitCode": null,
+      "originalNativeRunStatus": "FAIL",
+      "forcedTermination": false,
+      "defaultDirectoryFilesReadOrDeleted": false
+    },
+    "exactKnownProcessAbsence": [
+      {
+        "absent": true,
+        "pid": 113572
+      },
+      {
+        "absent": true,
+        "pid": 127724
+      }
+    ],
+    "proof": "completed_owned_fixture_run",
+    "recordedCloseTimeout": true
+  },
+  "stoppedProcesses": {
+    "processes": [],
+    "listeners": []
+  },
+  "retainedBeforeUninstall": {
+    "files": 67,
+    "bytes": 12145284,
+    "manifestSha256": "5fd3ee589ff3a437469712097398b9794b507b7a082b30046fed612ccf8d35b8",
+    "sqlite": {
+      "bytes": 221184,
+      "sha256": "29ba570b815c7304d7e7ef76c163b163bc29961a8be6813f4357f67a8fd16eeb"
+    },
+    "mainWebviewPresent": false,
+    "previewDirectoryCount": 2
+  },
+  "uninstall": {
+    "pid": 135740,
+    "exitCode": 0,
+    "signal": null
+  },
+  "retainedAfterUninstall": {
+    "files": 67,
+    "bytes": 12145284,
+    "manifestSha256": "5fd3ee589ff3a437469712097398b9794b507b7a082b30046fed612ccf8d35b8",
+    "sqlite": {
+      "bytes": 221184,
+      "sha256": "29ba570b815c7304d7e7ef76c163b163bc29961a8be6813f4357f67a8fd16eeb"
+    },
+    "mainWebviewPresent": false,
+    "previewDirectoryCount": 2
+  },
+  "finalProcesses": {
+    "processes": [],
+    "listeners": []
+  },
+  "closedPorts": [
+    7244,
+    7245,
+    7817
+  ],
+  "status": "PASS",
+  "finishedAt": "2026-10-13T16:32:18.447Z"
+}

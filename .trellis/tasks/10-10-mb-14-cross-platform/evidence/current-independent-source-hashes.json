@@ -1,0 +1,77 @@
+[
+  {
+    "file": "apps/desktop/src-tauri/src/main.rs",
+    "bytes": 53482,
+    "sha256": "ddafad588123957d03bd8bdf16cf4d15ae8f93fc8b7bb474badbc03285a49df3"
+  },
+  {
+    "file": "apps/desktop/src-tauri/src/preview.rs",
+    "bytes": 89408,
+    "sha256": "f2ba81e34dcc1960859306bb9fe5aa3cfc3dc18acdec90357232f271a60b764e"
+  },
+  {
+    "file": "apps/desktop/src-tauri/src/export.rs",
+    "bytes": 16047,
+    "sha256": "70dd9161b77c9ef82baba514b3c9c4b465f2b1aea2ea8cacd8325d4ad8abcb9b"
+  },
+  {
+    "file": "apps/desktop/src-tauri/Cargo.toml",
+    "bytes": 1535,
+    "sha256": "39dd2c4a67cd191c4378bc7844ba443956baeb28ada37f31526844f00b653e2a"
+  },
+  {
+    "file": "apps/desktop/src-tauri/tauri.conf.json",
+    "bytes": 829,
+    "sha256": "cc1442391bc28a110d7cdc2228e221f4e7968b4a398e7133f4e1fe0faac846cd"
+  },
+  {
+    "file": "crates/core/src/bridge/credentials.rs",
+    "bytes": 6547,
+    "sha256": "283070496260e83e2259b2dcedca14a19dfa751724f8668d3105872b1577d8dd"
+  },
+  {
+    "file": "crates/core/Cargo.toml",
+    "bytes": 1435,
+    "sha256": "949cd193b76ad551a241ded66cb0b35de9f079b543fd8e2037009ab98809389f"
+  },
+  {
+    "file": "Cargo.lock",
+    "bytes": 146497,
+    "sha256": "1b6a002ab38eec147b8b5152e1ce023b02e61e166019b8230dfdd63e790f6530"
+  },
+  {
+    "file": "scripts/native-build.mjs",
+    "bytes": 6640,
+    "sha256": "9488f5b45d16c97180bc9ecb9e97fa7391e1c398a68d9f4bd58f2075b7b7fcb8"
+  },
+  {
+    "file": "scripts/native-package.mjs",
+    "bytes": 11184,
+    "sha256": "bdf2fe6dbb28b024d93eb77c2b11c5c48986e6ef8fe84f465bcfbe8e32348153"
+  },
+  {
+    "file": "scripts/native-artifact.test.mjs",
+    "bytes": 17919,
+    "sha256": "f5db2c9a6c1be690c11dd56c516c9dc88cad9e9481110d9d0a0f49a7e4c3866e"
+  },
+  {
+    "file": ".github/workflows/ci.yml",
+    "bytes": 2798,
+    "sha256": "fa5499f2308ce44124b673bc9ac88d069f3bea506ea2a7f1dfaab35c7eb0edd4"
+  },
+  {
+    "file": "apps/desktop/src/features/settings/ConnectionSettings.tsx",
+    "bytes": 18614,
+    "sha256": "24692deb41dd32311f3b7afa9bbb90d579b45af26276f6a79dcecec72f5cf0fe"
+  },
+  {
+    "file": "apps/desktop/src/features/ai/AiSettings.tsx",
+    "bytes": 6169,
+    "sha256": "5253f6b39bb1be4c15fcba68cf36e930c3e9dda18f03ba84fdaa4a120fa996e5"
+  },
+  {
+    "file": "tests/e2e/secure-storage.spec.ts",
+    "bytes": 3829,
+    "sha256": "2f393f3c8cf126f5ff6ee26a34df29da7247a70a22653f0a6f154fd8370714d8"
+  }
+]

@@ -18,7 +18,9 @@
 
 01–04 为 M1 内部工程检查点，不单独宣传为用户可用发布。每个子任务必须能单独构建/检查，不以未来子任务掩盖当前失败。M1–M4 各自有可用产品闭环。13 的集成检查不能代替前面各任务的运行检查。
 
-当前结果、依赖阻塞和恢复步骤见 [实施状态](execution-status.md)。2026-10-13 原 01–12 与改版 R01–R08 已完成；本轮同步实际睡眠豁免后 03/04 结案。下一实施目标为既有 13，随后 14/15；后两者互不依赖，14 环境缺失时可继续 15。
+当前结果、依赖阻塞和恢复步骤见 [实施状态](execution-status.md)。2026-10-13 原 01–12 与改版 R01–R08 已完成；上一轮同步实际睡眠豁免后 03/04 结案。本轮13安装/诊断/自动检查满足批准的启动例外，14可执行适配及Windows回归已独立批准，清除指针后已启动独立15。最终新hash的Windows构建、打包、安装和新command权限检查随15集成。随后用户把其他平台移出当前范围，V17 保持 NOT_RUN；实际 V12/V18 保持未完成。
+
+2026-10-13 用户批准 [13→14/15 启动例外](gate-proposal-2026-10-13-model.md)：当前 Windows 安装、诊断导出及受影响自动检查通过后允许后续实施，13 实际模型 V12 和完整验收保持未完成。该决定不豁免模型或平台验收，也不使 M4/父任务完成。清除当前指针后逐项切换既有子任务，不启动父任务。
 
 ## 计划建立的命令
 
@@ -31,16 +33,20 @@
 | pnpm typecheck | 前端、扩展、共享协议 TypeScript |
 | pnpm test | Vitest 单次执行全部单元/组件测试 |
 | pnpm build | 前端、协议消费者和扩展生产构建 |
-| pnpm build:native | Windows 原生 release 可执行文件构建与路径/已知密钥模式扫描；不生成安装包，不代表原生交互通过 |
+| pnpm build:native | 当前真实 host 的原生 release 程序构建与格式/架构、路径/已知密钥扫描；显式 target，构建/扫描同一 releaseDirectory；不生成包，不代表原生交互通过 |
+| pnpm build:package | 复用同一 host/路径映射生成 NSIS、app/dmg 或 deb/AppImage，扫描实际包内程序并严格比较 release hash；不安装、签名或发布 |
 | pnpm protocol:check | 生成协议与已提交类型/schema 无差异 |
 | pnpm test:e2e | 可自动化的浏览器工作台与扩展用例；不代表原生 Tauri |
 | cargo fmt --all -- --check | Rust 格式 |
-| cargo clippy --workspace --all-targets -- -D warnings | Rust lint |
-| cargo test --workspace --locked | Rust 测试 |
+| cargo clippy --workspace --all-targets --locked -- -D warnings | Rust lint |
+| cargo test --workspace --all-targets --locked | Rust所有target测试，包含受控种子example编译 |
 | cargo build -p markbridge-core --example bridge_harness --locked | 03 临时原生验收驱动，复用生产 Bridge，不在 listener 增加测试接口 |
 | node .trellis/tasks/archive/2026-10/10-10-mb-03-chrome-bridge/evidence/chrome-native-harness.mjs | 03 两个临时 Chrome Profile、独立应用目录和凭据命名空间；实际浏览器配对/同步/恢复，排除 Tauri GUI |
 | pnpm --filter @markbridge/desktop tauri dev | Windows 原生交互检查 |
-| pnpm --filter @markbridge/desktop tauri build | 本地打包；不自动发布 |
+| pnpm --filter @markbridge/desktop tauri build | 裸本地构建，不经过正式路径映射/扫描；不能替代 build:native/build:package |
+| cargo build -p markbridge-core --example semantic_fixture_seed --locked | 15新临时根的生产Storage种子，不打开OS凭据或模型 |
+| node .trellis/tasks/10-10-mb-15-semantic-search/evidence/current-semantic-native.mjs | 当前release的真实Tauri/SQLite/HTTP合成功能，不是V18模型质量 |
+| node .trellis/tasks/10-10-mb-15-semantic-search/evidence/evaluate-real-model.mjs | 无参数仅NOT_RUN；未来显式本机模型+人工标签参数才执行V18，见evaluation.md |
 
 01 完成时如命令变化，必须更新父计划和所有依赖任务，不能留下已失效指令。各子任务列出需要增加的测试套件和原生步骤；测试名在实现后补充真实路径，不虚构当前测试文件。
 
@@ -66,6 +72,8 @@ Windows 首版要求 01–13 通过其正式验收及 verification.md 的 Window
 
 规划交付只校验任务结构、文档一致性、上下文引用、依赖无环和需求覆盖，不运行不存在的应用命令。
 
+2026-10-13 任务13原生harness退出观察细化：父V15没有Chrome45秒退出SLA；旧观察watchdog导致的FAIL保留。当前Chrome155真实aged/headful对照已观察约100秒后自行exit0，后续方法2用有界180秒观察并记录精确耗时、实际exit0/无信号及所属进程/监听检查，完整安装重启闭环仍须重测。该改动只影响验收观察器，不改变产品超时、安全约束、真实模型/平台门槛或任务完成状态。
+
 ## 2026-10-13 新版任务门槛调整
 
 用户明确将真实 OS 休眠/唤醒验收移至新版 R08 完成前，允许新版 R02–R07 继续实施。旧 V04 保持 UNVERIFIED，不改写本任务收据或完成状态；其他门槛不变。详见 ../10-12-mb-workspace-redesign/gate-change-2026-10-13.md。
@@ -74,4 +82,4 @@ Windows 首版要求 01–13 通过其正式验收及 verification.md 的 Window
 
 ## 2026-10-13 提交归档审计
 
-当前用户明确要求提交改动并归档已完成任务，授权适用于本轮。03/04 的其余 AC 已通过，同一真实睡眠项按既有用户决定 WAIVED 后完成；原始 V04 UNVERIFIED / 实际 NOT_RUN 保留。13/14/15 和本父任务仍未完成。前述“旧状态不改写”是当时阶段决定，现以本节及 execution-status.md 的证据映射为准。
+上一轮用户明确要求提交改动并归档已完成任务，授权适用于上一轮且已执行。03/04 的其余 AC 已通过，同一真实睡眠项按既有用户决定 WAIVED 后完成；原始 V04 UNVERIFIED / 实际 NOT_RUN 保留。本轮继续实施未新增提交/归档授权，13/14/15 和本父任务仍未完成。前述“旧状态不改写”是当时阶段决定，现以本节及 execution-status.md 的证据映射为准。

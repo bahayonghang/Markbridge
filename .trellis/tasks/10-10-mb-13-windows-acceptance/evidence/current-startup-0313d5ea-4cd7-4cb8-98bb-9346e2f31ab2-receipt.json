@@ -1,0 +1,31 @@
+{
+  "kind": "copied_release_startup_os_isolation_probe_only",
+  "runId": "0313d5ea-4cd7-4cb8-98bb-9346e2f31ab2",
+  "root": "C:\\Users\\lyh\\AppData\\Local\\Temp\\markbridge-task13-native-DeO1SI",
+  "startedAt": "2026-10-13T16:36:58.702Z",
+  "executableSha256": "7ecf1580ef5d72c886dbef4f8c132134a8e6a4c118dc78e4efd062e4ece01f1c",
+  "noPairingOrUiActions": true,
+  "installation": "NOT_RUN",
+  "errors": [
+    "MAIN_WEBVIEW_OS_DATA_DIRECTORY_MISMATCH",
+    "STARTUP_NORMAL_CLOSE_FAILED",
+    "STARTUP_PROCESS_OR_LISTENER_REMAINED"
+  ],
+  "osDataEvidence": {
+    "mainDirectoryExists": true,
+    "observations": [
+      {
+        "relativeDirectory": "other_fixture_directory",
+        "expectedMain": false,
+        "insideFixture": true,
+        "pid": 77748,
+        "parent": 56088,
+        "expectedPreview": false
+      }
+    ],
+    "previewDirectoryExists": false,
+    "owner": 56088
+  },
+  "status": "FAIL",
+  "finishedAt": "2026-10-13T16:38:08.299Z"
+}

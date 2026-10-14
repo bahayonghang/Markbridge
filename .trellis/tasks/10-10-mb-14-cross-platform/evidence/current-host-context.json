@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "kind": "native_host_context_only",
+  "platform": "win32",
+  "arch": "x64",
+  "target": "x86_64-pc-windows-msvc",
+  "binaryName": "markbridge-desktop.exe",
+  "bundles": [
+    "nsis"
+  ],
+  "releaseUnderHost": true,
+  "sourcePrefixCount": 10,
+  "build": "NOT_RUN",
+  "installation": "NOT_RUN"
+}
