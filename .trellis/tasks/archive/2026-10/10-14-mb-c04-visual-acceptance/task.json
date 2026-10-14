@@ -1,0 +1,56 @@
+{
+  "id": "mb-c04-visual-acceptance",
+  "name": "mb-c04-visual-acceptance",
+  "title": "C04 Claude 工作台集成与原生验收",
+  "description": "验证全应用明暗主题、字体字号、键盘、虚拟列表、Windows 重启及真实 DPI，形成当前产物证据。",
+  "status": "completed",
+  "dev_type": "fullstack",
+  "scope": "ui-fonts-claude",
+  "package": null,
+  "priority": "P2",
+  "creator": "lyh",
+  "assignee": "lyh",
+  "createdAt": "2026-10-14",
+  "completedAt": "2026-10-14",
+  "branch": "dev",
+  "base_branch": "dev",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "10-14-mb-claude-workspace-optimization",
+  "relatedFiles": [
+    "DESIGN.md",
+    ".trellis/tasks/10-14-mb-c04-visual-acceptance/prd.md",
+    ".trellis/tasks/10-14-mb-c04-visual-acceptance/design.md",
+    ".trellis/tasks/10-14-mb-c04-visual-acceptance/implement.md"
+  ],
+  "notes": "",
+  "meta": {
+    "implementation_approval": "granted",
+    "planning_status": "approved",
+    "depends_on": [
+      "10-14-mb-c03-workspace-layout"
+    ],
+    "font_scope": "installed_font_list_search_select_preview; no_file_import",
+    "approval_evidence": "2026-10-14 user approved sequential implementation of the reviewed C01-C04 plan",
+    "execution_status": "completed_pending_archive",
+    "acceptance_status": "passed",
+    "acceptance_scope": "approved C01-C04 requirements; supplementary startup failure retained",
+    "acceptance_evidence": "evidence/check-report.md",
+    "open_observations": [
+      {
+        "id": "startup_over_3000ms",
+        "status": "unresolved",
+        "scope": "supplemental startup observation; outside approved new V14 ordinary-search gate",
+        "evidence": "../10-14-mb-c04-visual-acceptance/evidence/performance-validation.md",
+        "valuesMs": [
+          4605.9007,
+          4552.3225
+        ],
+        "cause": "UNVERIFIED"
+      }
+    ]
+  }
+}

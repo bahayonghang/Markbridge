@@ -1,0 +1,165 @@
+{
+  "startedAt": "2026-10-14T15:32:34.359Z",
+  "productionFingerprint": "e199c0aa19a0e3560f398831d5a0297ce532ff443be706767f009770d3f69311",
+  "sourceReference": "../../../10-14-mb-c03-workspace-layout/evidence/current-source.json",
+  "browserFiles": [
+    {
+      "path": "tests/e2e/acceptance.spec.ts",
+      "sha256": "d0b6b094b5930a57eb4e3534a38f1006ac0d591d2f30a0f9ba85c9f065f3257d"
+    },
+    {
+      "path": "tests/e2e/appearance-captions.spec.ts",
+      "sha256": "912c5675d26a03b64a2dd54147951f64e46b50529fb9d51411dfe6d87c86a494"
+    },
+    {
+      "path": "tests/e2e/appearance.spec.ts",
+      "sha256": "df1f1f0148bef8ee117b7bc9b8a95a686cb9f7c9d8c7231b667326e18b3edc16"
+    },
+    {
+      "path": "tests/e2e/browse.spec.ts",
+      "sha256": "ecd7511c39946f7961be7a00776c9462884cbae29a1407505e9174e2ff96887c"
+    },
+    {
+      "path": "tests/e2e/connection.spec.ts",
+      "sha256": "ef230cba9087630390ff818e6cbaf53bdf694ba2033a65a51bce5f0a7fc1b615"
+    },
+    {
+      "path": "tests/e2e/details.spec.ts",
+      "sha256": "374f58f6743209fb7a7b7e7643c53b24425ed7e97611a65a5463937070092edb"
+    },
+    {
+      "path": "tests/e2e/diagnostics.spec.ts",
+      "sha256": "4b5a0a853ad00f4f14b621b78e2384a0f7c0db02f454ec32ff7979603441e538"
+    },
+    {
+      "path": "tests/e2e/editing.spec.ts",
+      "sha256": "624ee4a777677b584cc334dc3aa07239ebc5ec18f9929e861e99a0d6ec5e7ac7"
+    },
+    {
+      "path": "tests/e2e/font-picker.spec.ts",
+      "sha256": "c6de185ebe069953994e32eff9ae522fd5746e6df7128202fa3d96c9d04d507a"
+    },
+    {
+      "path": "tests/e2e/foundation.spec.ts",
+      "sha256": "904c59e8f732de125e6feeba007d19db91cde1874ade1dbe79d592761a471ec3"
+    },
+    {
+      "path": "tests/e2e/history.spec.ts",
+      "sha256": "f138c48cdc700d964f5e4ee14a08fea12513ed356a0a41be3f1075c2c719ffd6"
+    },
+    {
+      "path": "tests/e2e/mock-bridge.ts",
+      "sha256": "2f81778956f1a916a5ebec4ec77c801aebfb98a6b5f0c4836062bccd257f59c9"
+    },
+    {
+      "path": "tests/e2e/organize.spec.ts",
+      "sha256": "5fc3cde78fe9be8b6d22b5a18486b68f93b1d4bd053f135cb5fb74423f49d13a"
+    },
+    {
+      "path": "tests/e2e/secure-storage.spec.ts",
+      "sha256": "119e8e5a4e69853867d881d5156c1ce5513834a05322d269669231bf24d2abe7"
+    },
+    {
+      "path": "tests/e2e/semantic.spec.ts",
+      "sha256": "f80da4b0d48d274af8c14260927f2039780775a98eb325e6c1fbee88c40ceff9"
+    },
+    {
+      "path": "tests/e2e/settings-layout.spec.ts",
+      "sha256": "58bdd6941d4dee66e040bfc0e5da0a0308d1e021d7bbb75b887fd9b845ddd814"
+    },
+    {
+      "path": "tests/e2e/shell.spec.ts",
+      "sha256": "1f549715767a751de47ec83063cb0a1ab4ca1be7433f24732099825179077584"
+    },
+    {
+      "path": "tests/e2e/workspace-layout-review.spec.ts",
+      "sha256": "641105bc0ee648306348e50dc112164f8908ce45af061722fb184c4abce9bec4"
+    },
+    {
+      "path": "tests/e2e/workspace-layout.spec.ts",
+      "sha256": "567c5edf1ba3720cf8c06f18dcef04995c6e39530630ed01eb0a156347b6ecdb"
+    }
+  ],
+  "environment": {
+    "platform": "win32",
+    "release": "10.0.26300",
+    "architecture": "x64",
+    "node": "v26.7.0",
+    "pnpm": "12.12.0"
+  },
+  "browserEvidenceDirectory": "D:\\Documents\\Code\\Tauri\\Markbridge\\.trellis\\tasks\\10-14-mb-c04-visual-acceptance\\evidence\\browser-run-1791991954215",
+  "commands": [
+    {
+      "name": "lint",
+      "command": [
+        "pnpm",
+        "lint"
+      ],
+      "startedAt": "2026-10-14T15:32:34.694Z",
+      "log": "lint.log",
+      "exitCode": 0,
+      "finishedAt": "2026-10-14T15:32:37.195Z"
+    },
+    {
+      "name": "typecheck",
+      "command": [
+        "pnpm",
+        "typecheck"
+      ],
+      "startedAt": "2026-10-14T15:32:37.340Z",
+      "log": "typecheck.log",
+      "exitCode": 0,
+      "finishedAt": "2026-10-14T15:32:42.493Z"
+    },
+    {
+      "name": "test",
+      "command": [
+        "pnpm",
+        "test"
+      ],
+      "startedAt": "2026-10-14T15:32:42.662Z",
+      "log": "test.log",
+      "exitCode": 0,
+      "finishedAt": "2026-10-14T15:34:43.095Z"
+    },
+    {
+      "name": "protocol",
+      "command": [
+        "pnpm",
+        "protocol:check"
+      ],
+      "startedAt": "2026-10-14T15:34:43.242Z",
+      "log": "protocol.log",
+      "exitCode": 0,
+      "finishedAt": "2026-10-14T15:34:56.950Z"
+    },
+    {
+      "name": "build",
+      "command": [
+        "pnpm",
+        "build"
+      ],
+      "startedAt": "2026-10-14T15:34:57.091Z",
+      "log": "build.log",
+      "exitCode": 0,
+      "finishedAt": "2026-10-14T15:34:59.349Z"
+    },
+    {
+      "name": "browser",
+      "command": [
+        "pnpm",
+        "test:e2e",
+        "--workers=2",
+        "--reporter=line,json",
+        "--output",
+        "D:\\Documents\\Code\\Tauri\\Markbridge\\.trellis\\tasks\\10-14-mb-c04-visual-acceptance\\evidence\\browser-run-1791991954215\\test-artifacts"
+      ],
+      "startedAt": "2026-10-14T15:34:59.567Z",
+      "log": "browser.log",
+      "exitCode": 1,
+      "finishedAt": "2026-10-14T15:37:43.271Z"
+    }
+  ],
+  "finishedAt": "2026-10-14T15:37:43.382Z",
+  "status": "FAIL"
+}

@@ -1,0 +1,9 @@
+{
+  "checkedAt": "2026-10-14T15:43:17.9425393Z",
+  "sourceReference": "final-source.json",
+  "productionFingerprint": "e199c0aa19a0e3560f398831d5a0297ce532ff443be706767f009770d3f69311",
+  "completeSourceFingerprint": "4ebf3ca21a44355750944559305c663008a9916d94455a265f783848934af89b",
+  "checkedFiles": 436,
+  "mismatches": [],
+  "status": "PASS"
+}
