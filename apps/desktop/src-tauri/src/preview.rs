@@ -2369,6 +2369,7 @@ mod tests {
         assert!(names.contains(&"open_http_url"));
         assert!(names.contains(&"content_preview"));
         assert!(names.contains(&"save_diagnostics"));
+        assert!(names.contains(&"list_installed_fonts"));
         for name in names {
             let marker = format!("fn {name}(");
             let source = if main.contains(&marker) {

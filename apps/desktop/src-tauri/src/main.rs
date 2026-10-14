@@ -13,6 +13,7 @@ use std::sync::Arc;
 use tauri::{Emitter, Manager};
 
 mod export;
+mod fonts;
 mod preview;
 use preview::{clear_web_preview_session, open_web_preview, web_preview_action, web_preview_state};
 
@@ -22,6 +23,18 @@ fn trusted(window: &tauri::WebviewWindow) -> Result<(), ErrorCode> {
     } else {
         Err(ErrorCode::ReadOnly)
     }
+}
+
+#[tauri::command]
+async fn list_installed_fonts(
+    window: tauri::WebviewWindow,
+) -> Result<markbridge_protocol::InstalledFontCatalog, ErrorCode> {
+    trusted(&window)?;
+    Ok(tauri::async_runtime::spawn_blocking(fonts::installed_fonts)
+        .await
+        .unwrap_or(markbridge_protocol::InstalledFontCatalog::Unavailable {
+            reason: markbridge_protocol::FontCatalogUnavailableReason::EnumerationFailed,
+        }))
 }
 
 use markbridge_protocol::{
@@ -1215,6 +1228,7 @@ fn main() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            list_installed_fonts,
             get_startup_state,
             get_bridge_state,
             start_bridge,

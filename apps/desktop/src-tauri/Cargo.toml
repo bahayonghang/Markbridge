@@ -22,6 +22,7 @@ markbridge-protocol.workspace = true
 [target.'cfg(windows)'.dependencies]
 webview2-com = "0.39"
 windows-core = "0.62"
+windows = { version = "=0.62.2", features = ["Win32_Graphics_DirectWrite", "Win32_Globalization"] }
 windows-sys = { version = "0.61.2", features = ["Win32_UI_Controls_Dialogs", "Win32_Storage_FileSystem"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
