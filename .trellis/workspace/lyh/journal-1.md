@@ -509,3 +509,41 @@ User explicitly waived real OS sleep/wake acceptance. R08 and redesign parent co
 ### Next Steps
 
 - 原13/V12与15/V18仍缺实际模型及人工评测证据，原父任务不关闭；非Windows与外部同步缺口保持原状态。
+
+
+## Session 16: 提交通用字体与 Claude 工作台并归档
+<!-- trellis-session: v=2 fp=17bd69c12a24a268 -->
+
+**Date**: 2026-10-14
+**Task**: 提交通用字体与 Claude 工作台并归档
+**Branch**: `dev`
+
+### Summary
+
+字体目录、DirectWrite 命令和工作台界面分三笔提交。C01 到 C04 及其父任务已归档。13、15 与原父任务仍未完成。
+
+### Main Changes
+
+- 增加已安装字体目录契约、DirectWrite 列表命令，以及字体选择、字号和 Claude 工作台布局
+- 归档 10-14 父任务和 C01–C04；13、15 与原父任务保持 in_progress
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `965ec54` | feat(protocol): 增加已安装字体目录契约 |
+| `5d1b6d6` | feat(desktop): 用 DirectWrite 列出本机字体 |
+| `d08c829` | feat(workspace): 接入字体选择、字号和 Claude 工作台布局 |
+| `0bee115` | docs(task): 记录字体命令和归档后的验收入口 |
+
+### Testing
+
+- [OK] 本次未重跑测试。C04 报告中的 Vitest、浏览器和原生收据仍是上一轮证据。
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- 旧 13 的 V12 与 15 的 V18 仍未完成，不推送。
