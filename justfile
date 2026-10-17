@@ -83,4 +83,6 @@ dev-web:
     pnpm --filter @markbridge/desktop dev
 
 # GitHub Actions windows job, in the same order.
-ci: install lint typecheck build protocol-check test fmt clippy test-rust build-native playwright-install test-e2e
+# Show stage timing and a heartbeat while a child command is quiet.
+ci:
+    node scripts/ci.mjs

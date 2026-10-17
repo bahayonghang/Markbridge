@@ -26,6 +26,8 @@
 
 以下命令已由 01 创建。实际运行结论见各子任务证据；命令表定义检查职责。scripts/README/CI 必须保持一致。
 
+2026-10-17 CI 可见性优化：`just ci` 经 `scripts/ci.mjs` 串行执行原有 12 个 Windows 检查阶段，增加阶段耗时和静默等待提示；检查内容、顺序和验收门槛不变。协议生成每轮只构建一次当前 Rust 导出器，按本轮 Cargo 产物路径逐项运行；临时漂移反例共用一次新生成结果，独立 `pnpm protocol:check` 仍完整重新生成。对应顺序、失败停止及输出分流回归在 `scripts/command.test.mjs`，不创建或关闭任务。
+
 | 命令 | 责任 |
 |---|---|
 | pnpm install --frozen-lockfile | 重建 JS 依赖；首次生成 lockfile 后使用 |

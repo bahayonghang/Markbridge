@@ -6,6 +6,8 @@ Foundation Rust gates are `cargo fmt --all -- --check`, `cargo clippy --workspac
 
 Child 02 protocol behavior tests are in `crates/protocol/src/wire_tests.rs`; storage and migration tests are in `crates/core/src/storage/tests.rs`. Run the Rust tests and protocol generation against the current source. A cached exporter result alone does not establish that the current Rust source compiles. The TypeScript wire tests also invoke the Rust fixture executable and compare acceptance of shared input frames.
 
+Protocol generation builds `export-schema` once per invocation with `cargo build --locked --message-format=json-render-diagnostics`, resolves the executable from that build's `compiler-artifact` message, then invokes it directly for each schema. Do not guess the target path or reuse an executable without the current build. Show build diagnostics, idle notices and each schema name. Drift regression cases may share the same freshly generated in-memory outputs; the standalone `protocol:check` gate always regenerates. `just ci` reports all 12 Windows stages with timing and idle notices through `scripts/ci.mjs`; its command/order parity with the Windows workflow and fail-fast exit behavior are checked in `scripts/command.test.mjs`.
+
 Use synthetic fixtures and disposable profiles. Cover identity isolation, dynamic roots, managed nodes, event gaps, lost acknowledgments, worker restart, migration failure, interrupted batch, and rollback conflicts.
 
 Check fetch restrictions at every redirect and address resolution. A remote preview must fail to invoke protected commands.

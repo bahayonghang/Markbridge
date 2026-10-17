@@ -48,6 +48,7 @@ pnpm --filter @markbridge/desktop tauri dev
 
 | 命令 | 检查范围 |
 |---|---|
+| `just ci` | 按 Windows CI 顺序串行运行全部 12 个阶段；显示开始、结果、耗时，静默时每 15 秒提示当前阶段；失败即停止 |
 | `pnpm lint` | 产品 TS/JS、测试和工具配置，ESLint 不修改文件 |
 | `pnpm typecheck` | 桌面、扩展、协议和测试工具的严格类型检查 |
 | `pnpm test` | Vitest 启动/协议行为与双语言互通；Node manifest、capability、生成漂移和原生产物扫描反例 |
@@ -64,6 +65,10 @@ pnpm --filter @markbridge/desktop tauri dev
 | `pnpm --filter @markbridge/desktop tauri dev` | 原生开发窗口，需人工验收 |
 
 首次浏览器测试需先运行 `pnpm exec playwright install chromium`，下载 Playwright 的专用测试浏览器。浏览器数据不使用日常 Chrome Profile。
+
+`just ci` 通过 `scripts/ci.mjs` 调用现有单项 recipe，顺序与 `.github/workflows/ci.yml` 的 Windows job 一致，回归测试会检查两者是否漂移。等待提示只表示进程仍在运行，不表示检查已通过。协议生成先用 `cargo build --locked` 构建当前源码的导出器，再按 Cargo 本轮报告的实际可执行文件路径逐项导出，并显示 schema 名称；漂移测试的一组临时文件反例共用一次新生成的基线，避免反复启动 Cargo。`pnpm protocol:check` 仍独立重新生成全部 schema、类型和静态校验器，不使用跨运行缓存。
+
+本轮卡顿分析、协议测试前后对照和完整本地 CI 结果见 [2026-10-17 CI 验证记录](docs/ci-workflow-2026-10-17.md)。
 
 `just install-app` 是日常安装入口，只有用户明确要求安装时才执行；提交、构建和验收不自动调用。它不使用隔离验收的 `/NS` 或临时 `/D` 路径。单独运行 `node scripts/install-app.mjs` 只按原生目标、产品版本和文件名选择已有 Windows 包并安装，不重新构建；缺包、候选不唯一或文件名不符时拒绝执行。包内程序与当前构建的核对在 `build-package` 阶段完成，因此需要新包时使用完整的 `just install-app` 入口。开发与构建命令会持续转发子进程输出，原生编译长时间无输出时显示等待提示，并保留失败退出码。
 

@@ -23,6 +23,8 @@
 
 以下为正式检查入口。本轮实际自动检查、原始失败及成功重测见 evidence/current-independent-check.md；原生和模型验收分别记录，未运行项保持 NOT_RUN。命令变更同步父计划和受影响任务。
 
+2026-10-17：本地可使用 `just ci` 按 Windows workflow 的原顺序运行全部 12 项自动检查，显示阶段结果/耗时及每 15 秒的静默等待提示。协议导出每轮只构建一次当前 Rust 源码，漂移反例共用一次新生成基线；独立 `pnpm protocol:check` 保留。该流程优化不改变本任务原生/模型门槛，也不代表托管 CI 或 V12 已通过。
+
 ```text
 pnpm install --frozen-lockfile
 pnpm lint

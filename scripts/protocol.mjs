@@ -3,6 +3,7 @@ import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { compile } from 'json-schema-to-typescript';
+import { runVisible } from './run-command.mjs';
 
 // Ajv is declared by the protocol package, which owns the runtime contract.
 const requireProtocol = createRequire(new URL('../packages/protocol/package.json', import.meta.url));
@@ -31,10 +32,24 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 export const generatedDir = new URL('../packages/protocol/src/generated/', import.meta.url);
 
 export async function generateProtocol() {
+  console.log('[protocol] Building the current Rust schema exporter...');
+  const cargoOutput = [];
+  const build = await runVisible('cargo', ['build', '--locked', '-p', 'markbridge-protocol', '--bin', 'export-schema', '--message-format=json-render-diagnostics'], {
+    cwd: root,
+    onStdout: (chunk) => { cargoOutput.push(chunk); },
+    idleMessage: (seconds) => `[protocol] Schema exporter build is still running (${seconds}s).\n`,
+  });
+  if (build.status !== 0) throw new Error(`Schema exporter build failed: ${build.signal ?? `exit ${build.status ?? 1}`}`);
+  const artifacts = Buffer.concat(cargoOutput).toString('utf8').split(/\r?\n/)
+    .filter(line => line.startsWith('{')).map(line => JSON.parse(line))
+    .filter(message => message.reason === 'compiler-artifact' && message.target.name === 'export-schema' && message.executable);
+  if (artifacts.length !== 1) throw new Error('Cargo did not report exactly one schema exporter executable.');
+  const exporter = artifacts[0].executable;
   const outputs = new Map();
   for (const [name, title, argument] of [['installed-font-catalog', 'InstalledFontCatalog', 'installed-font-catalog'], ['startup-state', 'StartupState', 'startup'], ['wire-message', 'WireMessage', 'wire'], ['bridge-state', 'BridgeState', 'bridge'], ['pairing-offer', 'PairingOffer', 'pairing'], ['mirror-tree', 'MirrorTree', 'mirror-tree'], ['chrome-profiles', 'ChromeProfileList', 'chrome-profiles'], ['library-nodes', 'LibraryNodes', 'library-nodes'], ['library-page', 'LibraryPage', 'library-page'], ['library-search', 'LibrarySearch', 'library-search'], ['library-detail', 'LibraryDetail', 'library-detail'], ['library-count', 'LibraryCount', 'library-count'], ['library-query', 'LibraryQuery', 'library-query'], ['library-query-page', 'LibraryQueryPage', 'library-query-page'], ['batch-edit-preview', 'BatchEditPreview', 'batch-edit-preview'], ['batch-edit-status', 'BatchEditStatus', 'batch-edit-status'], ['edit-preview', 'EditPreview', 'edit-preview'], ['apply-result', 'ApplyResult', 'apply-result'], ['operation-list', 'OperationList', 'operation-list'], ['operation-detail', 'OperationDetail', 'operation-detail'], ['undo-preview', 'UndoPreview', 'undo-preview'], ['export-save-result', 'ExportSaveResult', 'export-save-result'], ['diagnostic-report', 'DiagnosticReport', 'diagnostic-report'], ['diagnostic-save-result', 'DiagnosticSaveResult', 'diagnostic-save-result'], ['edit-document', 'EditDocument', 'edit-document'], ['tag-catalog', 'TagCatalog', 'tag-catalog'], ['title-encoding', 'TitleEncodingPreview', 'title-encoding'], ['content-preview', 'ContentPreview', 'content-preview'], ['web-preview', 'WebPreviewState', 'web-preview'], ['ai-settings', 'AiSettings', 'ai-settings'], ['ai-connection', 'AiConnection', 'ai-connection'], ['ai-suggestion', 'AiSuggestion', 'ai-suggestion'], ['ai-apply', 'AiApplyResult', 'ai-apply'], ['organization-plan', 'OrganizationPlan', 'organization-plan'], ['maintenance-report', 'MaintenanceReport', 'maintenance-report'], ['semantic-settings', 'SemanticSettings', 'semantic-settings'], ['semantic-config', 'SemanticConfig', 'semantic-config'], ['semantic-scope', 'SemanticScope', 'semantic-scope'], ['semantic-review', 'SemanticScopeReview', 'semantic-review'], ['semantic-status', 'SemanticStatus', 'semantic-status'], ['semantic-query', 'SemanticQuery', 'semantic-query'], ['semantic-result', 'SemanticQueryResult', 'semantic-result'], ['semantic-model-check', 'SemanticModelCheck', 'semantic-model-check'], ['text-search', 'TextSearchPage', 'text-search']]) {
-    const result = spawnSync('cargo', ['run', '--quiet', '--locked', '-p', 'markbridge-protocol', '--bin', 'export-schema', '--', argument], {
-      cwd: root, encoding: 'utf8', maxBuffer: 4 * 1024 * 1024,
+    console.log(`[protocol] Generating ${name}...`);
+    const result = spawnSync(exporter, [argument], {
+      cwd: root, encoding: 'utf8', maxBuffer: 4 * 1024 * 1024, timeout: 30_000,
     });
     if (result.error || result.status !== 0) {
       throw new Error(`Schema exporter failed: ${result.error?.message ?? result.stderr}`);
@@ -59,8 +74,10 @@ function protocolText(value) {
   return value.replaceAll('\r\n', '\n').replaceAll('\r', '\n');
 }
 
-export async function checkProtocol(directory = generatedDir) {
-  const outputs = await generateProtocol();
+export async function checkProtocol(directory = generatedDir, outputs) {
+  // Tests compare several mutations against one freshly generated baseline.
+  // The CLI always generates from the current Rust source, without a disk cache.
+  outputs ??= await generateProtocol();
   const drift = [];
   for (const [name, expected] of outputs) {
     const actual = await readFile(new URL(name, directory), 'utf8').catch(() => null);
