@@ -26,5 +26,5 @@ export function OperationNotice({ profileId, result, onHistory }: { profileId: s
     const timer = window.setInterval(() => void pull(), 500);
     return () => { disposed = true; window.clearInterval(timer); };
   }, [profileId, result.operationId, pending]);
-  return <div className="organize-operation"><p role="status">{labels[receipt.state]}。离开页面不会撤回已确认的操作。</p>{onHistory && <button type="button" onClick={onHistory}>前往操作历史</button>}</div>;
+  return <div className="organize-operation" data-state={receipt.state}><p role="status">{labels[receipt.state]}。离开页面不会撤回已确认的操作。</p>{onHistory && <button type="button" onClick={onHistory}>前往操作历史</button>}</div>;
 }

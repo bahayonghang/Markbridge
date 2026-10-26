@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { mockBridge } from './mock-bridge';
+import { contrastRatio, renderedContrastColors } from './contrast';
 
 const evidence = process.env.MARKBRIDGE_EVIDENCE_DIR ?? 'test-results/screenshots';
 const sizes = [{ width: 1440, height: 900 }, { width: 1100, height: 760 }, { width: 640, height: 760 }, { width: 1100, height: 480 }, { width: 640, height: 480 }];
@@ -55,6 +56,9 @@ for (const size of sizes) {
     expect((await calls(page)).filter(call => call === 'query')).toEqual([]);
     await query.press('Enter');
     await expect(page.getByRole('button', { name: /Human Interface Guidelines.*相似度 0.913/ })).toBeVisible();
+    const score = page.locator('.semantic-hit > .secondary').first();
+    const colors = await renderedContrastColors(score);
+    for (const fill of colors.fill) expect(contrastRatio(colors.ink, fill)).toBeGreaterThanOrEqual(4.5);
     await page.getByRole('region', { name: '按意思查找' }).scrollIntoViewIfNeeded();
     await noOverflow(page);
     await page.screenshot({ path: `${evidence}/semantic-query-${size.width}x${size.height}.png` });

@@ -2,6 +2,7 @@ import { expect, test, type Locator } from '@playwright/test';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { mockBridge } from './mock-bridge';
+import { contrastRatio, renderedContrastColors } from './contrast';
 
 const key = 'markbridge.ui-preferences.v2';
 const output = join(process.env.MARKBRIDGE_EVIDENCE_DIR ?? 'test-results/screenshots', 'appearance');
@@ -187,33 +188,21 @@ for (const theme of ['light', 'dark']) {
     for (const pair of contrast) expect(pair.ratio, `${pair.foreground}/${pair.background}`).toBeGreaterThanOrEqual(pair.minimum);
     const renderedConsumers: { name: string; foreground: string; background: string; ratio: number; minimum: number }[] = [];
     async function checkConsumer(name: string, locator: Locator, boundary = false, focus = false) {
-      const colors = await locator.evaluate(node => {
-        function background(element: Element | null): string {
-          for (let current = element; current; current = current.parentElement) {
-            const color = getComputedStyle(current).backgroundColor;
-            if (color !== 'transparent' && color !== 'rgba(0, 0, 0, 0)') return color;
-          }
-          throw new Error('VISIBLE_BACKGROUND_NOT_FOUND');
+      const colors = await renderedContrastColors(locator);
+      if (boundary) expect(colors.borderStyle).toBe('solid');
+      if (focus) { expect(colors.outlineStyle).toBe('solid'); expect(parseFloat(colors.outlineWidth)).toBeGreaterThanOrEqual(2); }
+      for (let sample = 0; sample < colors.fill.length; sample += 1) {
+        const pairs: [string, string, string, number][] = [['text', colors.ink, colors.fill[sample], 4.5]];
+        if (boundary) pairs.push(['boundary', colors.border, colors.outside[sample], 3]);
+        if (focus) pairs.push(['focus', colors.outline, colors.outside[sample], 3]);
+        for (const [state, foreground, background, minimum] of pairs) {
+          const ratio = contrastRatio(foreground, background);
+          expect(ratio, `${theme} ${name} ${state} field sample ${sample}`).toBeGreaterThanOrEqual(minimum);
+          renderedConsumers.push({ name: `${name} ${state} field sample ${sample}`, foreground, background, ratio, minimum });
         }
-        const style = getComputedStyle(node);
-        return { ink: style.color, fill: background(node), outside: background(node.parentElement), border: style.borderColor, borderStyle: style.borderStyle, outline: style.outlineColor, outlineStyle: style.outlineStyle, outlineWidth: style.outlineWidth };
-      });
-      const pairs: [string, string, string, number][] = [['text', colors.ink, colors.fill, 4.5]];
-      if (boundary) { expect(colors.borderStyle).toBe('solid'); pairs.push(['boundary', colors.border, colors.outside, 3]); }
-      if (focus) { expect(colors.outlineStyle).toBe('solid'); expect(parseFloat(colors.outlineWidth)).toBeGreaterThanOrEqual(2); pairs.push(['focus', colors.outline, colors.outside, 3]); }
-      const luminance = (color: string) => {
-        const values = color.match(/[\d.]+/g)?.map(Number);
-        if (!values || values.length !== 3) throw new Error(`EXPECTED_OPAQUE_RGB: ${color}`);
-        const rgb = values.map(value => value / 255).map(value => value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4);
-        return rgb[0] * .2126 + rgb[1] * .7152 + rgb[2] * .0722;
-      };
-      for (const [state, foreground, background, minimum] of pairs) {
-        const a = luminance(foreground), b = luminance(background);
-        const ratio = (Math.max(a, b) + .05) / (Math.min(a, b) + .05);
-        expect(ratio, `${theme} ${name} ${state}`).toBeGreaterThanOrEqual(minimum);
-        renderedConsumers.push({ name: `${name} ${state}`, foreground, background, ratio, minimum });
       }
     }
+
     await checkConsumer('library title', page.locator('.list-pane .library-title').first());
     await checkConsumer('library URL', page.locator('.list-pane .library-url').first());
     const libraryNav = page.locator('.app-sidebar').getByRole('button', { name: '书签', exact: true });

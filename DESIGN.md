@@ -1,168 +1,165 @@
 ---
-name: Markbridge — Claude-inspired workspace
+name: Markbridge — Airy glass workspace
 status: approved
-source-entry: style:claude
+source-entry: style:airy-glass
 colors:
-  primary: "#38362f"
-  primary-hover: "#48453c"
-  primary-pressed: "#25241f"
-  on-primary: "#faf9f5"
-  canvas: "#faf9f5"
-  sidebar: "#f0eee7"
-  surface: "#fdfcf9"
-  text: "#25241f"
-  muted: "#68665d"
-  accent: "#a34b2f"
-  selected: "#eae4d8"
-  hover: "#efebe2"
-  pressed: "#eae4d8"
-  row-hover: "#f5f2eb"
-  disabled-surface: "#f0eee7"
-  line: "#ded8cc"
-  control-border: "#847e72"
-  danger: "#a93232"
-  warning: "#80570f"
-  canvas-dark: "#24231f"
-  sidebar-dark: "#201f1b"
-  surface-dark: "#2e2c27"
-  text-dark: "#efede5"
-  muted-dark: "#b6b2a7"
-  accent-dark: "#dea58b"
-  selected-dark: "#40392f"
-  hover-dark: "#38352e"
-  pressed-dark: "#40392f"
-  row-hover-dark: "#35322b"
-  disabled-surface-dark: "#302e28"
-  line-dark: "#514c42"
-  control-border-dark: "#8c877a"
-  primary-dark: "#e3ded2"
-  primary-hover-dark: "#f2eee4"
-  primary-pressed-dark: "#d1cabb"
-  on-primary-dark: "#26241f"
-  danger-dark: "#ffaba3"
-  warning-dark: "#e8c47d"
+  field-start: "#E7F6F1"
+  field-end: "#EDE7F8"
+  paper: "rgba(255,255,255,0.78)"
+  paper-solid: "rgba(255,255,255,0.96)"
+  paper-edge: "rgba(255,255,255,0.80)"
+  surface: "#FFFFFF"
+  sidebar: "#F1FAF6"
+  ink: "#24303A"
+  muted: "#5C6B76"
+  accent: "#187A56"
+  selected: "#E7F7F0"
+  output: "#6D4BD6"
+  output-wash: "#F3EEFC"
+  primary-fill: "#187A56"
+  primary-hover: "#146A4A"
+  primary-pressed: "#105A3E"
+  primary-ink: "#FFFFFF"
+  control-border: "#73828C"
+  line: "#D6E4DF"
+  hover: "#EDF7F3"
+  pressed: "#E2F1E9"
+  row-hover: "#F2F9F6"
+  disabled-surface: "#EEF3F1"
+  danger: "#A93232"
+  caution: "#80570F"
+  field-start-dark: "#162820"
+  field-end-dark: "#262238"
+  paper-dark: "rgba(30,38,43,0.90)"
+  paper-solid-dark: "rgba(30,38,43,0.96)"
+  paper-edge-dark: "rgba(181,193,201,0.24)"
+  surface-dark: "#1E262B"
+  sidebar-dark: "#24312D"
+  ink-dark: "#EAF0F3"
+  muted-dark: "#B5C1C9"
+  accent-dark: "#86D9B4"
+  selected-dark: "#203C32"
+  output-dark: "#C6B3FF"
+  output-wash-dark: "#342C49"
+  primary-fill-dark: "#86D9B4"
+  primary-hover-dark: "#A0E6C7"
+  primary-pressed-dark: "#71C8A2"
+  primary-ink-dark: "#162820"
+  control-border-dark: "#91A3AF"
+  line-dark: "#3E504C"
+  hover-dark: "#293C35"
+  pressed-dark: "#254335"
+  row-hover-dark: "#26372F"
+  disabled-surface-dark: "#27343A"
+  danger-dark: "#FFABA3"
+  caution-dark: "#E8C47D"
 typography:
-  body-md:
+  body:
     fontFamily: '"Segoe UI Variable Text", "Segoe UI", "Microsoft YaHei UI", "Microsoft YaHei", sans-serif'
     fontSize: 14px
     lineHeight: 1.6
     fontWeight: 400
-  h1:
-    fontFamily: inherit
-    fontSize: 20px
-    lineHeight: 1.4
-    fontWeight: 600
   mono:
     fontFamily: '"Cascadia Code", Consolas, ui-monospace, monospace'
-    fontSize: 1rem
-    lineHeight: 1.6
 rounded:
-  sm: 4px
-  md: 8px
-  lg: 12px
-spacing:
-  sourceScale: "4/8/12/16/24/32"
+  control: 8px
+  dialog: 16px
+  paper: 20px
+  action: 999px
+material:
+  field-angle: 160deg
+  sheet-blur: 20px
+  sheet-saturate: 1.15
+  backdrop-max: 1
+  solid-breakpoint: 960px
+  field-inset: 16px
+motion:
+  press-scale: 0.98
+  press-duration: 120ms
 ---
-<!-- design-md: entry=style:claude; source=https://github.com/bergside/awesome-design-skills@f631a09; license=MIT -->
-<!-- customized: Markbridge desktop adaptation; warm light/dark palettes, local CJK fonts, scalable typography, data-workspace layouts and accessible states -->
+<!-- design-md: entry=style:airy-glass; source=first-party; license=MIT -->
+<!-- customized: Markbridge Windows workbench; dark semantic palette, local user fonts, existing virtual-row geometry, one paper, solid reading surfaces, accessible fallbacks -->
 
 ## Overview
 
-以暖纸色、近黑墨色和克制的陶土强调色，建立易读、稳定的本地书签工作台。2026-10-14 用户已批准顺序实施；C01 主题和 C02 本机字体及精确字号已验收，C03 页面布局正在核验，C04 负责当前产物集成。各项验收以任务证据为准。
+以薄荷—淡紫低饱和场、单层纸面和清晰绿/紫语义替换Claude暖纸视觉。2026-10-25用户批准G01→G02→G03；设计批准不等于所有阶段验收通过。任务与当前证据在.trellis/tasks/10-25-mb-airy-glass-refactor。
 
-基于 design-md 的通用 `style:claude`，不混入 `brand:claude` 的官网结构。不添加 Claude/Anthropic 标志、名称或专有字体文件。保留 Markbridge 现有蓝色图标与名称；蓝色图标是品牌资产，交互色改用语义角色。浅/深色及跟随系统继续存在，不增加皮肤选择器。
+保留Markbridge名称和蓝色图标、浅色/深色/跟随系统。深色为项目扩展；目录本身没有深色，不宣称原目录提供。根DESIGN.md与styles.css是唯一视觉合同及实现层，不增加皮肤设置或第二主题系统。
 
 ## Colors
 
-使用以上颜色角色；实施在现有 `apps/desktop/src/styles.css` 建立一层令牌，不并存第二套主题引擎。
+field-start/end只构成#root的160deg静态渐变，不把渐变传给全部既有canvas消费者。canvas为同主题起始实底色，surface一直为完全不透明阅读面。
 
-- canvas 为工作区基底；sidebar 为导航；surface 为主要阅读面；selected 为当前项。
-- primary 是最重要动作；accent 是链接/选中标记/焦点。现有 `--blue` 消费点迁移到 `--accent` 或相应语义角色，不能只改色值继续把语义绑在颜色名上。
-- focus 复用 accent，disabled-ink 复用 muted。选中项在 hover/pressed 时保持 selected；普通按钮使用 hover/pressed，主按钮分别使用 primary-hover/primary-pressed。禁用按钮不响应 hover，不降低整体 opacity。
-- line 只作装饰分组；可操作边界使用 control-border。错误与警告必须同时有文字或图标。
-- 深色为暖炭灰，不直接反相。禁用状态降低强调但文字仍可读；hover/pressed 单独定义并验证，不能用透明度把对比度降到不可读。
-- 已计算 20 组候选对比度，见任务 `research/palette-contrast.json`；这是静态配色预检，不是运行页验收。正文 ≥4.5:1，控件边界/焦点 ≥3:1；所有实际消费组合须重新实测。
+paper是唯一允许模糊的workspace填充；paper-solid是无模糊时的高不透明回退，0.96仍须合成验证。光边仅作材料边缘，不承担输入/按钮的3:1边界。
+
+accent承担输入、链接、已确认完成、焦点与普通选中；output仅用于输出/结果区域的标记和摘要，正文始终ink。proposal不等于完成，颜色不改变授权和回执语义。danger/caution及未知状态同时带文字。
+
+primary-border复用primary-fill，focus复用accent，disabled-ink复用muted。selected在hover/pressed保留选中填充。禁用无hover效果，不用整体opacity使文字变淡。所有状态颜色在同一CSS令牌层。
 
 ## Typography
 
-所有可信主窗口页面使用用户字体选择。默认用本机系统字体栈，不下载网络字体，不捆绑 Anthropic Sans/Serif、Copernicus 或 StyreneB。
+保留本机系统默认与用户已安装字体、12–20px精确字号、v2偏好与v1只读迁移，不下载Figtree或任何网络字体。代码/端口继续等宽。
 
-frontmatter和下表给出14px基准的示例值；实际字号切换时，各角色与行高统一由父design的resolveAppearanceMetrics计算，不能再按独立rem倍率维护第二套字阶。C01阶段仍保留旧偏好尺寸，C02上线v2后才采用新用户14px默认。
+resolveAppearanceMetrics是字号、控件和虚拟行高的唯一来源。正文1.6、书签标题1.6、caption1.5；caption不低于12px。不套用目录1.7造成固定行错位，不用zoom/transform缩放文字或逐书签测量。
 
-C01 在同一 `:root` 中将现有字号归入 caption/label/section/prominent/dialog/heading 角色；辅助字不低于12px，现有正文12/13/15、控件40/40/44及树/书签虚拟行几何保持。C02 的集中度量上线时替换这些过渡角色值，不额外叠加一套缩放。
-
-| 角色 | 默认 14px 基准 | 规则 |
-|---|---:|---|
-| 正文/输入/导航 | 14px | 400；中文不加负字距 |
-| 辅助说明/URL/时间 | 12px | 不低于12px，随用户字号增长 |
-| 列表标题 | 15px | 500；单行截断，完整内容在详情可读 |
-| 分组标题 | 16px | 600；与正文保持清晰间距 |
-| 页面标题 | 20px | 600；不使用官网48/64px展示标题 |
-| 代码/端口/结构化标识 | 跟随正文 | 保留等宽角色，不强制用户界面字体 |
-
-建议用户字号范围 12–20 CSS px，步长1，提供12/14/16/18/20快捷值及数值输入；越界/无效输入保留上次有效值并提示。原有小/标准/大迁移为12/13/15，避免升级擅改既有字号；新用户及恢复默认为14。
-
-字号和虚拟行几何必须来自同一个纯函数。不得用 CSS zoom、transform 或让浏览器自行撑开固定虚拟行。具体尺寸合同见父任务 design.md。
+12/14/20px对应树40/40/48、书签52/56/76、控件40/40/48px。保留隐藏列表的行/像素锚点、底部、checkbox焦点、选择与草稿。
 
 ## Layout
 
-继续采用应用左导航 + 书签工作区 / 设置左分类，不重写路由或状态所有权。
+维持左应用导航、设置左分类与内容内部滚动。应用栏216px，<800px图标栏64；设置分类184/152/132。详情在≥1100px使用clamp(312px,26vw,400px)，低于此宽度替换列表；目录<800px替换。960px只决定材料，不改变这些布局断点。
 
-- 窗口宽 ≥1200：应用导航216、设置分类184；800–1199：设置分类152；640–799：应用图标栏64、设置分类132。保持现有折叠习惯。
-- 内容边距24，紧窄窗口16/12；纵向分组24，组内8/12/16。主标题、说明、内容及动作使用统一起始线。
-- 设置表单阅读宽度上限1040；连接管理和历史数据区可到1440；书签列表使用可用宽度。空白用于阅读节奏，不要求卡片铺满屏幕。
-- 连接两栏保留，阈值为 max(960px, 64rem)，用两个 min-width 容器条件共同判定。大字号自动提前叠列。来源状态/主要动作靠近标题；端口等高级项保留折叠。
-- 列表详情在 ≥1100 的宽屏使用 clamp(312px, 26vw, 400px)；不足以容纳列表时沿用替换模式。列表/详情/设置各自滚动，页面不出现横向滚动。
-- 字体选择器和确认弹窗限定在可视区域；窄窗/低窗可滚动访问底部动作。不增加拖拽分栏、仪表盘或新导航层级。
-- 窄窗文件夹/详情入口使用带可访问名称与提示的图标按钮；低窗工具栏可内部滚动，保留至少一整行书签。文件夹替换层避让随字号增长的底部状态条；详情固定标签栏避让实际标题高度。
+宽度≥960且高度≥551时#root边距16px、paper圆角20px/1px光边/单阴影；窄窗或低窗去外边距和外圆角以保护工作区。正式最小640×480，20px时至少一完整书签行与全部最终动作可达。
+
+设置表单上限1040px、连接和历史数据上限1440px；连接双列条件仍为宽度≥max(960px,64rem)，设置行叠列≤max(600px,40rem)。不新增导航层级、拖拽分栏或营销内容。
 
 ## Elevation & Depth
 
-普通阅读面无阴影或装饰渐变。浮层只使用一层轻阴影和可辨边界。对话框保留现有 backdrop、焦点锁定和返回焦点。非必要动画尊重 reduced-motion；不新增入场动画。
+#root承载场，workspace是唯一blur20px saturate1.15纸面。整个视口最多一层backdrop-filter，不放blob，不嵌套paper。默认纸面阴影0 20px 48px rgba(70,90,120,.08)，深色同几何rgba(0,0,0,.18)。
+
+列表行、正文、输入、well、sticky标题/tabs和dialog都保持实底，无二次模糊。浮层单阴影0 12px 32px rgba(70,90,120,.12)，深色rgba(0,0,0,.24)。dialog::backdrop只有遮罩，浅#24303A66、深#10181DB3，不模糊。
 
 ## Shapes
 
-控件/选中项8px，较小标记4px，对话框12px。中文工具应用不采用目录中不对称CTA、硬直角营销按钮或倒置广告卡片。现有图标沿用，不用emoji替换。
+普通动作按钮与标签用pill；密集导航、分类、breadcrumbs、tabs、输入及虚拟行保留8px工具控件圆角；dialog/well16px。避免将密集列表变成胶囊堆。
+
+按压仅按钮允许scale(.98)，只对transform过渡120ms；键盘focus-visible不缩放，reduced-motion关闭。不得缩放整个paper、窗口或滚动容器。
 
 ## Components
 
-- **导航/分类**：图标+名称，当前项用底色、字重及 aria 状态区分；hover 不覆盖 selected。
-- **设置行**：左侧名称/解释、右侧控件；容器≤max(600px,40rem)时上下排，默认行距16–24。通用为第一项。
-- **字体选择器**：独立“选择字体”操作打开搜索/列表/样例；列表名称用当前稳定UI字体，单个候选在样例区预览；选择后点“使用此字体”，取消不改变应用。提供系统默认和本机列表，刷新由用户触发。
-- **字号控件**：显示明确px数值，键盘可操作；有效提交即时生效，不因输入临时空值重置UI。
-- **预览**：中文、拉丁、数字、标点和长标题；字体切换只作用于样例直到应用。中文缺字通过既定回退显示，不能声称每个字形都来自所选字体。
-- **按钮/输入**：default/hover/focus/pressed/disabled/loading/error 都有定义。默认目标至少40×40，大字号至少44；checkbox本体16，点击区域至少40。
-- **列表/状态**：标题优先，URL/时间其次；已有选择、焦点、只读、失败、不确定结果仍独立可辨。
-- **审查/确认**：差异内容先于危险动作，不折叠必要授权信息；操作未知不改写为失败或成功。
+- 导航/列表：选中底色、文字/aria状态区分，hover不覆盖selected；checkbox独立键盘语义保持。
+- 输入/按钮：default、hover、pressed、focus-visible、disabled、loading、error分别核验；焦点≥2px；文字≥4.5:1，边界/焦点≥3:1。
+- 详情/设置：保持阅读宽度、实底sticky、底部动作可达，不隐藏必要审查信息。
+- 字体/确认：保留native dialog焦点约束、Escape、取消优先和返回触发器，不用装饰浮层替换交互。
+- 整理/语义/历史：范围/输入与结果分层；错误、只读、不确定结果有真实文字；不新增隐式模型/抓取/索引/写入。
 
 ## Do's and Don'ts
 
-Do：用角色令牌和宽度规则统一全应用；保留草稿与滚动；对本机枚举失败、字体消失、存储失败显示真实状态。
+Do：单纸面；可读的实底内容；相同角色浅深对应；透明度合成后验证；保留用户字体和布局合同。
 
-Don't：只给设置换色；把全部内容做成卡片；缩小文字来避免溢出；伪造已安装字体列表；使用网络字体；在隐藏页启动模型/抓取/索引。
+Don't：逐行blur、玻璃嵌套、叠加辉光、动画模糊、负中文字距、把光边当控制边界、缩小文字消除溢出、用换色掩盖状态或授权。
 
 ## Responsive Behavior
 
-正式 Windows 最小窗口为640×480，必须验证1440×900、1100×760、640×760、1100×480、640×480、1920×1080；另以用户截图尺寸2549×1356检查宽屏分配。320px是技能通用网页检查建议，本桌面任务不扩展到移动端支持。
+- <960px：paper-solid、blur none。
+- prefers-reduced-transparency:reduce：所有宽度paper-solid、blur none。
+- 不支持backdrop-filter：基础样式即回退；增强在@supports内。
+- forced-colors:active：系统Canvas/CanvasText/ButtonText/Highlight等，去渐变、blur、阴影，保留可辨焦点；这是装饰材料的可访问性例外。
+- prefers-reduced-motion:reduce：禁用非必要缩放/过渡。
 
-浅/深色、12/14/20px和CJK/Latin混排必须覆盖。20px与640×480交叉组合保留完整导航、字号恢复、字体取消和确认动作。
+验证七尺寸：640×480、640×760、1100×480、1100×760、1440×900、1920×1080、2549×1356，加959/960材料边界。每尺寸浅深14/20，12至少极窄和极宽。不扩展到移动端。
 
 ## Iteration Guide
 
-1. C01先落主题与字阶；C02接字体和精确字号；C03调整页面布局；C04做当前产物集成。
-2. 不在本文件和CSS之外再定义字体几何常量。
-3. 新状态复用令牌；只修改与本轮需求直接相关的样式。
-4. 字体服务影响IPC时，Rust DTO、Schema、TypeScript、Ajv与权限检查一起更新。
-5. 原生证据、模拟浏览器证据及配色计算分别记录。
+1. G01令牌/外壳/共享控件→G02全页面适配→G03当前产物集成，前一阶段PASS后推进。
+2. 新样式先更新设计再消费同一令牌。度量/存储/权限/业务生命周期变化须回到规划。
+3. 合成对比度验证两场端点、中间样本及实际消费状态；未知背景不能按白底忽略。静态候选预检不是运行验收。
+4. B10K滚动前后同机三轮，p95中位数≤max(基线×1.2,基线+2ms)，DOM有界；普通搜索独立p95≤200ms。
+5. 浏览器模拟与真实Windows/WebView2/DPI分开记；不复写归档证据，不将编译当原生PASS。
 
 ## Known Gaps
 
-- 本文件已经批准；C01 的浏览器截图与 computed-style 收据不代表 C02–C04 或原生验收通过。
-- 原目录存在白色surface与“never pure white”、4/8px与“0px corners”的内部冲突；本提案明确采用暖色surface与8px工具控件。
-- 目录字体为专有字体，使用本机系统栈与用户已安装字体替代。
-- 40px点击目标延续项目桌面约定；不是44px通用移动端目标的达成声明。
-- Windows标题栏、系统文件对话框、远程preview网页、扩展页面不强行继承主窗口字体主题。
+目录无深色；本项目自行补足。目录Figtree/1.7正文/paper按压/最多6层已分别适配为用户本机字体/原几何/只按钮按压/最多1层。4px密集内部间隔和40px桌面目标保留，不宣称44px移动目标。
 
-## Approval 2026-10-14
+Windows透明度系统设置是否传播到WebView2媒体查询须原生实测；模拟只能证明CSS分支。远程preview网页、扩展页面、系统文件对话框与原生标题栏不继承此主题。
 
-The user approved this design and sequential C01-C04 implementation. Design approval is not evidence that implementation or native acceptance has passed.
+根目录旧Claude设计已保存在G01/research，历史验收不改写。旧13/V12、15/V18不因本轮视觉改造关闭。
