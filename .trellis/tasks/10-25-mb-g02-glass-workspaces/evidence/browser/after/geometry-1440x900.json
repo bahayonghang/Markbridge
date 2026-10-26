@@ -1,0 +1,195 @@
+[
+  {
+    "tab": "通用",
+    "main": {
+      "x": 233,
+      "y": 17,
+      "width": 1190,
+      "height": 866,
+      "scrollWidth": 1190,
+      "scrollHeight": 866
+    },
+    "tabs": {
+      "x": 233,
+      "y": 73,
+      "width": 184,
+      "height": 778,
+      "scrollWidth": 183,
+      "scrollHeight": 778
+    },
+    "content": {
+      "x": 417,
+      "y": 73,
+      "width": 1006,
+      "height": 778,
+      "scrollWidth": 1006,
+      "scrollHeight": 778
+    },
+    "connection": null,
+    "sources": null,
+    "setup": null,
+    "export": null,
+    "documentWidth": 1440,
+    "documentHeight": 900
+  },
+  {
+    "tab": "Chrome 连接",
+    "main": {
+      "x": 233,
+      "y": 17,
+      "width": 1190,
+      "height": 866,
+      "scrollWidth": 1190,
+      "scrollHeight": 866
+    },
+    "tabs": {
+      "x": 233,
+      "y": 73,
+      "width": 184,
+      "height": 778,
+      "scrollWidth": 183,
+      "scrollHeight": 778
+    },
+    "content": {
+      "x": 417,
+      "y": 73,
+      "width": 1006,
+      "height": 778,
+      "scrollWidth": 1006,
+      "scrollHeight": 1378
+    },
+    "connection": {
+      "x": 441,
+      "y": 97,
+      "width": 958,
+      "height": 1330.390625,
+      "scrollWidth": 958,
+      "scrollHeight": 1330
+    },
+    "sources": {
+      "x": 441,
+      "y": 97,
+      "width": 958,
+      "height": 822.046875,
+      "scrollWidth": 958,
+      "scrollHeight": 822
+    },
+    "setup": {
+      "x": 441,
+      "y": 943.046875,
+      "width": 958,
+      "height": 484.34375,
+      "scrollWidth": 958,
+      "scrollHeight": 484
+    },
+    "export": null,
+    "documentWidth": 1440,
+    "documentHeight": 900
+  },
+  {
+    "tab": "AI",
+    "main": {
+      "x": 233,
+      "y": 17,
+      "width": 1190,
+      "height": 866,
+      "scrollWidth": 1190,
+      "scrollHeight": 866
+    },
+    "tabs": {
+      "x": 233,
+      "y": 73,
+      "width": 184,
+      "height": 778,
+      "scrollWidth": 183,
+      "scrollHeight": 778
+    },
+    "content": {
+      "x": 417,
+      "y": 73,
+      "width": 1006,
+      "height": 778,
+      "scrollWidth": 1006,
+      "scrollHeight": 805
+    },
+    "connection": null,
+    "sources": null,
+    "setup": null,
+    "export": null,
+    "documentWidth": 1440,
+    "documentHeight": 900
+  },
+  {
+    "tab": "语义检索",
+    "main": {
+      "x": 233,
+      "y": 17,
+      "width": 1190,
+      "height": 866,
+      "scrollWidth": 1190,
+      "scrollHeight": 866
+    },
+    "tabs": {
+      "x": 233,
+      "y": 73,
+      "width": 184,
+      "height": 778,
+      "scrollWidth": 183,
+      "scrollHeight": 778
+    },
+    "content": {
+      "x": 417,
+      "y": 73,
+      "width": 1006,
+      "height": 778,
+      "scrollWidth": 1006,
+      "scrollHeight": 778
+    },
+    "connection": null,
+    "sources": null,
+    "setup": null,
+    "export": null,
+    "documentWidth": 1440,
+    "documentHeight": 900
+  },
+  {
+    "tab": "备份导出",
+    "main": {
+      "x": 233,
+      "y": 17,
+      "width": 1190,
+      "height": 866,
+      "scrollWidth": 1190,
+      "scrollHeight": 866
+    },
+    "tabs": {
+      "x": 233,
+      "y": 73,
+      "width": 184,
+      "height": 778,
+      "scrollWidth": 183,
+      "scrollHeight": 778
+    },
+    "content": {
+      "x": 417,
+      "y": 73,
+      "width": 1006,
+      "height": 778,
+      "scrollWidth": 1006,
+      "scrollHeight": 778
+    },
+    "connection": null,
+    "sources": null,
+    "setup": null,
+    "export": {
+      "x": 441,
+      "y": 303.765625,
+      "width": 958,
+      "height": 222.75,
+      "scrollWidth": 958,
+      "scrollHeight": 223
+    },
+    "documentWidth": 1440,
+    "documentHeight": 900
+  }
+]

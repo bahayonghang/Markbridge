@@ -1,0 +1,78 @@
+{
+  "reviewedAt": "2026-10-25",
+  "status": "PASS",
+  "method": "view_image manual inspection; browser mocks only",
+  "screens": [
+    {
+      "path": "evidence/browser-full/airy-workspaces/dark-1440-cached-content.png",
+      "observations": "Opaque purple output well and readable body; wide split detail, selected row and sticky header visually intact.",
+      "sha256": "8f48ea9ad55554ea0d0d019e662e161320e5faecf8181bf58dbf032063bc6cfb"
+    },
+    {
+      "path": "evidence/browser-full/airy-workspaces/light-640-saved-export.png",
+      "observations": "20px minimum-window saved feedback and captured-source metadata readable; internal scroll and footer separation visible.",
+      "sha256": "a14e098d27fa74fcee179b996ee2bdcc80c1e3e62687b939045564dcab2ff863"
+    },
+    {
+      "path": "evidence/browser-full/airy-glass/dark-forced-colors.png",
+      "observations": "Selected settings/general/theme/size labels legible with system Highlight/HighlightText; focus visible.",
+      "sha256": "95465ba06c1d2d02c868dae4eb44d5774708a6145cb8c145a7744840608fcc9a"
+    },
+    {
+      "path": "evidence/browser-full/font-picker/dark-20-640x480-actions.png",
+      "observations": "Minimum-window20px picker sample, cancel and explicit apply remain visible after internal scroll.",
+      "sha256": "a037f4b18bd285cd9c37fe46d512837b309c9d457717e4a6e770582ea6f361f7"
+    },
+    {
+      "path": "evidence/browser-full/workspace-layout/light-20-640x480-library.png",
+      "observations": "Minimum20px retains one complete bookmark row, source/search/actions separated and status/footer clear.",
+      "sha256": "4bb571183579a7880a2299efc590148bcd2bdb413d629b7a901c9f921495f5db"
+    },
+    {
+      "path": "evidence/browser-full/workspace-layout/dark-20-1100x480-detail.png",
+      "observations": "Low-height dark20px split detail keeps tabs and list readable; detail body scrolls internally.",
+      "sha256": "5ffc669c8da00d93024105d7d0950ccc863b1e9dcfe15d51610218598d5670e8"
+    },
+    {
+      "path": "evidence/browser-full/workspace-layout/light-14-1440x900-整理.png",
+      "observations": "Organize input scope and explicit maintenance actions readable; single glass shell visible around solid reading content.",
+      "sha256": "51711f37c7148d7f23b9629cbff2c52c12fbccc468a179b40d886a0e732322a7"
+    },
+    {
+      "path": "evidence/browser-full/workspace-layout/dark-14-1920x1080-语义检索.png",
+      "observations": "Disabled semantic review state explains index status and explicit scope, readable at wide size.",
+      "sha256": "a3e15c378be56f21aea98ba30a956e2f49fda98629c9971044beaabbad120c55"
+    },
+    {
+      "path": "evidence/browser-full/workspace-layout/dark-12-2549x1356-history.png",
+      "observations": "Wide12px history keeps bounded reading width with distinct applied/unknown/partial/failed/conflict text states.",
+      "sha256": "c61607b165c443936e214811820a248228976f37b9d4d6477ccbeeb5d5874ec8"
+    },
+    {
+      "path": "evidence/browser-full/after/pending-1100x760.png",
+      "observations": "Pending extension identity/instructions and confirm/cancel visible; no ticket secret shown.",
+      "sha256": "aedd2a131cad5abe42e241f6db3632187506a825698c2f484d8a81166ecd6229"
+    },
+    {
+      "path": "evidence/browser-full/workspace-layout/light-14-640x760-settings-Chrome 连接.png",
+      "observations": "Narrow connection category remains left, source actions wrap without overlap, content scrolls independently.",
+      "sha256": "7a150955460e99f6daa1656ab73ad518d1fb1213d7c9cbc2fee7506640af9e29"
+    },
+    {
+      "path": "evidence/browser-full/workspace-layout/dark-20-1100x760-settings-AI.png",
+      "observations": "Dark20px AI inputs and default-off disclosure retain legible labels and content scrolling.",
+      "sha256": "23ce2f4188d3a06b3d15089e0d40b024228300299584a9760f3cbb921be6cc66"
+    },
+    {
+      "path": "evidence/browser-full/appearance/light-20-confirmation-640x480.png",
+      "observations": "Minimum20px solid confirmation shows full warning and cancel/danger actions without overlap.",
+      "sha256": "b1e94c7ba3b631050dfa47374178665ad61bf6a6b07ad7f311aa5dde0b814895"
+    },
+    {
+      "path": "evidence/browser-full/captions/20-folder-640x480.png",
+      "observations": "Minimum20px folder/tag editing uses solid body and internally scrolling form above unobscured status/footer.",
+      "sha256": "16af6fa49b7acd05f260af84a1c77e23ace82447562138e050bd73f8622127a8"
+    }
+  ],
+  "coverage": "All seven required sizes represented,12/14/20px,light/dark/forced-colors,library/detail/organize/semantic/history/connection/AI/export/font/confirmation/folder."
+}

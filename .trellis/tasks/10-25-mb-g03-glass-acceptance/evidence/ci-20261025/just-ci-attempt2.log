@@ -1,0 +1,62 @@
+node scripts/ci.mjs
+
+[ci 1/12] install: START
+pnpm install --frozen-lockfile
+Scope: all 4 workspace projects
+✓ Lockfile passes supply-chain policies (verified 20h ago)
+Lockfile is up to date, resolution step is skipped
+Packages are copied from the content-addressable store to the virtual store.
+  Content-addressable store is at: D:\.pnpm-store\v11
+  Virtual store is at:             node_modules/.pnpm
+Progress: resolved 218, reused 218, downloaded 0, added 206
+Packages: +218
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 218, reused 218, downloaded 0, added 218, done
+
+devDependencies:
++ @eslint/js 10.0.1
++ @playwright/test 1.64.0
++ @testing-library/jest-dom 7.0.1
++ @testing-library/react 16.3.3
++ @types/node 26.6.5
++ eslint 10.12.0
++ globals 17.13.0
++ jsdom 30.1.2
++ json-schema-to-typescript 16.0.0
++ typescript 5.9.3
++ typescript-eslint 8.71.1
++ vitest 5.0.3
+
+Done in 1.6s using pnpm v12.12.0
+[ci 1/12] install: PASS in 1.8s
+
+[ci 2/12] lint: START
+pnpm lint
+$ eslint apps packages scripts tests eslint.config.js playwright.config.ts vitest.config.ts --max-warnings 0
+[ci 2/12] lint: PASS in 2.4s
+
+[ci 3/12] typecheck: START
+pnpm typecheck
+$ pnpm -r typecheck && tsc -p tsconfig.tools.json
+packages/protocol typecheck$ tsc -p tsconfig.json
+packages/protocol typecheck: Done
+apps/desktop typecheck$ tsc -p tsconfig.json
+apps/extension typecheck$ tsc -p tsconfig.json
+apps/extension typecheck: src/bridge.test.ts(2,67): error TS2307: Cannot find module '@markbridge/protocol' or its corresponding type declarations.
+apps/extension typecheck: src/bridge.ts(4,8): error TS2307: Cannot find module '@markbridge/protocol' or its corresponding type declarations.
+apps/extension typecheck: src/executor.test.ts(2,50): error TS2307: Cannot find module '@markbridge/protocol' or its corresponding type declarations.
+apps/extension typecheck: src/executor.ts(1,112): error TS2307: Cannot find module '@markbridge/protocol' or its corresponding type declarations.
+apps/extension typecheck: src/executor.ts(121,86): error TS7006: Parameter 'expected' implicitly has an 'any' type.
+apps/extension typecheck: Failed
+[ELIFECYCLE] Command failed with exit code 2.
+apps/desktop typecheck: Failed
+[ELIFECYCLE] Command failed with exit code 1.
+Error: ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL
+
+  × "pnpm recursive run" failed in D:
+  │ \Documents\Code\Tauri\Markbridge\apps\extension
+
+[ELIFECYCLE] Command failed with exit code 1.
+error: recipe `typecheck` failed on line 26 with exit code 1
+[ci 3/12] typecheck: FAIL after 3.3s (exit 1)
+error: recipe `ci` failed on line 88 with exit code 1

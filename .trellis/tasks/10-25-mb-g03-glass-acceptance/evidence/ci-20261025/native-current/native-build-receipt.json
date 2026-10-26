@@ -1,0 +1,23 @@
+{
+  "kind": "canonical_ci_artifact_binding",
+  "boundUtc": "2026-10-26T01:19:20.390237+00:00",
+  "status": "PASS",
+  "artifact": "D:\\Documents\\Code\\Tauri\\Markbridge\\runs\\airy-glass-native-target\\x86_64-pc-windows-msvc\\release\\markbridge-desktop.exe",
+  "targetDirectory": "D:\\Documents\\Code\\Tauri\\Markbridge\\runs\\airy-glass-native-target",
+  "target": "x86_64-pc-windows-msvc",
+  "exeSha256": "661468a8bb210e4cf6bcacfd0f1e63874e0ce47baf0291d8e2f5e7f2728ae84b",
+  "exeBytes": 25621504,
+  "canonicalCommand": "just ci -> pnpm build:native -> node scripts/native-build.mjs",
+  "ciNativePassLine": "Native release artifact: PASS; 25621504 bytes; SHA256 661468a8bb210e4cf6bcacfd0f1e63874e0ce47baf0291d8e2f5e7f2728ae84b.",
+  "ciLog": "../just-ci-attempt7.log",
+  "ciSourceInputs": "../source-inputs.json",
+  "ciSourceInputsSha256": "d48e700094e61919d9c78665a49e055dc86e43bb81adb7a9df0df00a55fc3d24",
+  "seeder": "D:\\Documents\\Code\\Tauri\\Markbridge\\runs\\airy-glass-native-target\\debug\\examples\\seed_profile_cache.exe",
+  "seederSha256": "f5eccf16fdc30665626dad565c86b255fbbea589fd4cc8cc7db4eca869634d8e",
+  "seederOrigin": "Existing Rust-built fixture seeder, fresh hash verified; no rebuild or product change in this binding",
+  "installation": "NOT_RUN",
+  "signing": "NOT_RUN",
+  "artifactScan": "PASS",
+  "canonicalCiBuildReceipt": "../native-build-receipt.json",
+  "canonicalCiBuildReceiptSha256": "b2c4dcd6bc1c686dc6527b26b385d28ccdfc5c1ff2df6ec9b9941bad25977dc4"
+}

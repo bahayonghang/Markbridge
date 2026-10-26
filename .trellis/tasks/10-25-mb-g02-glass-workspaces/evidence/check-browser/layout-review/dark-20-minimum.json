@@ -1,0 +1,13 @@
+{
+  "theme": "dark",
+  "fontSizePx": 20,
+  "viewport": {
+    "width": 640,
+    "height": 480
+  },
+  "result": {
+    "calls": [],
+    "width": 640,
+    "height": 480
+  }
+}

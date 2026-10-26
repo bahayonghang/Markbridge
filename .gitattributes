@@ -11,3 +11,10 @@
 # Generated protocol text is compared after newline normalization, and must
 # stay LF in Git even when core.autocrlf rewrites other text files on checkout.
 packages/protocol/src/generated/** text eol=lf
+
+# Glass-refactor receipts and frozen input snapshots carry raw-byte SHA256s.
+# Preserve their exact bytes in active and archived task directories.
+.trellis/tasks/**/10-25-mb-airy-glass-refactor/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+.trellis/tasks/**/10-25-mb-g01-glass-foundation/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+.trellis/tasks/**/10-25-mb-g02-glass-workspaces/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+.trellis/tasks/**/10-25-mb-g03-glass-acceptance/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

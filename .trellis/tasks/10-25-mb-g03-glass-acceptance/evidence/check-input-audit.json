@@ -1,0 +1,156 @@
+{
+  "capturedUtc": "2026-10-25T12:17:01.508710+00:00",
+  "comparisonCounts": {
+    "automated464": 464,
+    "native440": 440,
+    "automatedHelpers3": 3
+  },
+  "sourceMismatches": [],
+  "artifactChecks": {
+    "artifact": {
+      "path": "D:\\Documents\\Code\\Tauri\\Markbridge\\runs\\airy-glass-native-target\\x86_64-pc-windows-msvc\\release\\markbridge-desktop.exe",
+      "sha256": "33b9a6014b6da98555090f56fd30dcf0050f8ad75488e2981aba61fa5b414732",
+      "matchesReceipt": true
+    },
+    "seeder": {
+      "path": "D:\\Documents\\Code\\Tauri\\Markbridge\\runs\\airy-glass-native-target\\debug\\examples\\seed_profile_cache.exe",
+      "sha256": "2088ad7ab5bcf6293daaf2660cc5b8dbb0ef1feb063e84c1d964d630db1dc4a8",
+      "matchesReceipt": true
+    }
+  },
+  "helperClosure": [
+    {
+      "path": ".trellis/tasks/10-10-mb-13-windows-acceptance/evidence/current-native-driver.mjs",
+      "sha256": "8150639d545b98e0956e52b3b93ae360ccdbc3b3586f2846a1efd46e45009ba3",
+      "bytes": 23025,
+      "mtimeUtc": "2026-10-13T19:56:03.217677+00:00"
+    },
+    {
+      "path": ".trellis/tasks/10-10-mb-13-windows-acceptance/evidence/current-native-probe.mjs",
+      "sha256": "aced24d8737122f7ea76cd4965be94639b9908c165f1e817b6c92c53b11103dd",
+      "bytes": 4285,
+      "mtimeUtc": "2026-10-13T16:23:17.857983+00:00"
+    },
+    {
+      "path": ".trellis/tasks/10-10-mb-13-windows-acceptance/evidence/current-native-system.ps1",
+      "sha256": "722711f4f60547bf9f33209fbfa8d86b932c53473398988ab36755582bc87e7f",
+      "bytes": 21916,
+      "mtimeUtc": "2026-10-13T19:56:01.890126+00:00"
+    },
+    {
+      "path": ".trellis/tasks/10-10-mb-13-windows-acceptance/evidence/current-native-window.ps1",
+      "sha256": "abf40f270ce63905e72e3c8e1b7b98d3e9216900dacd08600ea49cd65cb7eb74",
+      "bytes": 5165,
+      "mtimeUtc": "2026-10-13T17:09:48.380764+00:00"
+    },
+    {
+      "path": ".trellis/tasks/10-25-mb-g03-glass-acceptance/automated-run.mjs",
+      "sha256": "df9e36bc82a58778f495031236b8f3d17cb44df5c8836ff6b80d71f300939df6",
+      "bytes": 4032,
+      "mtimeUtc": "2026-10-25T12:03:43.319510+00:00"
+    },
+    {
+      "path": ".trellis/tasks/10-25-mb-g03-glass-acceptance/evidence/native-build.config.json",
+      "sha256": "664d5b4fb0ae3d8812fee50dc88ee8de87506cfd1dbe3368d351d8219771e900",
+      "bytes": 83,
+      "mtimeUtc": "2026-10-25T12:03:31.319125+00:00"
+    },
+    {
+      "path": ".trellis/tasks/10-25-mb-g03-glass-acceptance/evidence/native-build.mjs",
+      "sha256": "050c836c9b810a5af6ca727ccbc79cd7b95259f7e62b630fee9e511300b70375",
+      "bytes": 2986,
+      "mtimeUtc": "2026-10-25T12:03:31.320145+00:00"
+    },
+    {
+      "path": ".trellis/tasks/10-25-mb-g03-glass-acceptance/evidence/native-fingerprint.mjs",
+      "sha256": "764189b6f57e19e172e89c1fd95adc7e619e9776f23924b38935d762b4259e05",
+      "bytes": 2482,
+      "mtimeUtc": "2026-10-25T12:04:32.137218+00:00"
+    },
+    {
+      "path": ".trellis/tasks/10-25-mb-g03-glass-acceptance/evidence/native-integration-attempt1.mjs",
+      "sha256": "a481a0c5c00fbdda62bb2716c9078a2866d6dbf5a882d5546cd9e0aa98acf9f5",
+      "bytes": 26746,
+      "mtimeUtc": "2026-10-25T12:08:49.912755+00:00"
+    },
+    {
+      "path": ".trellis/tasks/10-25-mb-g03-glass-acceptance/evidence/native-integration.mjs",
+      "sha256": "47b442f588c6da218e79c3f64268f86ede23b92ca3fb1a0cac66f46a170eabcd",
+      "bytes": 27186,
+      "mtimeUtc": "2026-10-25T12:08:49.912755+00:00"
+    },
+    {
+      "path": ".trellis/tasks/10-25-mb-g03-glass-acceptance/evidence/native-performance.mjs",
+      "sha256": "1308f6241b1e81f80ca285a45e67dea14e52c06cd5de45a37886f58be0ca2bf7",
+      "bytes": 15169,
+      "mtimeUtc": "2026-10-25T12:05:51.031179+00:00"
+    },
+    {
+      "path": ".trellis/tasks/10-25-mb-g03-glass-acceptance/evidence/native-window.ps1",
+      "sha256": "e48bc35e5b3994d43a4040d50ded3c611d6b63759acb85fe94675ec139169694",
+      "bytes": 5384,
+      "mtimeUtc": "2026-10-25T12:04:32.135866+00:00"
+    },
+    {
+      "path": ".trellis/tasks/10-25-mb-g03-glass-acceptance/scroll-benchmark.spec.ts",
+      "sha256": "08a6794d4be1701aba0aebffcb3f9ea636ddb2a7b9a4868d260bcd85dc34f048",
+      "bytes": 5157,
+      "mtimeUtc": "2026-10-25T12:05:07.302638+00:00"
+    },
+    {
+      "path": ".trellis/tasks/10-25-mb-g03-glass-acceptance/validation.config.mjs",
+      "sha256": "699ddf13e9528d7f189241e4db53fd3a3bf5cd45cb08bd8574e6a8a77aa5b0dc",
+      "bytes": 1001,
+      "mtimeUtc": "2026-10-25T12:03:43.318993+00:00"
+    },
+    {
+      "path": ".trellis/tasks/archive/2026-10/10-12-mb-r01-shell/evidence/native-window.ps1",
+      "sha256": "2513f902c3be62e22d27223c5844590723c0cfbb6173210557f1c5271d7b9aba",
+      "bytes": 2803,
+      "mtimeUtc": "2026-10-13T07:21:52.297185+00:00",
+      "reason": "transitive repo-joined helper from archivedR02/R08 drivers"
+    },
+    {
+      "path": ".trellis/tasks/archive/2026-10/10-12-mb-r02-connection/evidence/native-driver.mjs",
+      "sha256": "313648165b9ea98c2c1aeda18f1d76b3676a5901cfc28fad6e7286233d85f983",
+      "bytes": 7909,
+      "mtimeUtc": "2026-10-13T15:19:02.291718+00:00"
+    },
+    {
+      "path": ".trellis/tasks/archive/2026-10/10-12-mb-r08-acceptance/evidence/native-chrome.mjs",
+      "sha256": "60c234cd603df1ad5853bac4ceefcd25955a8d19dc368c8ac83669ec3c9c7ace",
+      "bytes": 3446,
+      "mtimeUtc": "2026-10-13T15:19:02.103124+00:00"
+    },
+    {
+      "path": ".trellis/tasks/archive/2026-10/10-12-mb-r08-acceptance/evidence/native-driver.mjs",
+      "sha256": "5d93dae8727bcb650f939f25ec8e5545bac83525128bedc6fd699684d581ee95",
+      "bytes": 8456,
+      "mtimeUtc": "2026-10-13T15:19:02.111311+00:00"
+    },
+    {
+      "path": "apps/desktop/src/features/library/b10k.ts",
+      "sha256": "a983c75f8727a482ff11f2154fe858cbefd0870d4bcad869f3903f2cb5c52dbc",
+      "bytes": 5379,
+      "mtimeUtc": "2026-10-11T12:06:08.293699+00:00"
+    },
+    {
+      "path": "scripts/native-build.mjs",
+      "sha256": "e704b7f6bd0d176e58748df3d216ed147039d3e220862f5299683dd971813c37",
+      "bytes": 6778,
+      "mtimeUtc": "2026-10-14T06:20:20.262785+00:00"
+    },
+    {
+      "path": "scripts/run-command.mjs",
+      "sha256": "a13d72337836678b0e1c0bbe397cff8facad38420c03ed4717f48c08bdc91caa",
+      "bytes": 1390,
+      "mtimeUtc": "2026-10-17T17:15:53.472581+00:00"
+    }
+  ],
+  "status": "PASS",
+  "screenshotMetadataAudit": {
+    "reviewEntries": 14,
+    "allPathsExist": true,
+    "nonAsciiMetadata": "Unicode codepoints and file paths verified; tool stdout codepage artifact is not a file defect"
+  }
+}

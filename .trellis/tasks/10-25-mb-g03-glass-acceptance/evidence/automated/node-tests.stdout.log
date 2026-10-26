@@ -1,0 +1,268 @@
+TAP version 13
+# Subtest: runVisible copies stdout and stderr onto one stream
+ok 1 - runVisible copies stdout and stderr onto one stream
+  ---
+  duration_ms: 156.2014
+  type: 'test'
+  ...
+# Subtest: runVisible reports a quiet child and then resolves
+ok 2 - runVisible reports a quiet child and then resolves
+  ---
+  duration_ms: 302.372
+  type: 'test'
+  ...
+# Subtest: runVisible preserves a nonzero child status
+ok 3 - runVisible preserves a nonzero child status
+  ---
+  duration_ms: 126.3062
+  type: 'test'
+  ...
+# Subtest: runVisible captures machine stdout separately while forwarding diagnostics
+ok 4 - runVisible captures machine stdout separately while forwarding diagnostics
+  ---
+  duration_ms: 117.2307
+  type: 'test'
+  ...
+# Subtest: local CI preserves the commands and order of the Windows workflow
+ok 5 - local CI preserves the commands and order of the Windows workflow
+  ---
+  duration_ms: 4.0788
+  type: 'test'
+  ...
+# Subtest: local CI stops at the failing stage and preserves its exit status
+ok 6 - local CI stops at the failing stage and preserves its exit status
+  ---
+  duration_ms: 0.4187
+  type: 'test'
+  ...
+# Subtest: local CI reports a terminated stage as failure
+ok 7 - local CI reports a terminated stage as failure
+  ---
+  duration_ms: 0.3034
+  type: 'test'
+  ...
+# Subtest: native dev preserves JSON arguments, desktop cwd, port and CLI exit status
+ok 8 - native dev preserves JSON arguments, desktop cwd, port and CLI exit status
+  ---
+  duration_ms: 657.2021
+  type: 'test'
+  ...
+# Subtest: MV3 read-only bridge has bounded permissions and local worker
+ok 9 - MV3 read-only bridge has bounded permissions and local worker
+  ---
+  duration_ms: 1.3143
+  type: 'test'
+  ...
+# Subtest: capability is limited to local main window
+ok 10 - capability is limited to local main window
+  ---
+  duration_ms: 1.4512
+  type: 'test'
+  ...
+# Subtest: native artifact scanner rejects machine paths and secrets in ASCII and UTF-16
+ok 11 - native artifact scanner rejects machine paths and secrets in ASCII and UTF-16
+  ---
+  duration_ms: 9.4609
+  type: 'test'
+  ...
+# Subtest: native formats require host architecture and an executable file type
+ok 12 - native formats require host architecture and an executable file type
+  ---
+  duration_ms: 1.0568
+  type: 'test'
+  ...
+# Subtest: POSIX source/cache leaks fail without rejecting native system or virtual paths
+ok 13 - POSIX source/cache leaks fail without rejecting native system or virtual paths
+  ---
+  duration_ms: 0.3672
+  type: 'test'
+  ...
+# Subtest: native targets pin output and bundle arguments independently of inherited cross-target settings
+ok 14 - native targets pin output and bundle arguments independently of inherited cross-target settings
+  ---
+  duration_ms: 2.1792
+  type: 'test'
+  ...
+# Subtest: Rust host parsing rejects missing, ambiguous and malformed metadata
+ok 15 - Rust host parsing rejects missing, ambiguous and malformed metadata
+  ---
+  duration_ms: 0.9246
+  type: 'test'
+  ...
+# Subtest: packaged program byte mismatch and wrong format remain hard failures
+ok 16 - packaged program byte mismatch and wrong format remain hard failures
+  ---
+  duration_ms: 0.9763
+  type: 'test'
+  ...
+# Subtest: AppImage may differ in loader metadata but not in program sections
+ok 17 - AppImage may differ in loader metadata but not in program sections
+  ---
+  duration_ms: 1.1354
+  type: 'test'
+  ...
+# Subtest: Debian selectors reject missing/duplicate program and metadata mismatches
+ok 18 - Debian selectors reject missing/duplicate program and metadata mismatches
+  ---
+  duration_ms: 0.8853
+  type: 'test'
+  ...
+# Subtest: owned extraction cleanup does not traverse a child junction or accept redirected roots
+ok 19 - owned extraction cleanup does not traverse a child junction or accept redirected roots
+  ---
+  duration_ms: 28.877
+  type: 'test'
+  ...
+# Subtest: extraction ownership marker tampering prevents cleanup
+ok 20 - extraction ownership marker tampering prevents cleanup
+  ---
+  duration_ms: 6.9018
+  type: 'test'
+  ...
+# Subtest: Debian inspection reads one regular program to memory without filesystem archive extraction
+ok 21 - Debian inspection reads one regular program to memory without filesystem archive extraction
+  ---
+  duration_ms: 23.5964
+  type: 'test'
+  ...
+# Subtest: Mac app inspection validates actual arm64 executable and configured plist values
+ok 22 - Mac app inspection validates actual arm64 executable and configured plist values
+  ---
+  duration_ms: 20.0668
+  type: 'test'
+  ...
+# Subtest: DMG detach failure preserves owned extraction root instead of recursively deleting a mounted volume
+ok 23 - DMG detach failure preserves owned extraction root instead of recursively deleting a mounted volume
+  ---
+  duration_ms: 29.3202
+  type: 'test'
+  ...
+# Subtest: AppImage inspection uses only type-2 extraction and scans actual contained program
+ok 24 - AppImage inspection uses only type-2 extraction and scans actual contained program
+  ---
+  duration_ms: 38.1619
+  type: 'test'
+  ...
+# Subtest: bundle selection ignores other versions but rejects missing/ambiguous current artifacts
+ok 25 - bundle selection ignores other versions but rejects missing/ambiguous current artifacts
+  ---
+  duration_ms: 16.2352
+  type: 'test'
+  ...
+# Subtest: local install uses silent current-user NSIS and not the isolated acceptance flags
+ok 26 - local install uses silent current-user NSIS and not the isolated acceptance flags
+  ---
+  duration_ms: 0.4514
+  type: 'test'
+  ...
+# Subtest: locked bundle filename contracts preserve product casing and exact target architecture
+ok 27 - locked bundle filename contracts preserve product casing and exact target architecture
+  ---
+  duration_ms: 12.0341
+  type: 'test'
+  ...
+# [protocol] Building the current Rust schema exporter...
+#    Compiling markbridge-protocol v0.1.0 (D:\\Documents\\Code\\Tauri\\Markbridge\\crates\\protocol)
+#     Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.13s
+# [protocol] Generating installed-font-catalog...
+# [protocol] Generating startup-state...
+# [protocol] Generating wire-message...
+# [protocol] Generating bridge-state...
+# [protocol] Generating pairing-offer...
+# [protocol] Generating mirror-tree...
+# [protocol] Generating chrome-profiles...
+# [protocol] Generating library-nodes...
+# [protocol] Generating library-page...
+# [protocol] Generating library-search...
+# [protocol] Generating library-detail...
+# [protocol] Generating library-count...
+# [protocol] Generating library-query...
+# [protocol] Generating library-query-page...
+# [protocol] Generating batch-edit-preview...
+# [protocol] Generating batch-edit-status...
+# [protocol] Generating edit-preview...
+# [protocol] Generating apply-result...
+# [protocol] Generating operation-list...
+# [protocol] Generating operation-detail...
+# [protocol] Generating undo-preview...
+# [protocol] Generating export-save-result...
+# [protocol] Generating diagnostic-report...
+# [protocol] Generating diagnostic-save-result...
+# [protocol] Generating edit-document...
+# [protocol] Generating tag-catalog...
+# [protocol] Generating title-encoding...
+# [protocol] Generating content-preview...
+# [protocol] Generating web-preview...
+# [protocol] Generating ai-settings...
+# [protocol] Generating ai-connection...
+# [protocol] Generating ai-suggestion...
+# [protocol] Generating ai-apply...
+# [protocol] Generating organization-plan...
+# [protocol] Generating maintenance-report...
+# [protocol] Generating semantic-settings...
+# [protocol] Generating semantic-config...
+# [protocol] Generating semantic-scope...
+# [protocol] Generating semantic-review...
+# [protocol] Generating semantic-status...
+# [protocol] Generating semantic-query...
+# [protocol] Generating semantic-result...
+# [protocol] Generating semantic-model-check...
+# [protocol] Generating text-search...
+# Subtest: drift gate rejects changed TypeScript and schema, without touching tracked outputs
+    # Subtest: accepts freshly generated outputs
+    ok 1 - accepts freshly generated outputs
+      ---
+      duration_ms: 57.1846
+      type: 'test'
+      ...
+    # Subtest: accepts Windows CRLF checkouts
+    ok 2 - accepts Windows CRLF checkouts
+      ---
+      duration_ms: 193.1855
+      type: 'test'
+      ...
+    # Subtest: rejects TypeScript drift
+    ok 3 - rejects TypeScript drift
+      ---
+      duration_ms: 50.8042
+      type: 'test'
+      ...
+    # Subtest: rejects schema drift
+    ok 4 - rejects schema drift
+      ---
+      duration_ms: 49.9509
+      type: 'test'
+      ...
+    # Subtest: rejects standalone validator drift
+    ok 5 - rejects standalone validator drift
+      ---
+      duration_ms: 52.7044
+      type: 'test'
+      ...
+    # Subtest: rejects missing outputs
+    ok 6 - rejects missing outputs
+      ---
+      duration_ms: 57.8796
+      type: 'test'
+      ...
+    1..6
+ok 28 - drift gate rejects changed TypeScript and schema, without touching tracked outputs
+  ---
+  duration_ms: 4102.2211
+  type: 'test'
+  ...
+# Subtest: generated validators run with string code generation disabled, as required by MV3 CSP
+ok 29 - generated validators run with string code generation disabled, as required by MV3 CSP
+  ---
+  duration_ms: 172.8361
+  type: 'test'
+  ...
+1..29
+# tests 35
+# suites 0
+# pass 35
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4742.4198

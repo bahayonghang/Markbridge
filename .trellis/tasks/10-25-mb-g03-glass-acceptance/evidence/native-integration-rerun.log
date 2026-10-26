@@ -1,0 +1,14 @@
+{"name":"ordinary_general_does_not_enumerate_or_persist","status":"PASS"}
+{"name":"real_local_font_catalog_crosschecked_cjk_latin","status":"PASS"}
+{"name":"real_candidate_glyphs_cancel_apply_and_focus","status":"PASS"}
+{"name":"shared_native_font_and_row_metrics","status":"PASS"}
+{"name":"native_hidden_list_anchor_bottom_checkbox_and_draft","status":"PASS"}
+{"name":"actual_125_and_150_percent_monitors_maximum_font","status":"PASS"}
+{"name":"calibrated_no_business_or_remote_font_effect","status":"PASS"}
+{"name":"native_history_export_portal_and_real_save_cancel","status":"PASS"}
+{"name":"remote_preview_denies_new_font_and_all_registered_commands","status":"PASS"}
+{"name":"real_process_exit_and_new_pid_restore_preferences","status":"PASS"}
+{"name":"native_reset_only_v2","status":"PASS"}
+{"name":"native_legacy_12_13_15_migration_preserves_v1_bytes","status":"PASS"}
+{"name":"synthetic_missing_font_truthful_status_and_actual_local_fallback","status":"PASS"}
+{"runId":"run-1792930130353-bc46d593","status":"PASS","output":"D:\\Documents\\Code\\Tauri\\Markbridge\\.trellis\\tasks\\10-25-mb-g03-glass-acceptance\\evidence\\native\\run-1792930130353-bc46d593"}

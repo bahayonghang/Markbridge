@@ -1,0 +1,15 @@
+{
+  "createdAtUtc": "2026-10-26T00:53:59.991938+00:00",
+  "status": "PASS",
+  "basis": "Existing saved independent check-report.md and check-receipt.json, verdict PASS before child usage-limit notification",
+  "originalAutomatedReceiptIsFrozenPrePerformance": true,
+  "productionOrTestChangesAfterIndependentCheck": false,
+  "postReviewChanges": "outcome metadata/checklist/task-map, completion report and receipt-time clarification only; journal recorded separately",
+  "files": {
+    ".trellis/tasks/10-25-mb-g03-glass-acceptance/evidence/check-report.md": "94caef0c892423f988ddf2cd008f5e9eabb0933d974eb18c345a87b6161f06aa",
+    ".trellis/tasks/10-25-mb-g03-glass-acceptance/evidence/check-receipt.json": "bda57e835dad1de992e6d1e58b9b9da846bf9c0e6da8f2992c90a858fc7b6208",
+    ".trellis/tasks/10-25-mb-g03-glass-acceptance/evidence/check-final-input-audit.json": "d2d9d35e303c757123cf146d79a63f2443fa53a05c6085df772ec893982f9e0c",
+    ".trellis/tasks/10-25-mb-g03-glass-acceptance/evidence/scroll-comparison.json": "6116b5fc3f3d48f8f9ca6953ba2a70c16fcf08f9a9958eed58c607efa2f1f878",
+    ".trellis/tasks/10-25-mb-airy-glass-refactor/completion-report.md": "33c9c6026764352fec597e3f4d412d51a326f28532f4a4a28988cc77d51e2276"
+  }
+}

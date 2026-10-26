@@ -1,0 +1,106 @@
+{
+  "status": "PASS_AUTOMATED_PERFORMANCE_PENDING",
+  "sourceFingerprint": "f2e1343f521771151702d6f0f30b094bcdc8f42e143320c1fc20454ab77ba1b8",
+  "sourceFileCount": 464,
+  "helpers": [
+    {
+      "path": "automated-run.mjs",
+      "sha256": "df9e36bc82a58778f495031236b8f3d17cb44df5c8836ff6b80d71f300939df6",
+      "bytes": 4032
+    },
+    {
+      "path": "validation.config.mjs",
+      "sha256": "699ddf13e9528d7f189241e4db53fd3a3bf5cd45cb08bd8574e6a8a77aa5b0dc",
+      "bytes": 1001
+    },
+    {
+      "path": "scroll-benchmark.spec.ts",
+      "sha256": "08a6794d4be1701aba0aebffcb3f9ea636ddb2a7b9a4868d260bcd85dc34f048",
+      "bytes": 5157
+    }
+  ],
+  "vitest": {
+    "numTotalTests": 272,
+    "numPassedTests": 272,
+    "numFailedTests": 0
+  },
+  "nodeTests": {
+    "tests": 35,
+    "pass": 35,
+    "fail": 0,
+    "skipped": 0,
+    "report": "node-tests.stdout.log"
+  },
+  "browser": {
+    "startTime": "2026-10-25T12:04:05.399Z",
+    "duration": 288735.408,
+    "expected": 231,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "steps": [
+    {
+      "name": "lint",
+      "code": 0,
+      "elapsedMs": 6547
+    },
+    {
+      "name": "typecheck-desktop",
+      "code": 0,
+      "elapsedMs": 4606
+    },
+    {
+      "name": "typecheck-extension",
+      "code": 0,
+      "elapsedMs": 1755
+    },
+    {
+      "name": "typecheck-protocol",
+      "code": 0,
+      "elapsedMs": 1759
+    },
+    {
+      "name": "typecheck-tools",
+      "code": 0,
+      "elapsedMs": 2038
+    },
+    {
+      "name": "vitest",
+      "code": 0,
+      "elapsedMs": 38874
+    },
+    {
+      "name": "node-tests",
+      "code": 0,
+      "elapsedMs": 4864
+    },
+    {
+      "name": "protocol",
+      "code": 0,
+      "elapsedMs": 2379
+    },
+    {
+      "name": "build-protocol",
+      "code": 0,
+      "elapsedMs": 1056
+    },
+    {
+      "name": "build-desktop",
+      "code": 0,
+      "elapsedMs": 608
+    },
+    {
+      "name": "build-extension",
+      "code": 0,
+      "elapsedMs": 575
+    },
+    {
+      "name": "artifacts",
+      "code": 0,
+      "elapsedMs": 203
+    }
+  ],
+  "screenshotReview": "screenshot-review.json",
+  "runtimeAudit": "../../../10-25-mb-airy-glass-refactor/research/locked-runtime-audit.json"
+}

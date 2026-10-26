@@ -1,0 +1,299 @@
+{
+  "config": {
+    "argv": [
+      "D:\\GreenSoftware\\node\\node.exe",
+      "D:\\Documents\\Code\\Tauri\\Markbridge\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "--config",
+      ".trellis/tasks/10-25-mb-g01-glass-foundation/research/validation.config.mjs",
+      "appearance.spec.ts",
+      "workspace-layout.spec.ts",
+      "--grep",
+      "C03 workspace (light|dark) 14 1440x900|C03 workspace light 20 640x480|C02 (light|dark) contrast uses rendered semantic colors",
+      "--output",
+      "test-results/glass-baseline-recheck",
+      "--reporter=json"
+    ],
+    "configFile": "D:\\Documents\\Code\\Tauri\\Markbridge\\.trellis\\tasks\\10-25-mb-g01-glass-foundation\\research\\validation.config.mjs",
+    "rootDir": "D:/Documents/Code/Tauri/Markbridge/tests/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "D:/Documents/Code/Tauri/Markbridge/test-results/glass-baseline-recheck",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "D:/Documents/Code/Tauri/Markbridge/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "D:\\Documents\\Code\\Tauri\\Markbridge\\test-results\\glass-baseline-recheck",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "",
+        "testDir": "D:\\Documents\\Code\\Tauri\\Markbridge\\tests\\e2e",
+        "snapshotDir": "D:\\Documents\\Code\\Tauri\\Markbridge\\tests\\e2e",
+        "testIgnore": [],
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 30000,
+        "use": {
+          "baseURL": "http://127.0.0.1:14936",
+          "headless": true,
+          "channel": "msedge"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": ""
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.0",
+    "workers": 1,
+    "webServer": {
+      "command": "node \"D:\\Documents\\Code\\Tauri\\Markbridge/node_modules/vite/bin/vite.js\"",
+      "cwd": "D:\\Documents\\Code\\Tauri\\Markbridge\\runs\\airy-glass-baseline\\apps\\desktop",
+      "url": "http://127.0.0.1:14936",
+      "reuseExistingServer": false,
+      "env": {
+        "MARKBRIDGE_DEV_PORT": "14936"
+      }
+    }
+  },
+  "suites": [
+    {
+      "title": "appearance.spec.ts",
+      "file": "appearance.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "C02 light contrast uses rendered semantic colors",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2207,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-25T11:39:10.301Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "800c8f995c061dbbf429-ffd4676ae151249d9762",
+          "file": "appearance.spec.ts",
+          "line": 168,
+          "column": 3
+        },
+        {
+          "title": "C02 dark contrast uses rendered semantic colors",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1896,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-25T11:39:12.845Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "800c8f995c061dbbf429-7c1682bfaabfbec3340a",
+          "file": "appearance.spec.ts",
+          "line": 168,
+          "column": 3
+        }
+      ]
+    },
+    {
+      "title": "workspace-layout.spec.ts",
+      "file": "workspace-layout.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "C03 workspace light 14 1440x900",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1902,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-25T11:39:14.772Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "87206d496e61dcf70a84-29ef7467db46112ef291",
+          "file": "workspace-layout.spec.ts",
+          "line": 75,
+          "column": 3
+        },
+        {
+          "title": "C03 workspace light 20 640x480",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1849,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-25T11:39:16.681Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "87206d496e61dcf70a84-15147470f94b069094db",
+          "file": "workspace-layout.spec.ts",
+          "line": 75,
+          "column": 3
+        },
+        {
+          "title": "C03 workspace dark 14 1440x900",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2080,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-25T11:39:18.537Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "87206d496e61dcf70a84-d3bc9a583b17dd5866a8",
+          "file": "workspace-layout.spec.ts",
+          "line": 75,
+          "column": 3
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-25T11:39:09.432Z",
+    "duration": 12713.702000000001,
+    "expected": 5,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

@@ -1,0 +1,707 @@
+{
+  "phase": "after",
+  "theme": "light",
+  "fontSize": 14,
+  "width": 1440,
+  "height": 900,
+  "measurements": [
+    {
+      "name": "library",
+      "x": 233,
+      "right": 1423,
+      "width": 1190,
+      "clientWidth": 1190,
+      "scrollWidth": 1190,
+      "controls": [
+        {
+          "label": "测试研究资料 · Chrome另一份资料 · Chrome",
+          "x": 257,
+          "right": 437,
+          "width": 180
+        },
+        {
+          "label": "",
+          "x": 449,
+          "right": 1009,
+          "width": 560
+        },
+        {
+          "label": "详情",
+          "x": 1021,
+          "right": 1101,
+          "width": 80
+        }
+      ],
+      "documentWidth": 1440,
+      "documentHeight": 900,
+      "viewportWidth": 1440,
+      "viewportHeight": 900
+    },
+    {
+      "name": "detail",
+      "x": 1048.609375,
+      "right": 1423,
+      "width": 374.390625,
+      "clientWidth": 373,
+      "scrollWidth": 373,
+      "controls": [
+        {
+          "label": "关闭详情，返回列表",
+          "x": 1359,
+          "right": 1399,
+          "width": 40
+        },
+        {
+          "label": "信息",
+          "x": 1073.609375,
+          "right": 1179.40625,
+          "width": 105.796875
+        },
+        {
+          "label": "标签备注",
+          "x": 1183.40625,
+          "right": 1289.203125,
+          "width": 105.796875
+        },
+        {
+          "label": "内容预览",
+          "x": 1293.203125,
+          "right": 1399,
+          "width": 105.796875
+        },
+        {
+          "label": "在浏览器中打开",
+          "x": 1073.609375,
+          "right": 1197.609375,
+          "width": 124
+        },
+        {
+          "label": "诊断信息",
+          "x": 1073.609375,
+          "right": 1399,
+          "width": 325.390625
+        },
+        {
+          "label": "",
+          "x": 1073.609375,
+          "right": 1399,
+          "width": 325.390625
+        },
+        {
+          "label": "",
+          "x": 1073.609375,
+          "right": 1399,
+          "width": 325.390625
+        },
+        {
+          "label": "预览修改",
+          "x": 1073.609375,
+          "right": 1155.609375,
+          "width": 82
+        },
+        {
+          "label": "移动",
+          "x": 1163.609375,
+          "right": 1217.609375,
+          "width": 54
+        },
+        {
+          "label": "预览删除",
+          "x": 1225.609375,
+          "right": 1307.609375,
+          "width": 82
+        },
+        {
+          "label": "上移",
+          "x": 1315.609375,
+          "right": 1369.609375,
+          "width": 54
+        },
+        {
+          "label": "下移",
+          "x": 1073.609375,
+          "right": 1127.609375,
+          "width": 54
+        }
+      ],
+      "documentWidth": 1440,
+      "documentHeight": 900,
+      "viewportWidth": 1440,
+      "viewportHeight": 900
+    },
+    {
+      "name": "整理",
+      "x": 308,
+      "right": 1348,
+      "width": 1040,
+      "clientWidth": 1040,
+      "scrollWidth": 1040,
+      "controls": [
+        {
+          "label": "返回书签选择范围",
+          "x": 1210,
+          "right": 1348,
+          "width": 138
+        },
+        {
+          "label": "",
+          "x": 308,
+          "right": 324,
+          "width": 16
+        },
+        {
+          "label": "",
+          "x": 491.15625,
+          "right": 507.15625,
+          "width": 16
+        },
+        {
+          "label": "使用当前选择",
+          "x": 308,
+          "right": 418,
+          "width": 110
+        },
+        {
+          "label": "重复与链接",
+          "x": 308,
+          "right": 404,
+          "width": 96
+        },
+        {
+          "label": "AI 文件夹",
+          "x": 408,
+          "right": 492.59375,
+          "width": 84.59375
+        },
+        {
+          "label": "单条建议",
+          "x": 496.59375,
+          "right": 578.59375,
+          "width": 82
+        },
+        {
+          "label": "检查重复",
+          "x": 308,
+          "right": 390,
+          "width": 82
+        },
+        {
+          "label": "检查链接",
+          "x": 398,
+          "right": 480,
+          "width": 82
+        },
+        {
+          "label": "取消检查",
+          "x": 488,
+          "right": 570,
+          "width": 82
+        },
+        {
+          "label": "预览清理",
+          "x": 308,
+          "right": 390,
+          "width": 82
+        },
+        {
+          "label": "确认清理",
+          "x": 398,
+          "right": 480,
+          "width": 82
+        },
+        {
+          "label": "查看操作历史",
+          "x": 1238,
+          "right": 1348,
+          "width": 110
+        }
+      ],
+      "documentWidth": 1440,
+      "documentHeight": 900,
+      "viewportWidth": 1440,
+      "viewportHeight": 900
+    },
+    {
+      "name": "语义检索",
+      "x": 308,
+      "right": 1348,
+      "width": 1040,
+      "clientWidth": 1040,
+      "scrollWidth": 1040,
+      "controls": [
+        {
+          "label": "返回普通搜索",
+          "x": 1238,
+          "right": 1348,
+          "width": 110
+        },
+        {
+          "label": "语义设置",
+          "x": 1176,
+          "right": 1258,
+          "width": 82
+        },
+        {
+          "label": "刷新状态",
+          "x": 1266,
+          "right": 1348,
+          "width": 82
+        },
+        {
+          "label": "",
+          "x": 308,
+          "right": 324,
+          "width": 16
+        },
+        {
+          "label": "",
+          "x": 491.15625,
+          "right": 507.15625,
+          "width": 16
+        },
+        {
+          "label": "审查本次范围",
+          "x": 308,
+          "right": 418,
+          "width": 110
+        }
+      ],
+      "documentWidth": 1440,
+      "documentHeight": 900,
+      "viewportWidth": 1440,
+      "viewportHeight": 900
+    },
+    {
+      "name": "history",
+      "x": 257,
+      "right": 1399,
+      "width": 1142,
+      "clientWidth": 1142,
+      "scrollWidth": 1142,
+      "controls": [
+        {
+          "label": "重新查询回执",
+          "x": 1199,
+          "right": 1309,
+          "width": 110
+        },
+        {
+          "label": "备份导出",
+          "x": 1317,
+          "right": 1399,
+          "width": 82
+        },
+        {
+          "label": "移动2026/10/12 06:13:20 · 1 项已完成查看详情",
+          "x": 257,
+          "right": 1289,
+          "width": 1032
+        },
+        {
+          "label": "撤销此记录",
+          "x": 1301,
+          "right": 1387,
+          "width": 86
+        },
+        {
+          "label": "移动2026/10/12 06:12:20 · 2 项结果不确定查看详情",
+          "x": 257,
+          "right": 1289,
+          "width": 1032
+        },
+        {
+          "label": "撤销此记录",
+          "x": 1301,
+          "right": 1387,
+          "width": 86
+        },
+        {
+          "label": "移动2026/10/12 06:11:20 · 3 项部分完成查看详情",
+          "x": 257,
+          "right": 1289,
+          "width": 1032
+        },
+        {
+          "label": "撤销此记录",
+          "x": 1301,
+          "right": 1387,
+          "width": 86
+        },
+        {
+          "label": "移动2026/10/12 06:10:20 · 4 项执行失败查看详情",
+          "x": 257,
+          "right": 1289,
+          "width": 1032
+        },
+        {
+          "label": "撤销此记录",
+          "x": 1301,
+          "right": 1387,
+          "width": 86
+        },
+        {
+          "label": "移动2026/10/12 06:09:20 · 5 项撤销存在冲突查看详情",
+          "x": 257,
+          "right": 1289,
+          "width": 1032
+        },
+        {
+          "label": "撤销此记录",
+          "x": 1301,
+          "right": 1387,
+          "width": 86
+        }
+      ],
+      "documentWidth": 1440,
+      "documentHeight": 900,
+      "viewportWidth": 1440,
+      "viewportHeight": 900
+    },
+    {
+      "name": "settings-通用",
+      "x": 441,
+      "right": 1399,
+      "width": 958,
+      "clientWidth": 958,
+      "scrollWidth": 958,
+      "controls": [
+        {
+          "label": "跟随系统",
+          "x": 1039,
+          "right": 1153.65625,
+          "width": 114.65625
+        },
+        {
+          "label": "浅色",
+          "x": 1161.65625,
+          "right": 1276.328125,
+          "width": 114.671875
+        },
+        {
+          "label": "深色",
+          "x": 1284.328125,
+          "right": 1399,
+          "width": 114.671875
+        },
+        {
+          "label": "选择字体",
+          "x": 1317,
+          "right": 1399,
+          "width": 82
+        },
+        {
+          "label": "",
+          "x": 1039,
+          "right": 1139,
+          "width": 100
+        },
+        {
+          "label": "12 px",
+          "x": 1039,
+          "right": 1096.359375,
+          "width": 57.359375
+        },
+        {
+          "label": "14 px",
+          "x": 1104.359375,
+          "right": 1161.71875,
+          "width": 57.359375
+        },
+        {
+          "label": "16 px",
+          "x": 1169.71875,
+          "right": 1227.078125,
+          "width": 57.359375
+        },
+        {
+          "label": "18 px",
+          "x": 1235.078125,
+          "right": 1292.4375,
+          "width": 57.359375
+        },
+        {
+          "label": "20 px",
+          "x": 1300.4375,
+          "right": 1360.03125,
+          "width": 59.59375
+        },
+        {
+          "label": "恢复默认外观",
+          "x": 441,
+          "right": 551,
+          "width": 110
+        }
+      ],
+      "documentWidth": 1440,
+      "documentHeight": 900,
+      "viewportWidth": 1440,
+      "viewportHeight": 900
+    },
+    {
+      "name": "settings-Chrome 连接",
+      "x": 441,
+      "right": 1399,
+      "width": 958,
+      "clientWidth": 958,
+      "scrollWidth": 958,
+      "controls": [
+        {
+          "label": "浏览此资料",
+          "x": 441,
+          "right": 537,
+          "width": 96
+        },
+        {
+          "label": "重新连接",
+          "x": 545,
+          "right": 627,
+          "width": 82
+        },
+        {
+          "label": "吊销配对",
+          "x": 635,
+          "right": 717,
+          "width": 82
+        },
+        {
+          "label": "浏览此资料",
+          "x": 441,
+          "right": 537,
+          "width": 96
+        },
+        {
+          "label": "重新连接",
+          "x": 545,
+          "right": 627,
+          "width": 82
+        },
+        {
+          "label": "吊销配对",
+          "x": 635,
+          "right": 717,
+          "width": 82
+        },
+        {
+          "label": "选择只读文件目录",
+          "x": 441,
+          "right": 1399,
+          "width": 958
+        },
+        {
+          "label": "",
+          "x": 441,
+          "right": 681,
+          "width": 240
+        },
+        {
+          "label": "枚举资料",
+          "x": 693,
+          "right": 775,
+          "width": 82
+        },
+        {
+          "label": "重新读取",
+          "x": 787,
+          "right": 869,
+          "width": 82
+        },
+        {
+          "label": "导出诊断 JSON",
+          "x": 441,
+          "right": 560.296875,
+          "width": 119.296875
+        },
+        {
+          "label": "1. 准备 Chrome 扩展",
+          "x": 441,
+          "right": 1399,
+          "width": 958
+        },
+        {
+          "label": "开发构建：扩展目录",
+          "x": 441,
+          "right": 1399,
+          "width": 958
+        },
+        {
+          "label": "高级：连接端口",
+          "x": 441,
+          "right": 553.828125,
+          "width": 112.828125
+        },
+        {
+          "label": "",
+          "x": 441,
+          "right": 581,
+          "width": 140
+        },
+        {
+          "label": "连接已启动",
+          "x": 565.828125,
+          "right": 661.828125,
+          "width": 96
+        },
+        {
+          "label": "",
+          "x": 441,
+          "right": 681,
+          "width": 240
+        },
+        {
+          "label": "生成配对串",
+          "x": 693,
+          "right": 789,
+          "width": 96
+        }
+      ],
+      "documentWidth": 1440,
+      "documentHeight": 900,
+      "viewportWidth": 1440,
+      "viewportHeight": 900
+    },
+    {
+      "name": "settings-AI",
+      "x": 441,
+      "right": 1399,
+      "width": 958,
+      "clientWidth": 958,
+      "scrollWidth": 958,
+      "controls": [
+        {
+          "label": "",
+          "x": 1039,
+          "right": 1055,
+          "width": 16
+        },
+        {
+          "label": "未选择Ollama兼容端点",
+          "x": 1039,
+          "right": 1399,
+          "width": 360
+        },
+        {
+          "label": "",
+          "x": 1039,
+          "right": 1399,
+          "width": 360
+        },
+        {
+          "label": "",
+          "x": 1039,
+          "right": 1399,
+          "width": 360
+        },
+        {
+          "label": "保存配置",
+          "x": 441,
+          "right": 523,
+          "width": 82
+        },
+        {
+          "label": "",
+          "x": 1039,
+          "right": 1399,
+          "width": 360
+        },
+        {
+          "label": "保存密钥",
+          "x": 441,
+          "right": 523,
+          "width": 82
+        },
+        {
+          "label": "清除凭据",
+          "x": 531,
+          "right": 613,
+          "width": 82
+        },
+        {
+          "label": "测试连接",
+          "x": 621,
+          "right": 703,
+          "width": 82
+        }
+      ],
+      "documentWidth": 1440,
+      "documentHeight": 900,
+      "viewportWidth": 1440,
+      "viewportHeight": 900
+    },
+    {
+      "name": "settings-语义检索",
+      "x": 441,
+      "right": 1399,
+      "width": 958,
+      "clientWidth": 958,
+      "scrollWidth": 958,
+      "controls": [
+        {
+          "label": "",
+          "x": 1039,
+          "right": 1055,
+          "width": 16
+        },
+        {
+          "label": "",
+          "x": 1039,
+          "right": 1399,
+          "width": 360
+        },
+        {
+          "label": "",
+          "x": 1039,
+          "right": 1399,
+          "width": 360
+        },
+        {
+          "label": "保存语义配置",
+          "x": 441,
+          "right": 551,
+          "width": 110
+        },
+        {
+          "label": "检查本地模型",
+          "x": 559,
+          "right": 669,
+          "width": 110
+        }
+      ],
+      "documentWidth": 1440,
+      "documentHeight": 900,
+      "viewportWidth": 1440,
+      "viewportHeight": 900
+    },
+    {
+      "name": "settings-备份导出",
+      "x": 441,
+      "right": 1399,
+      "width": 958,
+      "clientWidth": 958,
+      "scrollWidth": 958,
+      "controls": [
+        {
+          "label": "测试研究资料 · Chrome另一份资料 · Chrome",
+          "x": 441,
+          "right": 801,
+          "width": 360
+        },
+        {
+          "label": "导出 HTML",
+          "x": 1304.71875,
+          "right": 1399,
+          "width": 94.28125
+        },
+        {
+          "label": "导出侧车 JSON",
+          "x": 1279.703125,
+          "right": 1399,
+          "width": 119.296875
+        }
+      ],
+      "documentWidth": 1440,
+      "documentHeight": 900,
+      "viewportWidth": 1440,
+      "viewportHeight": 900
+    }
+  ]
+}

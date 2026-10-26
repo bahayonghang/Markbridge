@@ -1,0 +1,12 @@
+{
+  "familyCount": 471,
+  "selectedExistingFamilies": [
+    "Arial",
+    "Microsoft YaHei UI",
+    "SimSun",
+    "Segoe UI"
+  ],
+  "checkedAt": "2026-10-26T01:19:45.0571835Z",
+  "method": "read-only System.Drawing.Text.InstalledFontCollection",
+  "fontInstallationOrRemoval": "NOT_RUN"
+}

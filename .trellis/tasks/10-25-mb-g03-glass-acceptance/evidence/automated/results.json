@@ -1,0 +1,171 @@
+{
+  "startedAt": "2026-10-25T12:03:47.648Z",
+  "node": "v26.7.0",
+  "fingerprint": "f2e1343f521771151702d6f0f30b094bcdc8f42e143320c1fc20454ab77ba1b8",
+  "steps": [
+    {
+      "name": "lint",
+      "executable": "node",
+      "args": [
+        "node_modules/eslint/bin/eslint.js",
+        "apps",
+        "packages",
+        "scripts",
+        "tests",
+        "eslint.config.js",
+        "playwright.config.ts",
+        "vitest.config.ts",
+        "--max-warnings",
+        "0"
+      ],
+      "cwd": ".",
+      "code": 0,
+      "signal": null,
+      "elapsedMs": 6547
+    },
+    {
+      "name": "typecheck-desktop",
+      "executable": "node",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "-p",
+        "apps/desktop/tsconfig.json"
+      ],
+      "cwd": ".",
+      "code": 0,
+      "signal": null,
+      "elapsedMs": 4606
+    },
+    {
+      "name": "typecheck-extension",
+      "executable": "node",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "-p",
+        "apps/extension/tsconfig.json"
+      ],
+      "cwd": ".",
+      "code": 0,
+      "signal": null,
+      "elapsedMs": 1755
+    },
+    {
+      "name": "typecheck-protocol",
+      "executable": "node",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "-p",
+        "packages/protocol/tsconfig.json"
+      ],
+      "cwd": ".",
+      "code": 0,
+      "signal": null,
+      "elapsedMs": 1759
+    },
+    {
+      "name": "typecheck-tools",
+      "executable": "node",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "-p",
+        "tsconfig.tools.json"
+      ],
+      "cwd": ".",
+      "code": 0,
+      "signal": null,
+      "elapsedMs": 2038
+    },
+    {
+      "name": "vitest",
+      "executable": "node",
+      "args": [
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "--reporter=json",
+        "--outputFile=D:\\Documents\\Code\\Tauri\\Markbridge\\.trellis\\tasks\\10-25-mb-g03-glass-acceptance\\evidence\\automated\\vitest-results.json"
+      ],
+      "cwd": ".",
+      "code": 0,
+      "signal": null,
+      "elapsedMs": 38874
+    },
+    {
+      "name": "node-tests",
+      "executable": "node",
+      "args": [
+        "--test",
+        "--test-reporter=tap",
+        "scripts/protocol.test.mjs",
+        "scripts/foundation.test.mjs",
+        "scripts/native-artifact.test.mjs",
+        "scripts/command.test.mjs"
+      ],
+      "cwd": ".",
+      "code": 0,
+      "signal": null,
+      "elapsedMs": 4864
+    },
+    {
+      "name": "protocol",
+      "executable": "node",
+      "args": [
+        "scripts/protocol.mjs",
+        "--check"
+      ],
+      "cwd": ".",
+      "code": 0,
+      "signal": null,
+      "elapsedMs": 2379
+    },
+    {
+      "name": "build-protocol",
+      "executable": "node",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "-p",
+        "packages/protocol/tsconfig.json"
+      ],
+      "cwd": ".",
+      "code": 0,
+      "signal": null,
+      "elapsedMs": 1056
+    },
+    {
+      "name": "build-desktop",
+      "executable": "node",
+      "args": [
+        "D:\\Documents\\Code\\Tauri\\Markbridge\\node_modules\\vite\\bin\\vite.js",
+        "build"
+      ],
+      "cwd": "apps\\desktop",
+      "code": 0,
+      "signal": null,
+      "elapsedMs": 608
+    },
+    {
+      "name": "build-extension",
+      "executable": "node",
+      "args": [
+        "D:\\Documents\\Code\\Tauri\\Markbridge\\node_modules\\vite\\bin\\vite.js",
+        "build"
+      ],
+      "cwd": "apps\\extension",
+      "code": 0,
+      "signal": null,
+      "elapsedMs": 575
+    },
+    {
+      "name": "artifacts",
+      "executable": "node",
+      "args": [
+        "scripts/check-artifacts.mjs"
+      ],
+      "cwd": ".",
+      "code": 0,
+      "signal": null,
+      "elapsedMs": 203
+    }
+  ],
+  "completedAt": "2026-10-25T12:04:52.961Z",
+  "status": "PASS"
+}

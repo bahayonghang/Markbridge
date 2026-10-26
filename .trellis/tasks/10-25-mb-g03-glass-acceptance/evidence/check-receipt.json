@@ -1,0 +1,106 @@
+{
+  "capturedUtc": "2026-10-25T12:25:01.187976+00:00",
+  "verdict": "PASS",
+  "scope": "approvedG03 andparent airy-glass R1-R8/AC1-AC8 only",
+  "g03Criteria": {
+    "AC-1": "PASS",
+    "AC-2": "PASS",
+    "AC-3": "PASS",
+    "AC-4": "PASS",
+    "AC-5": "PASS",
+    "AC-6": "PASS"
+  },
+  "lint": "PASS",
+  "typecheck": "PASS4projects",
+  "vitest": {
+    "numTotalTests": 272,
+    "numPassedTests": 272,
+    "numFailedTests": 0
+  },
+  "nodeTests": {
+    "tests": 35,
+    "pass": 35,
+    "fail": 0,
+    "skipped": 0,
+    "report": "node-tests.stdout.log"
+  },
+  "browser": {
+    "startTime": "2026-10-25T12:04:05.399Z",
+    "duration": 288735.408,
+    "expected": 231,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "native": {
+    "status": "PASS",
+    "exeSha256": "33b9a6014b6da98555090f56fd30dcf0050f8ad75488e2981aba61fa5b414732",
+    "controls": 13,
+    "screens": 42,
+    "actualDpi": [
+      120,
+      144
+    ],
+    "dpiCases": 8,
+    "firstPid": 51940,
+    "secondPid": 85720,
+    "previewRegisteredAndDeniedCount": 81,
+    "finalOwnedProcesses": 0,
+    "finalOwnedListeners": 0
+  },
+  "scroll": "PASS",
+  "nativeSearchRuns": [
+    {
+      "receipt": "current-performance-6c9eb871-0862-4c42-8ddb-5bb87860ddc9-receipt.json",
+      "sha256": "b3cdacab83f4333a9488451248080746aeb67c50b467a718c7dcf78406c76d63",
+      "status": "FAIL",
+      "sampleCount": 30,
+      "p50": 102.3999999910593,
+      "p95": 208.59999999403954,
+      "max": 257.70000000298023,
+      "samplesOver200ms": 2,
+      "allClosesClean": true
+    },
+    {
+      "receipt": "current-performance-743eda0d-b839-43b8-90ba-d5d8e5a1990c-receipt.json",
+      "sha256": "5b6381b4e4737302040af3554c19c287cb3e670349361ab8fcdc8bf3fc90e7f4",
+      "status": "PASS",
+      "sampleCount": 30,
+      "p50": 106.8999999910593,
+      "p95": 149.20000000298023,
+      "max": 242.5,
+      "samplesOver200ms": 1,
+      "allClosesClean": true
+    }
+  ],
+  "searchGate": "accepted unchanged-method quiet fresh-root rerun p95<=200ms; retain initialFAIL; variance causeUNVERIFIED; no fix/stability/max-latency claim",
+  "osTransparencyBridge": "NOT_VERIFIED",
+  "finalInputAudit": "PASS",
+  "helperClosureCount": 21,
+  "nativeInputsCompared": 440,
+  "postRunInputChanges": "two documentation-only spec corrections; no production/test/build changes",
+  "report": "check-report.md",
+  "evidenceSha256": {
+    "check-input-audit.json": "2cba1d8c5a8c6cb7cb32365e0e8dcbaccd42c10230416f08292591860f12cb53",
+    "check-final-input-audit.json": "d2d9d35e303c757123cf146d79a63f2443fa53a05c6085df772ec893982f9e0c",
+    "check-baseline-audit.json": "f3bf8ee1b42937d110257cbb9ef799c55da7b7d636c94fefb921554bceb70d9f",
+    "automated/results.json": "3f1fb2078200ba847182a7e1f0d4fb2a2a1e5ddffae6f44f0e39dac8af5e52e6",
+    "automated/receipt.json": "0789a2c379e542615fa0e36067abc19ed9fd688c8a2ab7c9d4023a085977ee74",
+    "browser-full-results.json": "f1e113a02bce84dbd3eafd1aa293b1a2b982b91b2fb594b12c8a1589504e6171",
+    "scroll-comparison.json": "6116b5fc3f3d48f8f9ca6953ba2a70c16fcf08f9a9958eed58c607efa2f1f878",
+    "native-build-receipt.json": "80c6b36554ef7c4464383a7646d22fac01168940b1336e4f4842ad760da2579f",
+    "native-build-input-audit.json": "234ffc45dfad4dc3e7eee8799725834d041a390142dc6b845f46624195757e87",
+    "native-source.json": "b40a8adf06d82030a7c0e3a5232394d73ac9d60645e0a3608a2bad9dcda1d2c0",
+    "native-summary.json": "055aa8e0539f946a416486ed22a81e92395c9cc1facd9e375031eee756768166",
+    "native-report.md": "f3a33ea48f09bf450fcddc486eda88c8bbc246064248ed3d2fa25730fa38227c",
+    "automated-report.md": "fea9cb8c75aaad9eb82873e343279184145f7f1f690c0e37d984aa0d67eeb532",
+    "native/run-1792930130353-bc46d593/result.json": "25ba0e471021b537f421b2e4a491d73e958211666711815970737ec46bd5fc53"
+  },
+  "unresolvedApprovedScopeDefects": [],
+  "outcomeBookkeepingExcluded": [
+    "task.json metadata",
+    "independent-check checklist state",
+    "later journal entries"
+  ],
+  "separateLegacy13V12and15V18": "unfinished; no waiver"
+}

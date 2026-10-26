@@ -1,0 +1,186 @@
+{
+  "config": {
+    "argv": [
+      "D:\\GreenSoftware\\node\\node.exe",
+      "D:\\Documents\\Code\\Tauri\\Markbridge\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "--config",
+      ".trellis/tasks/10-25-mb-g01-glass-foundation/research/validation.config.mjs",
+      "tests/e2e/airy-glass.spec.ts",
+      "--grep",
+      "forced-colors",
+      "--reporter=json"
+    ],
+    "configFile": "D:\\Documents\\Code\\Tauri\\Markbridge\\.trellis\\tasks\\10-25-mb-g01-glass-foundation\\research\\validation.config.mjs",
+    "rootDir": "D:/Documents/Code/Tauri/Markbridge/tests/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "D:/Documents/Code/Tauri/Markbridge/test-results/airy-glass",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "D:/Documents/Code/Tauri/Markbridge/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "D:\\Documents\\Code\\Tauri\\Markbridge\\test-results\\airy-glass",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "",
+        "testDir": "D:\\Documents\\Code\\Tauri\\Markbridge\\tests\\e2e",
+        "snapshotDir": "D:\\Documents\\Code\\Tauri\\Markbridge\\tests\\e2e",
+        "testIgnore": [],
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 30000,
+        "use": {
+          "baseURL": "http://127.0.0.1:14935",
+          "headless": true,
+          "channel": "msedge"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": ""
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.0",
+    "workers": 1,
+    "webServer": {
+      "command": "node \"D:\\Documents\\Code\\Tauri\\Markbridge/node_modules/vite/bin/vite.js\"",
+      "cwd": "D:\\Documents\\Code\\Tauri\\Markbridge\\apps\\desktop",
+      "url": "http://127.0.0.1:14935",
+      "reuseExistingServer": false,
+      "env": {
+        "MARKBRIDGE_DEV_PORT": "14935"
+      }
+    }
+  },
+  "suites": [
+    {
+      "title": "airy-glass.spec.ts",
+      "file": "airy-glass.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "airy light forced-colors fallback",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 738,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-25T11:40:34.983Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9fef34988bbc823ed60c-4ea8189ab4e41879f529",
+          "file": "airy-glass.spec.ts",
+          "line": 61,
+          "column": 5
+        },
+        {
+          "title": "airy dark forced-colors fallback",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 638,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-25T11:40:36.058Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9fef34988bbc823ed60c-2c8e50b858874fae51c2",
+          "file": "airy-glass.spec.ts",
+          "line": 61,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-25T11:40:34.174Z",
+    "duration": 3867.2079999999996,
+    "expected": 2,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

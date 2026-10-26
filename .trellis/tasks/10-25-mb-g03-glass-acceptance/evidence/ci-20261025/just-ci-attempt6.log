@@ -1,0 +1,81 @@
+node scripts/ci.mjs
+
+[ci 1/12] install: START
+pnpm install --frozen-lockfile
+Scope: all 4 workspace projects
+✓ Lockfile passes supply-chain policies (verified 20h ago)
+Done in 201ms using pnpm v12.12.0
+[ci 1/12] install: PASS in 0.5s
+
+[ci 2/12] lint: START
+pnpm lint
+$ eslint apps packages scripts tests eslint.config.js playwright.config.ts vitest.config.ts --max-warnings 0
+[ci 2/12] lint: PASS in 2.3s
+
+[ci 3/12] typecheck: START
+pnpm typecheck
+$ pnpm -r typecheck && tsc -p tsconfig.tools.json
+packages/protocol typecheck$ tsc -p tsconfig.json
+packages/protocol typecheck: Done
+apps/desktop typecheck$ tsc -p tsconfig.json
+apps/extension typecheck$ tsc -p tsconfig.json
+apps/extension typecheck: Done
+apps/desktop typecheck: Done
+[ci 3/12] typecheck: PASS in 4.5s
+
+[ci 4/12] build: START
+pnpm build
+$ pnpm -r build && node scripts/check-artifacts.mjs
+packages/protocol build$ tsc -p tsconfig.json
+packages/protocol build: Done
+apps/desktop build$ vite build
+apps/extension build$ vite build
+apps/desktop build: node:internal/modules/cjs/loader:1573
+apps/desktop build:   throw err;
+apps/desktop build:   ^
+apps/desktop build: 
+apps/desktop build: Error: Cannot find module 'D:\Documents\Code\Tauri\Markbridge\node_modules\.pnpm\vite@8.3.4_@types+node@26.6.5\node_modules\vite\bin\vite.js'
+apps/desktop build:     at Module._resolveFilename (node:internal/modules/cjs/loader:1569:15)
+apps/desktop build:     at wrapResolveFilename (node:internal/modules/cjs/loader:1123:27)
+apps/desktop build:     at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1147:10)
+apps/desktop build:     at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1174:12)
+apps/desktop build:     at Module._load (node:internal/modules/cjs/loader:1346:5)
+apps/desktop build:     at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)
+apps/desktop build:     at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+apps/desktop build:     at node:internal/main/run_main_module:33:47 {
+apps/desktop build:   code: 'MODULE_NOT_FOUND',
+apps/desktop build:   requireStack: []
+apps/desktop build: }
+apps/desktop build: 
+apps/desktop build: Node.js v26.7.0
+apps/extension build: node:internal/modules/cjs/loader:1573
+apps/extension build:   throw err;
+apps/extension build:   ^
+apps/extension build: 
+apps/extension build: Error: Cannot find module 'D:\Documents\Code\Tauri\Markbridge\node_modules\.pnpm\vite@8.3.4_@types+node@26.6.5\node_modules\vite\bin\vite.js'
+apps/extension build:     at Module._resolveFilename (node:internal/modules/cjs/loader:1569:15)
+apps/extension build:     at wrapResolveFilename (node:internal/modules/cjs/loader:1123:27)
+apps/extension build:     at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1147:10)
+apps/extension build:     at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1174:12)
+apps/extension build:     at Module._load (node:internal/modules/cjs/loader:1346:5)
+apps/extension build:     at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)
+apps/extension build:     at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+apps/extension build:     at node:internal/main/run_main_module:33:47 {
+apps/extension build:   code: 'MODULE_NOT_FOUND',
+apps/extension build:   requireStack: []
+apps/extension build: }
+apps/extension build: 
+apps/extension build: Node.js v26.7.0
+apps/desktop build: Failed
+[ELIFECYCLE] Command failed with exit code 1.
+apps/extension build: Failed
+[ELIFECYCLE] Command failed with exit code 1.
+Error: ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL
+
+  × "pnpm recursive run" failed in D:
+  │ \Documents\Code\Tauri\Markbridge\apps\desktop
+
+[ELIFECYCLE] Command failed with exit code 1.
+error: recipe `build` failed on line 62 with exit code 1
+[ci 4/12] build: FAIL after 1.4s (exit 1)
+error: recipe `ci` failed on line 88 with exit code 1
