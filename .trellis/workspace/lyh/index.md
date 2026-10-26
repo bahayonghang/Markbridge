@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 16
-- **Last Active**: 2026-10-14
+- **Total Sessions**: 18
+- **Last Active**: 2026-10-25
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~549 | Active |
+| `journal-1.md` | ~622 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,8 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 18 | 2026-10-25 | just ci、提交与归档轻盈玻璃任务 | `d6b227c`, `a9846be` | `dev` |
+| 17 | 2026-10-25 | 轻盈玻璃 G01–G03 实施与验收 | - | `dev` |
 | 16 | 2026-10-14 | 提交通用字体与 Claude 工作台并归档 | `965ec54`, `5d1b6d6`, `d08c829`, `0bee115` | `dev` |
 | 15 | 2026-10-14 | 品牌设置改版验收、提交与归档 | `f964bae`, `df90cf1`, `d966d67` | `main` |
 | 14 | 2026-10-13 | 提交平台适配与语义检索并延期其他平台 | `d31b0b8`, `dfa9c33`, `ce5cf21`, `606081e` | `main` |

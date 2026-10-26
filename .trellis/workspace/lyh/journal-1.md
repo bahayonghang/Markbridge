@@ -547,3 +547,76 @@ User explicitly waived real OS sleep/wake acceptance. R08 and redesign parent co
 ### Next Steps
 
 - 旧 13 的 V12 与 15 的 V18 仍未完成，不推送。
+
+
+## Session 17: 轻盈玻璃 G01–G03 实施与验收
+<!-- trellis-session: v=2 fp=f33c54d39b9721f7 -->
+
+**Date**: 2026-10-25
+**Task**: 轻盈玻璃 G01–G03 实施与验收
+**Branch**: `dev`
+
+### Summary
+
+续读规划聊天，完成轻盈玻璃改造及全部阶段独立验收；搜索首轮失败与同条件复测、系统透明度联动限制均保留。未提交或归档。
+
+### Main Changes
+
+- 单玻璃外壳、绿紫页面语义、实底内容与高对比选中态修复
+- 恢复锁定版本和integrity匹配的普通目录开发运行时，保留旧环境与失败收据
+
+### Git Commits
+
+(No commits - implementation and verification recorded before commit authorization)
+
+### Testing
+
+- [OK] 272单元、35Node、231浏览器、Lint/4TS/协议/构建/产物检查通过
+- [OK] 当前Windows原生13控制、真实125/150%DPI8组、重启和81命令隔离通过；B10K滚动预算通过
+- [OK] 原生搜索p95首轮208.6ms失败，同条件唯一静默复测149.2ms通过，差异原因UNVERIFIED
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- 等待用户明确提交/归档授权；旧13/V12与15/V18继续未完成
+
+
+## Session 18: just ci、提交与归档轻盈玻璃任务
+<!-- trellis-session: v=2 fp=bb25e120cbd72516 -->
+
+**Date**: 2026-10-25
+**Task**: just ci、提交与归档轻盈玻璃任务
+**Branch**: `dev`
+
+### Summary
+
+用户授权后实际just ci全部12阶段通过，补验标准CI新6614程序后拆分提交并归档轻盈玻璃父子四任务。
+
+### Main Changes
+
+- 功能d6b227c、规范证据a9846be；四任务归档a2d1a6b
+- 4604冻结文件/45原始日志归档字节保持，4636归档Git对象逐一匹配；上下文引用已重定位
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `d6b227c` | feat(ui): 应用轻盈玻璃工作台与语义结果样式 |
+| `a9846be` | docs(ui): 记录轻盈玻璃规范与完整验收 |
+
+### Testing
+
+- [OK] 真实just ci 12/12 PASS：272 Vitest、35 Node、195 Rust通过与5既有忽略、231 Chromium通过
+- [OK] 新6614程序13控制、8实际DPI、真实重启/81命令隔离通过；首次30搜索样本p95=126.8ms/max138ms
+- [OK] CI使用文档化外部modules目录配置，锁/manifest/CI命令未修改，默认链接安装限制明确保留
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- 旧13/V12与15/V18保持未完成；未push、安装、签名或发布
