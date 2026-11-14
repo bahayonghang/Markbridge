@@ -1,0 +1,81 @@
+{
+  "date": "2026-10-26",
+  "scope": "Task15 V18 evaluator observation repair only",
+  "status": "PASS",
+  "actualModelV18": "NOT_RUN",
+  "nativeResponseObservation": "NOT_RUN; synthetic IPC events only; runtime calibration required",
+  "modelPrerequisites": "Authorized endpoint/model and human-reviewed labels not supplied",
+  "nodeVersion": "v26.7.0",
+  "commands": [
+    {
+      "command": "node --test .trellis/tasks/10-10-mb-15-semantic-search/evidence/semantic-query-observer.test.mjs .trellis/tasks/10-10-mb-15-semantic-search/evidence/semantic-metrics.test.mjs",
+      "exitCode": 0,
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "log": "observer-repair-20261026-node-tests.log"
+    },
+    {
+      "command": "node node_modules/eslint/bin/eslint.js --no-ignore .trellis/tasks/10-10-mb-15-semantic-search/evidence/evaluate-real-model.mjs .trellis/tasks/10-10-mb-15-semantic-search/evidence/semantic-query-observer.mjs .trellis/tasks/10-10-mb-15-semantic-search/evidence/semantic-query-observer.test.mjs --max-warnings 0",
+      "exitCode": 0,
+      "log": "observer-repair-20261026-helper-lint.log"
+    },
+    {
+      "command": "node node_modules/eslint/bin/eslint.js apps packages scripts tests eslint.config.js playwright.config.ts vitest.config.ts --max-warnings 0",
+      "exitCode": 0,
+      "log": "observer-repair-20261026-root-lint.log"
+    },
+    {
+      "command": "node node_modules/typescript/bin/tsc -p apps/desktop/tsconfig.json",
+      "exitCode": 0,
+      "log": "observer-repair-20261026-typecheck.log"
+    },
+    {
+      "command": "node node_modules/typescript/bin/tsc -p apps/extension/tsconfig.json",
+      "exitCode": 0,
+      "log": "observer-repair-20261026-typecheck.log"
+    },
+    {
+      "command": "node node_modules/typescript/bin/tsc -p packages/protocol/tsconfig.json",
+      "exitCode": 0,
+      "log": "observer-repair-20261026-typecheck.log"
+    },
+    {
+      "command": "node node_modules/typescript/bin/tsc -p tsconfig.tools.json",
+      "exitCode": 0,
+      "log": "observer-repair-20261026-typecheck.log"
+    }
+  ],
+  "syntax": [
+    {
+      "file": "evaluate-real-model.mjs",
+      "exitCode": 0
+    },
+    {
+      "file": "semantic-query-observer.mjs",
+      "exitCode": 0
+    },
+    {
+      "file": "semantic-query-observer.test.mjs",
+      "exitCode": 0
+    }
+  ],
+  "diffCheckExitCode": 0,
+  "fileSha256": {
+    "evaluate-real-model.mjs": "f1c0edd367687ddcacc61d91185619f927a236014236b87fc5bca151547f5798",
+    "semantic-query-observer.mjs": "835a6f7fae7b794be7e20ff81da83867b29e8e196a7b4c286c6b911e5303ca7d",
+    "semantic-query-observer.test.mjs": "f432ecd570e163faf8f64a936805f97063bfe2c47c4ca72f4f5d1ba106051fd6",
+    "evaluation.md": "0c885b19e4d06281ff6ec372a4d8db9fc091a4a39678662e4653f2beef0597fc",
+    "observer-repair-20261026.md": "5e9b7d90e6a89683bdc90b0d1948b6c3eb0c96927a8878be8d916e39cffa2ab8",
+    "observer-repair-20261026-node-tests.log": "1ad548aa90097af901f815a08e5541d1d89ce83d4bc68a04187f0e08e8196c59",
+    "observer-repair-20261026-helper-lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "observer-repair-20261026-root-lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "observer-repair-20261026-typecheck.log": "b207ee2b045b3e25a3d17742298a41e812b1506db1c5a6621f11377ffd617017"
+  },
+  "typeCoverage": "Four existing tsconfig baselines; rtk task-owned JavaScript not included",
+  "attemptsRejected": [
+    "pnpm Scoop shim target cannot launch; RTK parse failure clarified by rtk bypass",
+    "Invalid PowerShell log redirection after foreach; shell exit0 rejected; script-block rerun accepted"
+  ],
+  "noNativeLaunchOrEndpointCalls": true
+}

@@ -42,6 +42,13 @@ node .trellis/tasks/10-10-mb-15-semantic-search/evidence/current-semantic-native
 
 在已授权本地 embedding 模型和 B10K 数据上执行相关性/时延检查；仅模拟模型时质量门槛为 NOT_RUN。
 
+## 2026-10-26 继续实施：真实模型评测入口
+
+- [x] 修复入口对不可写 Tauri invoke 的覆写，使用经显式 IPC 读取校准的 request/response 观测。
+- [x] 校验实际请求与结果身份、topK=5、输入及生成 schema；保留 UI 输入到呈现的完整计时。
+- [x] 8 项指标/观测器回归通过；变更脚本单独 ESLint、根 lint 与四组 TypeScript 检查通过。TypeScript 配置不覆盖任务目录中的 JavaScript，未将其冒充变更脚本类型检查。
+- [ ] 取得本轮允许使用的模型端点/名称及真实人工审查标签后运行 V18；当前仍为 NOT_RUN，不关闭任务。修复收据见 [observer-repair-20261026.md](evidence/observer-repair-20261026.md)。
+
 ## 证据与交付
 
 - [x] evidence/receipts.md 保存自动、浏览器、当前4fc原生合成模型、最终安装11控制和6c7e普通搜索性能原始收据/截图，首次失败保留。

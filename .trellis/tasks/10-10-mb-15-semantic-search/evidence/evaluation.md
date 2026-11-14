@@ -1,6 +1,6 @@
 # 语义评测与原生功能工具
 
-当前没有实际 embedding 模型，也没有人工审查标签。AC15-3/V18 为 NOT_RUN。开发者候选集、确定性向量和 HTTP mock 只验证实现，不能升级为相关性或真实模型性能证据。
+当前尚未提供本轮授权使用的实际 embedding 模型与人工审查标签。AC15-3/V18 为 NOT_RUN。开发者候选集、确定性向量和 HTTP mock 只验证实现，不能升级为相关性或真实模型性能证据。
 
 ## 固定数据与指标
 
@@ -33,3 +33,13 @@ node .trellis/tasks/10-10-mb-15-semantic-search/evidence/evaluate-real-model.mjs
 工具在创建 fixture/启动原生应用之前检查标签；不调用 pull、不装模型、不接受远程模型或代理端点。使用新的隔离根和生产 Storage worker，显式审查整个 B10K 后构建，核对实际模型 digest/维度及 10,000 个 ready 向量。模型元数据可能省略维度，此时以已完成索引的实际向量维度为准，不把 nullable 元数据误判为缺模型。50 次查询均走真实输入控件、提交按钮、HTTP、Rust 排序、协议解析和 UI 呈现。页面时钟从填入输入之前计时，到对应结果已经呈现后两个 animation frame；包含自动化观测开销，不减去任何时间。
 
 保留 20 条查询的实际结果与 30 条暖态原始时延，开始/结束核对 indexId/generation/digest。故障、低相关性、超门槛与退出失败均保留为 FAIL，不丢样本。当前未执行这条真实模型命令；无参数运行仅输出 NOT_RUN。
+
+## 2026-10-26 评测入口修复
+
+旧入口尝试覆写 Tauri 不可写的 `__TAURI_INTERNALS__.invoke`，无法可靠观测查询。现改为只读 Playwright IPC request/response 观测：隔离应用启动后先以 `get_bridge_state` 校准请求路径与返回值，校准失败立即停止，尚不启用模型或构建索引。每次 UI 提交核对实际 requestId、Profile/epoch、index/generation、输入与 topK=5；响应经过生成的 schema 校验，并与该请求身份一致后才等待真实结果呈现及两个动画帧。计时仍从填入输入前开始，包含观测开销，不扣减。
+
+新增的观测器测试以不可写 invoke 与合成 IPC 事件验证校准、空观测、身份错配及非法结果等反例，不证明真实 WebView/CDP 已发出这些事件。正式执行仍须通过运行时校准，缺事件会明确失败。未调用任何模型、未启动原生程序，V18 保持 NOT_RUN。修复检查见 [observer-repair-20261026.md](observer-repair-20261026.md)。
+
+```powershell
+node --test .trellis/tasks/10-10-mb-15-semantic-search/evidence/semantic-query-observer.test.mjs .trellis/tasks/10-10-mb-15-semantic-search/evidence/semantic-metrics.test.mjs
+```
