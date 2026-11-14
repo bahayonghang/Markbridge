@@ -12,7 +12,7 @@
   "assignee": "lyh",
   "createdAt": "2026-10-10",
   "completedAt": null,
-  "branch": "main",
+  "branch": "dev",
   "base_branch": "main",
   "worktree_path": null,
   "commit": null,
@@ -40,7 +40,7 @@
     "tests/e2e/semantic.spec.ts",
     ".trellis/tasks/10-10-mb-15-semantic-search/evidence"
   ],
-  "notes": "Implemented existing 15 after the approved 13 startup gate and the 14 executable checkpoint. Independent final 192 Rust (3 existing ignored), 217 Vitest + 20 Node, metrics 3, 80 E2E and lint/typecheck/build/fmt/clippy/protocol PASS. Default-OFF/frozen scopes/SQLite 008/cancel-before-registration 128/global serial build/sticky model Stale/10k exact ranking/UI implemented. Final 4fc release/packed/installed equal; 73edf605 native synthetic-model 9 controls PASS with pause/resume/restart zero-request preservation, identity isolation, digest-rebuild rule, late delete cancellation and actual SQLite notes/tags/summaries/FTS retained. Final 3ee4 Windows installation 11 controls PASS and 6c7e lexical B10K PASS. Strict human-label/full-path real-model eval tooling and developer candidate corpus prepared; actual embedding model/human-reviewed 20-query Recall@5/B10K semantic p95 V18 NOT_RUN. AC15-1/2/4 PASS; AC15-3, this task and the original parent remain unfinished. The Windows-default decision archives only 14 and does not close this task. No real model installation, cloud call, push or publication.",
+  "notes": "Implemented existing 15 after the approved 13 startup gate and the 14 executable checkpoint. Independent final 192 Rust (3 existing ignored), 217 Vitest + 20 Node, metrics 3, 80 E2E and lint/typecheck/build/fmt/clippy/protocol PASS. Default-OFF/frozen scopes/SQLite 008/cancel-before-registration 128/global serial build/sticky model Stale/10k exact ranking/UI implemented. Final 4fc release/packed/installed equal; 73edf605 native synthetic-model 9 controls PASS with pause/resume/restart zero-request preservation, identity isolation, digest-rebuild rule, late delete cancellation and actual SQLite notes/tags/summaries/FTS retained. Final 3ee4 Windows installation 11 controls PASS and 6c7e lexical B10K PASS. Strict human-label/full-path real-model eval tooling and developer candidate corpus prepared; actual embedding model/human-reviewed 20-query Recall@5/B10K semantic p95 V18 NOT_RUN. AC15-1/2/4 PASS; AC15-3, this task and the original parent remain unfinished. The Windows-default decision archives only 14 and does not close this task. No real model installation, cloud call, push or publication. On 2026-11-13 the user explicitly closed and archived this task without the remaining closure work. AC15-3 and real-model V18 stay NOT_RUN, not PASS.",
   "meta": {
     "sequence": "15",
     "milestone": "M5",
