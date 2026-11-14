@@ -1,0 +1,43 @@
+interface:
+  display_name: "Markbridge 本地书签库技能 (Qiaomu)"
+  short_description: "通过受控 Rust CLI 直接在 SQLite 中管理签桥隔离的 Skills 书签专夹、标签、备注与全文检索。"
+  default_prompt: "使用 qiaomu-markbridge-bookmarks 在签桥（Markbridge）本地 Skills 书签库中新建文件夹、收藏链接、打标签记笔记或检索导出书签。"
+
+compatibility:
+  canonical_format: "SKILL.md"
+  adapter_targets:
+    - "openai"
+    - "claude"
+    - "generic"
+    - "agent-skills-compatible"
+  activation:
+    mode: "on-demand"
+    entrypoint: "SKILL.md"
+    deterministic_runner: "scripts/mb_bookmarks.py"
+  execution:
+    runtime: "python3 + cargo/markbridge-skill"
+    os_support:
+      - "windows"
+      - "macos"
+      - "linux"
+  trust:
+    sqlite_writer: "crates/skill-cli (markbridge-skill via markbridge-core::storage::Storage)"
+    browser_mutation: "forbidden"
+    network_access: "none"
+  permissions:
+    filesystem_read:
+      - "Markbridge workspace Cargo.toml and target/markbridge-skill binary"
+      - "Target markbridge.sqlite (daily app-data or explicit --app-data)"
+    filesystem_write:
+      - "Explicit --app-data temporary/isolated SQLite directory"
+      - "Daily com.markbridge.desktop/markbridge.sqlite ONLY when --allow-daily-db is explicitly passed"
+      - "Explicit --backup or export --output file paths"
+  degradation:
+    missing_prebuilt_binary: "Automatically runs cargo build --quiet -p markbridge-skill-cli --bin markbridge-skill"
+    uninitialized_local_space: "Lazily provisions local-skills and protected root skills-root on init, mkdir, or add"
+
+gates:
+  single_skill_entrypoint: true
+  daily_db_write_protection: true
+  online_backup_before_recursive_delete: true
+  zero_chrome_profile_mutation: true

@@ -1,0 +1,220 @@
+{
+  "recommended_threshold": 0.4,
+  "description_required_concepts": [
+    "bookmark_target",
+    "bookmark_action",
+    "sidecar_metadata",
+    "local_sqlite_scope",
+    "cli_skill_workflow"
+  ],
+  "positive_concepts": {
+    "bookmark_target": [
+      "markbridge",
+      "签桥",
+      "bookmark",
+      "bookmarks",
+      "书签",
+      "书签库",
+      "书签应用",
+      "收藏",
+      "local-skills",
+      "skills 书签"
+    ],
+    "bookmark_action": [
+      "save",
+      "add",
+      "create",
+      "mkdir",
+      "organize",
+      "search",
+      "list",
+      "move",
+      "delete",
+      "backup",
+      "export",
+      "update",
+      "存",
+      "添加",
+      "收藏",
+      "保存",
+      "新建",
+      "创建",
+      "搜索",
+      "查找",
+      "检索",
+      "列出",
+      "整理",
+      "移动",
+      "删除",
+      "备份",
+      "导出",
+      "修改"
+    ],
+    "sidecar_metadata": [
+      "tag",
+      "tags",
+      "note",
+      "notes",
+      "summary",
+      "summaries",
+      "标签",
+      "打标签",
+      "备注",
+      "笔记",
+      "摘要"
+    ],
+    "local_sqlite_scope": [
+      "local",
+      "sqlite",
+      "markbridge.sqlite",
+      "folder",
+      "folders",
+      "本地",
+      "数据库",
+      "专夹",
+      "文件夹",
+      "目录"
+    ],
+    "cli_skill_workflow": [
+      "skill",
+      "mb_bookmarks",
+      "markbridge-skill",
+      "cli",
+      "url",
+      "https",
+      "链接",
+      "网址",
+      "文章"
+    ]
+  },
+  "negative_patterns": [
+    "chrome 的 bookmarks 文件",
+    "直接改写 chrome",
+    "直接修改 chrome",
+    "chrome bookmarks file",
+    "edit chrome bookmarks json",
+    "mv3 扩展",
+    "chrome mv3",
+    "pairing ticket",
+    "websocket 配对",
+    "配对码",
+    "chrome.bookmarks",
+    "同步到 chrome 书签栏",
+    "写回 chrome 浏览器",
+    "firefox",
+    "safari",
+    "nsis 安装包",
+    "build-package",
+    "github release"
+  ],
+  "should_trigger": [
+    {
+      "text": "帮我把这个链接 https://tokio.rs 存到签桥的本地书签库里，加个 rust 标签",
+      "family": "zh_save_bookmark"
+    },
+    {
+      "text": "在 Markbridge 的 Skills 书签专夹下新建一个「AI 论文」文件夹",
+      "family": "zh_mkdir"
+    },
+    {
+      "text": "搜索一下我在签桥本地书签库里收藏过的 Tauri 相关文章和笔记",
+      "family": "zh_search"
+    },
+    {
+      "text": "给 Markbridge 本地书签里的这条记录补充一段阅读备注和摘要",
+      "family": "zh_sidecar_note"
+    },
+    {
+      "text": "把签桥 Skills 书签文件夹里的几条失效链接删除，删除前先备份一下 SQLite 数据库",
+      "family": "zh_backup_delete"
+    },
+    {
+      "text": "导出 Markbridge 本地 Skills 书签库为 HTML 和 JSON 备份文件",
+      "family": "zh_export"
+    },
+    {
+      "text": "Save https://doc.rust-lang.org/book/ to the Markbridge local bookmarks folder with tags rust and docs",
+      "family": "en_save_bookmark"
+    },
+    {
+      "text": "Search my local Markbridge SQLite bookmarks for trigram notes mentioning async runtime",
+      "family": "en_search"
+    },
+    {
+      "text": "Create a 'Frontend Design' folder in Markbridge local-skills bookmarks and move node skills-bm-1 into it",
+      "family": "en_organize"
+    },
+    {
+      "text": "用 skill 查看当前签桥数据库里 Skills 书签专夹的状态和书签数量",
+      "family": "zh_status"
+    },
+    {
+      "text": "List all tags in my Markbridge local Skills bookmark library and rename tag 'todo' to 'reading-list'",
+      "family": "en_tags"
+    },
+    {
+      "text": "帮我把这个网址收藏到书签应用的本地文件夹并打标签",
+      "family": "zh_colloquial_capture"
+    }
+  ],
+  "should_not_trigger": [
+    {
+      "text": "帮我写个脚本直接修改 Chrome 的 Bookmarks 文件把书签排个序",
+      "family": "direct_chrome_file_mutation"
+    },
+    {
+      "text": "排查一下 Markbridge 和 Chrome MV3 扩展的 WebSocket 配对码为什么连不上",
+      "family": "extension_pairing_debug"
+    },
+    {
+      "text": "帮我打一个 Windows NSIS 安装包并发布到 GitHub Release",
+      "family": "packaging_and_release"
+    },
+    {
+      "text": "把当前项目的代码改动拆分提交 git commit",
+      "family": "git_commit"
+    },
+    {
+      "text": "帮我把 Firefox 和 Safari 的浏览器历史记录导入系统",
+      "family": "unsupported_browsers"
+    },
+    {
+      "text": "优化一下 React 设置页面的毛玻璃字体选择器样式",
+      "family": "ui_styling"
+    },
+    {
+      "text": "Write a Python scraper to crawl 500 pages and dump raw HTML to disk",
+      "family": "generic_web_scraping"
+    },
+    {
+      "text": "Run cargo clippy and review the latest pull request diff",
+      "family": "code_review"
+    }
+  ],
+  "near_neighbor": [
+    {
+      "text": "调用 chrome.bookmarks 把这条新链接直接写回 Chrome 浏览器书签栏",
+      "family": "chrome_extension_writeback"
+    },
+    {
+      "text": "Directly edit Chrome Bookmarks JSON in User Data/Default/Bookmarks to add a folder",
+      "family": "chrome_json_file_edit"
+    },
+    {
+      "text": "配置 Chrome MV3 扩展的 pairing ticket 完成浏览器在线同步",
+      "family": "pairing_setup"
+    },
+    {
+      "text": "调试 Ollama 向量模型的端口配置，不增删任何书签",
+      "family": "ollama_config_only"
+    },
+    {
+      "text": "帮我把这个链接同步到 Chrome 书签栏并让 Floccus 推到云端",
+      "family": "chrome_cloud_sync"
+    },
+    {
+      "text": "检查 Tauri 预览窗口 WebView2 的 session 目录隔离哈希算法",
+      "family": "webview_isolation_code"
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "schema_version": "1.0.0",
+  "skill": "qiaomu-markbridge-bookmarks",
+  "execution_mode": "isolated_temp_app_data",
+  "cases": [
+    {
+      "id": "out-01-lazy-status",
+      "description": "Read-only status against a fresh isolated directory reports initialized=false without creating daily side effects.",
+      "command": ["status"],
+      "expected": {
+        "exit_code": 0,
+        "ok": true,
+        "status.initialized": false,
+        "status.profileId": "local-skills",
+        "status.rootId": "skills-root"
+      }
+    },
+    {
+      "id": "out-02-mkdir-add-fts-search",
+      "description": "Creating a folder, adding an https bookmark with tags/note/summary, and searching by FTS5 trigram note returns exact match.",
+      "sequence": [
+        ["mkdir", "--title", "Rust 资料"],
+        ["add", "--title", "Tokio", "--url", "https://tokio.rs", "--tags", "rust,async", "--note", "并发读写笔记"],
+        ["search", "--query", "并发读写", "--tags", "rust"]
+      ],
+      "expected": {
+        "exit_code": 0,
+        "ok": true,
+        "page.total": 1
+      }
+    },
+    {
+      "id": "out-03-daily-db-write-refusal",
+      "description": "Write command against com.markbridge.desktop path without --allow-daily-db is blocked with READ_ONLY.",
+      "simulated_daily_path": true,
+      "command": ["init"],
+      "expected": {
+        "exit_code": 2,
+        "ok": false,
+        "errorCode": "READ_ONLY"
+      }
+    },
+    {
+      "id": "out-04-protected-root-refusal",
+      "description": "Attempting to delete or move protected root skills-root is blocked with PROTECTED_NODE.",
+      "command": ["delete", "--id", "skills-root", "--recursive"],
+      "expected": {
+        "exit_code": 2,
+        "ok": false,
+        "errorCode": "PROTECTED_NODE"
+      }
+    },
+    {
+      "id": "out-05-non-http-url-refusal",
+      "description": "Attempting to add javascript: or credentialed URL is blocked with INVALID_MESSAGE.",
+      "command": ["add", "--title", "Bad", "--url", "javascript:alert(1)"],
+      "expected": {
+        "exit_code": 2,
+        "ok": false,
+        "errorCode": "INVALID_MESSAGE"
+      }
+    }
+  ]
+}

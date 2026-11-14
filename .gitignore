@@ -1,8 +1,11 @@
 /data/
 target/
 
-# Harness-local scaffolding. Not the project contract.
-.agents/
+# Harness-local scaffolding. Not the project contract (except tracked project skill).
+/.agents/*
+!/.agents/skills/
+/.agents/skills/*
+!/.agents/skills/qiaomu-markbridge-bookmarks/
 .claude/
 .codex/
 .codegraph/

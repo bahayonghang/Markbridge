@@ -1,0 +1,187 @@
+{
+  "schema_version": "2.0.0-qiaomu-lite",
+  "generated_at": "2026-11-13",
+  "package": {
+    "name": "qiaomu-markbridge-bookmarks",
+    "version": "0.1.0",
+    "owner": "向阳乔木",
+    "maturity_tier": "governed",
+    "lifecycle_stage": "project-governed",
+    "upstream_inspiration": "karakeep-app/karakeep@karakeep, ginobefun/BestBlogs@bestblogs-capture, TriliumNext/Trilium@adding-llm-mcp-tools",
+    "upstream_sync": {
+      "mode": "conceptual-adaptation",
+      "checked_at": "2026-11-13",
+      "notes": "Adapts deterministic CLI + protected-node guard + online SQLite backup patterns to Markbridge's Rust-owned storage boundary."
+    }
+  },
+  "intent": {
+    "description": "Operate Markbridge (签桥) isolated local Skills bookmark library (`local-skills` / `Skills 书签`) in SQLite (`markbridge.sqlite`) through `scripts/mb_bookmarks.py` and the Rust `markbridge-skill` CLI. Use when the user asks to save/add a URL or article to Markbridge bookmarks, create or organize local bookmark folders, list or search saved bookmarks (including FTS5 trigram notes/summaries), manage local tags/notes/summaries, or backup/export the local Skills bookmark library (存书签、收藏链接到签桥、 管理本地书签专夹、新建书签目录、搜索收藏、给书签打标签/记笔记/写摘要、备份导出本地书签数据库). Do NOT use for editing Chrome's `Bookmarks` file directly, pairing or debugging the Chrome MV3 extension, mutating Chrome-synced profiles via `chrome.bookmarks`, Firefox/Safari bookmarks, or app packaging.",
+    "job_to_be_done": "Operate Markbridge's isolated local Skills bookmark library (`local-skills` / `skills-root`) directly in SQLite via the Rust `markbridge-skill` CLI without touching Chrome or MV3 extension pairing.",
+    "target_users": [
+      "Markbridge desktop users",
+      "AI coding agents operating inside the Markbridge repository"
+    ],
+    "inputs": [
+      "Bookmark URLs (http/https), titles, folder names, tags, notes, and summaries",
+      "Search queries, tag filters, and folder scopes",
+      "Optional --app-data isolation directory or explicit --allow-daily-db confirmation"
+    ],
+    "outputs": [
+      "Deterministic camelCase JSON envelopes from markbridge-skill",
+      "Consistent SQLite online backups and Netscape HTML / sidecar JSON exports",
+      "Live-reloaded bookmark state in a running Markbridge desktop window"
+    ],
+    "exclusions": [
+      "Directly reading or mutating Chrome Bookmarks JSON files",
+      "Chrome MV3 extension pairing, WebSocket troubleshooting, or mutating paired Chrome profiles",
+      "Calling system sqlite3 or Python sqlite3 directly against markbridge.sqlite",
+      "Publishing external installers or GitHub Releases"
+    ],
+    "qiaomu_defaults": {
+      "language": "zh-CN",
+      "copyright": "Copyright (c) 向阳乔木",
+      "links": {
+        "x": "https://x.com/vista8",
+        "github": "https://github.com/joeseesun/"
+      }
+    }
+  },
+  "triggers": {
+    "should_trigger": [
+      "帮我把这个链接 https://tokio.rs 存到签桥的本地书签库里，加个 rust 标签",
+      "在 Markbridge 的 Skills 书签专夹下新建一个「AI 论文」文件夹",
+      "搜索一下我在签桥本地书签库里收藏过的 Tauri 相关文章和笔记",
+      "给 Markbridge 本地书签里的这条记录补充一段阅读备注和摘要",
+      "把签桥 Skills 书签文件夹里的几条失效链接删除，删除前先备份一下 SQLite 数据库",
+      "导出 Markbridge 本地 Skills 书签库为 HTML 和 JSON 备份文件",
+      "Save https://doc.rust-lang.org/book/ to the Markbridge local bookmarks folder with tags rust and docs",
+      "Search my local Markbridge SQLite bookmarks for trigram notes mentioning async runtime",
+      "Create a 'Frontend Design' folder in Markbridge local-skills bookmarks and move node skills-bm-1 into it",
+      "用 skill 查看当前签桥数据库里 Skills 书签专夹的状态和书签数量",
+      "List all tags in my Markbridge local Skills bookmark library and rename tag 'todo' to 'reading-list'",
+      "帮我把这个网址收藏到书签应用的本地文件夹并打标签"
+    ],
+    "should_not_trigger": [
+      "帮我写个脚本直接修改 Chrome 的 Bookmarks 文件把书签排个序",
+      "排查一下 Markbridge 和 Chrome MV3 扩展的 WebSocket 配对码为什么连不上",
+      "帮我打一个 Windows NSIS 安装包并发布到 GitHub Release",
+      "把当前项目的代码改动拆分提交 git commit",
+      "帮我把 Firefox 和 Safari 的浏览器历史记录导入系统",
+      "优化一下 React 设置页面的毛玻璃字体选择器样式",
+      "Write a Python scraper to crawl 500 pages and dump raw HTML to disk",
+      "Run cargo clippy and review the latest pull request diff"
+    ],
+    "near_neighbor": [
+      "调用 chrome.bookmarks 把这条新链接直接写回 Chrome 浏览器书签栏",
+      "Directly edit Chrome Bookmarks JSON in User Data/Default/Bookmarks to add a folder",
+      "配置 Chrome MV3 扩展的 pairing ticket 完成浏览器在线同步",
+      "调试 Ollama 向量模型的端口配置，不增删任何书签",
+      "帮我把这个链接同步到 Chrome 书签栏并让 Floccus 推到云端",
+      "检查 Tauri 预览窗口 WebView2 的 session 目录隔离哈希算法"
+    ]
+  },
+  "workflow": {
+    "router_rules": [
+      "**Route IN** when the user wants to collect/save URLs (`http://` or `https://`), create nested folders, move/update/delete items, tag bookmarks, attach notes or summaries, search saved bookmarks, or backup/export the local `Skills 书签库` inside Markbridge.",
+      "**Route OUT** when the user asks to read/write Chrome's raw `Bookmarks` file, pair or troubleshoot the Chrome MV3 extension (`chrome.bookmarks` / WebSocket), modify bookmarks inside a Chrome-synced profile, or build/install NSIS packages.",
+      "**Rust-only SQLite writer**: Always invoke `python .agents/skills/qiaomu-markbridge-bookmarks/scripts/mb_bookmarks.py ...`. **Never** open or mutate `markbridge.sqlite` with `sqlite3` CLI or Python's `sqlite3` module (bypasses `rusqlite` bundled FTS5 `trigram` tokenizer, semantic invalidation triggers, and DTO invariants).",
+      "**Daily DB write gate**: Reads (`status`, `tree`, `list`, `search`, `get`, `tag list`, `export`) work on the daily database by default. Writes to the daily `%APPDATA%\\com.markbridge.desktop\\markbridge.sqlite` require explicit `--allow-daily-db` **only when the user actually asked to modify their Markbridge bookmark library**; automated tests, demos, and rehearsals MUST pass `--app-data <ABS_TEMP_DIR>`.",
+      "**Destructive folder deletes**: Deleting a non-empty folder requires `--recursive` AND an online SQLite snapshot `--backup <ABS_BACKUP_FILE>` before execution."
+    ],
+    "compact_workflow": [
+      "**Inspect status first**: Run `python .agents/skills/qiaomu-markbridge-bookmarks/scripts/mb_bookmarks.py status` (with `--app-data <ABS_DIR>` for isolated runs) to check `exists`, `schemaVersion`, `revision`, `folderCount`, and `bookmarkCount`.",
+      "**Initialize lazily when needed**: If `exists` is `false` and the user wants to create folders or save bookmarks in `Skills 书签库`, run `init` (with `--allow-daily-db` for the real app DB, or `--app-data <ABS_DIR>` for isolated DBs) or proceed directly to `mkdir` / `add` (both auto-provision `local-skills` + `skills-root` idempotently).",
+      "**Resolve target folder**: Use `tree` or `list` to check existing folders under `skills-root` (`Skills 书签`) before creating duplicate folders; create missing sub-folders via `mkdir --title \"<NAME>\" [--parent <FOLDER_ID>]`.",
+      "**Execute atomic CRUD / sidecar action**:",
+      "Save bookmark + sidecars in one call: `add --title \"<TITLE>\" --url \"<HTTPS_URL>\" [--parent <FOLDER_ID>] [--tags \"tag1,tag2\"] [--note \"<NOTE>\"] [--summary \"<SUMMARY>\"]`",
+      "Search bookmarks (title, URL, tags, and FTS5 trigram note/summary): `search --query \"<KEYWORD>\" [--tags \"tag1\"] [--folder <FOLDER_ID>]`",
+      "Update metadata: `update`, `move`, `tag add|remove|rename|delete`, `note`, `summary`",
+      "**Backup before destructive changes**: Before `delete --recursive` or bulk reorganization, pass `--backup <ABS_SQLITE_BACKUP_PATH>` (uses `rusqlite::backup` online WAL-safe snapshot) or run `backup --output <ABS_PATH>`.",
+      "**Report structured receipt**: Parse the single-line/pretty JSON stdout (`ok`, `revision`, `result`) and report affected node IDs, folder path, tags, and new `revision` (which any running Markbridge desktop window picks up automatically within ~120ms)."
+    ],
+    "gate_ladder": [
+      "**Boundary & Redaction Gate**: Reject non-`http(s)` URLs, URLs with embedded credentials (`user:pass@host`), mutations targeting non-`local-skills` profiles (`WRONG_PROFILE`), and mutations targeting protected root `skills-root` (`PROTECTED_NODE`). Never print raw filesystem paths in error envelopes.",
+      "**Daily Database Protection Gate**: Any write command targeting a path containing `com.markbridge.desktop` without `--allow-daily-db` exits with code `2` and `errorCode: \"READ_ONLY\"`.",
+      "**Deterministic Execution Gate**: `python .agents/skills/qiaomu-markbridge-bookmarks/scripts/mb_bookmarks.py --self-test` and `python -m unittest discover -s .agents/skills/qiaomu-markbridge-bookmarks/tests -p \"test_*.py\"` must pass 100% in disposable temp directories.",
+      "**Governance & Package Gate**: Pass `validate_skill.py` (zero warnings), `trigger_eval.py` (100% pass), `export_skill_ir.py`, and `release_check.py --phase local --run-tests`."
+    ],
+    "output_contract": [
+      "**CLI / Script Stdout**: Always valid UTF-8 JSON with `\"ok\": true` (plus command payload & `revision`) on exit code `0`, or `{\"ok\": false, \"errorCode\": \"<SCREAMING_SNAKE_CASE>\", \"message\": \"<redacted summary>\"}` on exit code `1` (storage/migration failure) or `2` (validation/policy refusal).",
+      "**Agent Reply to User**: Concisely report the action taken in `Skills 书签库` (`local-skills`), created/updated node title & `chromeId`, folder location, applied tags/note/summary, and current `revision` (noting that if Markbridge desktop is open, switching the top-left source selector to `Skills 书签库（本地库）` shows the update immediately; if first-time enabled from empty state, click `设置 -> 连接 -> 启用本地 Skills 书签库` or reopen).",
+      "X: https://x.com/vista8",
+      "GitHub: https://github.com/joeseesun/"
+    ]
+  },
+  "resources": {
+    "references": [
+      "references\\command-contract.md",
+      "references\\safety-and-rollback.md"
+    ],
+    "scripts": [
+      "scripts\\mb_bookmarks.py"
+    ],
+    "evals": [
+      "evals\\output_cases.json",
+      "evals\\trigger_cases.json"
+    ],
+    "reports": [
+      "reports\\creation-handoff.md",
+      "reports\\prior-art-research.md",
+      "reports\\trigger-eval.json"
+    ]
+  },
+  "portability": {
+    "canonical_format": "SKILL.md",
+    "adapter_targets": [
+      "openai",
+      "claude",
+      "generic",
+      "agent-skills-compatible"
+    ],
+    "activation": {
+      "mode": "on-demand",
+      "entrypoint": "SKILL.md",
+      "deterministic_runner": "scripts/mb_bookmarks.py"
+    },
+    "execution": {
+      "runtime": "python3 + cargo/markbridge-skill",
+      "os_support": [
+        "windows",
+        "macos",
+        "linux"
+      ]
+    },
+    "trust": {
+      "sqlite_writer": "crates/skill-cli (markbridge-skill via markbridge-core::storage::Storage)",
+      "browser_mutation": "forbidden",
+      "network_access": "none"
+    },
+    "permissions": {
+      "filesystem_read": [
+        "Markbridge workspace Cargo.toml and target/markbridge-skill binary",
+        "Target markbridge.sqlite (daily app-data or explicit --app-data)"
+      ],
+      "filesystem_write": [
+        "Explicit --app-data temporary/isolated SQLite directory",
+        "Daily com.markbridge.desktop/markbridge.sqlite ONLY when --allow-daily-db is explicitly passed",
+        "Explicit --backup or export --output file paths"
+      ]
+    },
+    "degradation": {
+      "missing_prebuilt_binary": "Automatically runs cargo build --quiet -p markbridge-skill-cli --bin markbridge-skill",
+      "uninitialized_local_space": "Lazily provisions local-skills and protected root skills-root on init, mkdir, or add"
+    }
+  },
+  "gates": {
+    "single_skill_entrypoint": true,
+    "daily_db_write_protection": true,
+    "online_backup_before_recursive_delete": true,
+    "zero_chrome_profile_mutation": true
+  },
+  "evidence_boundary": {
+    "generated_reports_are_evidence": true,
+    "planned_work_is_evidence": false,
+    "missing_external_or_human_evidence_label": "missing evidence",
+    "public_claim_policy": "claim only what local validation, install proof, human review, or provider-backed evidence actually supports"
+  }
+}

@@ -1,0 +1,366 @@
+{
+  "ok": true,
+  "threshold": 0.4,
+  "description_concepts": [
+    "bookmark_action",
+    "bookmark_target",
+    "cli_skill_workflow",
+    "local_sqlite_scope",
+    "sidecar_metadata"
+  ],
+  "missing_description_concepts": [],
+  "summary": {
+    "total": 26,
+    "passed": 26,
+    "false_positive": 0,
+    "false_negative": 0,
+    "pass_rate": 1.0
+  },
+  "failures": [],
+  "results": {
+    "should_trigger": [
+      {
+        "prompt": "帮我把这个链接 https://tokio.rs 存到签桥的本地书签库里，加个 rust 标签",
+        "family": "zh_save_bookmark",
+        "expected_trigger": true,
+        "predicted_trigger": true,
+        "passed": true,
+        "score": 1.0,
+        "matched_concepts": [
+          "bookmark_action",
+          "bookmark_target",
+          "cli_skill_workflow",
+          "local_sqlite_scope",
+          "sidecar_metadata"
+        ],
+        "negative_pattern": null
+      },
+      {
+        "prompt": "在 Markbridge 的 Skills 书签专夹下新建一个「AI 论文」文件夹",
+        "family": "zh_mkdir",
+        "expected_trigger": true,
+        "predicted_trigger": true,
+        "passed": true,
+        "score": 0.6,
+        "matched_concepts": [
+          "bookmark_action",
+          "bookmark_target",
+          "local_sqlite_scope"
+        ],
+        "negative_pattern": null
+      },
+      {
+        "prompt": "搜索一下我在签桥本地书签库里收藏过的 Tauri 相关文章和笔记",
+        "family": "zh_search",
+        "expected_trigger": true,
+        "predicted_trigger": true,
+        "passed": true,
+        "score": 1.0,
+        "matched_concepts": [
+          "bookmark_action",
+          "bookmark_target",
+          "cli_skill_workflow",
+          "local_sqlite_scope",
+          "sidecar_metadata"
+        ],
+        "negative_pattern": null
+      },
+      {
+        "prompt": "给 Markbridge 本地书签里的这条记录补充一段阅读备注和摘要",
+        "family": "zh_sidecar_note",
+        "expected_trigger": true,
+        "predicted_trigger": true,
+        "passed": true,
+        "score": 0.6,
+        "matched_concepts": [
+          "bookmark_target",
+          "local_sqlite_scope",
+          "sidecar_metadata"
+        ],
+        "negative_pattern": null
+      },
+      {
+        "prompt": "把签桥 Skills 书签文件夹里的几条失效链接删除，删除前先备份一下 SQLite 数据库",
+        "family": "zh_backup_delete",
+        "expected_trigger": true,
+        "predicted_trigger": true,
+        "passed": true,
+        "score": 0.8,
+        "matched_concepts": [
+          "bookmark_action",
+          "bookmark_target",
+          "cli_skill_workflow",
+          "local_sqlite_scope"
+        ],
+        "negative_pattern": null
+      },
+      {
+        "prompt": "导出 Markbridge 本地 Skills 书签库为 HTML 和 JSON 备份文件",
+        "family": "zh_export",
+        "expected_trigger": true,
+        "predicted_trigger": true,
+        "passed": true,
+        "score": 0.6,
+        "matched_concepts": [
+          "bookmark_action",
+          "bookmark_target",
+          "local_sqlite_scope"
+        ],
+        "negative_pattern": null
+      },
+      {
+        "prompt": "Save https://doc.rust-lang.org/book/ to the Markbridge local bookmarks folder with tags rust and docs",
+        "family": "en_save_bookmark",
+        "expected_trigger": true,
+        "predicted_trigger": true,
+        "passed": true,
+        "score": 1.0,
+        "matched_concepts": [
+          "bookmark_action",
+          "bookmark_target",
+          "cli_skill_workflow",
+          "local_sqlite_scope",
+          "sidecar_metadata"
+        ],
+        "negative_pattern": null
+      },
+      {
+        "prompt": "Search my local Markbridge SQLite bookmarks for trigram notes mentioning async runtime",
+        "family": "en_search",
+        "expected_trigger": true,
+        "predicted_trigger": true,
+        "passed": true,
+        "score": 0.8,
+        "matched_concepts": [
+          "bookmark_action",
+          "bookmark_target",
+          "local_sqlite_scope",
+          "sidecar_metadata"
+        ],
+        "negative_pattern": null
+      },
+      {
+        "prompt": "Create a 'Frontend Design' folder in Markbridge local-skills bookmarks and move node skills-bm-1 into it",
+        "family": "en_organize",
+        "expected_trigger": true,
+        "predicted_trigger": true,
+        "passed": true,
+        "score": 0.6,
+        "matched_concepts": [
+          "bookmark_action",
+          "bookmark_target",
+          "local_sqlite_scope"
+        ],
+        "negative_pattern": null
+      },
+      {
+        "prompt": "用 skill 查看当前签桥数据库里 Skills 书签专夹的状态和书签数量",
+        "family": "zh_status",
+        "expected_trigger": true,
+        "predicted_trigger": true,
+        "passed": true,
+        "score": 0.6,
+        "matched_concepts": [
+          "bookmark_target",
+          "cli_skill_workflow",
+          "local_sqlite_scope"
+        ],
+        "negative_pattern": null
+      },
+      {
+        "prompt": "List all tags in my Markbridge local Skills bookmark library and rename tag 'todo' to 'reading-list'",
+        "family": "en_tags",
+        "expected_trigger": true,
+        "predicted_trigger": true,
+        "passed": true,
+        "score": 0.8,
+        "matched_concepts": [
+          "bookmark_action",
+          "bookmark_target",
+          "local_sqlite_scope",
+          "sidecar_metadata"
+        ],
+        "negative_pattern": null
+      },
+      {
+        "prompt": "帮我把这个网址收藏到书签应用的本地文件夹并打标签",
+        "family": "zh_colloquial_capture",
+        "expected_trigger": true,
+        "predicted_trigger": true,
+        "passed": true,
+        "score": 1.0,
+        "matched_concepts": [
+          "bookmark_action",
+          "bookmark_target",
+          "cli_skill_workflow",
+          "local_sqlite_scope",
+          "sidecar_metadata"
+        ],
+        "negative_pattern": null
+      }
+    ],
+    "should_not_trigger": [
+      {
+        "prompt": "帮我写个脚本直接修改 Chrome 的 Bookmarks 文件把书签排个序",
+        "family": "direct_chrome_file_mutation",
+        "expected_trigger": false,
+        "predicted_trigger": false,
+        "passed": true,
+        "score": 0.4,
+        "matched_concepts": [
+          "bookmark_action",
+          "bookmark_target"
+        ],
+        "negative_pattern": "chrome 的 bookmarks 文件"
+      },
+      {
+        "prompt": "排查一下 Markbridge 和 Chrome MV3 扩展的 WebSocket 配对码为什么连不上",
+        "family": "extension_pairing_debug",
+        "expected_trigger": false,
+        "predicted_trigger": false,
+        "passed": true,
+        "score": 0.2,
+        "matched_concepts": [
+          "bookmark_target"
+        ],
+        "negative_pattern": "mv3 扩展"
+      },
+      {
+        "prompt": "帮我打一个 Windows NSIS 安装包并发布到 GitHub Release",
+        "family": "packaging_and_release",
+        "expected_trigger": false,
+        "predicted_trigger": false,
+        "passed": true,
+        "score": 0.0,
+        "matched_concepts": [],
+        "negative_pattern": "nsis 安装包"
+      },
+      {
+        "prompt": "把当前项目的代码改动拆分提交 git commit",
+        "family": "git_commit",
+        "expected_trigger": false,
+        "predicted_trigger": false,
+        "passed": true,
+        "score": 0.0,
+        "matched_concepts": [],
+        "negative_pattern": null
+      },
+      {
+        "prompt": "帮我把 Firefox 和 Safari 的浏览器历史记录导入系统",
+        "family": "unsupported_browsers",
+        "expected_trigger": false,
+        "predicted_trigger": false,
+        "passed": true,
+        "score": 0.0,
+        "matched_concepts": [],
+        "negative_pattern": "firefox"
+      },
+      {
+        "prompt": "优化一下 React 设置页面的毛玻璃字体选择器样式",
+        "family": "ui_styling",
+        "expected_trigger": false,
+        "predicted_trigger": false,
+        "passed": true,
+        "score": 0.0,
+        "matched_concepts": [],
+        "negative_pattern": null
+      },
+      {
+        "prompt": "Write a Python scraper to crawl 500 pages and dump raw HTML to disk",
+        "family": "generic_web_scraping",
+        "expected_trigger": false,
+        "predicted_trigger": false,
+        "passed": true,
+        "score": 0.0,
+        "matched_concepts": [],
+        "negative_pattern": null
+      },
+      {
+        "prompt": "Run cargo clippy and review the latest pull request diff",
+        "family": "code_review",
+        "expected_trigger": false,
+        "predicted_trigger": false,
+        "passed": true,
+        "score": 0.0,
+        "matched_concepts": [],
+        "negative_pattern": null
+      }
+    ],
+    "near_neighbor": [
+      {
+        "prompt": "调用 chrome.bookmarks 把这条新链接直接写回 Chrome 浏览器书签栏",
+        "family": "chrome_extension_writeback",
+        "expected_trigger": false,
+        "predicted_trigger": false,
+        "passed": true,
+        "score": 0.4,
+        "matched_concepts": [
+          "bookmark_target",
+          "cli_skill_workflow"
+        ],
+        "negative_pattern": "chrome.bookmarks"
+      },
+      {
+        "prompt": "Directly edit Chrome Bookmarks JSON in User Data/Default/Bookmarks to add a folder",
+        "family": "chrome_json_file_edit",
+        "expected_trigger": false,
+        "predicted_trigger": false,
+        "passed": true,
+        "score": 0.6,
+        "matched_concepts": [
+          "bookmark_action",
+          "bookmark_target",
+          "local_sqlite_scope"
+        ],
+        "negative_pattern": "edit chrome bookmarks json"
+      },
+      {
+        "prompt": "配置 Chrome MV3 扩展的 pairing ticket 完成浏览器在线同步",
+        "family": "pairing_setup",
+        "expected_trigger": false,
+        "predicted_trigger": false,
+        "passed": true,
+        "score": 0.0,
+        "matched_concepts": [],
+        "negative_pattern": "mv3 扩展"
+      },
+      {
+        "prompt": "调试 Ollama 向量模型的端口配置，不增删任何书签",
+        "family": "ollama_config_only",
+        "expected_trigger": false,
+        "predicted_trigger": false,
+        "passed": true,
+        "score": 0.2,
+        "matched_concepts": [
+          "bookmark_target"
+        ],
+        "negative_pattern": null
+      },
+      {
+        "prompt": "帮我把这个链接同步到 Chrome 书签栏并让 Floccus 推到云端",
+        "family": "chrome_cloud_sync",
+        "expected_trigger": false,
+        "predicted_trigger": false,
+        "passed": true,
+        "score": 0.4,
+        "matched_concepts": [
+          "bookmark_target",
+          "cli_skill_workflow"
+        ],
+        "negative_pattern": "同步到 chrome 书签栏"
+      },
+      {
+        "prompt": "检查 Tauri 预览窗口 WebView2 的 session 目录隔离哈希算法",
+        "family": "webview_isolation_code",
+        "expected_trigger": false,
+        "predicted_trigger": false,
+        "passed": true,
+        "score": 0.2,
+        "matched_concepts": [
+          "local_sqlite_scope"
+        ],
+        "negative_pattern": null
+      }
+    ]
+  }
+}
