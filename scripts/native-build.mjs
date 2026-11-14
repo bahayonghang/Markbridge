@@ -44,7 +44,16 @@ export function inspectNativeArtifact(data, { platform, arch, sourcePrefixes = [
   for (const encoding of ['utf8', 'utf16le']) {
     const content = data.toString(encoding);
     for (const [label, pattern] of patterns) {
-      assert.ok(!pattern.test(content), `Native artifact contains ${label} (${encoding}).`);
+      // Binary bytes decoded with replacement must not manufacture path characters.
+      // Delimit replacements so a real path next to invalid bytes is still caught;
+      // separately retain literal U+FFFD paths only when their encoded bytes exist.
+      const matches = content.matchAll(new RegExp(pattern.source, `${pattern.flags}g`));
+      const literalMatch = [...matches].some(([value]) => {
+        const prefixes = [value, ...Array.from(value.matchAll(/\ufffd/g), match => value.slice(0, match.index))];
+        return prefixes.some(prefix => pattern.test(prefix) && data.includes(Buffer.from(prefix, encoding)));
+      });
+      assert.ok(!pattern.test(content.replaceAll('\ufffd', '\0')) && !literalMatch,
+        `Native artifact contains ${label} (${encoding}).`);
     }
     for (const prefix of sourcePrefixes) {
       for (const value of new Set([prefix, prefix.replaceAll('\\', '/')])) {

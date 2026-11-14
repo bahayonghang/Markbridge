@@ -17,6 +17,19 @@ test('native artifact scanner rejects machine paths and secrets in ASCII and UTF
   }
 });
 
+test('artifact scanner ignores decoding-generated paths but still rejects real Unicode paths', () => {
+  // Invalid UTF-8 bytes must not become path characters via replacement decoding.
+  const binaryNoise = Buffer.from([0x75, 0x3a, 0x2f, 0xff, 0x3d, 0x38, 0x2f, 0xff, 0xff]);
+  inspectNativeArtifact(binaryNoise);
+  for (const encoding of ['utf8', 'utf16le']) {
+    for (const path of ['C:/Users/\u4e2d\u6587/source.rs', 'D:/\ufffd/source.rs']) {
+      assert.throws(() => inspectNativeArtifact(Buffer.from(path, encoding)), /absolute Windows path/);
+      assert.throws(() => inspectNativeArtifact(Buffer.concat([Buffer.from(path, encoding), Buffer.from([0xff])])), /absolute Windows path/);
+      assert.throws(() => inspectNativeArtifact(Buffer.concat([binaryNoise, Buffer.from([0]), Buffer.from('\0' + path, encoding)])), /absolute Windows path/);
+    }
+  }
+});
+
 function executable(platform, type = 2) {
   const data = Buffer.alloc(128);
   if (platform === 'win32') {
