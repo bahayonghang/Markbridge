@@ -155,3 +155,5 @@ When undoing creation, check the current tree after simulating earlier inverse s
 ## Skill wrapper output encoding
 
 `mb_bookmarks.py` emits UTF-8 JSON on stdout, including redirected Windows pipes. Configure stdout and stderr at CLI entry while preserving their error handlers; imported StringIO callers remain supported. Keep the live bridge integration test under forced `PYTHONIOENCODING=cp1252` so locale-dependent regressions fail on every platform. Child CLI output is already decoded as UTF-8; changing only CI environment variables does not repair the wrapper boundary.
+
+Foundation checks run only on `pull_request`, not branch pushes. `scripts/command.test.mjs` verifies the trigger contract and preserves local CI command/order parity.

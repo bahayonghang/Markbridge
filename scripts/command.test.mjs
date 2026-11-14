@@ -91,3 +91,11 @@ test('local CI reports a terminated stage as failure', async () => {
   assert.match(output.chunks.join(''), /install: FAIL.*SIGTERM/);
   assert.doesNotMatch(output.chunks.join(''), /\[ci 2\/12\]/);
 });
+
+// Keep checks on PRs without duplicating runs on branch pushes.
+test('foundation CI is triggered only by pull requests', async () => {
+  const workflow = await readFile(new URL('../.github/workflows/ci.yml', import.meta.url), 'utf8');
+  const triggers = workflow.match(/^on:\r?\n([\s\S]*?)^permissions:/m)?.[1];
+  assert.ok(triggers, 'workflow trigger block must exist');
+  assert.deepEqual(triggers.trim().split(/\r?\n/).map(line => line.trim()), ['pull_request:']);
+});
