@@ -11,11 +11,19 @@ use tokio::sync::{mpsc, oneshot};
 
 pub(crate) mod ai;
 mod library;
+pub mod local_space;
 pub(crate) mod maintenance;
 mod operations;
 pub(crate) mod preview;
 pub(crate) mod semantic;
 mod tags;
+pub use local_space::{
+    LOCAL_SKILLS_DISPLAY_NAME, LOCAL_SKILLS_INSTANCE_ID, LOCAL_SKILLS_ORIGIN,
+    LOCAL_SKILLS_PROFILE_ID, LOCAL_SKILLS_ROOT_ID, LOCAL_SKILLS_ROOT_TITLE,
+    LOCAL_SKILLS_SESSION_ID, LocalBackupOutcome, LocalDeleteOutcome, LocalNodeDetail,
+    LocalNodeMutation, LocalSkillsStatus, LocalTreeItem, validate_local_bookmark_url,
+    validate_local_title,
+};
 pub(crate) use operations::{
     AfterBody, BatchProgress, BeforeBody, EncodingBody, IdMapBody, OperationRecord, OrderBody,
     RestoreBody, SidecarRow, StepRecord,
@@ -44,9 +52,35 @@ pub struct Profile {
     pub paired_origin: PairedOrigin,
     pub credential_reference: Option<Id>,
 }
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ProfileOrigin {
+    Chrome(PairedOrigin),
+    LocalSkills,
+}
+#[derive(Debug, Clone)]
+pub struct StoredIdentity {
+    pub id: Id,
+    pub instance_id: Id,
+    pub source_epoch: SourceEpoch,
+    pub display_name: DisplayName,
+    pub origin: ProfileOrigin,
+    pub credential_reference: Option<Id>,
+}
+impl From<Profile> for StoredIdentity {
+    fn from(profile: Profile) -> Self {
+        Self {
+            id: profile.id,
+            instance_id: profile.instance_id,
+            source_epoch: profile.source_epoch,
+            display_name: profile.display_name,
+            origin: ProfileOrigin::Chrome(profile.paired_origin),
+            credential_reference: profile.credential_reference,
+        }
+    }
+}
 #[derive(Debug, Clone)]
 pub struct StoredProfile {
-    pub profile: Profile,
+    pub profile: StoredIdentity,
     pub revoked: bool,
     pub last_synced_at: Option<Counter>,
 }
@@ -168,6 +202,9 @@ impl Storage {
         Ok(())
     }
     pub async fn create_profile(&self, profile: Profile) -> Result<()> {
+        if profile.id.as_str() == local_space::LOCAL_SKILLS_PROFILE_ID {
+            return Err(ErrorCode::WrongProfile);
+        }
         self.call(move |conn| {
             conn.execute("INSERT INTO profiles(id,instance_id,source_epoch,display_name,pairing_state,paired_origin,credential_reference) VALUES(?1,?2,?3,?4,'paired',?5,?6)",
                 params![profile.id.as_str(), profile.instance_id.as_str(), profile.source_epoch.get() as i64, profile.display_name.as_str(), profile.paired_origin.as_str(), profile.credential_reference.as_ref().map(Id::as_str)]).map_err(storage_error)?;
@@ -180,12 +217,41 @@ impl Storage {
             let rows = statement.query_map([], |row| Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?, row.get::<_, i64>(2)?, row.get::<_, String>(3)?, row.get::<_, String>(4)?, row.get::<_, Option<String>>(5)?, row.get::<_, String>(6)?, row.get::<_, Option<i64>>(7)?))).map_err(storage_error)?;
             rows.map(|row| {
                 let (id, instance, epoch, name, origin, reference, state, synced) = row.map_err(storage_error)?;
-                Ok(StoredProfile { profile: Profile { id: Id::new(id)?, instance_id: Id::new(instance)?, source_epoch: SourceEpoch::new(epoch as u64)?, display_name: DisplayName::new(name)?, paired_origin: PairedOrigin::new(origin)?, credential_reference: reference.map(Id::new).transpose()? }, revoked: state == "revoked", last_synced_at: synced.map(|value| Counter::new(value as u64)).transpose()? })
+                let parsed_origin = if origin == local_space::LOCAL_SKILLS_ORIGIN {
+                    if id != local_space::LOCAL_SKILLS_PROFILE_ID
+                        || instance != local_space::LOCAL_SKILLS_INSTANCE_ID
+                        || reference.is_some()
+                        || state != "paired"
+                    {
+                        return Err(ErrorCode::InvalidMessage);
+                    }
+                    ProfileOrigin::LocalSkills
+                } else {
+                    if id == local_space::LOCAL_SKILLS_PROFILE_ID {
+                        return Err(ErrorCode::InvalidMessage);
+                    }
+                    ProfileOrigin::Chrome(PairedOrigin::new(origin)?)
+                };
+                Ok(StoredProfile {
+                    profile: StoredIdentity {
+                        id: Id::new(id)?,
+                        instance_id: Id::new(instance)?,
+                        source_epoch: SourceEpoch::new(epoch as u64)?,
+                        display_name: DisplayName::new(name)?,
+                        origin: parsed_origin,
+                        credential_reference: reference.map(Id::new).transpose()?,
+                    },
+                    revoked: state == "revoked",
+                    last_synced_at: synced.map(|value| Counter::new(value as u64)).transpose()?,
+                })
             }).collect()
         }).await
     }
     /// Revocation preserves cache and local metadata. The OS credential is removed by Bridge.
     pub async fn revoke_profile(&self, profile_id: Id) -> Result<()> {
+        if profile_id.as_str() == local_space::LOCAL_SKILLS_PROFILE_ID {
+            return Err(ErrorCode::ReadOnly);
+        }
         self.call(move |conn| {
             if conn.execute("UPDATE profiles SET pairing_state='revoked',credential_reference=NULL WHERE id=?1", [profile_id.as_str()]).map_err(storage_error)? != 1 { return Err(ErrorCode::WrongProfile); }
             Ok(())
@@ -193,6 +259,9 @@ impl Storage {
     }
     /// Identity reset is explicit. Old cache and sidecar rows remain available for review.
     pub async fn reset_source_epoch(&self, profile_id: Id, epoch: SourceEpoch) -> Result<()> {
+        if profile_id.as_str() == local_space::LOCAL_SKILLS_PROFILE_ID {
+            return Err(ErrorCode::ReadOnly);
+        }
         self.call(move |conn| {
             let transaction = conn.transaction().map_err(storage_error)?;
             let changed = transaction
@@ -226,6 +295,9 @@ impl Storage {
         session_id: Id,
         snapshot: TreeSnapshot,
     ) -> Result<()> {
+        if profile_id.as_str() == local_space::LOCAL_SKILLS_PROFILE_ID {
+            return Err(ErrorCode::WrongProfile);
+        }
         self.call(move |conn| replace_tree(conn, &profile_id, &session_id, &snapshot, || Ok(())))
             .await
     }
@@ -236,6 +308,9 @@ impl Storage {
         previous: Vec<BookmarkNode>,
         snapshot: TreeSnapshot,
     ) -> Result<()> {
+        if profile_id.as_str() == local_space::LOCAL_SKILLS_PROFILE_ID {
+            return Err(ErrorCode::WrongProfile);
+        }
         self.call(move |conn| {
             commit_tree(
                 conn,

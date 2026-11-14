@@ -60,6 +60,7 @@ function accessNote(source: Source): string {
   }
   switch (source.profile.connection) {
     case 'live': return '资料正在实时同步。写入 Chrome 前需要确认。';
+    case 'local': return '本地专属书签库。支持搜索、标签备注与预览，不写回 Chrome。';
     case 'connecting': return '正在连接扩展。当前只读。';
     case 'reconciling': return '正在核对书签。当前只读。';
     case 'cached_read_only': return '扩展未连接。显示本机缓存，当前只读。';
@@ -553,6 +554,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
   const profiles = state?.profiles ?? [];
   const mirrors = state?.mirrors ?? [];
   const inputsReady = native && !invalid && !!source;
+  const isLocalProfile = profile?.connection === 'local';
 
 
   const folderPane = source && native && !invalid ? (
@@ -581,7 +583,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
         {state && (profiles.length > 0 || mirrors.length > 0) && <div className="library-controls">
           <label htmlFor="library-source">书签来源
             <select id="library-source" ref={sourceTrigger} value={source ? `${source.kind}:${source.id}` : ''} onChange={(event) => chooseSource(event.target.value)} disabled={!native || invalid}>
-              {profiles.map((item) => <option key={`profile:${item.profileId}`} value={`profile:${item.profileId}`}>{item.displayName} · Chrome</option>)}
+              {profiles.map((item) => <option key={`profile:${item.profileId}`} value={`profile:${item.profileId}`}>{item.displayName} · {item.connection === 'local' ? '本地库' : 'Chrome'}</option>)}
               {mirrors.map((item) => <option key={`mirror:${item.mirrorSourceId}`} value={`mirror:${item.mirrorSourceId}`}>{item.displayName} · 文件只读</option>)}
             </select>
           </label>
@@ -643,8 +645,8 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
         <div className="library-pane list-pane">
           <div className="browse-actions">
           <div className="pane-heading browse-heading" aria-hidden={pickedIds.length > 0} inert={pickedIds.length > 0}><nav ref={breadcrumbs} className="library-breadcrumbs" aria-label="当前目录"><button type="button" onClick={() => { const root = rootFolders(activeIndex)[0]; if (root) chooseFolder(root.chromeId, true); }}>书签</button>{folderPath(activeIndex, folderId).map((node) => <button type="button" key={node.chromeId} title={displayTitle(node.title)} aria-current={node.chromeId === folderId ? 'location' : undefined} onClick={() => chooseFolder(node.chromeId)}>{displayTitle(node.title)}</button>)}</nav>
-          <h2 className="visually-hidden">{filtering ? '标签筛选' : searching ? '搜索结果' : '书签列表'}</h2><button type="button" aria-expanded={filtersOpen} aria-controls="library-filters" onClick={() => setFiltersOpen((value) => !value)}>筛选</button><button type="button" disabled={profile?.connection !== 'live' || !folderId} onClick={() => leaveMetadata(() => { setBookmarkId(null); setCreating(true); setEditingBatch(false); showDetail(); requestAnimationFrame(() => document.getElementById('edit-title')?.focus()); })}>新建</button>{(searching || filtering) && <button type="button" onClick={() => leaveMetadata(() => { setQuery(''); setFilterTagId(null); setIncludeNote(false); setIncludeSummary(false); })}>清空筛选</button>}{hasMore && <button type="button" disabled={busy} onClick={() => void loadMore()}>加载下一页</button>}</div>
-          {pickedIds.length > 0 && <div className="selection-toolbar" aria-label="所选项目操作"><details className="selection-path" onKeyDown={(event) => { if (event.key === 'Escape') { event.stopPropagation(); event.currentTarget.open = false; event.currentTarget.querySelector('summary')?.focus(); } }}><summary aria-label="查看当前目录完整路径" title={currentFolderPath.join(' / ')}>{currentFolderPath.at(-1) ?? '全部书签'}</summary><p tabIndex={0}>{currentFolderPath.join(' / ') || '全部书签'}</p></details><span>{pickedIds.length} 项待处理</span>{(['move', 'delete'] as const).map((kind) => <button key={kind} type="button" disabled={profile?.connection !== 'live'} onClick={() => leaveMetadata(() => { setCreating(false); setEditingBatch(true); setBatchRequest({ id: ++editSeq.current, kind, chromeIds: [...pickedIds] }); showDetail(); })}>{kind === 'move' ? '移动所选' : '删除所选'}</button>)}<button type="button" onClick={() => { setEditingBatch(false); setDetailTab('metadata'); showDetail(); requestAnimationFrame(() => document.getElementById('tag-name')?.focus()); }}>标签</button><button type="button" onClick={() => leaveMetadata(() => setPicked(new Set()))}>取消选择</button></div>}
+          <h2 className="visually-hidden">{filtering ? '标签筛选' : searching ? '搜索结果' : '书签列表'}</h2><button type="button" aria-expanded={filtersOpen} aria-controls="library-filters" onClick={() => setFiltersOpen((value) => !value)}>筛选</button>{!isLocalProfile && <button type="button" disabled={profile?.connection !== 'live' || !folderId} onClick={() => leaveMetadata(() => { setBookmarkId(null); setCreating(true); setEditingBatch(false); showDetail(); requestAnimationFrame(() => document.getElementById('edit-title')?.focus()); })}>新建</button>}{(searching || filtering) && <button type="button" onClick={() => leaveMetadata(() => { setQuery(''); setFilterTagId(null); setIncludeNote(false); setIncludeSummary(false); })}>清空筛选</button>}{hasMore && <button type="button" disabled={busy} onClick={() => void loadMore()}>加载下一页</button>}</div>
+          {pickedIds.length > 0 && <div className="selection-toolbar" aria-label="所选项目操作"><details className="selection-path" onKeyDown={(event) => { if (event.key === 'Escape') { event.stopPropagation(); event.currentTarget.open = false; event.currentTarget.querySelector('summary')?.focus(); } }}><summary aria-label="查看当前目录完整路径" title={currentFolderPath.join(' / ')}>{currentFolderPath.at(-1) ?? '全部书签'}</summary><p tabIndex={0}>{currentFolderPath.join(' / ') || '全部书签'}</p></details><span>{pickedIds.length} 项待处理</span>{!isLocalProfile && (['move', 'delete'] as const).map((kind) => <button key={kind} type="button" disabled={profile?.connection !== 'live'} onClick={() => leaveMetadata(() => { setCreating(false); setEditingBatch(true); setBatchRequest({ id: ++editSeq.current, kind, chromeIds: [...pickedIds] }); showDetail(); })}>{kind === 'move' ? '移动所选' : '删除所选'}</button>)}<button type="button" onClick={() => { setEditingBatch(false); setDetailTab('metadata'); showDetail(); requestAnimationFrame(() => document.getElementById('tag-name')?.focus()); }}>标签</button><button type="button" onClick={() => leaveMetadata(() => setPicked(new Set()))}>取消选择</button></div>}
           </div>
           <p className="secondary" role="status">{busy ? '正在读取 · ' : ''}已加载 {visible.length} / {total} 项{pickedIds.length > 0 ? ` · 已选 ${pickedIds.length} 项` : ''} · {(searching || filtering) ? (scope === 'all' ? '全部书签' : '当前目录及后代') : '当前目录'}{filtering ? ` · 标签：${tags.find((tag) => tag.tagId === filterTagId)?.name ?? '已选择'}` : ''}{searching && includeSummary ? ' · 摘要' : ''}{searching && includeNote ? ' · 备注' : ''} · Ctrl+A 已加载{hasMore ? ' · Ctrl+End 末项' : ''}</p>
           {paging.restarted && <p role="status">来源版本已改变，已从第一页重新读取。</p>}
@@ -675,7 +677,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
               render={(row: ListRow) => <span className="library-label">{<label className="row-checkbox" onClick={(event) => event.stopPropagation()}><input type="checkbox" aria-label={`选择 ${row.title}`} checked={picked.has(row.chromeId)} onClick={(event) => event.stopPropagation()} onChange={() => togglePick(row.chromeId)} /></label>}<span className="library-kind"><WorkspaceIcon name={row.kind === 'folder' ? 'folder' : 'bookmark'} /></span><span className="library-row-text"><span className="library-title">{row.title}</span>{row.url && <span className="library-url">{siteLabel(row.url)}</span>}</span></span>}
             />
           )}
-          {visible.length === 0 && !searching && !filtering && profile?.connection !== 'live' && <p>当前只读，连接 Chrome 后可新建。</p>}
+          {visible.length === 0 && !searching && !filtering && profile?.connection !== 'live' && <p>{isLocalProfile ? '可通过项目 Skills 或命令行在此文件夹添加书签。' : '当前只读，连接 Chrome 后可新建。'}</p>}
         </div>
         <div key={sourceKey} className="library-pane detail-pane" hidden={!detailOpen} aria-labelledby="detail-title" onChangeCapture={(event) => {
           const target = event.target;
@@ -711,11 +713,11 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
             {profile && epochRef.current.epoch !== null && !multiSelection && detailView?.kind === 'bookmark' && visibleDetailTab === 'content' && active && section === 'library' && detailOpen && <div key={`${sourceKey}:${epochRef.current.epoch}:${detailView.chromeId}:${detailView.url}`} id="detail-panel-content" role="tabpanel" aria-labelledby="detail-tab-content">
               <ContentPreviewPanel key={`${profile.profileId}:${detailView.chromeId}:${detailView.url}`} profileId={profile.profileId} chromeId={detailView.chromeId} url={detailView.url} />
               <WebPreviewPanel profileId={profile.profileId} profileName={profile.displayName} chromeId={detailView.chromeId} url={detailView.url} native={native} />
-              <button type="button" onClick={onOrganize}>前往整理查看 AI 建议</button>
+              {!isLocalProfile && <button type="button" onClick={onOrganize}>前往整理查看 AI 建议</button>}
             </div>}
           </>}
-          {profile && batchRequest && <div hidden={!editingBatch}><BatchEditDesk profileId={profile.profileId} profileName={profile.displayName} revision={profile.revision} live={profile.connection === 'live'} nodes={nodes} request={batchRequest} /></div>}
-          {profile && <div hidden={editingBatch || (!creating && (multiSelection || visibleDetailTab !== 'info'))}><EditDesk
+          {profile && !isLocalProfile && batchRequest && <div hidden={!editingBatch}><BatchEditDesk profileId={profile.profileId} profileName={profile.displayName} revision={profile.revision} live={profile.connection === 'live'} nodes={nodes} request={batchRequest} /></div>}
+          {profile && !isLocalProfile && <div hidden={editingBatch || (!creating && (multiSelection || visibleDetailTab !== 'info'))}><EditDesk
             mode="edit"
             nodes={nodes}
             creating={creating}
@@ -734,6 +736,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
             profileId={profile.profileId}
             revision={profile.revision}
             live={profile.connection === 'live'}
+            allowTitleEncoding={!isLocalProfile}
             chromeIds={metadataTargets}
             sourceEpoch={epochRef.current.epoch}
             onDiscardDraft={() => { setMetadataDirty(false); setMetadataDraftIds(null); setDraftReset((value) => value + 1); }}
@@ -750,10 +753,12 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
         </div>
         <div className="workspace-page" hidden={section !== 'organize'}>
           {!profile && <><h2>整理书签</h2><p>只读文件来源不支持整理。请在书签来源中选择已配对资料。</p></>}
-          {organizeVisited && profile && epochRef.current.epoch !== null && <OrganizeWorkspace key={`organize:${sourceKey}:${epochRef.current.epoch}`} profileId={profile.profileId} profileName={profile.displayName} sourceEpoch={epochRef.current.epoch} revision={profile.revision} live={profile.connection === 'live'} active={active && section === 'organize'} nodes={nodes} selected={pickedBookmarks} folderId={folderId} onLibrary={onLibrary} onSettings={onAiSettings} onHistory={onHistory} onChanged={() => refreshMetadataSearch(true)} />}
+          {isLocalProfile && <><h2>整理书签</h2><p>本地 Skills 书签库由项目 Skills 或命令行维护目录结构，不支持浏览器整理写回。</p></>}
+          {organizeVisited && profile && !isLocalProfile && epochRef.current.epoch !== null && <OrganizeWorkspace key={`organize:${sourceKey}:${epochRef.current.epoch}`} profileId={profile.profileId} profileName={profile.displayName} sourceEpoch={epochRef.current.epoch} revision={profile.revision} live={profile.connection === 'live'} active={active && section === 'organize'} nodes={nodes} selected={pickedBookmarks} folderId={folderId} onLibrary={onLibrary} onSettings={onAiSettings} onHistory={onHistory} onChanged={() => refreshMetadataSearch(true)} />}
         </div>
         <div className="workspace-page" hidden={section !== 'history'}>
-          {section === 'history' && profile && <HistoryWorkspace profileId={profile.profileId} profileName={profile.displayName} revision={profile.revision} refreshToken={state?.revision} live={profile.connection === 'live'} nodes={nodes} onExport={onExport} />}
+          {section === 'history' && profile && !isLocalProfile && <HistoryWorkspace profileId={profile.profileId} profileName={profile.displayName} revision={profile.revision} refreshToken={state?.revision} live={profile.connection === 'live'} nodes={nodes} onExport={onExport} />}
+          {isLocalProfile && <><h2>操作历史</h2><p>本地 Skills 书签库不产生浏览器写回操作历史。</p></>}
           {!profile && <><h2>操作历史</h2><p>此文件来源没有浏览器操作记录。请切换到 Chrome 资料查看历史。</p></>}
         </div>
         <div className="workspace-page" hidden={section !== 'semantic'}>

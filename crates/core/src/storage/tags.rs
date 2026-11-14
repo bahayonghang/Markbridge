@@ -33,11 +33,11 @@ struct LinkSnap {
     bookmark_id: String,
     tag_id: String,
 }
-struct Outcome {
-    affected: u64,
-    merge_required: bool,
-    source: Option<Id>,
-    target: Option<Id>,
+pub(super) struct Outcome {
+    pub(super) affected: u64,
+    pub(super) merge_required: bool,
+    pub(super) source: Option<Id>,
+    pub(super) target: Option<Id>,
 }
 
 impl Storage {
@@ -85,7 +85,7 @@ impl Storage {
     }
 }
 
-fn command_ids(command: &TagCommand) -> &[Id] {
+pub(super) fn command_ids(command: &TagCommand) -> &[Id] {
     match command {
         TagCommand::SetNote { chrome_ids, .. }
         | TagCommand::Add { chrome_ids, .. }
@@ -94,7 +94,11 @@ fn command_ids(command: &TagCommand) -> &[Id] {
     }
 }
 
-fn apply(conn: &rusqlite::Connection, profile_id: &Id, command: &TagCommand) -> Result<Outcome> {
+pub(super) fn apply(
+    conn: &rusqlite::Connection,
+    profile_id: &Id,
+    command: &TagCommand,
+) -> Result<Outcome> {
     let epoch = epoch_of(conn, profile_id)?;
     match command {
         TagCommand::SetNote { chrome_ids, note } => {
@@ -429,7 +433,7 @@ fn restore(conn: &rusqlite::Connection, _epoch: i64, snap: &Snap) -> Result<()> 
     Ok(())
 }
 
-fn read_catalog(
+pub(super) fn read_catalog(
     conn: &rusqlite::Connection,
     profile_id: &Id,
     chrome_ids: &[Id],

@@ -14,6 +14,7 @@ pub enum BridgeConnection {
     Reconciling,
     Live,
     CachedReadOnly,
+    Local,
     Error,
 }
 

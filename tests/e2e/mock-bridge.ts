@@ -52,6 +52,13 @@ export async function mockBridge(page: Page, scenario: 'connected' | 'startup-er
         state = { ...state, revision: state.revision + 1, profiles: [{ ...profile, connection: 'unpaired' }] };
         return state;
       }
+      export async function ensureLocalLibrary() {
+        const localProfile = { profileId: 'local-skills', instanceId: 'local-skills', displayName: 'Skills 书签库', connection: 'local', nodeCount: 1, revision: 1, lastSyncedAt: 1791800000000, errorCode: null };
+        const exists = state.profiles.some((item) => item.profileId === 'local-skills');
+        state = { ...state, revision: state.revision + 1, profiles: exists ? state.profiles : [...state.profiles, localProfile] };
+        receive?.(state);
+        return state;
+      }
       export async function enumerateChromeUserData() { return { profiles: [] }; }
       export async function attachFileMirror() { return state; }
       export async function rescanFileMirrors() { return state; }

@@ -7,6 +7,7 @@ mod history;
 mod semantic;
 pub use history::ExportSnapshot;
 mod file_mirror;
+mod local_watch;
 mod maintenance;
 mod organization;
 mod sync;
@@ -14,7 +15,7 @@ mod tags;
 mod transport;
 
 use crate::preview::Gate;
-use crate::storage::{PairedOrigin, Profile, Storage};
+use crate::storage::{PairedOrigin, Profile, ProfileOrigin, Storage, StoredIdentity};
 use credentials::CredentialStore;
 use markbridge_protocol::*;
 use rand::{TryRngCore, rngs::OsRng};
@@ -41,6 +42,7 @@ pub struct Bridge {
     ai_audit: crate::ai::Audit,
     lifecycle: Arc<Mutex<()>>,
     watches: Arc<Mutex<BTreeMap<String, file_mirror::Watch>>>,
+    local_watch: Arc<Mutex<Option<local_watch::Watch>>>,
     preview: Gate,
     links: Gate,
     link_net: Arc<std::sync::Mutex<Arc<dyn crate::preview::Network>>>,
@@ -51,7 +53,7 @@ struct Pending {
     approved: bool,
 }
 struct ActiveProfile {
-    identity: Profile,
+    identity: StoredIdentity,
     view: BridgeProfile,
     revoked: bool,
     session: Option<Id>,
@@ -170,10 +172,10 @@ impl Bridge {
                 profile_id: profile.id.clone(),
                 instance_id: profile.instance_id.clone(),
                 display_name: profile.display_name.clone(),
-                connection: if stored.revoked {
-                    BridgeConnection::Unpaired
-                } else {
-                    BridgeConnection::CachedReadOnly
+                connection: match &profile.origin {
+                    ProfileOrigin::LocalSkills => BridgeConnection::Local,
+                    ProfileOrigin::Chrome(_) if stored.revoked => BridgeConnection::Unpaired,
+                    ProfileOrigin::Chrome(_) => BridgeConnection::CachedReadOnly,
                 },
                 node_count: Counter::new(nodes.len() as u64)?,
                 revision: cursor
@@ -225,6 +227,7 @@ impl Bridge {
             ai_audit: crate::ai::Audit::default(),
             lifecycle: Arc::new(Mutex::new(())),
             watches: Arc::new(Mutex::new(BTreeMap::new())),
+            local_watch: Arc::new(Mutex::new(None)),
             preview: Gate::default(),
             links: Gate::default(),
             link_net: Arc::new(std::sync::Mutex::new(Arc::new(
@@ -232,6 +235,7 @@ impl Bridge {
             ))),
         };
         bridge.arm_saved_watches().await;
+        bridge.arm_local_watch(path).await;
         Ok(bridge)
     }
     pub fn subscribe(&self) -> watch::Receiver<BridgeState> {
@@ -348,6 +352,9 @@ impl Bridge {
             .profiles
             .get_mut(profile_id.as_str())
             .ok_or(ErrorCode::WrongProfile)?;
+        if matches!(profile.identity.origin, ProfileOrigin::LocalSkills) {
+            return Err(ErrorCode::ReadOnly);
+        }
         profile.revoked = true;
         profile.disconnect();
         let reference = profile.identity.credential_reference.clone();
@@ -371,6 +378,9 @@ impl Bridge {
             .profiles
             .get_mut(profile_id.as_str())
             .ok_or(ErrorCode::WrongProfile)?;
+        if matches!(profile.identity.origin, ProfileOrigin::LocalSkills) {
+            return Err(ErrorCode::ReadOnly);
+        }
         if profile.revoked {
             return Err(ErrorCode::Unpaired);
         }
@@ -418,6 +428,7 @@ impl Bridge {
         self.links.cancel_all().await;
         self.ai_gate.cancel_all().await;
         self.stop_watches().await;
+        self.stop_local_watch().await;
         let listener = {
             let mut inner = self.inner.lock().await;
             inner.port = None;
@@ -596,7 +607,7 @@ impl Bridge {
         inner.profiles.insert(
             profile_id.as_str().to_owned(),
             ActiveProfile {
-                identity,
+                identity: identity.into(),
                 view,
                 revoked: false,
                 session: None,
@@ -635,7 +646,7 @@ impl Bridge {
             .ok_or(ErrorCode::Unpaired)?;
         if profile.revoked
             || profile.identity.instance_id != payload.instance_id
-            || profile.identity.paired_origin != *origin
+            || profile.identity.origin != ProfileOrigin::Chrome(origin.clone())
         {
             return Err(ErrorCode::WrongProfile);
         }

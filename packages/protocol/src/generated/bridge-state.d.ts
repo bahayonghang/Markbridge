@@ -47,7 +47,8 @@ export type RequiredNullable5 = string | null;
  * A required JSON field whose value can be null. Unlike Option, absence is rejected.
  */
 export type RequiredNullable = number | null;
-export type BridgeConnection = 'unpaired' | 'connecting' | 'reconciling' | 'live' | 'cached_read_only' | 'error';
+export type BridgeConnection =
+  'unpaired' | 'connecting' | 'reconciling' | 'live' | 'cached_read_only' | 'local' | 'error';
 export type Version = number;
 
 export interface BridgeState {

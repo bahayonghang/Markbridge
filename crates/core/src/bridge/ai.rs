@@ -267,9 +267,20 @@ impl Bridge {
             .await?;
         }
         if let Some(summary) = &plan.summary {
-            storage
-                .set_summary(plan.bookmark_id.clone(), summary.clone())
-                .await?;
+            if plan.profile_id.as_str() == crate::storage::LOCAL_SKILLS_PROFILE_ID {
+                storage
+                    .local_set_summary(
+                        plan.profile_id.clone(),
+                        plan.chrome_id.clone(),
+                        summary.clone(),
+                    )
+                    .await?;
+                let _ = self.reload_local_space().await;
+            } else {
+                storage
+                    .set_summary(plan.bookmark_id.clone(), summary.clone())
+                    .await?;
+            }
         }
         Ok(())
     }

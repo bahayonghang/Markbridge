@@ -4,7 +4,7 @@ export type SourceTarget = { kind: 'profile' | 'mirror'; id: string };
 export type SourceRequest = SourceTarget & { request: number };
 export const connectionLabels: Record<BridgeState['profiles'][number]['connection'], string> = {
   unpaired: '未配对 · 只读', connecting: '连接中 · 只读', reconciling: '核对中 · 只读',
-  live: '实时同步', cached_read_only: '缓存 · 只读', error: '连接错误 · 只读',
+  live: '实时同步', cached_read_only: '缓存 · 只读', local: '本地书签库', error: '连接错误 · 只读',
 };
 export const fileLabels: Record<BridgeState['mirrors'][number]['fileStatus'], string> = {
   current: '文件已同步', stale: '文件陈旧 · 保留缓存', unavailable: '文件不可用 · 保留缓存',
@@ -12,6 +12,7 @@ export const fileLabels: Record<BridgeState['mirrors'][number]['fileStatus'], st
 export function profileNextStep(connection: BridgeState['profiles'][number]['connection']): string {
   switch (connection) {
     case 'live': return '已完成全树核对。写入 Chrome 前仍需审查并确认。';
+    case 'local': return '本地专属书签库，由本机 SQLite 直接维护，不会同步或写回 Chrome。';
     case 'unpaired': return '此资料已取消配对。缓存可继续浏览；要恢复连接，请生成新的配对串。';
     case 'connecting': return '请保持 Chrome 与扩展运行，等待连接。若没有进展，可在扩展选项页重新连接。';
     case 'reconciling': return '正在核对完整书签树。核对完成前不能写入，请等待状态变为实时同步。';

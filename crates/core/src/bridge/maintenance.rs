@@ -236,6 +236,16 @@ impl Bridge {
             confirm,
             second_confirm,
         } = args;
+        let profile_origin = inner
+            .profiles
+            .get(profile_id.as_str())
+            .ok_or(ErrorCode::WrongProfile)?
+            .identity
+            .origin
+            .clone();
+        if matches!(profile_origin, crate::storage::ProfileOrigin::LocalSkills) {
+            return Err(ErrorCode::ReadOnly);
+        }
         let revision = inner
             .profiles
             .get(profile_id.as_str())

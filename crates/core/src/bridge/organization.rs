@@ -40,6 +40,12 @@ impl Bridge {
                     .profiles
                     .get(profile_id.as_str())
                     .ok_or(ErrorCode::WrongProfile)?;
+                if matches!(
+                    profile.identity.origin,
+                    crate::storage::ProfileOrigin::LocalSkills
+                ) {
+                    return Err(ErrorCode::ReadOnly);
+                }
                 let cached = inner
                     .storage()?
                     .bookmarks(profile_id.clone(), profile.identity.source_epoch)
@@ -175,6 +181,12 @@ impl Bridge {
             .profiles
             .get(record.profile_id.as_str())
             .ok_or(ErrorCode::WrongProfile)?;
+        if matches!(
+            profile.identity.origin,
+            crate::storage::ProfileOrigin::LocalSkills
+        ) {
+            return Err(ErrorCode::ReadOnly);
+        }
         let mut reserved = org::reserved_ids(&record.scope, &record.anchor_id);
         for node in &profile.nodes {
             reserved.insert(node.chrome_id.as_str().to_owned());
@@ -386,6 +398,12 @@ impl Bridge {
             .profiles
             .get(record.profile_id.as_str())
             .ok_or(ErrorCode::WrongProfile)?;
+        if matches!(
+            profile.identity.origin,
+            crate::storage::ProfileOrigin::LocalSkills
+        ) {
+            return Err(ErrorCode::ReadOnly);
+        }
         let live = profile.view.connection == BridgeConnection::Live
             && profile.session.is_some()
             && profile.outbound.is_some();
@@ -504,6 +522,12 @@ impl Bridge {
             .profiles
             .get(profile_id.as_str())
             .ok_or(ErrorCode::WrongProfile)?;
+        if matches!(
+            profile.identity.origin,
+            crate::storage::ProfileOrigin::LocalSkills
+        ) {
+            return Err(ErrorCode::ReadOnly);
+        }
         if profile.view.connection != BridgeConnection::Live
             || profile.session.is_none()
             || profile.outbound.is_none()

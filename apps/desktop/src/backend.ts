@@ -174,6 +174,10 @@ export function reconnectProfile(profileId: string): Promise<BridgeState> {
   return bridgeCommand('reconnect_profile', { profileId });
 }
 
+export function ensureLocalLibrary(): Promise<BridgeState> {
+  return bridgeCommand('ensure_local_library', {});
+}
+
 export async function enumerateChromeUserData(userDataPath: string): Promise<ChromeProfileList> {
   if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
   const { parseChromeProfileList } = await loadBridge();

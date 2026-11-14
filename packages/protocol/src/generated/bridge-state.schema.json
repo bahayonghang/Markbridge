@@ -53,6 +53,7 @@
         "reconciling",
         "live",
         "cached_read_only",
+        "local",
         "error"
       ]
     },

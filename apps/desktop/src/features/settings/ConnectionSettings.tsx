@@ -3,7 +3,7 @@ import type { BridgeState, ChromeProfileList, PairingOffer } from '@markbridge/p
 import { DiagnosticExport } from './DiagnosticExport';
 import {
   associateFileMirror, attachFileMirror, beginPairing, cancelPairing, confirmPairing,
-  detachFileMirror, enumerateChromeUserData,
+  detachFileMirror, ensureLocalLibrary, enumerateChromeUserData,
   reconnectProfile, rescanFileMirrors, revokePairing, startBridge,
 } from '../../backend';
 
@@ -109,6 +109,8 @@ export function ConnectionSettings({ state, error, native, accept, onBrowseSourc
   }
 
   const pending = state?.pending.filter((candidate) => candidate.expiresAt > now) ?? [];
+  const pairedChromeProfiles = state?.profiles.filter((profile) => profile.connection !== 'local') ?? [];
+  const hasLocalLibrary = !!state?.profiles.some((profile) => profile.connection === 'local');
   const unavailable = !native || busy || !state || error === 'event';
   const hasSources = !!(state?.profiles.length || state?.mirrors.length);
   const setup = (
@@ -158,17 +160,34 @@ export function ConnectionSettings({ state, error, native, accept, onBrowseSourc
     <div key="sources" className="connection-sources">
             <section className="connection-panel" aria-labelledby="profiles-title" hidden={!state?.profiles.length}>
               <div className="panel-heading"><h2 id="profiles-title">已配对资料</h2><span className="secondary">{state?.profiles.length ?? 0} 个资料</span></div>
-              {!state?.profiles.length ? <p className="secondary">尚未连接书签来源。完成配对后，可在此查看同步状态和节点计数。</p> : state.profiles.map((profile) => <article className="profile" key={profile.profileId}>
-                <div className="panel-heading"><h3>{profile.displayName}</h3><span className="source-state">{error === 'event' ? '状态无效 · 只读' : connectionLabels[profile.connection]}</span></div>
-                <dl className="profile-metrics"><div><dt>缓存节点</dt><dd>{profile.nodeCount}</dd></div><div><dt>来源版本</dt><dd>{profile.revision}</dd></div><div><dt>最近同步</dt><dd>{cacheTime(profile.lastSyncedAt)}</dd></div></dl>
-                {profile.errorCode && <p className="secondary">{safeError(profile.errorCode)}</p>}
-                <p className="secondary">{profileNextStep(profile.connection)}</p>
-                <div className="actions">
-                  <button type="button" disabled={unavailable} onClick={() => onBrowseSource({ kind: 'profile', id: profile.profileId })}>浏览此资料</button>
-                  <button disabled={unavailable || profile.connection === 'unpaired'} onClick={() => { void act(async () => { accept(await reconnectProfile(profile.profileId)); }); }}>重新连接</button>
-                  <button className="secondary-button" disabled={unavailable || profile.connection === 'unpaired'} onClick={() => setRevoke(profile)}>吊销配对</button>
-                </div>
-              </article>)}
+              {!state?.profiles.length ? <p className="secondary">尚未连接书签来源。完成配对后，可在此查看同步状态和节点计数。</p> : state.profiles.map((profile) => {
+                const isLocal = profile.connection === 'local';
+                return <article className="profile" key={profile.profileId}>
+                  <div className="panel-heading"><h3>{profile.displayName}</h3><span className="source-state">{error === 'event' ? '状态无效 · 只读' : connectionLabels[profile.connection]}</span></div>
+                  <dl className="profile-metrics"><div><dt>缓存节点</dt><dd>{profile.nodeCount}</dd></div><div><dt>来源版本</dt><dd>{profile.revision}</dd></div><div><dt>最近同步</dt><dd>{cacheTime(profile.lastSyncedAt)}</dd></div></dl>
+                  {profile.errorCode && <p className="secondary">{safeError(profile.errorCode)}</p>}
+                  <p className="secondary">{profileNextStep(profile.connection)}</p>
+                  <div className="actions">
+                    <button type="button" disabled={unavailable} onClick={() => onBrowseSource({ kind: 'profile', id: profile.profileId })}>浏览此资料</button>
+                    {!isLocal && <button disabled={unavailable || profile.connection === 'unpaired'} onClick={() => { void act(async () => { accept(await reconnectProfile(profile.profileId)); }); }}>重新连接</button>}
+                    {!isLocal && <button className="secondary-button" disabled={unavailable || profile.connection === 'unpaired'} onClick={() => setRevoke(profile)}>吊销配对</button>}
+                  </div>
+                </article>;
+              })}
+            </section>
+            <section className="connection-panel" aria-labelledby="local-library-title" hidden={onboarding || hasLocalLibrary}>
+              <div className="panel-heading"><h2 id="local-library-title">本地 Skills 书签库</h2><span className="secondary">独立 SQLite 空间</span></div>
+              <p className="secondary">启用本机专属书签空间（Skills 书签），可由项目 Skills 或命令行直接维护，不会同步或写回 Chrome。</p>
+              <div className="actions">
+                <button type="button" disabled={unavailable} onClick={() => {
+                  void act(async () => {
+                    const next = await ensureLocalLibrary();
+                    accept(next);
+                    const created = next.profiles.find((profile) => profile.connection === 'local');
+                    if (created) onBrowseSource({ kind: 'profile', id: created.profileId });
+                  }, '无法启用本地 Skills 书签库。请检查本机存储状态后重试。');
+                }}>启用本地 Skills 书签库</button>
+              </div>
             </section>
             <section className="connection-panel" aria-labelledby="mirrors-title" hidden={onboarding && path !== 'readonly'}>
               <div className="panel-heading"><h2 id="mirrors-title">只读文件来源</h2><span className="secondary">{state?.mirrors.length ?? 0} 个来源</span></div>
@@ -212,14 +231,14 @@ export function ConnectionSettings({ state, error, native, accept, onBrowseSourc
                   <button type="button" disabled={unavailable} onClick={() => onBrowseSource({ kind: 'mirror', id: mirror.mirrorSourceId })}>浏览缓存</button>
                   <button type="button" className="secondary-button" disabled={unavailable || !mirror.watching} onClick={() => { void act(async () => { accept(await detachFileMirror(mirror.mirrorSourceId)); }); }}>停止监听</button>
                 </div>
-                {!!state.profiles.length && <form className="inline-form" onSubmit={(event) => {
+                {pairedChromeProfiles.length > 0 && <form className="inline-form" onSubmit={(event) => {
                   event.preventDefault();
                   if (!profileChoice) { setMessage('请选择要验证的已配对资料。'); return; }
                   void act(async () => { accept(await associateFileMirror(mirror.mirrorSourceId, profileChoice)); }, '文件与在线资料不一致，保持独立只读。');
                 }}>
                   <label htmlFor={`associate-${mirror.mirrorSourceId}`}>已配对资料<select id={`associate-${mirror.mirrorSourceId}`} value={profileChoice} onChange={(event) => setProfileChoice(event.target.value)} disabled={unavailable || mirror.fileStatus !== 'current'}>
                     <option value="">选择已配对资料</option>
-                    {state.profiles.map((profile) => <option key={profile.profileId} value={profile.profileId}>{profile.displayName}</option>)}
+                    {pairedChromeProfiles.map((profile) => <option key={profile.profileId} value={profile.profileId}>{profile.displayName}</option>)}
                   </select></label>
                   <button type="submit" disabled={unavailable || mirror.fileStatus !== 'current' || !profileChoice}>验证关联</button>
                 </form>}

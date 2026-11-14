@@ -57,13 +57,35 @@ impl Bridge {
         command: TagCommand,
         expected_source_epoch: Option<SourceEpoch>,
     ) -> Result<TagCatalog> {
-        let inner = self.inner.lock().await;
+        let mut inner = self.inner.lock().await;
         let profile = inner
             .profiles
             .get(profile_id.as_str())
             .ok_or(ErrorCode::WrongProfile)?;
         if expected_source_epoch.is_some_and(|epoch| epoch != profile.identity.source_epoch) {
             return Err(ErrorCode::Conflict);
+        }
+        if matches!(
+            profile.identity.origin,
+            crate::storage::ProfileOrigin::LocalSkills
+        ) {
+            if matches!(command, TagCommand::SetEncoding { .. }) {
+                return Err(ErrorCode::ReadOnly);
+            }
+            let storage = inner.storage()?.share();
+            let catalog = storage
+                .local_mutate_tags(profile_id.clone(), command)
+                .await?;
+            let status = storage.local_skills_status().await?;
+            if let Some(active) = inner.profiles.get_mut(profile_id.as_str())
+                && active.view.revision.get() != status.revision
+            {
+                active.view.revision = Counter::new(status.revision)?;
+                active.view.last_synced_at =
+                    RequiredNullable(status.last_synced_at.map(Counter::new).transpose()?);
+                self.publish(&mut inner);
+            }
+            return Ok(catalog);
         }
         inner.storage()?.mutate_tags(profile_id, command).await
     }
@@ -207,6 +229,12 @@ async fn prepare(
         .profiles
         .get(profile_id.as_str())
         .ok_or(ErrorCode::WrongProfile)?;
+    if matches!(
+        profile.identity.origin,
+        crate::storage::ProfileOrigin::LocalSkills
+    ) {
+        return Err(ErrorCode::ReadOnly);
+    }
     if expected_source_epoch.is_some_and(|epoch| epoch != profile.identity.source_epoch) {
         return Err(ErrorCode::Conflict);
     }

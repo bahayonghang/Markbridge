@@ -10,7 +10,10 @@ vi.mock('./backend', () => ({
   getStartupState: vi.fn(), getBridgeState: vi.fn(), subscribeBridgeState: vi.fn(),
   listInstalledFonts: vi.fn(async () => ({ status: 'ready', families: [] })),
   hasNativeBridge: vi.fn(), startBridge: vi.fn(), beginPairing: vi.fn(),
-  confirmPairing: vi.fn(), cancelPairing: vi.fn(), revokePairing: vi.fn(), reconnectProfile: vi.fn(),
+  confirmPairing: vi.fn(), cancelPairing: vi.fn(), revokePairing: vi.fn(), reconnectProfile: vi.fn(), ensureLocalLibrary: vi.fn(),
+  readCacheQuery: vi.fn(async () => ({ items: [], total: 0, offset: 0, nextOffset: null, sourceEpoch: 1, revision: 1 })),
+  readTagState: vi.fn(async () => ({ affected: 0, encodingEnabled: false, entries: [], filterTagId: null, journalId: null, matches: [], mergeRequired: false, profileId: 'local-skills', sourceTagId: null, tags: [], targetTagId: null })),
+  tagCommand: vi.fn(),
   enumerateChromeUserData: vi.fn(), attachFileMirror: vi.fn(), rescanFileMirrors: vi.fn(),
   detachFileMirror: vi.fn(), associateFileMirror: vi.fn(), getMirrorTree: vi.fn(),
   readCacheTree: vi.fn(async () => ({ nodes: [] })),
@@ -435,4 +438,61 @@ it('expires hydrated pending candidates and allows an explicit fresh offer', asy
   await act(async () => fireEvent.click(screen.getByRole('button', { name: '生成配对串' })));
   expect(backend.cancelPairing).toHaveBeenCalledExactlyOnceWith('expired');
   expect(screen.getByLabelText('一次性配对串')).toHaveValue('synthetic-fresh');
+});
+
+
+it('enables and browses the isolated local Skills library from settings without exposing Chrome pairing or tree-write controls', async () => {
+  const mirror: BridgeState['mirrors'][number] = {
+    mirrorSourceId: 'mirror-local-check', displayName: '独立镜像', association: 'independent', pairedProfileId: null,
+    fileStatus: 'current', watching: true, nodeCount: 1, revision: 1, lastSyncedAt: null, errorCode: null, canWriteBrowser: false,
+  };
+  const localProfile: BridgeState['profiles'][number] = {
+    profileId: 'local-skills', instanceId: 'local-skills', displayName: 'Skills 书签库', connection: 'local',
+    nodeCount: 2, revision: 2, lastSyncedAt: 1791800000000, errorCode: null,
+  };
+  render(<App />);
+  expect(await screen.findByRole('region', { name: '首次接入' })).toBeVisible();
+  expect(screen.queryByRole('button', { name: '启用本地 Skills 书签库' })).toBeNull();
+
+  fireEvent.click(screen.getByRole('button', { name: '设置' }));
+  fireEvent.click(screen.getByRole('tab', { name: 'Chrome 连接' }));
+  const enableButton = await screen.findByRole('button', { name: '启用本地 Skills 书签库' });
+  expect(enableButton).toBeVisible();
+
+  vi.mocked(backend.ensureLocalLibrary).mockResolvedValue({ ...initial, revision: 2, profiles: [localProfile], mirrors: [mirror] });
+  vi.mocked(backend.readCacheTree).mockResolvedValue({
+    nodes: [
+      { chromeId: 'skills-root', parentId: null, position: 0, kind: 'folder', title: 'Skills 书签', url: null, folderType: null, unmodifiable: null, dateAdded: null, dateLastUsed: null },
+      { chromeId: 'local-b:1', parentId: 'skills-root', position: 0, kind: 'bookmark', title: '本地研究条目', url: 'https://example.com/local', folderType: null, unmodifiable: null, dateAdded: null, dateLastUsed: null },
+    ],
+  });
+  vi.mocked(backend.readCacheQuery).mockResolvedValue({
+    items: [{ chromeId: 'local-b:1', parentId: 'skills-root', position: 0, kind: 'bookmark', title: '本地研究条目', url: 'https://example.com/local', folderType: null, unmodifiable: null, dateAdded: null, dateLastUsed: null }],
+    total: 1, offset: 0, nextOffset: null, sourceEpoch: 1, revision: 2,
+  });
+  vi.mocked(backend.readCacheNode).mockResolvedValue({
+    node: { chromeId: 'local-b:1', parentId: 'skills-root', position: 0, kind: 'bookmark', title: '本地研究条目', url: 'https://example.com/local', folderType: null, unmodifiable: null, dateAdded: null, dateLastUsed: null },
+    ancestors: ['Skills 书签'],
+  });
+
+  fireEvent.click(enableButton);
+  await waitFor(() => expect(backend.ensureLocalLibrary).toHaveBeenCalledOnce());
+  expect(await screen.findByRole('heading', { level: 1, name: '书签' })).toBeVisible();
+  expect(document.querySelector('.workspace-heading .connection')).toHaveTextContent('本地书签库');
+  expect(screen.getByLabelText('书签来源')).toHaveValue('profile:local-skills');
+  expect(screen.queryByRole('button', { name: '新建' })).toBeNull();
+  expect(await screen.findByRole('option', { name: /本地研究条目/ })).toBeVisible();
+
+  fireEvent.click(screen.getByRole('checkbox', { name: '选择 本地研究条目' }));
+  expect(screen.queryByRole('button', { name: '移动所选' })).toBeNull();
+  expect(screen.queryByRole('button', { name: '删除所选' })).toBeNull();
+  expect(screen.getByRole('button', { name: '标签' })).toBeVisible();
+
+  fireEvent.click(screen.getByRole('button', { name: '设置' }));
+  fireEvent.click(screen.getByRole('tab', { name: 'Chrome 连接' }));
+  expect(screen.queryByRole('button', { name: '启用本地 Skills 书签库' })).toBeNull();
+  expect(screen.queryByRole('button', { name: '重新连接' })).toBeNull();
+  expect(screen.queryByRole('button', { name: '吊销配对' })).toBeNull();
+  expect(screen.queryByRole('combobox', { name: '已配对资料' })).toBeNull();
+  expect(screen.queryByRole('button', { name: '验证关联' })).toBeNull();
 });

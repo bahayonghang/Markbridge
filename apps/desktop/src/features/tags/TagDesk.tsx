@@ -23,6 +23,7 @@ type TagDeskProps = {
   profileId: string;
   revision: number;
   live: boolean;
+  allowTitleEncoding?: boolean;
   chromeIds: string[];
   filterTagId: string | null;
   onFilter: (tagId: string | null) => void;
@@ -39,7 +40,7 @@ export function TagDesk(props: TagDeskProps) {
   return <TagEditor key={`${props.profileId}:${props.chromeIds.join(',')}:${props.resetDraft ?? 0}`} {...props} />;
 }
 
-function TagEditor({ profileId, revision, live, chromeIds, filterTagId, onFilter, onCatalog, onChanged, onDirtyChange, sourceEpoch, onDiscardDraft, refreshVersion = 0 }: TagDeskProps) {
+function TagEditor({ profileId, revision, live, allowTitleEncoding = true, chromeIds, filterTagId, onFilter, onCatalog, onChanged, onDirtyChange, sourceEpoch, onDiscardDraft, refreshVersion = 0 }: TagDeskProps) {
   const selectionKey = chromeIds.join('\n');
   const [catalog, setCatalog] = useState<TagCatalog | null>(null);
   const [loadedEpoch, setLoadedEpoch] = useState<number | null>(null);
@@ -318,7 +319,7 @@ function TagEditor({ profileId, revision, live, chromeIds, filterTagId, onFilter
       <div className="edit-actions">
         <button type="button" disabled={!canMutate || !catalog?.journalId} onClick={() => { if (catalog?.journalId) void run({ kind: 'undo', journalId: catalog.journalId }); }}>撤销上次标签变更</button>
       </div>
-      <details className="detail-disclosure"><summary>可选：将标签写入标题</summary>
+      {allowTitleEncoding && <details className="detail-disclosure"><summary>可选：将标签写入标题</summary>
       <label htmlFor="title-encoding">
         <input id="title-encoding" type="checkbox" disabled={!canMutate} checked={!!catalog?.encodingEnabled} onChange={(event) => void run({ kind: 'set_encoding', enabled: event.target.checked })} />
         启用标题编码
@@ -341,7 +342,7 @@ function TagEditor({ profileId, revision, live, chromeIds, filterTagId, onFilter
           <button type="button" onClick={() => setPreview(null)}>取消</button>
         </div>
       </div>}
-      </details>
+      </details>}
       {notice && <p role="status">{notice}</p>}
     </div>
   );

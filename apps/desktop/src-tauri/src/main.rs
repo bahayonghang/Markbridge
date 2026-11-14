@@ -211,6 +211,14 @@ async fn reconnect_profile(
     bridge.reconnect_profile(profile_id).await
 }
 #[tauri::command]
+async fn ensure_local_library(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+) -> Result<BridgeState, ErrorCode> {
+    trusted(&window)?;
+    bridge.ensure_local_library().await
+}
+#[tauri::command]
 async fn enumerate_chrome_user_data(
     window: tauri::WebviewWindow,
     bridge: tauri::State<'_, Bridge>,
@@ -1156,6 +1164,7 @@ fn on_run_event(event: &tauri::RunEvent, bridge: Option<&Bridge>) {
         let bridge = Bridge::clone(bridge);
         tauri::async_runtime::spawn(async move {
             let _ = bridge.rescan_file_mirrors().await;
+            let _ = bridge.reload_local_space().await;
         });
     }
     if matches!(event, tauri::RunEvent::Exit)
@@ -1237,6 +1246,7 @@ fn main() {
             cancel_pairing,
             revoke_pairing,
             reconnect_profile,
+            ensure_local_library,
             enumerate_chrome_user_data,
             attach_file_mirror,
             rescan_file_mirrors,

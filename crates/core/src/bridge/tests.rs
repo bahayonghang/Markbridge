@@ -5103,3 +5103,322 @@ async fn daily_batch_large_recovery_frame_rejects_before_any_backup_operation_or
         bridge.shutdown().await.unwrap();
     }
 }
+
+#[tokio::test]
+async fn local_skills_library_stays_lazy_isolates_from_chrome_and_rejects_browser_mutations() {
+    #[derive(Default)]
+    struct CountingCredentials {
+        inner: MemoryCredentials,
+        calls: AtomicUsize,
+    }
+    impl CredentialStore for CountingCredentials {
+        fn get(&self, reference: &str) -> Result<String> {
+            self.calls.fetch_add(1, Ordering::SeqCst);
+            self.inner.get(reference)
+        }
+        fn set(&self, reference: &str, value: &str) -> Result<()> {
+            self.calls.fetch_add(1, Ordering::SeqCst);
+            self.inner.set(reference, value)
+        }
+        fn delete(&self, reference: &str) -> Result<()> {
+            self.calls.fetch_add(1, Ordering::SeqCst);
+            self.inner.delete(reference)
+        }
+    }
+
+    let dir = tempfile::tempdir().unwrap();
+    let creds = Arc::new(CountingCredentials::default());
+    let bridge = Bridge::open(dir.path().join("markbridge.sqlite"), creds.clone())
+        .await
+        .unwrap();
+    assert!(bridge.state().await.profiles.is_empty());
+
+    let socket = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+    let port = socket.local_addr().unwrap().port();
+    drop(socket);
+    bridge.start(port).await.unwrap();
+    let (chrome_profile, secret) = paired(&bridge, "inst-local-test").await;
+    assert!(
+        bridge
+            .authenticate(
+                &origin(),
+                &hello(&chrome_profile, "inst-local-test", "sess-1", &secret),
+            )
+            .await
+            .is_ok()
+    );
+    full(&bridge, &chrome_profile, "sess-1", 1).await;
+
+    let state = bridge.ensure_local_library().await.unwrap();
+    let local = state
+        .profiles
+        .iter()
+        .find(|p| p.profile_id.as_str() == "local-skills")
+        .expect("local-skills profile");
+    assert_eq!(local.connection, BridgeConnection::Local);
+    assert_eq!(local.node_count.get(), 1);
+    assert_eq!(local.revision.get(), 1);
+
+    let local_id = Id::new("local-skills").unwrap();
+    let root_id = Id::new("skills-root").unwrap();
+    let ext_storage = Storage::open(dir.path().join("markbridge.sqlite"))
+        .await
+        .unwrap();
+    let added = ext_storage
+        .local_add_bookmark(
+            local_id.clone(),
+            Some(root_id.clone()),
+            "Local Item".into(),
+            "https://example.com/local-item".into(),
+            None,
+            vec![],
+            None,
+            None,
+        )
+        .await
+        .unwrap();
+    ext_storage.close().await.unwrap();
+    bridge.reload_local_space().await.unwrap();
+    let item_id = added.node.chrome_id;
+
+    let cred_calls_before = creds.calls.load(Ordering::SeqCst);
+
+    assert_eq!(
+        bridge.revoke_pairing(local_id.clone()).await.unwrap_err(),
+        ErrorCode::ReadOnly
+    );
+    assert_eq!(
+        bridge
+            .reconnect_profile(local_id.clone())
+            .await
+            .unwrap_err(),
+        ErrorCode::ReadOnly
+    );
+    let edit_preview = bridge
+        .preview_edit(
+            local_id.clone(),
+            2,
+            EditAction::Create {
+                parent_id: root_id.clone(),
+                position: Position::new(0).unwrap(),
+                title: Title::new("Blocked").unwrap(),
+                url: Some(Url::new("https://example.com/blocked").unwrap()),
+            },
+        )
+        .await
+        .unwrap();
+    assert!(!edit_preview.writable);
+    assert_eq!(
+        bridge
+            .apply_edit(
+                local_id.clone(),
+                2,
+                EditAction::Create {
+                    parent_id: root_id.clone(),
+                    position: Position::new(0).unwrap(),
+                    title: Title::new("Blocked").unwrap(),
+                    url: Some(Url::new("https://example.com/blocked").unwrap()),
+                },
+                false,
+            )
+            .await
+            .unwrap_err(),
+        ErrorCode::ReadOnly
+    );
+    assert_eq!(
+        bridge
+            .preview_batch_edit(
+                local_id.clone(),
+                2,
+                vec![root_id.clone()],
+                BatchEditAction::Delete {},
+            )
+            .await
+            .unwrap_err(),
+        ErrorCode::ProtectedNode
+    );
+    let batch_preview = bridge
+        .preview_batch_edit(
+            local_id.clone(),
+            2,
+            vec![item_id.clone()],
+            BatchEditAction::Delete {},
+        )
+        .await
+        .unwrap();
+    assert!(!batch_preview.writable);
+    assert_eq!(
+        bridge
+            .apply_batch_edit(
+                local_id.clone(),
+                batch_preview.plan_id,
+                batch_preview.plan_hash,
+                true,
+            )
+            .await
+            .unwrap_err(),
+        ErrorCode::ReadOnly
+    );
+    assert_eq!(
+        bridge
+            .preview_title_encoding(local_id.clone(), 2, vec![item_id.clone()], false)
+            .await
+            .unwrap_err(),
+        ErrorCode::ReadOnly
+    );
+    assert_eq!(
+        bridge
+            .apply_title_encoding(local_id.clone(), 2, vec![item_id.clone()], false)
+            .await
+            .unwrap_err(),
+        ErrorCode::ReadOnly
+    );
+    assert_eq!(
+        bridge
+            .mutate_tags(local_id.clone(), TagCommand::SetEncoding { enabled: true },)
+            .await
+            .unwrap_err(),
+        ErrorCode::ReadOnly
+    );
+    assert_eq!(
+        bridge
+            .propose_organization(local_id.clone(), vec![item_id.clone()])
+            .await
+            .unwrap_err(),
+        ErrorCode::ReadOnly
+    );
+    assert_eq!(
+        bridge
+            .confirm_cleanup(
+                local_id.clone(),
+                2,
+                vec![item_id.clone()],
+                root_id.clone(),
+                true,
+                true,
+            )
+            .await
+            .unwrap_err(),
+        ErrorCode::ReadOnly
+    );
+    assert_eq!(creds.calls.load(Ordering::SeqCst), cred_calls_before);
+
+    // Chrome resync must not alter local-skills
+    full(&bridge, &chrome_profile, "sess-1", 2).await;
+    let tree = bridge.tree(local_id.clone(), None, None).await.unwrap();
+    assert_eq!(tree.len(), 1);
+    assert_eq!(tree[0].node.chrome_id.as_str(), "skills-root");
+    assert_eq!(
+        bridge
+            .count(local_id.clone(), Some(root_id.clone()))
+            .await
+            .unwrap()
+            .bookmarks,
+        1
+    );
+
+    // Local sidecar mutations and exports succeed and advance local revision
+    let catalog = bridge
+        .mutate_tags(
+            local_id.clone(),
+            TagCommand::SetNote {
+                chrome_ids: vec![root_id],
+                note: "本地根目录备注".into(),
+            },
+        )
+        .await
+        .unwrap();
+    assert_eq!(catalog.entries[0].note, "本地根目录备注");
+    let refreshed = bridge
+        .state()
+        .await
+        .profiles
+        .into_iter()
+        .find(|p| p.profile_id.as_str() == "local-skills")
+        .unwrap();
+    assert_eq!(refreshed.revision.get(), 3);
+    assert!(
+        !bridge
+            .export_html(local_id.clone())
+            .await
+            .unwrap()
+            .body
+            .is_empty()
+    );
+    assert!(
+        !bridge
+            .export_sidecar(local_id)
+            .await
+            .unwrap()
+            .body
+            .is_empty()
+    );
+
+    bridge.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn external_sqlite_writes_trigger_live_bridge_reload_and_clean_shutdown() {
+    let temp = tempfile::tempdir().unwrap();
+    let dir_path = temp.keep();
+    let db_path = dir_path.join("markbridge.sqlite");
+    let creds = Arc::new(MemoryCredentials::default());
+    let bridge = Bridge::open(&db_path, creds).await.unwrap();
+    let mut rx = bridge.subscribe();
+    assert!(rx.borrow().profiles.is_empty());
+
+    let external = Storage::open(&db_path).await.unwrap();
+    external.ensure_local_skills_space().await.unwrap();
+    let added = external
+        .local_add_bookmark(
+            Id::new("local-skills").unwrap(),
+            None,
+            "外部 Skill 写入书签".into(),
+            "https://example.com/skill-live".into(),
+            None,
+            Vec::new(),
+            None,
+            None,
+        )
+        .await
+        .unwrap();
+    external.close().await.unwrap();
+
+    let deadline = tokio::time::Instant::now() + Duration::from_secs(5);
+    loop {
+        {
+            let snapshot = rx.borrow_and_update().clone();
+            if let Some(profile) = snapshot
+                .profiles
+                .iter()
+                .find(|p| p.profile_id.as_str() == "local-skills")
+                && profile.revision.get() >= 2
+                && profile.node_count.get() == 2
+            {
+                assert_eq!(profile.connection, BridgeConnection::Local);
+                break;
+            }
+        }
+        assert!(
+            tokio::time::Instant::now() < deadline,
+            "local_watch did not broadcast external SQLite changes within 5s"
+        );
+        tokio::time::timeout_at(deadline, rx.changed())
+            .await
+            .expect("timed out waiting for bridge-state update")
+            .expect("watch sender dropped");
+    }
+
+    let fetched = bridge
+        .get(Id::new("local-skills").unwrap(), added.node.chrome_id)
+        .await
+        .unwrap();
+    assert_eq!(fetched.node.title.as_str(), "外部 Skill 写入书签");
+
+    drop(rx);
+    bridge.shutdown().await.unwrap();
+    drop(bridge);
+    std::fs::remove_dir_all(&dir_path)
+        .expect("temporary directory must be immediately deletable after Bridge::shutdown");
+    assert!(!dir_path.exists());
+}

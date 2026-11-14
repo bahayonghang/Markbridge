@@ -1,7 +1,7 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import { invoke, isTauri } from '@tauri-apps/api/core';
 import { listen, type Event } from '@tauri-apps/api/event';
-import { saveDiagnostics } from './backend';
+import { saveDiagnostics, ensureLocalLibrary } from './backend';
 import { aiSettings, applyAi, applyEdit, applyTitleEncoding, beginPairing, cancelAi, clearAiCredential, clearWebPreviewSession, enumerateChromeUserData, exportHtml, getBridgeState, getMirrorTree, openHttpUrl, openWebPreview, previewEdit, previewTitleEncoding, readCacheCount, readCacheList, readCacheNode, readCacheSearch, readCacheTree, readTagState, saveAiConfig, setAiCredential, startBridge, subscribeBridgeState, subscribeWebPreview, suggestAi, tagCommand, testAiConnection, webPreviewAction, webPreviewState } from './backend';
 
 vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn(), isTauri: vi.fn() }));
@@ -94,4 +94,29 @@ it('validates event payloads and retains a safe invalid-data path', async () => 
   expect(receive).toHaveBeenCalledExactlyOnceWith(state);
   unsubscribe();
   expect(stop).toHaveBeenCalledOnce();
+});
+
+
+it('invokes ensure_local_library and validates the local profile connection state', async () => {
+  vi.mocked(isTauri).mockReturnValue(false);
+  await expect(ensureLocalLibrary()).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
+
+  vi.mocked(isTauri).mockReturnValue(true);
+  const localState = {
+    ...state,
+    revision: 2,
+    profiles: [{
+      profileId: 'local-skills',
+      instanceId: 'local-skills',
+      displayName: 'Skills 书签库',
+      connection: 'local' as const,
+      nodeCount: 1,
+      revision: 1,
+      lastSyncedAt: 1791800000000,
+      errorCode: null,
+    }],
+  };
+  vi.mocked(invoke).mockResolvedValue(localState);
+  expect(await ensureLocalLibrary()).toEqual(localState);
+  expect(invoke).toHaveBeenCalledWith('ensure_local_library', {});
 });
