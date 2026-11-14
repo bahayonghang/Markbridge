@@ -151,3 +151,7 @@ SQLite `mode=ro`/`query_only` restrict SQL mutations but do not promise unchange
 ## Conditional undo of created folders
 
 When undoing creation, check the current tree after simulating earlier inverse steps: a folder must be empty before planning its removal. External descendants produce an existence conflict, not a recursive delete. Bind the empty folder as the complete single-node `expectedSubtree` so the extension rechecks it and uses non-recursive removal at the actual effect. Keep valid create-then-move inverse ordering. Regressions: `crates/core/src/editing/tests.rs` and `apps/extension/src/executor.test.ts`.
+
+## Skill wrapper output encoding
+
+`mb_bookmarks.py` emits UTF-8 JSON on stdout, including redirected Windows pipes. Configure stdout and stderr at CLI entry while preserving their error handlers; imported StringIO callers remain supported. Keep the live bridge integration test under forced `PYTHONIOENCODING=cp1252` so locale-dependent regressions fail on every platform. Child CLI output is already decoded as UTF-8; changing only CI environment variables does not repair the wrapper boundary.

@@ -44,6 +44,8 @@ fn run_skill_wrapper(
         .arg(app_data)
         .args(args)
         .env("MARKBRIDGE_SKILL_BIN", bin_path)
+        // Piped output must remain UTF-8 even with a legacy Windows code page.
+        .env("PYTHONIOENCODING", "cp1252")
         .output()
         .expect("spawn mb_bookmarks.py");
     assert!(

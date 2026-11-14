@@ -9,7 +9,7 @@ import json
 import os
 import tempfile
 import unittest
-from contextlib import redirect_stdout
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 
 
@@ -38,6 +38,24 @@ class MbBookmarksTests(unittest.TestCase):
         finally:
             os.environ.clear()
             os.environ.update(saved_env)
+
+    def test_main_configures_legacy_streams_as_utf8(self) -> None:
+        stdout_bytes, stderr_bytes = io.BytesIO(), io.BytesIO()
+        with io.TextIOWrapper(stdout_bytes, encoding="cp1252") as stdout, io.TextIOWrapper(
+            stderr_bytes, encoding="cp1252", errors="backslashreplace"
+        ) as stderr:
+            with redirect_stdout(stdout), redirect_stderr(stderr):
+                self.assertEqual(MB.main(["--wrapper-help"]), 0)
+                self.assertEqual(stdout.encoding, "utf-8")
+                self.assertEqual(stderr.encoding, "utf-8")
+                self.assertEqual(stdout.errors, "strict")
+                self.assertEqual(stderr.errors, "backslashreplace")
+                stdout.write("\u4e2d\u6587\U0001f430")
+                stderr.write("\u4e2d\u6587\U0001f430")
+                stdout.flush()
+                stderr.flush()
+                self.assertTrue(stdout_bytes.getvalue().decode("utf-8").endswith("\u4e2d\u6587\U0001f430"))
+                self.assertEqual(stderr_bytes.getvalue().decode("utf-8"), "\u4e2d\u6587\U0001f430")
 
     def test_workspace_and_binary_resolution(self) -> None:
         workspace = MB.find_workspace_root(SKILL_ROOT)

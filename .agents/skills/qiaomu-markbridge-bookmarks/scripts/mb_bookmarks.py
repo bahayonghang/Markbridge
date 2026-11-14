@@ -373,6 +373,11 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    # CLI JSON is UTF-8, including when Windows redirects stdout to a pipe.
+    # StringIO used by embedded callers has no encoding to configure.
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors=stream.errors)
     raw_args = list(sys.argv[1:] if argv is None else argv)
     parser = build_parser()
     known, forwarded = parser.parse_known_args(raw_args)
