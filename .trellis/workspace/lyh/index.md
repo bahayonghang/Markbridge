@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 19
+- **Total Sessions**: 20
 - **Last Active**: 2026-11-13
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~663 | Active |
+| `journal-1.md` | ~699 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 20 | 2026-11-13 | 按用户决定归档原规划剩余三项 | `a55670e`, `2b9d4f1` | `dev` |
 | 19 | 2026-11-13 | 提交并归档本地 Skills 书签库 | `a74eef8`, `bca6154`, `54ba034`, `460bd8f`, `105aab2` | `dev` |
 | 18 | 2026-10-25 | just ci、提交与归档轻盈玻璃任务 | `d6b227c`, `a9846be` | `dev` |
 | 17 | 2026-10-25 | 轻盈玻璃 G01–G03 实施与验收 | - | `dev` |

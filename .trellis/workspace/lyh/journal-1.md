@@ -661,3 +661,39 @@ User explicitly waived real OS sleep/wake acceptance. R08 and redesign parent co
 
 - 13 的 V12 与 15 的 V18 仍未完成，原父任务保持进行中
 - 未 push、未安装、未签名、未发布
+
+
+## Session 20: 按用户决定归档原规划剩余三项
+<!-- trellis-session: v=2 fp=490683b6daf51c08 -->
+
+**Date**: 2026-11-13
+**Task**: 按用户决定归档原规划剩余三项
+**Branch**: `dev`
+
+### Summary
+
+用户要求不再做剩余收口，直接归档 Windows 验收、语义检索和原父任务。V12 与 V18 仍为 NOT_RUN，V16 仍为 UNVERIFIED，活动任务队列已空。
+
+### Main Changes
+
+- 把 13、15 和原父任务移入 archive/2026-11
+- 仓库说明改为这三项已归档，未把缺测项改写成通过
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `a55670e` | docs(task): 记下原父任务直接归档的决定 |
+| `2b9d4f1` | docs(task): 同步仓库说明里的直接归档决定 |
+
+### Testing
+
+- [OK] 未运行 V12 或 V18
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- 未 push、未安装、未签名、未发布
