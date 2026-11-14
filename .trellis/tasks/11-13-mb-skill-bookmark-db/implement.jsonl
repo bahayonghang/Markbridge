@@ -1,0 +1,6 @@
+{"file":".trellis/spec/project-baseline.md","reason":"产品硬边界、唯一写入责任与既有 13/15 状态保持"}
+{"file":".trellis/spec/backend/database-guidelines.md","reason":"SQLite 串行工作线程、SCHEMA_VERSION=8、FTS5 trigram、语义触发器与 rusqlite 在线备份规范"}
+{"file":".trellis/spec/backend/directory-structure.md","reason":"Rust workspace 目录分层与无 GUI 领域逻辑约束"}
+{"file":".trellis/spec/frontend/type-safety.md","reason":"可信桌面 IPC 协议与静态校验器同步要求"}
+{"file":".trellis/tasks/11-13-mb-skill-bookmark-db/research/architecture-analysis.md","reason":"源码级可行性分析、Chrome 同步隔离与桌面端实时刷新机制"}
+{"file":".trellis/tasks/11-13-mb-skill-bookmark-db/research/qiaomu-skill-prior-art.md","reason":"qiaomu-meta-skill 先例研究与 Governed 包结构规范"}

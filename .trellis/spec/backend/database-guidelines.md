@@ -88,3 +88,51 @@ R06 captures export data before the native save dialog opens. Hold the Bridge lo
 History reads use the stored snapshot tree for deleted descendants, not only the touched-node subset in before JSON. Restored identity mappings must remain traceable after metadata restoration consumes transient after maps; reconstruct them from persisted restore requests and confirmed create receipts. Undo rejects an original operation from another source epoch even if Chrome IDs and revision are reused. Keep the original conflict/uncertain result when a user marks a record reviewed.
 
 Pending metadata restore maps are also scoped to profile_id and source_epoch at their operations query. Never resolve an old epoch's pending map against a reused Chrome ID in the new epoch. A reset regression must retain an unconsumed old map, reuse its target Chrome ID in the new epoch, and verify that old notes/tags are not copied.
+
+## Isolated local Skills bookmark space (`local-skills`)
+
+### 1. Scope / trigger
+
+Tasks K01–K03 (`11-13-mb-skill-bookmark-db`) add an isolated local bookmark source operated directly in SQLite by Rust (`crates/skill-cli` / `markbridge-skill`) and observed live by the desktop `Bridge` without modifying Chrome `Bookmarks` files or dispatching MV3 extension commands. `SCHEMA_VERSION` remains `8` with zero schema-migration churn.
+
+### 2. Signatures
+
+- `ProfileOrigin::LocalSkills` (`markbridge-local://skills`) paired strictly with `profile_id = "local-skills"`, `instance_id = "local-skills"`, `display_name = "Skills 书签库"`, and protected root folder `chrome_id = "skills-root"` (`"Skills 书签"`).
+- Storage methods (`crates/core/src/storage/local_space.rs`): `local_skills_status()`, `ensure_local_skills_space()`, `local_tree(...)`, `local_node_detail(...)`, `local_mkdir(...)`, `local_add_bookmark(...)`, `local_update_node(...)`, `local_move_node(...)`, `local_delete_node(...)`, `local_mutate_tags(...)`, `local_set_summary(...)`, `local_export(...)`, and `backup_database(dest)`.
+- Bridge & Tauri (`crates/core/src/bridge/local_watch.rs`, `apps/desktop/src-tauri/src/main.rs`): `BridgeConnection::Local` (`"local"`), `Bridge::ensure_local_library()`, `Bridge::reload_local_space()`, and trusted main-only IPC command `ensure_local_library`.
+
+### 3. Contracts
+
+- Lazy initialization: opening an empty database never auto-creates `local-skills`, preserving first-run `onboarding` (`profiles: []`). Only explicit `ensure_local_skills_space()` / `init` / `mkdir` / `add` / `ensure_local_library()` provisions the profile and root folder.
+- All mutations run inside the Rust `Storage` worker transaction, maintaining contiguous sibling `position` (`0..N-1`), incrementing `source_cursors.revision`, syncing `metadata_fts` (`trigram`), and deleting `semantic_index_members` on tombstoned nodes while letting `008_semantic.sql` triggers handle title/summary invalidation.
+- CLI daily-database write gate: `markbridge-skill` resolves `--app-data` -> `MARKBRIDGE_APP_DATA` -> OS `com.markbridge.desktop`; any write command targeting a path containing `com.markbridge.desktop` requires `--allow-daily-db`.
+- Live desktop reload: `local_watch.rs` watches the DB parent directory non-recursively for `markbridge.sqlite`, `-wal`, and `-shm` changes (120ms debounce) plus `RunEvent::Resumed` rescan, reloading nodes only when `local-skills` appears or `revision` increases, and stopping cleanly on `Bridge::shutdown()`.
+
+### 4. Validation and error matrix
+
+| Condition | Result |
+|---|---|
+| `ProfileOrigin::LocalSkills` with any ID other than `local-skills` or WebSocket auth/replace_tree against `local-skills` | `WRONG_PROFILE` / `READ_ONLY` |
+| Browser mutation, pairing revoke/reconnect, mirror association, title encoding, or AI organization/cleanup on `local-skills` | `READ_ONLY` (or `writable: false` on edit/batch previews); zero OS credential access |
+| Rename, move, or delete of `skills-root` | `PROTECTED_NODE` |
+| Non-`http(s)` URL, missing host, or embedded userinfo credentials | `INVALID_MESSAGE` |
+| Missing/non-folder parent or folder move into own descendant | `INVALID_TREE` |
+| Non-empty folder delete without `recursive = true`, or existing export/backup target without overwrite | `CONFLICT` / `STORAGE_ERROR` |
+| Daily database write in `markbridge-skill` without `--allow-daily-db` | `READ_ONLY` (exit code `2`) |
+
+### 5. Good, base and bad cases
+
+- Good: external `mb_bookmarks.py` adds a bookmark + trigram note to `local-skills` while `Bridge` is open; `Bridge` publishes `BridgeConnection::Local` with incremented `revision` within ~120ms and `query_library` matches the note immediately.
+- Base: uninitialized database opens with `profiles: []`; read-only `markbridge-skill status` against an absent daily DB returns `initialized: false` without creating `markbridge.sqlite`.
+- Bad: calling `python -c "import sqlite3 ..."` directly on `markbridge.sqlite` fails or corrupts FTS5 `trigram` / semantic triggers; attempting `apply_edit` on `local-skills` returns `READ_ONLY`.
+
+### 6. Required tests
+
+- `storage::local_space::tests`: contiguous sibling compaction, cycle/protected-root refusal, spoofed origin rejection, semantic trigger & `metadata_fts` consistency.
+- `bridge::tests`: lazy empty-DB startup, Chrome `TreeFull` isolation from `local-skills`, browser-write/pairing/encoding refusal without credential reads, external SQLite WAL live reload, and immediate directory removal after `Bridge::shutdown()`.
+- `crates/skill-cli` & `.agents/skills/qiaomu-markbridge-bookmarks/tests`: full CRUD/search/backup/export lifecycle, `--allow-daily-db` write gate, and live cross-process `mb_bookmarks.py -> markbridge-skill -> Bridge` integration (`tests/live_bridge_skill.rs`).
+
+### 7. Wrong and correct usage
+
+- Wrong: mutate `markbridge.sqlite` from Python's built-in `sqlite3`, or insert synthetic local nodes into a Chrome-paired `profile_id` where the next `TreeFull` tombstones them.
+- Correct: invoke `markbridge-skill` (directly or via `scripts/mb_bookmarks.py`) so Rust `Storage` owns every SQLite write inside the isolated `local-skills` profile.

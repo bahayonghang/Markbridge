@@ -1,0 +1,4 @@
+{"file":".trellis/spec/project-baseline.md","reason":"项目安全硬约束与证据如实标注规则"}
+{"file":".trellis/spec/backend/logging-guidelines.md","reason":"Skill 包装脚本与报告输出脱敏规范"}
+{"file":".trellis/tasks/11-13-mb-skill-bookmark-db/research/qiaomu-skill-prior-art.md","reason":"qiaomu-meta-skill Governed 模式要求、先例决策与目录结构"}
+{"file":".trellis/tasks/11-13-mb-skill-bookmark-db/research/architecture-analysis.md","reason":"mb_bookmarks.py 与 markbridge-skill CLI 参数及隔离契约"}

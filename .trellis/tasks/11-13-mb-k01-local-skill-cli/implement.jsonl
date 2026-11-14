@@ -1,0 +1,7 @@
+{"file":".trellis/spec/project-baseline.md","reason":"Rust 唯一 SQLite 写入方、URL 安全与日常书签库隔离边界"}
+{"file":".trellis/spec/backend/index.md","reason":"后端总体约定入口"}
+{"file":".trellis/spec/backend/database-guidelines.md","reason":"SCHEMA_VERSION=8 兼容、事务原子性、metadata_fts trigram 与 rusqlite backup 规范"}
+{"file":".trellis/spec/backend/directory-structure.md","reason":"workspace 模块边界与无 GUI 依赖要求"}
+{"file":".trellis/spec/backend/error-handling.md","reason":"稳定 ErrorCode 映射与禁止泄露原始 SQL/隐私路径"}
+{"file":".trellis/spec/backend/logging-guidelines.md","reason":"CLI 与存储层日志脱敏要求"}
+{"file":".trellis/tasks/11-13-mb-skill-bookmark-db/research/architecture-analysis.md","reason":"local-skills 存储常量、根文件夹保护与 CLI 子命令设计"}

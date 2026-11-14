@@ -1,0 +1,5 @@
+{"file":".trellis/spec/project-baseline.md","reason":"核验 local-skills 绝不触发 Chrome 写回或系统凭据访问"}
+{"file":".trellis/spec/frontend/type-safety.md","reason":"核验 pnpm protocol:check 零漂移与 DTO 静态校验通过"}
+{"file":".trellis/spec/frontend/component-guidelines.md","reason":"核验空库首次引导保持与本地来源按钮可见性"}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"核验 Vitest 与 Playwright E2E 回归标准"}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"核验 SQLite -> Bridge -> Tauri Event -> React 状态刷新链路与句柄释放"}

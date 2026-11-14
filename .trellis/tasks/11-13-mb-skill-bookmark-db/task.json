@@ -1,0 +1,45 @@
+{
+  "id": "mb-skill-bookmark-db",
+  "name": "mb-skill-bookmark-db",
+  "title": "Markbridge 项目内书签操作 Skill 与本地数据库专夹",
+  "description": "基于 qiaomu-meta-skill 规范与 Rust Storage 唯一写入边界，设计并实现项目内通过 Skill 直接操作 SQLite 独立书签文件夹的完整能力及桌面端实时感知",
+  "status": "completed",
+  "dev_type": null,
+  "scope": "skill-db",
+  "package": null,
+  "priority": "P2",
+  "creator": "lyh",
+  "assignee": "lyh",
+  "createdAt": "2026-11-13",
+  "completedAt": "2026-11-13",
+  "branch": "dev",
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [
+    "11-13-mb-k01-local-skill-cli",
+    "11-13-mb-k02-desktop-local-sync",
+    "11-13-mb-k03-qiaomu-bookmark-skill"
+  ],
+  "parent": null,
+  "relatedFiles": [
+    "crates/core/src/storage/local_space.rs",
+    "crates/core/src/bridge/local_watch.rs",
+    "crates/skill-cli/src/main.rs",
+    "crates/skill-cli/tests/live_bridge_skill.rs",
+    ".agents/skills/qiaomu-markbridge-bookmarks/SKILL.md",
+    ".agents/skills/qiaomu-markbridge-bookmarks/scripts/mb_bookmarks.py",
+    ".trellis/spec/backend/database-guidelines.md",
+    ".trellis/spec/backend/directory-structure.md"
+  ],
+  "notes": "K01, K02, and K03 completed and PASS on 2026-11-13. Not committed or archived pending separate user authorization.",
+  "meta": {
+    "planning_consent": "User explicitly requested architecture analysis and Trellis task creation via /qiaomu-meta-skill on 2026-11-13.",
+    "implementation_approval": "granted",
+    "product_decision": "2026-11-13 user: 按照推荐方案来即可 (Option A: independent local-skills source with built-in Skills 书签 root folder, SCHEMA_VERSION=8 preserved)",
+    "approval_evidence": "2026-11-13 user: 批准实施; approves K01 -> K02 -> K03 plan. No commit, archive, install, push or release authorization.",
+    "acceptance_status": "PASS"
+  }
+}
