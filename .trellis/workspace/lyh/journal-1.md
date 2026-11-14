@@ -620,3 +620,44 @@ User explicitly waived real OS sleep/wake acceptance. R08 and redesign parent co
 ### Next Steps
 
 - 旧13/V12与15/V18保持未完成；未push、安装、签名或发布
+
+
+## Session 19: 提交并归档本地 Skills 书签库
+<!-- trellis-session: v=2 fp=5e4cff4f3d7479b7 -->
+
+**Date**: 2026-11-13
+**Task**: 提交并归档本地 Skills 书签库
+**Branch**: `dev`
+
+### Summary
+
+拆成五次提交落地 local-skills 存储、桌面实时感知、JSON 命令行、qiaomu 技能和语义查询观察器，并归档已完成的 K01–K03 父子任务。Windows 验收与语义检索真实模型仍未完成。
+
+### Main Changes
+
+- 新增隔离的 local-skills 书签库、Bridge 监听和桌面 Local 入口
+- 新增 markbridge-skill JSON 命令行与 qiaomu-markbridge-bookmarks 技能包
+- 补上真实模型评测的请求观察器；V18 仍为 NOT_RUN
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `a74eef8` | feat(core): 增加隔离的本地 Skills 书签库与桌面实时感知 |
+| `bca6154` | feat(skill-cli): 增加本地书签库的 JSON 命令行 |
+| `54ba034` | feat(skill): 添加 qiaomu 本地书签操作技能 |
+| `460bd8f` | docs(spec): 记录本地书签库合同与任务验收 |
+| `105aab2` | test(semantic): 补上真实模型查询的请求观察器 |
+
+### Testing
+
+- [OK] 沿用 K01–K03 与 observer-repair 已记录的通过证据；本次提交未重跑测试
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- 13 的 V12 与 15 的 V18 仍未完成，原父任务保持进行中
+- 未 push、未安装、未签名、未发布
