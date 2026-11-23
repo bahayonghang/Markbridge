@@ -1,4 +1,4 @@
-export type IconName = 'bookmark' | 'folder' | 'organize' | 'search' | 'history' | 'settings' | 'back' | 'detail' | 'close' | 'chevron';
+export type IconName = 'bookmark' | 'folder' | 'organize' | 'search' | 'history' | 'settings' | 'connection' | 'back' | 'detail' | 'close' | 'chevron';
 
 const paths: Record<IconName, string> = {
   bookmark: 'M6 3h12v18l-6-4-6 4V3Z',
@@ -7,6 +7,7 @@ const paths: Record<IconName, string> = {
   search: 'M10.5 3a7.5 7.5 0 1 0 0 15 7.5 7.5 0 0 0 0-15Zm5.5 13 5 5',
   history: 'M4 4v5h5M4 9a8 8 0 1 1-1 7M12 7v5l3 2',
   settings: 'M10 3h4l1 3 3 1 3 3v4l-3 1-1 3-3 3h-4l-1-3-3-1-3-3v-4l3-1 1-3 3-3ZM9 12a3 3 0 1 0 6 0 3 3 0 0 0-6 0',
+  connection: 'M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71',
   back: 'm10 5-7 7 7 7M3 12h18',
   detail: 'M3 4h18v16H3V4ZM15 4v16',
   close: 'm6 6 12 12M18 6 6 18',

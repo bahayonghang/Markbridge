@@ -63,7 +63,7 @@ it('opens General for ordinary settings, follows system with cleanup, and never 
   const query = vi.spyOn(window, 'matchMedia').mockReturnValue(media as unknown as MediaQueryList);
   const save = vi.spyOn(Storage.prototype, 'setItem');
   const view = render(<StrictMode><App /></StrictMode>);
-  await screen.findByText('未连接 · 只读');
+  await waitFor(() => expect(document.querySelector('.workspace-heading .connection')).toHaveTextContent('未连接 · 只读'));
   fireEvent.click(screen.getByRole('button', { name: '设置' }));
   expect(screen.getByRole('tab', { name: '通用' })).toHaveAttribute('aria-selected', 'true');
   expect(listeners.size).toBe(1);
@@ -112,7 +112,7 @@ it('portals export into one settings panel without duplicating the source owner 
   let finish!: (value: Awaited<ReturnType<typeof backend.saveExport>>) => void;
   vi.mocked(backend.saveExport).mockReturnValueOnce(new Promise(resolve => { finish = resolve; }));
   render(<App />);
-  await screen.findByText('已连接 Chrome');
+  await waitFor(() => expect(document.querySelector('.workspace-heading .connection')).toHaveTextContent('已连接 Chrome'));
   fireEvent.click(screen.getByRole('button', { name: '设置' }));
   fireEvent.click(screen.getByRole('tab', { name: 'Chrome 连接' }));
   fireEvent.click(screen.getByRole('tab', { name: '备份导出' }));
@@ -133,7 +133,7 @@ it('portals export into one settings panel without duplicating the source owner 
 it('opens bookmarks first and shares one bridge subscription across workspaces', async () => {
   vi.mocked(backend.getBridgeState).mockResolvedValue({ ...initial, profiles: [profile] });
   render(<App />);
-  await screen.findByText('已连接 Chrome');
+  await waitFor(() => expect(document.querySelector('.workspace-heading .connection')).toHaveTextContent('已连接 Chrome'));
   expect(screen.getByRole('heading', { level: 1, name: '书签' })).toBeVisible();
   expect(screen.queryByLabelText('端口')).not.toBeInTheDocument();
   expect(screen.queryByLabelText('启用 AI')).not.toBeInTheDocument();
@@ -154,7 +154,7 @@ it('shows cached history without enabling browser undo', async () => {
   vi.mocked(backend.getBridgeState).mockResolvedValue({ ...initial, profiles: [{ ...profile, connection: 'cached_read_only' }] });
   vi.mocked(backend.listOperations).mockResolvedValue({ operations: [{ operationId: 'op-cached', state: 'applied', affected: 1, errorCode: null, conflicts: [] }] });
   render(<App />);
-  await screen.findByText('未连接 · 只读');
+  await waitFor(() => expect(document.querySelector('.workspace-heading .connection')).toHaveTextContent('未连接 · 只读'));
   fireEvent.click(screen.getByRole('button', { name: '操作历史' }));
   expect(await screen.findByText('已完成')).toBeVisible();
   expect(screen.queryByText('op-cached')).toBeNull();
@@ -195,7 +195,7 @@ it('keeps browser preview unpaired and disables native actions', async () => {
   render(<App />);
   fireEvent.click(screen.getByRole('button', { name: '设置' }));
   fireEvent.click(screen.getByRole('tab', { name: 'Chrome 连接' }));
-  expect(await screen.findByText('未连接 · 只读')).toBeVisible();
+  await waitFor(() => expect(document.querySelector('.workspace-heading .connection')).toHaveTextContent('未连接 · 只读'));
   expect(screen.getByText(/浏览器预览 · 仅显示界面/)).toBeVisible();
   expect(screen.getByRole('button', { name: '启动连接' })).toBeDisabled();
   expect(backend.startBridge).not.toHaveBeenCalled();
@@ -231,7 +231,7 @@ it('validates port locally and sends a corrected port once', async () => {
   render(<App />);
   fireEvent.click(screen.getByRole('button', { name: '设置' }));
   fireEvent.click(screen.getByRole('tab', { name: 'Chrome 连接' }));
-  await screen.findByText('未连接 · 只读');
+  await waitFor(() => expect(document.querySelector('.workspace-heading .connection')).toHaveTextContent('未连接 · 只读'));
   fireEvent.change(screen.getByLabelText('端口'), { target: { value: '0' } });
   fireEvent.click(screen.getByRole('button', { name: '启动连接' }));
   expect(screen.getByRole('alert')).toHaveTextContent('1024–65535');
@@ -305,7 +305,7 @@ it('unsubscribes after unmount even when listener registration resolves late', a
 
 it('development remount subscribes safely without duplicate actions', async () => {
   const view = render(<StrictMode><App /></StrictMode>);
-  await screen.findByText('未连接 · 只读');
+  await waitFor(() => expect(document.querySelector('.workspace-heading .connection')).toHaveTextContent('未连接 · 只读'));
   expect(backend.subscribeBridgeState).toHaveBeenCalledTimes(2);
   expect(unsubscribe).toHaveBeenCalledOnce();
   expect(backend.startBridge).not.toHaveBeenCalled();
@@ -335,7 +335,7 @@ it('uses the selected source for status even when another profile is live', asyn
   const cached = { ...profile, profileId: 'profile-b', displayName: '离线资料', connection: 'cached_read_only' as const };
   vi.mocked(backend.getBridgeState).mockResolvedValue({ ...initial, profiles: [profile, cached] });
   render(<App />);
-  await screen.findByText('已连接 Chrome');
+  await waitFor(() => expect(document.querySelector('.workspace-heading .connection')).toHaveTextContent('已连接 Chrome'));
   fireEvent.change(screen.getByLabelText('书签来源'), { target: { value: 'profile:profile-b' } });
   expect(document.querySelector('.workspace-heading .connection')).toHaveTextContent('未连接 · 只读');
   expect(screen.getByText(/缓存时间：尚无同步时间/)).toBeVisible();
@@ -408,4 +408,36 @@ it('enables and browses the isolated local Skills library from settings without 
   expect(screen.queryByRole('button', { name: '吊销配对' })).toBeNull();
   expect(screen.queryByRole('combobox', { name: '已配对资料' })).toBeNull();
   expect(screen.queryByRole('button', { name: '验证关联' })).toBeNull();
+});
+
+it('groups all 5 primary nav items at top, hides sidebar-library off library, removes status-bar, and navigates via connection-pill', async () => {
+  vi.mocked(backend.getBridgeState).mockResolvedValue({ ...initial, profiles: [profile] });
+  const { container } = render(<App />);
+  await waitFor(() => expect(document.querySelector('.workspace-heading .connection')).toHaveTextContent('已连接 Chrome'));
+
+  const nav = container.querySelector('.app-sidebar > nav.primary-navigation[aria-label="主导航"]');
+  expect(nav).not.toBeNull();
+  expect(Array.from(nav!.querySelectorAll('button.nav-button')).map((btn) => btn.textContent?.trim())).toEqual([
+    '书签', '整理', '语义检索', '操作历史', '设置',
+  ]);
+  expect(container.querySelector('.secondary-navigation')).toBeNull();
+  expect(container.querySelector('footer.status-bar')).toBeNull();
+
+  const sidebarLibrary = container.querySelector('.sidebar-library');
+  expect(sidebarLibrary).not.toBeNull();
+  expect(sidebarLibrary).not.toHaveAttribute('hidden');
+
+  const pill = container.querySelector('.app-sidebar > button.connection-pill[type="button"]');
+  expect(pill).not.toBeNull();
+  expect(pill).toHaveTextContent('已连接 Chrome');
+  expect(pill!.querySelector('svg.workspace-icon')).not.toBeNull();
+  expect(pill!.querySelector('.dot, .status-dot, .indicator')).toBeNull();
+
+  fireEvent.click(screen.getByRole('button', { name: '整理' }));
+  expect(sidebarLibrary).toHaveAttribute('hidden');
+
+  fireEvent.click(pill!);
+  expect(screen.getByRole('heading', { level: 1, name: '设置' })).toBeVisible();
+  expect(screen.getByRole('tab', { name: 'Chrome 连接' })).toHaveAttribute('aria-selected', 'true');
+  expect(sidebarLibrary).toHaveAttribute('hidden');
 });

@@ -1,12 +1,26 @@
 import type { Locator } from '@playwright/test';
 
 type Color = [number, number, number, number];
-type Layer = { color: string; image: string; fieldStart: string; fieldEnd: string; isField: boolean; backdropFilter: string; isPaper: boolean };
+export type Layer = {
+  color: string;
+  image: string;
+  fieldStart: string;
+  fieldEnd: string;
+  blobStart: string;
+  blobEnd: string;
+  blobMid: string;
+  isField: boolean;
+  backdropFilter: string;
+  isPaper: boolean;
+  isRow?: boolean;
+};
 
 function parseColor(value: string): Color {
-  if (/^#[\da-f]{6}$/i.test(value)) return [1, 3, 5].map(offset => parseInt(value.slice(offset, offset + 2), 16)).concat(1) as Color;
-  if (!/^rgba?\([\d.,\s]+\)$/.test(value)) throw new Error(`UNSUPPORTED_CONTRAST_COLOR: ${value}`);
-  const values = value.match(/[\d.]+/g)!.map(Number);
+  const trimmed = value.trim();
+  if (trimmed === 'transparent') return [0, 0, 0, 0];
+  if (/^#[\da-f]{6}$/i.test(trimmed)) return [1, 3, 5].map(offset => parseInt(trimmed.slice(offset, offset + 2), 16)).concat(1) as Color;
+  if (!/^rgba?\([\d.,\s]+\)$/.test(trimmed)) throw new Error(`UNSUPPORTED_CONTRAST_COLOR: ${value}`);
+  const values = trimmed.match(/[\d.]+/g)!.map(Number);
   if (values.length !== 3 && values.length !== 4) throw new Error(`INVALID_CONTRAST_COLOR: ${value}`);
   return [values[0], values[1], values[2], values[3] ?? 1];
 }
@@ -19,6 +33,56 @@ function blend(front: Color, back: Color): Color {
 
 function css(color: Color) { return `rgb(${color.slice(0, 3).join(', ')})`; }
 
+function sameRgb(a: Color, b: Color) {
+  return Math.abs(a[0] - b[0]) < 1 && Math.abs(a[1] - b[1]) < 1 && Math.abs(a[2] - b[2]) < 1;
+}
+
+export function splitTopLevel(value: string): string[] {
+  const parts: string[] = [];
+  let depth = 0, start = 0;
+  for (let i = 0; i < value.length; i += 1) {
+    const ch = value[i];
+    if (ch === '(') depth += 1;
+    else if (ch === ')') depth -= 1;
+    else if (ch === ',' && depth === 0) {
+      parts.push(value.slice(start, i).trim());
+      start = i + 1;
+    }
+  }
+  const tail = value.slice(start).trim();
+  if (tail) parts.push(tail);
+  return parts;
+}
+
+function parseFieldImage(layer: Layer) {
+  const parts = splitTopLevel(layer.image);
+  if (!layer.isField || parts.length !== 4) throw new Error(`UNSUPPORTED_CONTRAST_BACKGROUND: ${layer.image}`);
+  const blobTokens = [layer.blobStart, layer.blobEnd, layer.blobMid];
+  const blobs = parts.slice(0, 3).map((part, index) => {
+    if (!/^radial-gradient\(/.test(part) || !/\s70%\)$/.test(part)) throw new Error(`UNSUPPORTED_CONTRAST_BACKGROUND: ${part}`);
+    const stops = part.match(/(?:rgba?\([^)]+\)|transparent)/g);
+    if (stops?.length !== 2) throw new Error(`UNSUPPORTED_CONTRAST_BACKGROUND: ${part}`);
+    const fill = parseColor(stops[0]);
+    const fade = parseColor(stops[1]);
+    if (fade[3] !== 0) throw new Error(`UNSUPPORTED_CONTRAST_BACKGROUND: ${part}`);
+    const expected = parseColor(blobTokens[index]);
+    if (!sameRgb(fill, expected) || Math.abs(fill[3] - expected[3]) >= 0.01 || Math.abs(expected[3] - 0.7) >= 0.01) {
+      throw new Error('CONTRAST_FIELD_TOKEN_DRIFT');
+    }
+    return expected;
+  });
+  const linear = parts[3];
+  const linearStops = linear.match(/rgba?\([^)]+\)/g);
+  if (!/^linear-gradient\(160deg,/.test(linear) || linearStops?.length !== 2 || linear !== `linear-gradient(160deg, ${linearStops[0]}, ${linearStops[1]})`) {
+    throw new Error(`UNSUPPORTED_CONTRAST_BACKGROUND: ${linear}`);
+  }
+  const start = parseColor(layer.fieldStart), end = parseColor(layer.fieldEnd);
+  if (start[3] !== 1 || end[3] !== 1 || css(start) !== css(parseColor(linearStops[0])) || css(end) !== css(parseColor(linearStops[1]))) {
+    throw new Error('CONTRAST_FIELD_TOKEN_DRIFT');
+  }
+  return { start, end, blobs };
+}
+
 export function contrastRatio(foreground: string, background: string): number {
   const back = parseColor(background);
   if (back[3] !== 1) throw new Error('CONTRAST_BACKGROUND_NOT_COMPOSITED');
@@ -30,27 +94,28 @@ export function contrastRatio(foreground: string, background: string): number {
 }
 
 export function compositeBackgrounds(layers: Layer[]): string[] {
-  return [0, .25, .5, .75, 1].map(position => {
+  const hasAnyField = layers.some(layer => layer.isField && layer.image !== 'none');
+  const samples = hasAnyField
+    ? [
+      ...[0, 0.25, 0.5, 0.75, 1].map(position => ({ position, blobIndex: null as number | null })),
+      ...[0, 1, 2].flatMap(blobIndex => [0, 0.5, 1].map(position => ({ position, blobIndex }))),
+    ]
+    : [{ position: 0, blobIndex: null as number | null }];
+
+  return samples.map(({ position, blobIndex }) => {
     let background: Color = [0, 0, 0, 0];
-    let hasField = false, hasPaperFilter = false;
+    let hasField = false;
     for (const layer of layers) {
       if (layer.backdropFilter !== 'none') {
-        if (!layer.isPaper || !hasField || hasPaperFilter || layer.backdropFilter !== 'blur(20px) saturate(1.15)') throw new Error(`UNSUPPORTED_CONTRAST_BACKDROP: ${layer.backdropFilter}`);
-        // Blur mixes the controlled field's colors; sample its full range, including both endpoints.
-        // CSS saturate() operates on sRGB before the translucent paper is painted over the backdrop.
-        const gray = background[0] * .213 + background[1] * .715 + background[2] * .072;
-        background = background.map((channel, i) => i === 3 ? channel : Math.max(0, Math.min(255, gray + 1.15 * (channel - gray)))) as Color;
-        hasPaperFilter = true;
+        throw new Error(`UNSUPPORTED_CONTRAST_BACKDROP: ${layer.backdropFilter}`);
       }
       background = blend(parseColor(layer.color), background);
       if (layer.image !== 'none') {
-        // Only the application's controlled, two-stop field is supported. Fail closed for images or new gradients.
-        const stops = layer.image.match(/rgba?\([^)]+\)/g);
-        if (!layer.isField || !/^linear-gradient\(160deg,/.test(layer.image) || stops?.length !== 2
-          || layer.image !== `linear-gradient(160deg, ${stops[0]}, ${stops[1]})`) throw new Error(`UNSUPPORTED_CONTRAST_BACKGROUND: ${layer.image}`);
-        const start = parseColor(layer.fieldStart), end = parseColor(layer.fieldEnd);
-        if (start[3] !== 1 || end[3] !== 1 || css(start) !== css(parseColor(stops[0])) || css(end) !== css(parseColor(stops[1]))) throw new Error('CONTRAST_FIELD_TOKEN_DRIFT');
-        background = blend(start.map((channel, i) => channel + (end[i] - channel) * position) as Color, background);
+        if (!layer.isField || hasField) throw new Error(`UNSUPPORTED_CONTRAST_BACKGROUND: ${layer.image}`);
+        const { start, end, blobs } = parseFieldImage(layer);
+        const linearColor = start.map((channel, i) => channel + (end[i] - channel) * position) as Color;
+        background = blend(linearColor, background);
+        if (blobIndex !== null) background = blend(blobs[blobIndex], background);
         hasField = true;
       }
     }
@@ -62,13 +127,25 @@ export function compositeBackgrounds(layers: Layer[]): string[] {
 export async function renderedContrastColors(locator: Locator) {
   const result = await locator.evaluate(node => {
     function layers(element: Element | null) {
-      const result = [];
+      const collected = [];
       for (let current = element; current; current = current.parentElement) {
         const style = getComputedStyle(current);
         if (Number(style.opacity) !== 1 || style.filter !== 'none' || style.mixBlendMode !== 'normal') throw new Error('UNSUPPORTED_CONTRAST_COMPOSITING');
-        result.unshift({ color: style.backgroundColor, image: style.backgroundImage, fieldStart: style.getPropertyValue('--field-start').trim(), fieldEnd: style.getPropertyValue('--field-end').trim(), isField: current.id === 'root', backdropFilter: style.backdropFilter, isPaper: current.classList.contains('workspace') });
+        collected.unshift({
+          color: style.backgroundColor,
+          image: style.backgroundImage,
+          fieldStart: style.getPropertyValue('--field-start').trim(),
+          fieldEnd: style.getPropertyValue('--field-end').trim(),
+          blobStart: style.getPropertyValue('--blob-start-fill').trim(),
+          blobEnd: style.getPropertyValue('--blob-end-fill').trim(),
+          blobMid: style.getPropertyValue('--blob-mid-fill').trim(),
+          isField: current.id === 'root',
+          backdropFilter: style.backdropFilter,
+          isPaper: current.classList.contains('app-sidebar') || current.classList.contains('app-main'),
+          isRow: current.classList.contains('library-row'),
+        });
       }
-      return result;
+      return collected;
     }
     const style = getComputedStyle(node);
     return { ink: style.color, fill: layers(node), outside: layers(node.parentElement), border: style.borderColor, borderStyle: style.borderStyle, outline: style.outlineColor, outlineStyle: style.outlineStyle, outlineWidth: style.outlineWidth };

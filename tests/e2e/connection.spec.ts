@@ -52,6 +52,7 @@ test('R02 source-switch confirmation keeps focus and separates identical Chrome 
   await expect(page.getByLabel('新标题')).toHaveValue('另一份资料 10');
   await page.evaluate(() => (window as unknown as { __r02disconnect: () => void }).__r02disconnect());
   await expect(page.locator('.workspace-heading .connection')).toHaveText('未连接 · 只读');
+  await expect(page.locator('.connection-pill span')).toHaveText('未连接 · 只读');
   await expect(page.getByRole('button', { name: '预览修改' })).toBeDisabled();
   await page.screenshot({ path: `${evidence}/selected-offline-other-live.png` });
   const calls = await page.evaluate(() => (window as unknown as { __r01calls: string[] }).__r01calls);
@@ -62,8 +63,8 @@ test('R02 source-switch confirmation keeps focus and separates identical Chrome 
 test('R02 revocation requires a second action and Escape returns to its trigger', async ({ page }) => {
   await mockBridge(page);
   await page.goto('/');
-  await page.getByRole('button', { name: '设置', exact: true }).click();
-  await page.getByRole('tab', { name: 'Chrome 连接', exact: true }).click();
+  await page.locator('.connection-pill').click();
+  await expect(page.getByRole('tab', { name: 'Chrome 连接', exact: true })).toHaveAttribute('aria-selected', 'true');
   const revoke = page.getByRole('button', { name: '吊销配对', exact: true });
   await revoke.click();
   await expect(page.getByRole('dialog')).toContainText('本机缓存、标签和备注都会保留');
@@ -75,4 +76,5 @@ test('R02 revocation requires a second action and Escape returns to its trigger'
   await page.screenshot({ path: `${evidence}/revoke-confirmation.png` });
   await page.getByRole('button', { name: '确认吊销配对', exact: true }).click();
   await expect(page.locator('.workspace-heading .connection')).toHaveText('已忽略 · 只读');
+  await expect(page.locator('.connection-pill span')).toHaveText('已忽略 · 只读');
 });

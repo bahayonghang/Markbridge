@@ -80,13 +80,11 @@ export function App({ initialPreferences }: { initialPreferences?: UiPreferences
     <a className="skip-link" href="#main-content">跳至内容</a>
     <aside className="app-sidebar" aria-label="工作区导航">
       <div className="brand"><img className="brand-mark" src={brandIcon} alt="" width={32} height={32} /><strong lang="en">Markbridge</strong></div>
-      <nav aria-label="主导航">
-        {sections.slice(0, 1).map((item) => <button type="button" className="nav-button" key={item.id} aria-current={section === item.id ? 'page' : undefined} aria-label={item.label} title={item.label} onClick={() => navigate(item.id)}><WorkspaceIcon name={item.icon} /><span>{item.label}</span></button>)}
+      <nav className="primary-navigation" aria-label="主导航">
+        {sections.map((item) => <button type="button" className="nav-button" key={item.id} aria-current={section === item.id ? 'page' : undefined} aria-label={item.label} title={item.label} onClick={() => { if (item.id === 'settings') chooseSettingsTab('general'); navigate(item.id); }}><WorkspaceIcon name={item.icon} /><span>{item.label}</span></button>)}
       </nav>
-      <div className="sidebar-library" ref={setSidebarHost} />
-      <nav className="secondary-navigation" aria-label="更多工作区">
-        {sections.slice(1).map((item) => <button type="button" className="nav-button" key={item.id} aria-current={section === item.id ? 'page' : undefined} aria-label={item.label} title={item.label} onClick={() => { if (item.id === 'settings') chooseSettingsTab('general'); navigate(item.id); }}><WorkspaceIcon name={item.icon} /><span>{item.label}</span></button>)}
-      </nav>
+      <div className="sidebar-library" ref={setSidebarHost} hidden={section !== 'library'} />
+      <button type="button" className="connection-pill" aria-label={`连接状态：${connection}`} title={connection} onClick={() => { chooseSettingsTab('connection'); navigate('settings'); }}><WorkspaceIcon name="connection" /><span>{connection}</span></button>
     </aside>
     <main id="main-content" className="app-main" tabIndex={-1}>
       <header className="workspace-heading"><h1 ref={heading} tabIndex={-1}>{title}</h1><span className="connection" role="status">{connection}</span></header>
@@ -107,7 +105,6 @@ export function App({ initialPreferences }: { initialPreferences?: UiPreferences
             <div role="tabpanel" tabIndex={0} id="settings-panel-export" aria-labelledby="settings-tab-export" hidden={onboarding || settingsTab !== 'export'}><div className="settings-export-host" ref={setExportHost} /></div>
         </SettingsWorkspace>
       </>}
-      <footer className="status-bar"><span>书签保留在 Chrome</span><span>标签和备注保留在本机</span></footer>
     </main>
   </div></RowHeightsContext.Provider>;
 }

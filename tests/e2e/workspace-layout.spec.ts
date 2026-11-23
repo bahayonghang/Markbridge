@@ -92,8 +92,7 @@ for (const theme of ['light', 'dark']) for (const fontSize of [12, 14, 20]) for 
         const folder = page.getByRole('button', { name: '文件夹', exact: true });
         await folder.click();
         const pane = (await page.locator('.folder-pane.is-open').boundingBox())!;
-        const footer = (await page.locator('.status-bar').boundingBox())!;
-        expect(pane.y + pane.height).toBeLessThanOrEqual(footer.y + 1);
+        expect(pane.y + pane.height).toBeLessThanOrEqual(height + 1);
         await page.keyboard.press('Escape'); await expect(folder).toBeFocused();
       }
     }

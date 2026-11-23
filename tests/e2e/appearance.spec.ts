@@ -232,7 +232,8 @@ for (const theme of ['light', 'dark']) {
     await page.keyboard.press('ArrowUp'); await page.keyboard.press('ArrowDown');
     await expect(category).toBeFocused();
     await checkConsumer('selected category keyboard', category, false, true);
-    await checkConsumer('text control', page.getByLabel('资料名称', { exact: true }), true);
+    await page.getByText('选择只读文件目录', { exact: true }).click();
+    await checkConsumer('text control', page.getByLabel('用户数据目录', { exact: true }), true);
     const disabled = page.getByRole('button', { name: '连接已启动', exact: true });
     await expect(disabled).toBeDisabled();
     await checkConsumer('disabled listener', disabled, true);
@@ -240,7 +241,7 @@ for (const theme of ['light', 'dark']) {
     await disabled.hover();
     expect(await disabled.evaluate(node => getComputedStyle(node).backgroundColor)).toBe(disabledFill);
     await checkConsumer('disabled listener hover', disabled, true);
-    const primary = page.getByRole('button', { name: '生成配对串', exact: true });
+    const primary = page.getByRole('button', { name: '枚举资料', exact: true });
     const before = await primary.evaluate(node => ({ fill: getComputedStyle(node).backgroundColor, border: getComputedStyle(node).borderColor, ink: getComputedStyle(node).color }));
     await checkConsumer('primary normal', primary, true);
     await primary.hover();
@@ -265,7 +266,7 @@ for (const theme of ['light', 'dark']) {
     await page.keyboard.press('Escape');
     await primary.click();
     await expect(page.getByRole('alert')).toBeVisible();
-    await checkConsumer('pairing error', page.getByRole('alert'));
+    await checkConsumer('connection validation error', page.getByRole('alert'));
     for (const scenario of ['readonly', 'loading', 'cache-error', 'startup-error'] as const) {
       await mockBridge(page, scenario); await page.goto('/');
       const state = scenario === 'readonly' ? page.locator('.access-note') : scenario === 'loading'
