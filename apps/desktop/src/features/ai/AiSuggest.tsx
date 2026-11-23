@@ -6,7 +6,7 @@ import { OperationNotice } from '../history/OperationNotice';
 
 let nextRequest = 0;
 
-export function AiSuggest({ profileId, chromeId, url, revision, settings = null, live = true, onChanged, onSettings, onHistory }: {
+export function AiSuggest({ profileId, chromeId, url, revision, settings = null, live = true, writePaused = false, onChanged, onSettings, onHistory }: {
   profileId: string;
   chromeId: string;
   url: string | null;
@@ -14,6 +14,7 @@ export function AiSuggest({ profileId, chromeId, url, revision, settings = null,
   onChanged?: () => void;
   settings?: AiSettings | null;
   live?: boolean;
+  writePaused?: boolean;
   onSettings?: () => void;
   onHistory?: () => void;
 }) {
@@ -158,30 +159,35 @@ export function AiSuggest({ profileId, chromeId, url, revision, settings = null,
 
   return (
     <section className="ai-desk" aria-label="AI 建议">
-      <h4>单条建议</h4>
-      <p className="secondary">生成前不会请求模型。建议可以修改。确认后标题走浏览器写入，标签和摘要留在本机。</p>
-      <AiDisclosure settings={settings} onSettings={onSettings} />
-      {!live && <p className="notice">当前浏览器只读。本地标签和摘要仍可保存；连接恢复后才能保存标题或撤销标题。</p>}
-      {draft && <>
-        <p>端点 {draft.endpointLabel ?? '未记录'} · 模型 {draft.model ?? '未记录'}</p>
+      <div className="well-group">
+        <h3>单条建议</h3>
+        <p className="secondary">生成前不会请求模型。建议可以修改。确认后标题走浏览器写入，标签和摘要留在本机。</p>
+        <AiDisclosure settings={settings} onSettings={onSettings} />
+        {!live && <p className="notice">{writePaused ? '已暂停写入（只读保护）。本地标签和摘要仍可保存；恢复写入后才能保存标题或撤销标题。' : '当前浏览器只读。本地标签和摘要仍可保存；连接恢复后才能保存标题或撤销标题。'}</p>}
+        <div className="edit-actions">
+          <button type="button" className={draft?.state !== 'ready' ? 'primary-button' : undefined} disabled={busy || !settings?.enabled} onClick={() => { void generate(); }}>生成建议</button>
+          <button type="button" className="secondary-button" disabled={!!writeRef.current || (!draft && !busy)} onClick={cancel}>取消</button>
+          {operationId && <button type="button" disabled={busy || !live} onClick={() => { void undoTitle(); }}>撤销标题</button>}
+        </div>
+        {message && <p role="status">{message}</p>}
+      </div>
+      {draft && <div className="output-well ai-suggestion-review">
+        <h4>生成结果</h4>
+        <div className="settings-facts"><span>端点 {draft.endpointLabel ?? '未记录'}</span><span>模型 {draft.model ?? '未记录'}</span></div>
         {scope && <p className="secondary">{scope}</p>}
         {draft.suggestedFolder && <p className="secondary">建议文件夹：{draft.suggestedFolder}。不会移动书签。</p>}
-      </>}
-      {draft?.state === 'ready' && <>
-        <label htmlFor={`ai-title-${chromeId}`}>建议标题<input id={`ai-title-${chromeId}`} value={title} onChange={(event) => setTitle(event.target.value)} /></label>
-        {tags.map((tag, index) => <label key={index} htmlFor={`ai-tag-${chromeId}-${index}`}>标签 {index + 1}<input id={`ai-tag-${chromeId}-${index}`} value={tag} onChange={(event) => setTags((current) => current.map((item, itemIndex) => itemIndex === index ? event.target.value : item))} /></label>)}
-        <label htmlFor={`ai-summary-${chromeId}`}>摘要<textarea id={`ai-summary-${chromeId}`} value={summary} onChange={(event) => setSummary(event.target.value)} /></label>
-        <label><input type="checkbox" checked={applyTitle} disabled={busy || (!live && !applyTitle)} onChange={(event) => setApplyTitle(event.target.checked)} />保存标题</label>
-        <label><input type="checkbox" checked={applyTags} onChange={(event) => setApplyTags(event.target.checked)} />保存标签</label>
-        <label><input type="checkbox" checked={applySummary} onChange={(event) => setApplySummary(event.target.checked)} />保存摘要</label>
-      </>}
-      {message && <p role="status">{message}</p>}
-      <div className="edit-actions">
-        <button type="button" disabled={busy || !settings?.enabled} onClick={() => { void generate(); }}>生成建议</button>
-        <button type="button" className="secondary-button" disabled={!!writeRef.current || (!draft && !busy)} onClick={cancel}>取消</button>
-        {draft?.state === 'ready' && <button type="button" disabled={busy || (applyTitle && !live)} onClick={() => { void confirm(); }}>确认这条建议</button>}
-        {operationId && <button type="button" disabled={busy || !live} onClick={() => { void undoTitle(); }}>撤销标题</button>}
-      </div>
+        {draft.state === 'ready' && <>
+          <label htmlFor={`ai-title-${chromeId}`}>建议标题<input id={`ai-title-${chromeId}`} value={title} onChange={(event) => setTitle(event.target.value)} /></label>
+          {tags.map((tag, index) => <label key={index} htmlFor={`ai-tag-${chromeId}-${index}`}>标签 {index + 1}<input id={`ai-tag-${chromeId}-${index}`} value={tag} onChange={(event) => setTags((current) => current.map((item, itemIndex) => itemIndex === index ? event.target.value : item))} /></label>)}
+          <label htmlFor={`ai-summary-${chromeId}`}>摘要<textarea id={`ai-summary-${chromeId}`} value={summary} onChange={(event) => setSummary(event.target.value)} /></label>
+          <label><input type="checkbox" checked={applyTitle} disabled={busy || (!live && !applyTitle)} onChange={(event) => setApplyTitle(event.target.checked)} />保存标题</label>
+          <label><input type="checkbox" checked={applyTags} onChange={(event) => setApplyTags(event.target.checked)} />保存标签</label>
+          <label><input type="checkbox" checked={applySummary} onChange={(event) => setApplySummary(event.target.checked)} />保存摘要</label>
+          <div className="edit-actions">
+            <button type="button" className="primary-button" disabled={busy || (applyTitle && !live)} onClick={() => { void confirm(); }}>确认这条建议</button>
+          </div>
+        </>}
+      </div>}
       {receipt && <OperationNotice key={receipt.operationId} profileId={profileId} result={receipt} onHistory={onHistory} />}
     </section>
   );

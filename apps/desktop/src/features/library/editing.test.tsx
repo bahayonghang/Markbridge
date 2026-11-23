@@ -95,3 +95,17 @@ it('requires batch second confirmation and accepts an own revision before apply 
   view.rerender(component(2)); await act(async () => pending.resolve({ operationId: 'op', profileId: 'p', state: 'applied', stopped: false, errorCode: null, items: [{ chromeId: 'a', title: '目录', state: 'applied', errorCode: null }] }));
   expect(screen.getByText('全部回执已确认')).toBeVisible();
 });
+
+it('uses segmented-control for create kind, separates well-groups from output-well previews, and marks one primary action', async () => {
+  const { container } = render(desk(null, 1, true));
+  expect(container.querySelector('.segmented-control[aria-label="新建类型"]')).not.toBeNull();
+  expect(container.querySelectorAll('.well-group').length).toBeGreaterThanOrEqual(1);
+  expect(container.querySelectorAll('button.primary-button')).toHaveLength(1);
+  fireEvent.change(screen.getByLabelText('名称'), { target: { value: '新书签' } });
+  fireEvent.change(screen.getByLabelText('网址'), { target: { value: 'https://new.example/' } });
+  fireEvent.click(screen.getByRole('button', { name: '预览新书签' }));
+  const dialog = await screen.findByRole('dialog', { name: '确认变更' });
+  expect(dialog).toHaveClass('output-well');
+  expect(container.querySelectorAll('button.primary-button')).toHaveLength(1);
+  expect(container.querySelector('button.primary-button')).toHaveTextContent('确认变更');
+});

@@ -6,8 +6,8 @@ import { BatchReceipt } from './BatchReceipt';
 
 export type BatchRequest = { id: number; kind: 'move' | 'delete'; chromeIds: string[] };
 
-export function BatchEditDesk({ profileId, profileName, revision, live, nodes, request }: {
-  profileId: string; profileName: string; revision: number; live: boolean; nodes: BookmarkNode[]; request: BatchRequest;
+export function BatchEditDesk({ profileId, profileName, revision, live, writePaused = false, nodes, request }: {
+  profileId: string; profileName: string; revision: number; live: boolean; writePaused?: boolean; nodes: BookmarkNode[]; request: BatchRequest;
 }) {
   const [target, setTarget] = useState<string | null>(null);
   const [preview, setPreview] = useState<BatchEditPreview | null>(null);
@@ -60,20 +60,23 @@ export function BatchEditDesk({ profileId, profileName, revision, live, nodes, r
     finally { lock.current = false; setApplying(false); }
   }
   return <section className="edit-desk batch-edit-desk" aria-label="多选变更" onKeyDown={(event) => { if (event.key === 'Escape' && preview) { event.stopPropagation(); cancelReview(); } }}>
-    <h3>{request.kind === 'move' ? '移动所选项目' : '删除所选项目'}</h3>
-    <p>资料：{profileName} · 已选择 {request.chromeIds.length} 项</p>
-    {request.kind === 'move' && !result && !preview && <><FolderPicker nodes={nodes} value={target} excluded={request.chromeIds} onChange={(id) => { cancelReview(); setNotice(''); setTarget(id); }} /><button type="button" disabled={!live || !writableFolder(nodes, target) || busy || applying} onClick={() => { if (target) void review({ kind: 'move', parentId: target }); }}>预览批量移动</button></>}
-    {request.kind === 'delete' && !preview && !result && !busy && <button type="button" disabled={!live || applying} onClick={() => void review({ kind: 'delete' })}>重新预览删除</button>}
-    {busy && <p role="status">正在核对所选范围。</p>}
-    {preview && <div className="edit-dialog" role="dialog" aria-label="确认批量变更">
+    <div className="well-group">
+      <h3>{request.kind === 'move' ? '移动所选项目' : '删除所选项目'}</h3>
+      <div className="settings-facts"><span>资料：{profileName}</span><span>已选择 {request.chromeIds.length} 项</span></div>
+      {!live && <p className="notice">{writePaused ? '已暂停写入（只读保护）。恢复写入后才能执行批量浏览器变更。' : '当前只读。连接恢复后才能执行批量浏览器变更。'}</p>}
+      {request.kind === 'move' && !result && !preview && <><FolderPicker nodes={nodes} value={target} excluded={request.chromeIds} onChange={(id) => { cancelReview(); setNotice(''); setTarget(id); }} /><button type="button" className="primary-button" disabled={!live || !writableFolder(nodes, target) || busy || applying} onClick={() => { if (target) void review({ kind: 'move', parentId: target }); }}>预览批量移动</button></>}
+      {request.kind === 'delete' && !preview && !result && !busy && <button type="button" disabled={!live || applying} onClick={() => void review({ kind: 'delete' })}>重新预览删除</button>}
+      {busy && <p role="status">正在核对所选范围。</p>}
+      {busy && <button type="button" onClick={cancelReview}>取消批量预览</button>}
+    </div>
+    {preview && <div className="edit-dialog output-well" role="dialog" aria-label="确认批量变更">
       <h4>{second ? '再次确认删除' : '变更差异'}</h4>
       <p>已选 {preview.selectedCount} 项，去重后 {preview.items.length} 项操作，含子树共 {preview.affected} 项。</p>
       <p>目标：{preview.destinationPath ?? '删除'}</p>
-      <ol className="batch-items">{preview.items.map((item) => <li key={item.chromeId}><strong>{item.title || '未命名'}</strong><p>{item.path} · 含子树 {item.affected} 项</p>{item.changes.map((change, i) => <p key={i}>{change.before ?? '无'} → {change.after ?? '删除'}</p>)}</li>)}</ol>
+      <ol className="batch-items">{preview.items.map((item) => <li key={item.chromeId}><strong>{item.title || '未命名'}</strong><div className="settings-facts"><span>{item.path}</span><span>含子树 {item.affected} 项</span></div>{item.changes.map((change, i) => <p key={i}>{change.before ?? '无'} → {change.after ?? '删除'}</p>)}</li>)}</ol>
       {second && <p>影响超过 20 项。确认后才会删除。</p>}
       <div className="edit-actions"><button className={request.kind === 'delete' ? 'danger-button' : 'primary-button'} type="button" disabled={!live || !preview.writable || applying} onClick={() => void confirm()}>{second ? '确认批量删除' : preview.requiresSecondConfirm ? '继续确认批量删除' : '确认批量变更'}</button><button type="button" disabled={applying} onClick={cancelReview}>取消批量预览</button></div>
     </div>}
-    {busy && <button type="button" onClick={cancelReview}>取消批量预览</button>}
     {result && <BatchReceipt profileId={profileId} operationId={result.operationId} initial={result} />}
     {notice && <p role="status">{notice}</p>}
   </section>;

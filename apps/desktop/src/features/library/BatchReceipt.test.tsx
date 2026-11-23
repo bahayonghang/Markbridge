@@ -71,5 +71,7 @@ it('keeps a retry available after a failed or mismatched status response', async
   render(<BatchReceipt profileId="p" operationId="batch" />);
   expect(await screen.findByText('无法读取回执，请重新查询。')).toBeVisible();
   fireEvent.click(screen.getByRole('button', { name: '重新查询逐项回执' }));
-  expect(await screen.findByText('批次已停止')).toBeVisible();
+  const heading = await screen.findByText('批次已停止');
+  expect(heading).toBeVisible();
+  expect(heading.closest('section.batch-results')).toHaveClass('output-well');
 });

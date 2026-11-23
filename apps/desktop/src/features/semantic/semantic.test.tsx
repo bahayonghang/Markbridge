@@ -241,3 +241,23 @@ it('groups semantic settings in well-groups, marks a single primary button, and 
   expect(screen.getByText(/每次最多授权 10,000 个书签/)).toBeVisible();
   expect(screen.getByText(/每条向量最多 16 KiB/)).toBeVisible();
 });
+
+it('separates semantic controls in well-groups from output-well review and query hits with at most one primary button', async () => {
+  vi.mocked(backend.reviewSemanticScope).mockResolvedValue(scopeReview);
+  vi.mocked(backend.querySemantic).mockImplementation(async query => resultFor(query, '命中的书签'));
+  const { container } = render(<SemanticWorkspace {...props} />);
+  await waitFor(() => expect(screen.getByRole('button', { name: '审查本次范围' })).toBeEnabled());
+  expect(container.querySelectorAll('.well-group').length).toBeGreaterThanOrEqual(3);
+  expect(container.querySelectorAll('button.primary-button')).toHaveLength(1);
+  expect(container.querySelector('button.primary-button')).toHaveTextContent('查询语义索引');
+  fireEvent.change(screen.getByLabelText('描述想找的内容'), { target: { value: '键盘' } });
+  fireEvent.click(screen.getByRole('button', { name: '查询语义索引' }));
+  const hitsList = await screen.findByRole('list', { name: '语义查询结果' });
+  expect(hitsList.closest('.output-well')).not.toBeNull();
+  fireEvent.click(screen.getByRole('button', { name: '审查本次范围' }));
+  const reviewRegion = await screen.findByRole('region', { name: '索引确认审查' });
+  expect(reviewRegion).toHaveClass('output-well');
+  expect(reviewRegion.closest('.well-group')).toBeNull();
+  expect(container.querySelectorAll('button.primary-button')).toHaveLength(1);
+  expect(container.querySelector('button.primary-button')).toHaveTextContent('确认并建立索引');
+});

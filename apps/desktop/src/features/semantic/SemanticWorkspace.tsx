@@ -108,29 +108,33 @@ export function SemanticWorkspace({ profileId, profileName, sourceEpoch, revisio
   const resumable = index && index.pending > 0 && (index.phase === 'paused' || index.phase === 'failed')
     && !['MODEL_CHANGED', 'DIMENSION_MISMATCH', 'STALE_INDEX'].includes(index.failure ?? '');
 
+  const canQuery = enabled && !!index && index.ready > 0 && (index.phase === 'ready' || index.phase === 'paused');
+
   return <section className="semantic-workspace" aria-label="本地语义工作区">
-    <div className="page-intro semantic-heading"><div><h2>本地语义检索</h2><p className="secondary">用标题与已保存摘要建立本机索引。按意思查找，与普通搜索分别使用。</p></div><button type="button" onClick={onLibrary}>返回普通搜索</button></div>
-    <div className="scope-bar"><div><strong>{profileName}</strong><p>索引状态：{status ? phase : '正在读取'}</p></div><div className="edit-actions"><button type="button" onClick={onSettings}>语义设置</button><button type="button" disabled={busy} onClick={() => void run(async valid => { const value = await semanticStatus(profileId, sourceEpoch); if (valid()) accept(value); })}>刷新状态</button></div></div>
-    {!enabled && status && <p className="secondary">语义检索默认关闭。请在语义设置中选择本机模型并启用，再审查本次范围。</p>}
-    {index && <div className="semantic-index" role="region" aria-label="当前语义索引">
-      <dl className="semantic-facts"><dt>模型</dt><dd>{index.model}</dd><dt>已完成</dt><dd>{index.ready} / {index.total} 个书签，{index.pending} 个待处理</dd><dt>向量空间</dt><dd>{indexBytes(index.storedBytes)}{index.dimension ? `，${index.dimension} 维` : '，维度尚未确认'}</dd></dl>
-      {index.phase === 'running' && <progress max={index.total} value={index.ready} aria-label="索引建立进度" />}
-      {index.failure && <p role="status">{semanticFailureText(index.failure)}</p>}
-      <div className="edit-actions">
-        <button type="button" disabled={!ready || index.phase !== 'running'} onClick={() => void run(async valid => { const value = await pauseSemanticIndex(profileId, sourceEpoch); if (valid() && accept(value)) setMessage('索引已暂停。已完成的条目保留。'); })}>暂停索引</button>
-        <button type="button" disabled={!ready || !enabled || !resumable} onClick={() => void run(async valid => { const value = await resumeSemanticIndex(profileId, sourceEpoch); if (valid()) accept(value); })}>继续索引</button>
-        <button type="button" ref={deleteTrigger} className="danger-button" disabled={!ready} onClick={() => setDeleting(true)}>删除派生索引</button>
-      </div>
-    </div>}
-    {enabled && <div className="edit-actions"><button type="button" disabled={!ready} onClick={() => void run(async valid => {
-      if (!status) return;
-      await saveSemanticConfig({ enabled: false, endpoint: status.settings.endpointLabel, model: status.settings.model });
-      if (!valid()) return;
-      const value = await semanticStatus(profileId, sourceEpoch);
-      if (valid() && accept(value)) { setReview(null); setMessage('语义检索已关闭。普通搜索、标签、备注和摘要保留。'); }
-    })}>停用语义检索</button></div>}
-    {index && <SemanticQueryPanel key={`${index.indexId}:${index.generation}`} profileId={profileId} sourceEpoch={sourceEpoch} visit={visit} revision={revision} refreshVersion={refreshVersion} index={index} enabled={enabled} active={active && !busy} onSelect={onSelect} />}
-    <section className="semantic-scope" aria-labelledby="semantic-scope-title">
+    <div className="page-intro semantic-heading"><div><h2>本地语义检索</h2><p className="secondary">用标题与已保存摘要建立本机索引，与普通搜索分别使用。</p></div><button type="button" onClick={onLibrary}>返回普通搜索</button></div>
+    <div className="well-group semantic-status-well">
+      <div className="scope-bar"><div><strong>{profileName}</strong><p>索引状态：{status ? phase : '正在读取'}</p></div><div className="edit-actions"><button type="button" onClick={onSettings}>语义设置</button><button type="button" disabled={busy} onClick={() => void run(async valid => { const value = await semanticStatus(profileId, sourceEpoch); if (valid()) accept(value); })}>刷新状态</button></div></div>
+      {!enabled && status && <p className="secondary">语义检索默认关闭。请在语义设置中选择本机模型并启用，再审查本次范围。</p>}
+      {index && <div className="semantic-index" role="region" aria-label="当前语义索引">
+        <dl className="semantic-facts"><dt>模型</dt><dd>{index.model}</dd><dt>已完成</dt><dd>{index.ready} / {index.total} 个书签，{index.pending} 个待处理</dd><dt>向量空间</dt><dd>{indexBytes(index.storedBytes)}{index.dimension ? `，${index.dimension} 维` : '，维度尚未确认'}</dd></dl>
+        {index.phase === 'running' && <progress max={index.total} value={index.ready} aria-label="索引建立进度" />}
+        {index.failure && <p role="status">{semanticFailureText(index.failure)}</p>}
+        <div className="edit-actions">
+          <button type="button" disabled={!ready || index.phase !== 'running'} onClick={() => void run(async valid => { const value = await pauseSemanticIndex(profileId, sourceEpoch); if (valid() && accept(value)) setMessage('索引已暂停。已完成的条目保留。'); })}>暂停索引</button>
+          <button type="button" disabled={!ready || !enabled || !resumable} onClick={() => void run(async valid => { const value = await resumeSemanticIndex(profileId, sourceEpoch); if (valid()) accept(value); })}>继续索引</button>
+          <button type="button" ref={deleteTrigger} className="danger-button" disabled={!ready} onClick={() => setDeleting(true)}>删除派生索引</button>
+        </div>
+      </div>}
+      {enabled && <div className="edit-actions"><button type="button" disabled={!ready} onClick={() => void run(async valid => {
+        if (!status) return;
+        await saveSemanticConfig({ enabled: false, endpoint: status.settings.endpointLabel, model: status.settings.model });
+        if (!valid()) return;
+        const value = await semanticStatus(profileId, sourceEpoch);
+        if (valid() && accept(value)) { setReview(null); setMessage('语义检索已关闭。普通搜索、标签、备注和摘要保留。'); }
+      })}>停用语义检索</button></div>}
+    </div>
+    {index && <SemanticQueryPanel key={`${index.indexId}:${index.generation}`} profileId={profileId} sourceEpoch={sourceEpoch} visit={visit} revision={revision} refreshVersion={refreshVersion} index={index} enabled={enabled} active={active && !busy} hasPendingReview={!!review} onSelect={onSelect} />}
+    <section className="semantic-scope well-group" aria-labelledby="semantic-scope-title">
       <h3 id="semantic-scope-title">审查索引范围</h3>
       <p className="secondary">只发送书签标题与已保存摘要，不追加网址、本地标签、备注或正文。不抓取网页；新增书签不会自动加入。</p>
       <div className="scope-choices" role="radiogroup" aria-label="语义索引范围">
@@ -138,16 +142,16 @@ export function SemanticWorkspace({ profileId, profileName, sourceEpoch, revisio
         <label><input type="radio" name="semantic-scope" checked={mode === 'folder'} disabled={!ready || !enabled} onChange={() => { replaceScope(); setMode('folder'); }} />指定目录及后代</label>
       </div>
       <div className="edit-actions">{mode === 'folder' && <label>索引目录<select value={chosenFolder} disabled={!ready || !enabled} onChange={event => { replaceScope(); setChosenFolder(event.target.value); }}><option value="">请选择目录</option>{folders.map(folder => <option key={folder.id} value={folder.id}>{folder.name}</option>)}</select></label>}
-        <button type="button" disabled={!ready || !enabled || index?.phase === 'running' || (mode === 'selection' ? !selected.length || selected.length > 10000 : !chosenFolder)} onClick={reviewScope}>审查本次范围</button>
+        <button type="button" className={!review && !canQuery ? 'primary-button' : undefined} disabled={!ready || !enabled || index?.phase === 'running' || (mode === 'selection' ? !selected.length || selected.length > 10000 : !chosenFolder)} onClick={reviewScope}>审查本次范围</button>
       </div>
       {!selected.length && mode === 'selection' && <p className="secondary">先在书签列表勾选条目，或明确选择一个目录。范围最多 10,000 个书签，超限不会截断。</p>}
-      {review && <div className="semantic-review" role="region" aria-label="索引确认审查">
-        <h4>确认建立这份索引</h4>
-        <dl className="semantic-facts"><dt>资料与范围</dt><dd>{profileName} / {scopeName}</dd><dt>模型</dt><dd>{review.model}</dd><dt>书签数量</dt><dd>{review.count} 个</dd><dt>向量空间上界</dt><dd>{indexBytes(review.upperBytes)}，另加 SQLite 开销与模型自身空间</dd><dt>输入裁剪</dt><dd>{review.clippedCount} 个输入会裁剪；每条最多 {review.maxInputChars.toLocaleString()} 个字符、{indexBytes(review.maxInputBytes)}</dd></dl>
-        <p className="secondary">仅处理这次确认的范围。标题或摘要变化会使条目待更新；暂停后须主动继续。已有派生索引会由本次范围替换。</p>
-        <div className="edit-actions"><button type="button" className="primary-button" disabled={!ready || !enabled} onClick={() => void run(async valid => { const value = await startSemanticIndex(review.reviewId); if (valid() && accept(value)) setReview(null); })}>确认并建立索引</button><button type="button" disabled={busy} onClick={() => setReview(null)}>取消本次审查</button></div>
-      </div>}
     </section>
+    {review && <div className="semantic-review output-well" role="region" aria-label="索引确认审查">
+      <h4>确认建立这份索引</h4>
+      <dl className="semantic-facts"><dt>资料与范围</dt><dd>{profileName} / {scopeName}</dd><dt>模型</dt><dd>{review.model}</dd><dt>书签数量</dt><dd>{review.count} 个</dd><dt>向量空间上界</dt><dd>{indexBytes(review.upperBytes)}，另加 SQLite 开销与模型自身空间</dd><dt>输入裁剪</dt><dd>{review.clippedCount} 个输入会裁剪；每条最多 {review.maxInputChars.toLocaleString()} 个字符、{indexBytes(review.maxInputBytes)}</dd></dl>
+      <p className="secondary">仅处理这次确认的范围。标题或摘要变化会使条目待更新；暂停后须主动继续。已有派生索引会由本次范围替换。</p>
+      <div className="edit-actions"><button type="button" className="primary-button" disabled={!ready || !enabled} onClick={() => void run(async valid => { const value = await startSemanticIndex(review.reviewId); if (valid() && accept(value)) setReview(null); })}>确认并建立索引</button><button type="button" disabled={busy} onClick={() => setReview(null)}>取消本次审查</button></div>
+    </div>}
     {!index && status && <p className="secondary">还没有语义索引。普通搜索不受影响；完成范围确认后可在这里查询。</p>}
     {busy && <p role="status">正在完成你请求的语义操作。</p>}
     {message && <p role="status">{message}</p>}
