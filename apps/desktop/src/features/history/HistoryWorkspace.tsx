@@ -144,7 +144,7 @@ function HistoryDetail({ profileId, operationId, profileName, revision, refreshT
   const names = new Map(nodes.map((node) => [node.chromeId, node.title]));
   for (const step of preview?.steps ?? []) if (step.payload.kind === 'create') names.set(step.requestId, step.payload.title);
   return <section className="history-detail" aria-label="操作详情">
-    {(error || !detail || detail) && <div className="well-group">
+    {(error || !detail || detail) && <div className="output-well">
       {error && <p role="alert">无法读取记录详情，请重新查询回执。</p>}
       {!detail && !error && <p role="status">正在读取前后值。</p>}
       {detail && <>

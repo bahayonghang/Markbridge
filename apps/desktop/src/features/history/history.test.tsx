@@ -174,15 +174,19 @@ it('shows writePaused notice and disables Chrome undo while keeping details and 
   expect(backend.applyEdit).not.toHaveBeenCalled();
 });
 
-it('groups history header and details in well-groups, uses output-well for undo review, and keeps one primary button', async () => {
+it('groups history header in well-group, uses output-well for history detail and undo review, and keeps one primary button', async () => {
   const { container } = render(<HistoryWorkspace profileId="p" profileName="A" revision={4} live />);
   expect(await screen.findByRole('button', { name: '撤销此记录' })).toBeEnabled();
-  expect(container.querySelectorAll('.well-group').length).toBeGreaterThanOrEqual(1);
+  expect(container.querySelectorAll('.well-group')).toHaveLength(1);
   expect(container.querySelectorAll('button.primary-button')).toHaveLength(0);
   fireEvent.click(screen.getByRole('button', { name: '撤销此记录' }));
   const undoReview = await screen.findByRole('region', { name: '撤销预览' });
   expect(undoReview).toHaveClass('output-well');
-  expect(container.querySelectorAll('.well-group').length).toBeGreaterThanOrEqual(2);
+  const detailCard = container.querySelector('.history-detail > div');
+  expect(detailCard).toHaveClass('output-well');
+  expect(detailCard).not.toHaveClass('well-group');
+  expect(container.querySelectorAll('.well-group')).toHaveLength(1);
+  expect(container.querySelectorAll('.output-well')).toHaveLength(2);
   expect(undoReview.closest('.well-group')).toBeNull();
   expect(container.querySelectorAll('button.primary-button')).toHaveLength(1);
   expect(container.querySelector('button.primary-button')).toHaveTextContent('确认条件撤销');
