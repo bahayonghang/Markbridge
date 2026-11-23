@@ -252,6 +252,30 @@ impl Storage {
             }).collect()
         }).await
     }
+    async fn execute_profile_update<P>(
+        &self,
+        profile_id: Id,
+        sql: &'static str,
+        param: P,
+    ) -> Result<()>
+    where
+        P: rusqlite::ToSql + Send + 'static,
+    {
+        if profile_id.as_str() == local_space::LOCAL_SKILLS_PROFILE_ID {
+            return Err(ErrorCode::ReadOnly);
+        }
+        self.call(move |conn| {
+            if conn
+                .execute(sql, params![profile_id.as_str(), param])
+                .map_err(storage_error)?
+                != 1
+            {
+                return Err(ErrorCode::WrongProfile);
+            }
+            Ok(())
+        })
+        .await
+    }
     pub async fn rename_profile(&self, profile_id: Id, display_name: DisplayName) -> Result<()> {
         if profile_id.as_str() == local_space::LOCAL_SKILLS_PROFILE_ID {
             return Err(ErrorCode::ReadOnly);
@@ -261,58 +285,28 @@ impl Storage {
             return Err(ErrorCode::InvalidMessage);
         }
         let display_name = DisplayName::new(trimmed)?;
-        self.call(move |conn| {
-            if conn
-                .execute(
-                    "UPDATE profiles SET display_name=?2 WHERE id=?1",
-                    params![profile_id.as_str(), display_name.as_str()],
-                )
-                .map_err(storage_error)?
-                != 1
-            {
-                return Err(ErrorCode::WrongProfile);
-            }
-            Ok(())
-        })
+        self.execute_profile_update(
+            profile_id,
+            "UPDATE profiles SET display_name=?2 WHERE id=?1",
+            display_name.as_str().to_owned(),
+        )
         .await
     }
     pub async fn set_write_paused(&self, profile_id: Id, paused: bool) -> Result<()> {
-        if profile_id.as_str() == local_space::LOCAL_SKILLS_PROFILE_ID {
-            return Err(ErrorCode::ReadOnly);
-        }
-        self.call(move |conn| {
-            if conn
-                .execute(
-                    "UPDATE profiles SET write_paused=?2 WHERE id=?1",
-                    params![profile_id.as_str(), i64::from(paused)],
-                )
-                .map_err(storage_error)?
-                != 1
-            {
-                return Err(ErrorCode::WrongProfile);
-            }
-            Ok(())
-        })
+        self.execute_profile_update(
+            profile_id,
+            "UPDATE profiles SET write_paused=?2 WHERE id=?1",
+            i64::from(paused),
+        )
         .await
     }
     /// Ignoring preserves cache and local metadata.
     pub async fn set_ignored(&self, profile_id: Id, ignored: bool) -> Result<()> {
-        if profile_id.as_str() == local_space::LOCAL_SKILLS_PROFILE_ID {
-            return Err(ErrorCode::ReadOnly);
-        }
-        self.call(move |conn| {
-            if conn
-                .execute(
-                    "UPDATE profiles SET ignored=?2, pairing_state=CASE WHEN ?2=0 THEN 'paired' ELSE pairing_state END WHERE id=?1",
-                    params![profile_id.as_str(), i64::from(ignored)],
-                )
-                .map_err(storage_error)?
-                != 1
-            {
-                return Err(ErrorCode::WrongProfile);
-            }
-            Ok(())
-        })
+        self.execute_profile_update(
+            profile_id,
+            "UPDATE profiles SET ignored=?2, pairing_state=CASE WHEN ?2=0 THEN 'paired' ELSE pairing_state END WHERE id=?1",
+            i64::from(ignored),
+        )
         .await
     }
     /// Identity reset is explicit. Old cache and sidecar rows remain available for review.

@@ -26,7 +26,6 @@ pub(super) async fn serve(
 ) {
     let permits = Arc::new(Semaphore::new(32));
     let mut connections = JoinSet::new();
-    let mut maintenance = interval(Duration::from_secs(1));
     let mut rate_window = Instant::now();
     let mut accepted = 0;
     loop {
@@ -34,7 +33,6 @@ pub(super) async fn serve(
             biased;
             _ = stopped.changed() => break,
             Some(_) = connections.join_next(), if !connections.is_empty() => {},
-            _ = maintenance.tick() => { bridge.state().await; },
             socket = listener.accept() => {
                 let Ok((socket, peer)) = socket else { break; };
                 if !peer.ip().is_loopback() { continue; }
@@ -226,41 +224,62 @@ async fn authenticated_loop(
                 if rate_window.elapsed() >= Duration::from_secs(1) { rate_window = Instant::now(); frames = 0; }
                 frames += 1;
                 if frames > 120 { return Err(ErrorCode::LimitExceeded); }
-                if message.identity() != (profile, session) {
-                    flush_pause_sync(ws, &mut outbound_rx).await;
-                    return Err(ErrorCode::WrongProfile);
-                }
-                // Check current authority for heartbeats as well as cache messages.
-                if let Err(err) = bridge.inner.lock().await.authenticated(profile, session).map(|_| ()) {
+                if let Err(err) = handle_incoming_message(bridge, ws, profile, session, message).await {
                     flush_pause_sync(ws, &mut outbound_rx).await;
                     return Err(err);
-                }
-                match message {
-                    WireMessage::Ping { request_id, .. } => send(ws, envelope("pong", profile, session, request_id.0, serde_json::json!({}))?).await?,
-                    WireMessage::Pong { .. } => {},
-                    WireMessage::TreeFull { .. } | WireMessage::Event { .. } => {
-                        match bridge.receive(message).await {
-                            Ok(true) => request_sync(bridge, ws, profile, session).await?,
-                            Ok(false) => {}
-                            Err(err) => {
-                                flush_pause_sync(ws, &mut outbound_rx).await;
-                                return Err(err);
-                            }
-                        }
-                    },
-                    WireMessage::ResyncRequired { .. } => { request_sync(bridge, ws, profile, session).await?; },
-                    // An operation receipt is the extension's acknowledgement. Treating it as a command closes the session and freezes the write.
-                    WireMessage::OperationReceipt { .. } => {
-                        if let Err(err) = bridge.receive(message).await {
-                            flush_pause_sync(ws, &mut outbound_rx).await;
-                            return Err(err);
-                        }
-                    },
-                    _ => return Err(ErrorCode::ReadOnly),
                 }
             }
         }
     }
+}
+
+async fn handle_incoming_message(
+    bridge: &Bridge,
+    ws: &mut WebSocketStream<TcpStream>,
+    profile: &Id,
+    session: &Id,
+    message: WireMessage,
+) -> Result<()> {
+    if message.identity() != (profile, session) {
+        return Err(ErrorCode::WrongProfile);
+    }
+    // Check current authority for heartbeats as well as cache messages.
+    bridge
+        .inner
+        .lock()
+        .await
+        .authenticated(profile, session)
+        .map(|_| ())?;
+    match message {
+        WireMessage::Ping { request_id, .. } => {
+            send(
+                ws,
+                envelope(
+                    "pong",
+                    profile,
+                    session,
+                    request_id.0,
+                    serde_json::json!({}),
+                )?,
+            )
+            .await?;
+        }
+        WireMessage::Pong { .. } => {}
+        WireMessage::TreeFull { .. } | WireMessage::Event { .. } => {
+            if bridge.receive(message).await? {
+                request_sync(bridge, ws, profile, session).await?;
+            }
+        }
+        WireMessage::ResyncRequired { .. } => {
+            request_sync(bridge, ws, profile, session).await?;
+        }
+        // An operation receipt is the extension's acknowledgement. Treating it as a command closes the session and freezes the write.
+        WireMessage::OperationReceipt { .. } => {
+            bridge.receive(message).await?;
+        }
+        _ => return Err(ErrorCode::ReadOnly),
+    }
+    Ok(())
 }
 
 async fn flush_pause_sync(

@@ -105,6 +105,7 @@ it('uses segmented-control for create kind, separates well-groups from output-we
   fireEvent.change(screen.getByLabelText('网址'), { target: { value: 'https://new.example/' } });
   fireEvent.click(screen.getByRole('button', { name: '预览新书签' }));
   const dialog = await screen.findByRole('dialog', { name: '确认变更' });
+  await screen.findByRole('button', { name: '确认变更' });
   expect(dialog).toHaveClass('output-well');
   expect(container.querySelectorAll('button.primary-button')).toHaveLength(1);
   expect(container.querySelector('button.primary-button')).toHaveTextContent('确认变更');
