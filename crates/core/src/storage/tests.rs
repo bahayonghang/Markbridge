@@ -1058,3 +1058,127 @@ async fn mirror_storage_does_not_copy_tags_or_metadata_by_url() {
     );
     storage.close().await.unwrap();
 }
+
+#[tokio::test]
+async fn migration_9_migrates_revoked_rows_and_persists_zero_click_profile_controls() {
+    let directory = tempfile::tempdir().unwrap();
+    let path = directory.path().join("v8.sqlite");
+    {
+        let conn = Connection::open(&path).unwrap();
+        for migration in &MIGRATIONS[..8] {
+            conn.execute_batch(migration).unwrap();
+        }
+        conn.pragma_update(None, "user_version", 8).unwrap();
+        conn.execute(
+            "INSERT INTO profiles VALUES('p-live','inst-1',1,'Profile One','paired',NULL,'chrome-extension://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',NULL)",
+            [],
+        )
+        .unwrap();
+        conn.execute(
+            "INSERT INTO profiles VALUES('p-revoked','inst-2',1,'Old Revoked','revoked',NULL,'chrome-extension://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',NULL)",
+            [],
+        )
+        .unwrap();
+    }
+
+    let storage = Storage::open(&path).await.unwrap();
+    assert!(storage.migration_backup.is_some());
+    assert_eq!(SCHEMA_VERSION, 9);
+
+    let profiles = storage.profiles().await.unwrap();
+    let live = profiles
+        .iter()
+        .find(|p| p.profile.id.as_str() == "p-live")
+        .unwrap();
+    assert!(!live.write_paused);
+    assert!(!live.ignored);
+    let legacy = profiles
+        .iter()
+        .find(|p| p.profile.id.as_str() == "p-revoked")
+        .unwrap();
+    assert!(!legacy.write_paused);
+    assert!(legacy.ignored);
+
+    storage
+        .call(|conn| {
+            let has_index: bool = conn
+                .query_row(
+                    "SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE type='index' AND name='idx_profiles_instance_id')",
+                    [],
+                    |row| row.get(0),
+                )
+                .unwrap();
+            assert!(has_index);
+            Ok(())
+        })
+        .await
+        .unwrap();
+
+    storage
+        .rename_profile(id("p-live"), DisplayName::new("工作资料").unwrap())
+        .await
+        .unwrap();
+    storage.set_write_paused(id("p-live"), true).await.unwrap();
+    storage.set_ignored(id("p-live"), true).await.unwrap();
+    storage.set_ignored(id("p-revoked"), false).await.unwrap();
+
+    assert_eq!(
+        storage
+            .rename_profile(
+                id(local_space::LOCAL_SKILLS_PROFILE_ID),
+                DisplayName::new("Nope").unwrap()
+            )
+            .await
+            .unwrap_err(),
+        ErrorCode::ReadOnly
+    );
+    assert_eq!(
+        storage
+            .set_write_paused(id(local_space::LOCAL_SKILLS_PROFILE_ID), true)
+            .await
+            .unwrap_err(),
+        ErrorCode::ReadOnly
+    );
+    assert_eq!(
+        storage
+            .set_ignored(id(local_space::LOCAL_SKILLS_PROFILE_ID), true)
+            .await
+            .unwrap_err(),
+        ErrorCode::ReadOnly
+    );
+    assert_eq!(
+        storage
+            .rename_profile(id("missing"), DisplayName::new("Nope").unwrap())
+            .await
+            .unwrap_err(),
+        ErrorCode::WrongProfile
+    );
+    assert_eq!(
+        storage
+            .rename_profile(
+                id("p-live"),
+                DisplayName::new(local_space::LOCAL_SKILLS_PROFILE_ID).unwrap()
+            )
+            .await
+            .unwrap_err(),
+        ErrorCode::InvalidMessage
+    );
+
+    storage.close().await.unwrap();
+
+    let reopened = Storage::open(&path).await.unwrap();
+    let after = reopened.profiles().await.unwrap();
+    let live = after
+        .iter()
+        .find(|p| p.profile.id.as_str() == "p-live")
+        .unwrap();
+    assert_eq!(live.profile.display_name.as_str(), "工作资料");
+    assert!(live.write_paused);
+    assert!(live.ignored);
+    let resumed = after
+        .iter()
+        .find(|p| p.profile.id.as_str() == "p-revoked")
+        .unwrap();
+    assert!(!resumed.ignored);
+    reopened.close().await.unwrap();
+}

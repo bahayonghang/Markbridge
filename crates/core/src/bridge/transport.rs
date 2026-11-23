@@ -63,10 +63,12 @@ async fn connection(bridge: Bridge, socket: TcpStream, mut stopped: watch::Recei
         Ok(addr) => addr.port(),
         Err(_) => return,
     };
+    let allowed_origin = bridge.allowed_origin();
     let handshake = accept_hdr_async_with_config(
         socket,
         HandshakeCheck {
             port,
+            allowed_origin,
             origin: actual_origin,
         },
         Some(
@@ -98,7 +100,7 @@ async fn connection(bridge: Bridge, socket: TcpStream, mut stopped: watch::Recei
                 let (requested_profile, session) = message.identity();
                 let authenticated = tokio::select! {
                     _ = stopped.changed() => None,
-                    result = timeout_at(deadline, bridge.authenticate(&origin, &message)) => result.ok(),
+                    result = timeout_at(deadline, bridge.connect_extension(&origin, &message)) => result.ok(),
                 };
                 if let Some(authenticated) = authenticated {
                     let (accepted, resolved_profile, display_name, epoch, write_paused, error) =
@@ -208,7 +210,13 @@ async fn authenticated_loop(
             _ = reconcile.tick() => { request_sync(bridge, ws, profile, session).await?; },
             outgoing = outbound_rx.recv(), if outbound_open => {
                 match outgoing {
-                    Some(message) => send(ws, message).await?,
+                    Some(message) => {
+                        let close_after = matches!(message, WireMessage::PauseSync { .. });
+                        send(ws, message).await?;
+                        if close_after {
+                            return Ok(());
+                        }
+                    }
                     None => outbound_open = false,
                 }
             },
@@ -218,21 +226,51 @@ async fn authenticated_loop(
                 if rate_window.elapsed() >= Duration::from_secs(1) { rate_window = Instant::now(); frames = 0; }
                 frames += 1;
                 if frames > 120 { return Err(ErrorCode::LimitExceeded); }
-                if message.identity() != (profile, session) { return Err(ErrorCode::WrongProfile); }
+                if message.identity() != (profile, session) {
+                    flush_pause_sync(ws, &mut outbound_rx).await;
+                    return Err(ErrorCode::WrongProfile);
+                }
                 // Check current authority for heartbeats as well as cache messages.
-                { bridge.inner.lock().await.authenticated(profile, session)?; }
+                if let Err(err) = bridge.inner.lock().await.authenticated(profile, session).map(|_| ()) {
+                    flush_pause_sync(ws, &mut outbound_rx).await;
+                    return Err(err);
+                }
                 match message {
                     WireMessage::Ping { request_id, .. } => send(ws, envelope("pong", profile, session, request_id.0, serde_json::json!({}))?).await?,
                     WireMessage::Pong { .. } => {},
                     WireMessage::TreeFull { .. } | WireMessage::Event { .. } => {
-                        if bridge.receive(message).await? { request_sync(bridge, ws, profile, session).await?; }
+                        match bridge.receive(message).await {
+                            Ok(true) => request_sync(bridge, ws, profile, session).await?,
+                            Ok(false) => {}
+                            Err(err) => {
+                                flush_pause_sync(ws, &mut outbound_rx).await;
+                                return Err(err);
+                            }
+                        }
                     },
                     WireMessage::ResyncRequired { .. } => { request_sync(bridge, ws, profile, session).await?; },
                     // An operation receipt is the extension's acknowledgement. Treating it as a command closes the session and freezes the write.
-                    WireMessage::OperationReceipt { .. } => { bridge.receive(message).await?; },
+                    WireMessage::OperationReceipt { .. } => {
+                        if let Err(err) = bridge.receive(message).await {
+                            flush_pause_sync(ws, &mut outbound_rx).await;
+                            return Err(err);
+                        }
+                    },
                     _ => return Err(ErrorCode::ReadOnly),
                 }
             }
+        }
+    }
+}
+
+async fn flush_pause_sync(
+    ws: &mut WebSocketStream<TcpStream>,
+    outbound_rx: &mut mpsc::UnboundedReceiver<WireMessage>,
+) {
+    while let Ok(message) = outbound_rx.try_recv() {
+        if matches!(message, WireMessage::PauseSync { .. }) {
+            let _ = send(ws, message).await;
+            break;
         }
     }
 }
@@ -251,6 +289,7 @@ async fn request_sync(
 
 struct HandshakeCheck {
     port: u16,
+    allowed_origin: PairedOrigin,
     origin: Arc<StdMutex<Option<PairedOrigin>>>,
 }
 impl Callback for HandshakeCheck {
@@ -259,7 +298,13 @@ impl Callback for HandshakeCheck {
         request: &Request,
         response: Response,
     ) -> std::result::Result<Response, ErrorResponse> {
-        match checked_handshake(self.port, &self.origin, request, response) {
+        match checked_handshake(
+            self.port,
+            &self.allowed_origin,
+            &self.origin,
+            request,
+            response,
+        ) {
             Ok(response) => Ok(response),
             Err(error) => Err(*error),
         }
@@ -267,12 +312,13 @@ impl Callback for HandshakeCheck {
 }
 fn checked_handshake(
     port: u16,
+    allowed_origin: &PairedOrigin,
     actual_origin: &Arc<StdMutex<Option<PairedOrigin>>>,
     request: &Request,
     response: Response,
 ) -> std::result::Result<Response, Box<ErrorResponse>> {
     let reject = || {
-        let mut response = ErrorResponse::new(Some("UNPAIRED".to_owned()));
+        let mut response = ErrorResponse::new(Some("FORBIDDEN".to_owned()));
         *response.status_mut() = tokio_tungstenite::tungstenite::http::StatusCode::FORBIDDEN;
         Box::new(response)
     };
@@ -293,6 +339,9 @@ fn checked_handshake(
         .and_then(|value| value.to_str().ok())
         .and_then(|value| PairedOrigin::new(value).ok())
         .ok_or_else(reject)?;
+    if &parsed != allowed_origin {
+        return Err(reject());
+    }
     *actual_origin.lock().map_err(|_| reject())? = Some(parsed);
     Ok(response)
 }

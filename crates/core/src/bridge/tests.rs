@@ -45,6 +45,7 @@ async fn fixture() -> (Bridge, tempfile::TempDir, Arc<MemoryCredentials>) {
     let bridge = Bridge::open(directory.path().join("cache.sqlite"), store.clone())
         .await
         .unwrap();
+    bridge.set_allowed_origin(origin());
     let socket = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
     let port = socket.local_addr().unwrap().port();
     drop(socket);
@@ -66,7 +67,7 @@ async fn paired(bridge: &Bridge, instance: &str) -> (Id, String) {
     let pending = Id::new("pending").unwrap();
     let session = format!("init-{instance}");
     let auth = bridge
-        .authenticate(&origin(), &hello(&pending, instance, &session, ""))
+        .connect_extension(&origin(), &hello(&pending, instance, &session, ""))
         .await
         .unwrap();
     assert_eq!(bridge.state().await.profiles.len(), before + 1);
@@ -110,7 +111,7 @@ async fn local_metadata_and_title_drafts_reject_reused_chrome_ids_after_epoch_re
     let (bridge, _directory, _) = fixture().await;
     let (profile, secret) = paired(&bridge, "instance").await;
     bridge
-        .authenticate(&origin(), &hello(&profile, "instance", "s", &secret))
+        .connect_extension(&origin(), &hello(&profile, "instance", "s", &secret))
         .await
         .unwrap();
     full(&bridge, &profile, "s", 0).await;
@@ -242,7 +243,7 @@ async fn direct_hello_binds_origin_instance_and_supports_profile_controls() {
     let (bridge, _dir, _credentials) = fixture().await;
     let pending = Id::new("pending").unwrap();
     let first = bridge
-        .authenticate(&origin(), &hello(&pending, "inst-a", "s1", ""))
+        .connect_extension(&origin(), &hello(&pending, "inst-a", "s1", ""))
         .await
         .unwrap();
     assert_eq!(
@@ -252,7 +253,7 @@ async fn direct_hello_binds_origin_instance_and_supports_profile_controls() {
     let other = PairedOrigin::new(format!("chrome-extension://{}", "b".repeat(32))).unwrap();
     assert_eq!(
         bridge
-            .authenticate(&other, &hello(&first.profile_id, "inst-a", "s2", ""))
+            .connect_extension(&other, &hello(&first.profile_id, "inst-a", "s2", ""))
             .await
             .unwrap_err(),
         ErrorCode::WrongProfile
@@ -281,7 +282,7 @@ async fn direct_hello_binds_origin_instance_and_supports_profile_controls() {
     );
     assert_eq!(
         bridge
-            .authenticate(&origin(), &hello(&first.profile_id, "inst-a", "s3", ""))
+            .connect_extension(&origin(), &hello(&first.profile_id, "inst-a", "s3", ""))
             .await
             .unwrap_err(),
         ErrorCode::ProfileIgnored
@@ -292,7 +293,7 @@ async fn direct_hello_binds_origin_instance_and_supports_profile_controls() {
         .unwrap();
     assert!(!bridge.state().await.profiles[0].ignored);
     bridge
-        .authenticate(&origin(), &hello(&first.profile_id, "inst-a", "s4", ""))
+        .connect_extension(&origin(), &hello(&first.profile_id, "inst-a", "s4", ""))
         .await
         .unwrap();
     bridge.shutdown().await.unwrap();
@@ -303,7 +304,7 @@ async fn reconnect_uses_persisted_revision_and_revocation_preserves_cache() {
     let (bridge, dir, credentials) = fixture().await;
     let (profile, secret) = paired(&bridge, "instance").await;
     bridge
-        .authenticate(&origin(), &hello(&profile, "instance", "s1", &secret))
+        .connect_extension(&origin(), &hello(&profile, "instance", "s1", &secret))
         .await
         .unwrap();
     full(&bridge, &profile, "s1", 12).await;
@@ -317,12 +318,12 @@ async fn reconnect_uses_persisted_revision_and_revocation_preserves_cache() {
         BridgeConnection::CachedReadOnly
     );
     bridge
-        .authenticate(&origin(), &hello(&profile, "instance", "s2", &secret))
+        .connect_extension(&origin(), &hello(&profile, "instance", "s2", &secret))
         .await
         .unwrap();
     full(&bridge, &profile, "s2", 0).await;
     assert_eq!(bridge.state().await.profiles[0].revision.get(), 2);
-    bridge.revoke_pairing(profile.clone()).await.unwrap();
+    bridge.ignore_profile(profile.clone()).await.unwrap();
     assert_eq!(
         bridge.state().await.profiles[0].connection,
         BridgeConnection::Ignored
@@ -331,7 +332,7 @@ async fn reconnect_uses_persisted_revision_and_revocation_preserves_cache() {
     assert!(credentials.0.lock().unwrap().is_empty());
     assert!(
         bridge
-            .authenticate(&origin(), &hello(&profile, "instance", "s3", &secret))
+            .connect_extension(&origin(), &hello(&profile, "instance", "s3", &secret))
             .await
             .is_err()
     );
@@ -346,7 +347,7 @@ async fn reconnect_uses_persisted_revision_and_revocation_preserves_cache() {
     );
     assert!(
         bridge
-            .authenticate(&origin(), &hello(&profile, "instance", "s4", &secret))
+            .connect_extension(&origin(), &hello(&profile, "instance", "s4", &secret))
             .await
             .is_err()
     );
@@ -402,7 +403,7 @@ async fn events_commit_once_and_gaps_require_full_reconciliation() {
     let (bridge, _dir, _) = fixture().await;
     let (profile, secret) = paired(&bridge, "instance").await;
     bridge
-        .authenticate(&origin(), &hello(&profile, "instance", "s", &secret))
+        .connect_extension(&origin(), &hello(&profile, "instance", "s", &secret))
         .await
         .unwrap();
     full(&bridge, &profile, "s", 0).await;
@@ -458,17 +459,17 @@ async fn equal_chrome_ids_and_wrong_auth_never_cross_profiles() {
         hello(&one, "i2", "bad", &secret),
         hello(&two, "i1", "bad", &secret),
     ] {
-        assert!(bridge.authenticate(&origin(), &message).await.is_err());
+        assert!(bridge.connect_extension(&origin(), &message).await.is_err());
     }
     assert!(bridge.cache(one.clone()).await.unwrap().0.is_empty());
     bridge
-        .authenticate(&origin(), &hello(&one, "i1", "s1", &secret))
+        .connect_extension(&origin(), &hello(&one, "i1", "s1", &secret))
         .await
         .unwrap();
     full(&bridge, &one, "s1", 0).await;
     assert!(bridge.cache(two.clone()).await.unwrap().0.is_empty());
     bridge
-        .authenticate(&origin(), &hello(&two, "i2", "s2", &other_secret))
+        .connect_extension(&origin(), &hello(&two, "i2", "s2", &other_secret))
         .await
         .unwrap();
     full(&bridge, &two, "s2", 0).await;
@@ -526,7 +527,7 @@ async fn real_websocket_rejects_headers_identity_version_and_unauthenticated_idl
     assert!(
         std::str::from_utf8(response.body().as_deref().unwrap_or_default())
             .unwrap_or_default()
-            .contains("UNPAIRED")
+            .contains("FORBIDDEN")
     );
     assert_eq!(persisted_rows(&database), (0, 0));
     let mut request = url.as_str().into_client_request().unwrap();
@@ -645,15 +646,16 @@ async fn windows_task_namespace_pairing_reaches_authenticated_session() {
     let bridge = Bridge::open(directory.path().join("cache.sqlite"), store)
         .await
         .unwrap();
+    bridge.set_allowed_origin(origin());
     let socket = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
     let port = socket.local_addr().unwrap().port();
     drop(socket);
     bridge.start(port).await.unwrap();
     let (profile, secret) = paired(&bridge, "instance").await;
     let authenticated = bridge
-        .authenticate(&origin(), &hello(&profile, "instance", "s-os", &secret))
+        .connect_extension(&origin(), &hello(&profile, "instance", "s-os", &secret))
         .await;
-    let revoked = bridge.revoke_pairing(profile).await;
+    let revoked = bridge.ignore_profile(profile).await;
     bridge.shutdown().await.unwrap();
     authenticated.unwrap();
     revoked.unwrap();
@@ -764,7 +766,7 @@ async fn cache_reads_use_local_nodes_and_see_applied_creates() {
     let (profile, secret) = paired(&bridge, "instance").await;
     let (other, _) = paired(&bridge, "other").await;
     bridge
-        .authenticate(&origin(), &hello(&profile, "instance", "s", &secret))
+        .connect_extension(&origin(), &hello(&profile, "instance", "s", &secret))
         .await
         .unwrap();
     accept_tree(&bridge, &profile, "s", 0, library()).await;
@@ -970,7 +972,7 @@ async fn live_profile_cache_wins_over_a_changed_file_mirror() {
     let nodes = crate::mirror::parse_bookmarks(personal.as_bytes()).unwrap();
     let (profile, secret) = paired(&bridge, "instance").await;
     bridge
-        .authenticate(&origin(), &hello(&profile, "instance", "s", &secret))
+        .connect_extension(&origin(), &hello(&profile, "instance", "s", &secret))
         .await
         .unwrap();
     accept_tree(&bridge, &profile, "s", 0, nodes.clone()).await;
@@ -1064,7 +1066,7 @@ async fn edit_requires_a_live_session_and_keeps_chrome_unchanged_when_backup_or_
     let (bridge, directory, _credentials) = fixture().await;
     let (profile, secret) = paired(&bridge, "instance").await;
     bridge
-        .authenticate(&origin(), &hello(&profile, "instance", "s", &secret))
+        .connect_extension(&origin(), &hello(&profile, "instance", "s", &secret))
         .await
         .unwrap();
     let rename = EditAction::Update {
@@ -1223,7 +1225,7 @@ async fn undo_conflict_does_not_send_a_browser_write() {
     let (bridge, _directory, _credentials) = fixture().await;
     let (profile, secret) = paired(&bridge, "instance").await;
     bridge
-        .authenticate(&origin(), &hello(&profile, "instance", "s", &secret))
+        .connect_extension(&origin(), &hello(&profile, "instance", "s", &secret))
         .await
         .unwrap();
     accept_tree(&bridge, &profile, "s", 0, nodes()).await;
@@ -1508,7 +1510,7 @@ async fn confirmed_ai_title_uses_the_edit_path_and_undo_sends_the_previous_title
     bridge.start(port).await.unwrap();
     let (profile, secret) = paired(&bridge, "instance").await;
     bridge
-        .authenticate(&origin(), &hello(&profile, "instance", "s", &secret))
+        .connect_extension(&origin(), &hello(&profile, "instance", "s", &secret))
         .await
         .unwrap();
     accept_tree(&bridge, &profile, "s", 0, nodes()).await;
@@ -1725,7 +1727,7 @@ async fn reqwest_ten_public_pages_apply_undo_and_cached_suggest() {
     bridge.start(port).await.unwrap();
     let (profile, secret) = paired(&bridge, "instance").await;
     bridge
-        .authenticate(&origin(), &hello(&profile, "instance", "s", &secret))
+        .connect_extension(&origin(), &hello(&profile, "instance", "s", &secret))
         .await
         .unwrap();
     let pages = live_pages();
@@ -2284,7 +2286,7 @@ async fn live_org() -> (
     let (bridge, directory, credentials) = fixture().await;
     let (profile, secret) = paired(&bridge, "instance").await;
     bridge
-        .authenticate(&origin(), &hello(&profile, "instance", "s", &secret))
+        .connect_extension(&origin(), &hello(&profile, "instance", "s", &secret))
         .await
         .unwrap();
     accept_tree(&bridge, &profile, "s", 0, org_nodes()).await;
@@ -2721,7 +2723,7 @@ async fn restart_leaves_a_dispatched_step_uncertain_and_does_not_replay() {
         OperationState::Uncertain
     );
     bridge
-        .authenticate(&origin(), &hello(&profile, "instance", "s2", &secret))
+        .connect_extension(&origin(), &hello(&profile, "instance", "s2", &secret))
         .await
         .unwrap();
     let mut restarted = bind_session(&bridge, &profile, "s2").await;
@@ -2746,7 +2748,7 @@ async fn open_leaves_an_unacked_edit_create_uncertain_and_does_not_replay() {
     let (bridge, directory, credentials) = fixture().await;
     let (profile, secret) = paired(&bridge, "instance").await;
     bridge
-        .authenticate(&origin(), &hello(&profile, "instance", "s", &secret))
+        .connect_extension(&origin(), &hello(&profile, "instance", "s", &secret))
         .await
         .unwrap();
     accept_tree(&bridge, &profile, "s", 0, org_nodes()).await;
@@ -2789,7 +2791,7 @@ async fn open_leaves_an_unacked_edit_create_uncertain_and_does_not_replay() {
     assert_eq!(stored.operations[0].operation_id, operation_id);
     assert_eq!(stored.operations[0].state, OperationState::Uncertain);
     bridge
-        .authenticate(&origin(), &hello(&profile, "instance", "s2", &secret))
+        .connect_extension(&origin(), &hello(&profile, "instance", "s2", &secret))
         .await
         .unwrap();
     let mut restarted = bind_session(&bridge, &profile, "s2").await;
@@ -3036,7 +3038,7 @@ async fn duplicate_groups_do_not_merge_query_fragment_or_metadata() {
     let (bridge, _dir, _) = fixture().await;
     let (profile, secret) = paired(&bridge, "instance").await;
     bridge
-        .authenticate(&origin(), &hello(&profile, "instance", "s", &secret))
+        .connect_extension(&origin(), &hello(&profile, "instance", "s", &secret))
         .await
         .unwrap();
     let tree = vec![
@@ -3204,7 +3206,7 @@ async fn link_probe_keeps_unknown_and_rechecks_gone() {
     let (bridge, _dir, _) = fixture().await;
     let (profile, secret) = paired(&bridge, "instance").await;
     bridge
-        .authenticate(&origin(), &hello(&profile, "instance", "s", &secret))
+        .connect_extension(&origin(), &hello(&profile, "instance", "s", &secret))
         .await
         .unwrap();
     let rows = [
@@ -3326,7 +3328,7 @@ async fn link_timeout_is_unknown() {
     let (bridge, _dir, _) = fixture().await;
     let (profile, secret) = paired(&bridge, "instance").await;
     bridge
-        .authenticate(&origin(), &hello(&profile, "instance", "s", &secret))
+        .connect_extension(&origin(), &hello(&profile, "instance", "s", &secret))
         .await
         .unwrap();
     accept_tree(
@@ -3374,7 +3376,7 @@ async fn link_check_cancel_does_not_block_tree_or_edit() {
     let (bridge, _dir, _) = fixture().await;
     let (profile, secret) = paired(&bridge, "instance").await;
     bridge
-        .authenticate(&origin(), &hello(&profile, "instance", "s", &secret))
+        .connect_extension(&origin(), &hello(&profile, "instance", "s", &secret))
         .await
         .unwrap();
     let mut tree = vec![fixture_node("0", None, 0, true, "root", None)];
@@ -3454,7 +3456,7 @@ async fn cleanup_preview_confirm_receipt_and_undo() {
     let (bridge, _dir, _) = fixture().await;
     let (profile, secret) = paired(&bridge, "instance").await;
     bridge
-        .authenticate(&origin(), &hello(&profile, "instance", "s", &secret))
+        .connect_extension(&origin(), &hello(&profile, "instance", "s", &secret))
         .await
         .unwrap();
     let same = "https://example.com/item";
@@ -3880,11 +3882,11 @@ async fn text_search_is_profile_scoped() {
     let (profile_a, secret_a) = paired(&bridge, "instance-a").await;
     let (profile_b, secret_b) = paired(&bridge, "instance-b").await;
     bridge
-        .authenticate(&origin(), &hello(&profile_a, "instance-a", "sa", &secret_a))
+        .connect_extension(&origin(), &hello(&profile_a, "instance-a", "sa", &secret_a))
         .await
         .unwrap();
     bridge
-        .authenticate(&origin(), &hello(&profile_b, "instance-b", "sb", &secret_b))
+        .connect_extension(&origin(), &hello(&profile_b, "instance-b", "sb", &secret_b))
         .await
         .unwrap();
     let tree = vec![
@@ -4020,7 +4022,7 @@ async fn daily_batch_fixture(
     let (bridge, directory, _) = fixture().await;
     let (profile, secret) = paired(&bridge, "batch-instance").await;
     bridge
-        .authenticate(
+        .connect_extension(
             &origin(),
             &hello(&profile, "batch-instance", "batch-session", &secret),
         )
@@ -5105,7 +5107,7 @@ async fn local_skills_library_stays_lazy_isolates_from_chrome_and_rejects_browse
     let (chrome_profile, secret) = paired(&bridge, "inst-local-test").await;
     assert!(
         bridge
-            .authenticate(
+            .connect_extension(
                 &origin(),
                 &hello(&chrome_profile, "inst-local-test", "sess-1", &secret),
             )
@@ -5149,7 +5151,7 @@ async fn local_skills_library_stays_lazy_isolates_from_chrome_and_rejects_browse
     let cred_calls_before = creds.calls.load(Ordering::SeqCst);
 
     assert_eq!(
-        bridge.revoke_pairing(local_id.clone()).await.unwrap_err(),
+        bridge.ignore_profile(local_id.clone()).await.unwrap_err(),
         ErrorCode::ReadOnly
     );
     assert_eq!(
@@ -5386,4 +5388,1459 @@ async fn external_sqlite_writes_trigger_live_bridge_reload_and_clean_shutdown() 
     std::fs::remove_dir_all(&dir_path)
         .expect("temporary directory must be immediately deletable after Bridge::shutdown");
     assert!(!dir_path.exists());
+}
+
+static AUTO_PORT_LOCK: tokio::sync::Mutex<()> = tokio::sync::Mutex::const_new(());
+
+struct EnvPortGuard(Option<std::ffi::OsString>);
+impl EnvPortGuard {
+    fn set(value: Option<&str>) -> Self {
+        let prev = std::env::var_os("MARKBRIDGE_BRIDGE_PORT");
+        match value {
+            Some(v) => unsafe { std::env::set_var("MARKBRIDGE_BRIDGE_PORT", v) },
+            None => unsafe { std::env::remove_var("MARKBRIDGE_BRIDGE_PORT") },
+        }
+        Self(prev)
+    }
+}
+impl Drop for EnvPortGuard {
+    fn drop(&mut self) {
+        match &self.0 {
+            Some(v) => unsafe { std::env::set_var("MARKBRIDGE_BRIDGE_PORT", v) },
+            None => unsafe { std::env::remove_var("MARKBRIDGE_BRIDGE_PORT") },
+        }
+    }
+}
+
+#[tokio::test]
+async fn start_auto_scans_range_reports_exhausted_recovers_and_honors_env_override() {
+    let _guard = AUTO_PORT_LOCK.lock().await;
+    let _env = EnvPortGuard::set(None);
+
+    // 1. Default binds 49153 when free.
+    {
+        let dir = tempfile::tempdir().unwrap();
+        let bridge = Bridge::open(
+            dir.path().join("cache.sqlite"),
+            Arc::new(MemoryCredentials::default()),
+        )
+        .await
+        .unwrap();
+        let state = bridge.start_auto().await.unwrap();
+        assert_eq!(state.port.0, Some(BRIDGE_PORT_START));
+        assert_eq!(state.error_code.0, None);
+        bridge.shutdown().await.unwrap();
+    }
+
+    // 2. When 49153 is occupied, falls back to 49154.
+    {
+        let occupied = TcpListener::bind(("127.0.0.1", BRIDGE_PORT_START))
+            .await
+            .unwrap();
+        let dir = tempfile::tempdir().unwrap();
+        let bridge = Bridge::open(
+            dir.path().join("cache.sqlite"),
+            Arc::new(MemoryCredentials::default()),
+        )
+        .await
+        .unwrap();
+        let state = bridge.start_auto().await.unwrap();
+        assert_eq!(state.port.0, Some(BRIDGE_PORT_START + 1));
+        assert_eq!(state.error_code.0, None);
+        bridge.shutdown().await.unwrap();
+        drop(occupied);
+    }
+
+    // 3. When all 8 ports 49153..=49160 are occupied, sets PortExhausted and recovers when freed.
+    {
+        let mut held = Vec::new();
+        for port in BRIDGE_PORT_START..=BRIDGE_PORT_END {
+            held.push((port, TcpListener::bind(("127.0.0.1", port)).await.unwrap()));
+        }
+        let dir = tempfile::tempdir().unwrap();
+        let bridge = Bridge::open(
+            dir.path().join("cache.sqlite"),
+            Arc::new(MemoryCredentials::default()),
+        )
+        .await
+        .unwrap();
+        let err = bridge.start_auto().await.unwrap_err();
+        assert_eq!(err, ErrorCode::PortExhausted);
+        let state = bridge.state().await;
+        assert_eq!(state.port.0, None);
+        assert_eq!(state.error_code.0, Some(ErrorCode::PortExhausted));
+
+        // Free port 49155 and retry start_auto().
+        let idx = held.iter().position(|(p, _)| *p == 49155).unwrap();
+        held.remove(idx);
+        let recovered = bridge.start_auto().await.unwrap();
+        assert_eq!(recovered.port.0, Some(49155));
+        assert_eq!(recovered.error_code.0, None);
+        bridge.shutdown().await.unwrap();
+        drop(held);
+    }
+
+    // 4. MARKBRIDGE_BRIDGE_PORT overrides to explicit single port.
+    {
+        let probe = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        let custom_port = probe.local_addr().unwrap().port();
+        drop(probe);
+        let custom_str = custom_port.to_string();
+        let _override = EnvPortGuard::set(Some(&custom_str));
+        let dir = tempfile::tempdir().unwrap();
+        let bridge = Bridge::open(
+            dir.path().join("cache.sqlite"),
+            Arc::new(MemoryCredentials::default()),
+        )
+        .await
+        .unwrap();
+        let state = bridge.start_auto().await.unwrap();
+        assert_eq!(state.port.0, Some(custom_port));
+        assert_eq!(state.error_code.0, None);
+        bridge.shutdown().await.unwrap();
+    }
+}
+
+async fn ws_connect_with_origin(
+    url: &str,
+    origin_header: Option<&str>,
+) -> std::result::Result<
+    tokio_tungstenite::WebSocketStream<tokio_tungstenite::MaybeTlsStream<TcpStream>>,
+    tokio_tungstenite::tungstenite::Error,
+> {
+    let mut request = url.into_client_request().unwrap();
+    if let Some(value) = origin_header {
+        request
+            .headers_mut()
+            .insert("Origin", value.parse().unwrap());
+    }
+    let (ws, _) = connect_async(request).await?;
+    Ok(ws)
+}
+
+fn assert_http_403_forbidden(err: tokio_tungstenite::tungstenite::Error) {
+    let tokio_tungstenite::tungstenite::Error::Http(response) = err else {
+        panic!("expected HTTP 403 rejection, got {err:?}");
+    };
+    assert_eq!(
+        response.status(),
+        tokio_tungstenite::tungstenite::http::StatusCode::FORBIDDEN
+    );
+    let body = std::str::from_utf8(response.body().as_deref().unwrap_or_default())
+        .unwrap_or_default()
+        .to_owned();
+    assert!(body.contains("FORBIDDEN"), "unexpected body: {body}");
+}
+
+#[tokio::test]
+async fn handshake_accepts_only_official_origin_by_default_and_rejects_others_with_403_forbidden() {
+    let dir = tempfile::tempdir().unwrap();
+    let bridge = Bridge::open(
+        dir.path().join("cache.sqlite"),
+        Arc::new(MemoryCredentials::default()),
+    )
+    .await
+    .unwrap();
+    let probe = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+    let port = probe.local_addr().unwrap().port();
+    drop(probe);
+    bridge.start(port).await.unwrap();
+
+    let url = format!("ws://127.0.0.1:{port}/");
+    let http_origin = format!("http://127.0.0.1:{port}");
+    let unknown_ext = format!("chrome-extension://{}", "b".repeat(32));
+
+    for rejected in [
+        None,
+        Some("https://example.com"),
+        Some(http_origin.as_str()),
+        Some(unknown_ext.as_str()),
+    ] {
+        let err = ws_connect_with_origin(&url, rejected).await.unwrap_err();
+        assert_http_403_forbidden(err);
+    }
+
+    let mut ws = ws_connect_with_origin(&url, Some(OFFICIAL_EXTENSION_ORIGIN))
+        .await
+        .expect("official extension origin should connect");
+    let hello_msg = hello(&Id::new("pending").unwrap(), "official-inst", "sess-1", "");
+    ws.send(Message::Text(
+        String::from_utf8(encode_frame(&hello_msg).unwrap())
+            .unwrap()
+            .into(),
+    ))
+    .await
+    .unwrap();
+    let WireMessage::HelloResult { payload, .. } = next_frame(&mut ws).await else {
+        panic!("expected hello_result");
+    };
+    assert!(payload.accepted);
+    assert_eq!(
+        payload.display_name.0.as_ref().map(DisplayName::as_str),
+        Some("Chrome 资料 1")
+    );
+    let WireMessage::GetTree { .. } = next_frame(&mut ws).await else {
+        panic!("expected get_tree");
+    };
+    let _ = ws.close(None).await;
+    bridge.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn multi_profile_ws_auto_creates_lowest_unused_names_reuses_instance_and_persists_rename() {
+    let dir = tempfile::tempdir().unwrap();
+    let db_path = dir.path().join("cache.sqlite");
+    let store = Arc::new(MemoryCredentials::default());
+    let bridge = Bridge::open(&db_path, store.clone()).await.unwrap();
+    bridge.set_allowed_origin(origin());
+    let probe = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+    let port = probe.local_addr().unwrap().port();
+    drop(probe);
+    bridge.start(port).await.unwrap();
+    let url = format!("ws://127.0.0.1:{port}/");
+
+    async fn connect_and_sync(
+        url: &str,
+        instance_id: &str,
+        session_id: &str,
+        title: &str,
+    ) -> (
+        tokio_tungstenite::WebSocketStream<tokio_tungstenite::MaybeTlsStream<TcpStream>>,
+        Id,
+        DisplayName,
+    ) {
+        let mut ws = ws_connect_with_origin(url, Some(origin().as_str()))
+            .await
+            .unwrap();
+        let hello_msg = hello(&Id::new("pending").unwrap(), instance_id, session_id, "");
+        ws.send(Message::Text(
+            String::from_utf8(encode_frame(&hello_msg).unwrap())
+                .unwrap()
+                .into(),
+        ))
+        .await
+        .unwrap();
+        let WireMessage::HelloResult { payload, .. } = next_frame(&mut ws).await else {
+            panic!("expected hello_result");
+        };
+        assert!(payload.accepted);
+        let profile_id = payload.profile_id.0.expect("profile_id");
+        let display_name = payload.display_name.0.expect("display_name");
+        let WireMessage::GetTree { request_id, .. } = next_frame(&mut ws).await else {
+            panic!("expected get_tree");
+        };
+        let mut tree = nodes();
+        tree[1].title = Title::new(title).unwrap();
+        let full_msg = envelope(
+            "tree_full",
+            &profile_id,
+            &Id::new(session_id).unwrap(),
+            request_id.0,
+            serde_json::to_value(TreeSnapshot {
+                source_epoch: payload.source_epoch,
+                revision: Counter::new(0).unwrap(),
+                barrier_seq: Counter::new(0).unwrap(),
+                nodes: tree,
+            })
+            .unwrap(),
+        )
+        .unwrap();
+        ws.send(Message::Text(
+            String::from_utf8(encode_frame(&full_msg).unwrap())
+                .unwrap()
+                .into(),
+        ))
+        .await
+        .unwrap();
+        (ws, profile_id, display_name)
+    }
+
+    let (ws1, p1, name1) = connect_and_sync(&url, "inst-one", "s1", "First Bookmark").await;
+    assert_eq!(name1.as_str(), "Chrome 资料 1");
+    let (ws2, p2, name2) = connect_and_sync(&url, "inst-two", "s2", "Second Bookmark").await;
+    assert_eq!(name2.as_str(), "Chrome 资料 2");
+    assert_ne!(p1, p2);
+
+    // Wait for both profiles to become Live & browsable.
+    tokio::time::timeout(Duration::from_secs(2), async {
+        loop {
+            let state = bridge.state().await;
+            if state.profiles.len() == 2
+                && state
+                    .profiles
+                    .iter()
+                    .all(|p| p.connection == BridgeConnection::Live)
+            {
+                break;
+            }
+            tokio::time::sleep(Duration::from_millis(10)).await;
+        }
+    })
+    .await
+    .unwrap();
+    let tree1 = bridge.tree(p1.clone(), None, None).await.unwrap();
+    assert_eq!(tree1[0].children[0].node.title.as_str(), "First Bookmark");
+
+    // Save local metadata on p1.
+    bridge
+        .mutate_tags(
+            p1.clone(),
+            TagCommand::SetNote {
+                chrome_ids: vec![Id::new("42").unwrap()],
+                note: "keep across reconnect".into(),
+            },
+        )
+        .await
+        .unwrap();
+
+    // Rename validation & success.
+    assert_eq!(
+        bridge
+            .rename_profile(p1.clone(), "   ".into())
+            .await
+            .unwrap_err(),
+        ErrorCode::InvalidMessage
+    );
+    assert_eq!(
+        bridge
+            .rename_profile(p1.clone(), "x".repeat(129))
+            .await
+            .unwrap_err(),
+        ErrorCode::InvalidMessage
+    );
+    assert_eq!(
+        bridge
+            .rename_profile(p1.clone(), "local-skills".into())
+            .await
+            .unwrap_err(),
+        ErrorCode::InvalidMessage
+    );
+    bridge.ensure_local_library().await.unwrap();
+    assert_eq!(
+        bridge
+            .rename_profile(Id::new("local-skills").unwrap(), "Other".into())
+            .await
+            .unwrap_err(),
+        ErrorCode::ReadOnly
+    );
+    bridge
+        .rename_profile(p1.clone(), " 工作资料 ".into())
+        .await
+        .unwrap();
+
+    // Lowest unused N >= 1 picks 1 (since p1 was renamed away from Chrome 资料 1), then skips 2 -> picks 3.
+    let (ws3, p3, name3) = connect_and_sync(&url, "inst-three", "s3", "Third").await;
+    assert_eq!(name3.as_str(), "Chrome 资料 1");
+    let (ws4, p4, name4) = connect_and_sync(&url, "inst-four", "s4", "Fourth").await;
+    assert_eq!(name4.as_str(), "Chrome 资料 3");
+    assert_ne!(p3, p4);
+
+    drop((ws1, ws2, ws3, ws4));
+    bridge.shutdown().await.unwrap();
+
+    // Reopen persisted bridge and reconnect inst-one -> reuses p1 and keeps local note.
+    let reopened = Bridge::open(&db_path, store).await.unwrap();
+    reopened.set_allowed_origin(origin());
+    let state_after_reopen = reopened.state().await;
+    let p1_after = state_after_reopen
+        .profiles
+        .iter()
+        .find(|p| p.profile_id == p1)
+        .unwrap();
+    assert_eq!(p1_after.display_name.as_str(), "工作资料");
+
+    let probe2 = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+    let port2 = probe2.local_addr().unwrap().port();
+    drop(probe2);
+    reopened.start(port2).await.unwrap();
+    let url2 = format!("ws://127.0.0.1:{port2}/");
+    let (ws1_again, p1_reconnected, name1_reconnected) =
+        connect_and_sync(&url2, "inst-one", "s1-again", "First Bookmark").await;
+    assert_eq!(p1_reconnected, p1);
+    assert_eq!(name1_reconnected.as_str(), "工作资料");
+    assert_eq!(
+        reopened
+            .state()
+            .await
+            .profiles
+            .iter()
+            .filter(|p| p.connection != BridgeConnection::Local)
+            .count(),
+        4
+    );
+    let catalog = reopened
+        .tag_catalog(p1.clone(), vec![Id::new("42").unwrap()], None)
+        .await
+        .unwrap();
+    assert_eq!(catalog.entries[0].note, "keep across reconnect");
+    drop(ws1_again);
+    reopened.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn write_paused_persists_keeps_live_sync_and_blocks_all_seven_write_modules() {
+    let dir = tempfile::tempdir().unwrap();
+    let db_path = dir.path().join("cache.sqlite");
+    let creds = Arc::new(MemoryCredentials::default());
+    let transport = Arc::new(crate::ai::ScriptedTransport::new(vec![
+        crate::ai::ScriptedStep::Respond {
+            status: 200,
+            body: serde_json::json!({
+                "message": {
+                    "content": "{\"title\":\"AI 建议标题\",\"tags\":[\"阅读\"],\"summary\":\"AI 本地摘要\",\"suggestedFolder\":\"资料\",\"evidence\":\"摘录\"}"
+                }
+            })
+            .to_string(),
+            retry_after: None,
+        },
+    ]));
+    let bridge = Bridge::open_with_ai(
+        &db_path,
+        creds.clone(),
+        Arc::new(MemoryCredentials::default()),
+        transport.clone(),
+    )
+    .await
+    .unwrap();
+    bridge.set_allowed_origin(origin());
+    let probe = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+    let port = probe.local_addr().unwrap().port();
+    drop(probe);
+    bridge.start(port).await.unwrap();
+    bridge
+        .save_ai_config(
+            true,
+            "ollama".into(),
+            "http://127.0.0.1:11434".into(),
+            "qwen2.5:7b".into(),
+        )
+        .await
+        .unwrap();
+
+    // Connect over real WebSocket and sync initial tree (with duplicate bookmarks 10/11 for cleanup).
+    let url = format!("ws://127.0.0.1:{port}/");
+    let mut ws = ws_connect_with_origin(&url, Some(origin().as_str()))
+        .await
+        .unwrap();
+    let hello_msg = hello(&Id::new("pending").unwrap(), "wp-inst", "wp-s1", "");
+    ws.send(Message::Text(
+        String::from_utf8(encode_frame(&hello_msg).unwrap())
+            .unwrap()
+            .into(),
+    ))
+    .await
+    .unwrap();
+    let WireMessage::HelloResult { payload, .. } = next_frame(&mut ws).await else {
+        panic!("expected hello_result");
+    };
+    assert!(!payload.write_paused);
+    let profile = payload.profile_id.0.unwrap();
+    let session = Id::new("wp-s1").unwrap();
+    let WireMessage::GetTree { request_id, .. } = next_frame(&mut ws).await else {
+        panic!("expected get_tree");
+    };
+    let mut tree = vec![
+        fixture_node("0", None, 0, true, "root", None),
+        fixture_node("1", Some("0"), 0, true, "Bar", None),
+        fixture_node(
+            "10",
+            Some("1"),
+            0,
+            false,
+            "Alpha",
+            Some("https://example.com/dup"),
+        ),
+        fixture_node(
+            "11",
+            Some("1"),
+            1,
+            false,
+            "Alpha Dup",
+            Some("https://example.com/dup"),
+        ),
+        fixture_node(
+            "20",
+            Some("1"),
+            2,
+            false,
+            "Target",
+            Some("https://example.com/target"),
+        ),
+    ];
+    tree[1].folder_type = Some(FolderType::BookmarksBar);
+    let full_msg = envelope(
+        "tree_full",
+        &profile,
+        &session,
+        request_id.0,
+        serde_json::to_value(TreeSnapshot {
+            source_epoch: SourceEpoch::new(1).unwrap(),
+            revision: Counter::new(0).unwrap(),
+            barrier_seq: Counter::new(0).unwrap(),
+            nodes: tree.clone(),
+        })
+        .unwrap(),
+    )
+    .unwrap();
+    ws.send(Message::Text(
+        String::from_utf8(encode_frame(&full_msg).unwrap())
+            .unwrap()
+            .into(),
+    ))
+    .await
+    .unwrap();
+
+    tokio::time::timeout(Duration::from_secs(2), async {
+        loop {
+            if bridge
+                .state()
+                .await
+                .profiles
+                .iter()
+                .any(|p| p.profile_id == profile && p.connection == BridgeConnection::Live)
+            {
+                break;
+            }
+            tokio::time::sleep(Duration::from_millis(10)).await;
+        }
+    })
+    .await
+    .unwrap();
+
+    // Perform one applied edit before pausing so preview_undo has an operation to inspect.
+    let initial_rev = revision_of(&bridge, &profile).await;
+    let applied = bridge
+        .apply_edit(
+            profile.clone(),
+            initial_rev,
+            EditAction::Update {
+                chrome_id: Id::new("20").unwrap(),
+                title: Some(Title::new("Target Edited").unwrap()),
+                url: None,
+            },
+            false,
+        )
+        .await
+        .unwrap();
+    let WireMessage::ApplyOperation {
+        payload: op_payload,
+        ..
+    } = next_frame(&mut ws).await
+    else {
+        panic!("expected apply_operation");
+    };
+    let before_node = op_payload.steps[0].expected_before.clone().unwrap();
+    let mut after_node = before_node.clone();
+    after_node.title = Title::new("Target Edited").unwrap();
+    let receipt = envelope(
+        "operation_receipt",
+        &profile,
+        &session,
+        Some(op_payload.steps[0].request_id.clone()),
+        serde_json::json!({
+            "operationId": applied.operation_id,
+            "requestId": op_payload.steps[0].request_id,
+            "state": "applied",
+            "before": before_node,
+            "after": after_node,
+            "beforeChildIds": null,
+            "afterChildIds": null,
+            "errorCode": null
+        }),
+    )
+    .unwrap();
+    ws.send(Message::Text(
+        String::from_utf8(encode_frame(&receipt).unwrap())
+            .unwrap()
+            .into(),
+    ))
+    .await
+    .unwrap();
+    let changed_ev = serde_json::from_value::<WireMessage>(serde_json::json!({
+        "type": "event",
+        "protocolVersion": 1,
+        "profileId": profile,
+        "sessionId": session,
+        "requestId": null,
+        "seq": 1,
+        "payload": {
+            "sourceEpoch": 1,
+            "event": {
+                "kind": "changed",
+                "chromeId": "20",
+                "title": "Target Edited",
+                "url": "https://example.com/target"
+            }
+        }
+    }))
+    .unwrap();
+    ws.send(Message::Text(
+        String::from_utf8(encode_frame(&changed_ev).unwrap())
+            .unwrap()
+            .into(),
+    ))
+    .await
+    .unwrap();
+    tokio::time::timeout(Duration::from_secs(2), async {
+        loop {
+            let applied_done = bridge
+                .list_operations(profile.clone())
+                .await
+                .unwrap()
+                .operations
+                .iter()
+                .any(|op| {
+                    op.operation_id == applied.operation_id && op.state == OperationState::Applied
+                });
+            let title_updated = cached_tree(&bridge, &profile)
+                .await
+                .iter()
+                .any(|n| n.chrome_id.as_str() == "20" && n.title.as_str() == "Target Edited");
+            if applied_done && title_updated {
+                break;
+            }
+            tokio::time::sleep(Duration::from_millis(10)).await;
+        }
+    })
+    .await
+    .unwrap();
+    let rev_before_pause = revision_of(&bridge, &profile).await;
+
+    // Enable title encoding and add a tag before pause.
+    bridge
+        .mutate_tags(profile.clone(), TagCommand::SetEncoding { enabled: true })
+        .await
+        .unwrap();
+    bridge
+        .mutate_tags(
+            profile.clone(),
+            TagCommand::Add {
+                chrome_ids: vec![Id::new("20").unwrap()],
+                name: "研究".into(),
+            },
+        )
+        .await
+        .unwrap();
+
+    // Pause writes!
+    let paused_state = bridge
+        .set_write_paused(profile.clone(), true)
+        .await
+        .unwrap();
+    let paused_profile = paused_state
+        .profiles
+        .iter()
+        .find(|p| p.profile_id == profile)
+        .unwrap();
+    assert!(paused_profile.write_paused);
+    assert_eq!(paused_profile.connection, BridgeConnection::Live);
+
+    // Incoming Event MUST still update bookmarks_cache while write_paused == true.
+    let incoming_ev = serde_json::from_value::<WireMessage>(serde_json::json!({
+        "type": "event",
+        "protocolVersion": 1,
+        "profileId": profile,
+        "sessionId": session,
+        "requestId": null,
+        "seq": 2,
+        "payload": {
+            "sourceEpoch": 1,
+            "event": {
+                "kind": "changed",
+                "chromeId": "11",
+                "title": "Alpha Dup While Paused",
+                "url": "https://example.com/dup"
+            }
+        }
+    }))
+    .unwrap();
+    ws.send(Message::Text(
+        String::from_utf8(encode_frame(&incoming_ev).unwrap())
+            .unwrap()
+            .into(),
+    ))
+    .await
+    .unwrap();
+    let expected_rev = rev_before_pause + 1;
+    tokio::time::timeout(Duration::from_secs(2), async {
+        loop {
+            if revision_of(&bridge, &profile).await >= expected_rev {
+                break;
+            }
+            tokio::time::sleep(Duration::from_millis(10)).await;
+        }
+    })
+    .await
+    .unwrap();
+    assert_eq!(
+        cached_tree(&bridge, &profile)
+            .await
+            .iter()
+            .find(|n| n.chrome_id.as_str() == "11")
+            .unwrap()
+            .title
+            .as_str(),
+        "Alpha Dup While Paused"
+    );
+    assert_eq!(
+        bridge
+            .state()
+            .await
+            .profiles
+            .iter()
+            .find(|p| p.profile_id == profile)
+            .unwrap()
+            .connection,
+        BridgeConnection::Live
+    );
+
+    // Re-prepare batch preview & org job at updated revision.
+    let rev = revision_of(&bridge, &profile).await;
+    let batch_preview = bridge
+        .preview_batch_edit(
+            profile.clone(),
+            rev,
+            vec![Id::new("20").unwrap()],
+            BatchEditAction::Delete {},
+        )
+        .await
+        .unwrap();
+    assert!(!batch_preview.writable);
+    assert_eq!(
+        bridge
+            .apply_batch_edit(
+                profile.clone(),
+                batch_preview.plan_id,
+                batch_preview.plan_hash,
+                false
+            )
+            .await
+            .unwrap_err(),
+        ErrorCode::WritePaused
+    );
+
+    // 1. edit.rs
+    let edit_preview = bridge
+        .preview_edit(
+            profile.clone(),
+            rev,
+            EditAction::Update {
+                chrome_id: Id::new("20").unwrap(),
+                title: Some(Title::new("Blocked").unwrap()),
+                url: None,
+            },
+        )
+        .await
+        .unwrap();
+    assert!(!edit_preview.writable);
+    assert_eq!(edit_preview.error_code.0, Some(ErrorCode::WritePaused));
+    assert_eq!(
+        bridge
+            .apply_edit(
+                profile.clone(),
+                rev,
+                EditAction::Update {
+                    chrome_id: Id::new("20").unwrap(),
+                    title: Some(Title::new("Blocked").unwrap()),
+                    url: None,
+                },
+                false,
+            )
+            .await
+            .unwrap_err(),
+        ErrorCode::WritePaused
+    );
+
+    // 3. history.rs
+    let undo_preview = bridge
+        .preview_undo(profile.clone(), applied.operation_id.clone(), rev)
+        .await
+        .unwrap();
+    assert!(!undo_preview.writable);
+    assert_eq!(undo_preview.error_code.0, Some(ErrorCode::WritePaused));
+
+    // 4. tags.rs (title encoding blocked, local tags/notes writable!)
+    let enc_preview = bridge
+        .preview_title_encoding(profile.clone(), rev, vec![Id::new("20").unwrap()], false)
+        .await
+        .unwrap();
+    assert!(!enc_preview.writable);
+    assert_eq!(enc_preview.error_code.0, Some(ErrorCode::WritePaused));
+    assert_eq!(
+        bridge
+            .apply_title_encoding(profile.clone(), rev, vec![Id::new("20").unwrap()], false)
+            .await
+            .unwrap_err(),
+        ErrorCode::WritePaused
+    );
+    let local_note = bridge
+        .mutate_tags(
+            profile.clone(),
+            TagCommand::SetNote {
+                chrome_ids: vec![Id::new("20").unwrap()],
+                note: "local note while paused".into(),
+            },
+        )
+        .await
+        .unwrap();
+    assert_eq!(local_note.entries[0].note, "local note while paused");
+
+    // 5. ai.rs (suggest works while paused; browser title action blocked; local tags/summary remain writable)
+    let suggestion = bridge
+        .suggest_ai(
+            profile.clone(),
+            Id::new("20").unwrap(),
+            Id::new("ai-wp").unwrap(),
+        )
+        .await
+        .unwrap();
+    assert_eq!(suggestion.state, AiJobState::Ready);
+    let ai_title_draft = AiDraft {
+        job_id: suggestion.job_id.clone(),
+        profile_id: profile.clone(),
+        chrome_id: Id::new("20").unwrap(),
+        input_fingerprint: suggestion.input_fingerprint.clone(),
+        title: "AI 建议标题".into(),
+        tags: vec!["阅读".into()],
+        summary: RequiredNullable(Some("AI 本地摘要".into())),
+        apply_title: true,
+        apply_tags: true,
+        apply_summary: true,
+    };
+    assert_eq!(
+        bridge.apply_ai(ai_title_draft).await.unwrap_err(),
+        ErrorCode::WritePaused
+    );
+    let ai_local_only = AiDraft {
+        job_id: suggestion.job_id.clone(),
+        profile_id: profile.clone(),
+        chrome_id: Id::new("20").unwrap(),
+        input_fingerprint: suggestion.input_fingerprint.clone(),
+        title: "AI 建议标题".into(),
+        tags: vec!["阅读".into()],
+        summary: RequiredNullable(Some("AI 本地摘要".into())),
+        apply_title: false,
+        apply_tags: true,
+        apply_summary: true,
+    };
+    let local_ai_applied = bridge.apply_ai(ai_local_only).await.unwrap();
+    assert!(local_ai_applied.tags_applied);
+    assert!(local_ai_applied.summary_applied);
+
+    // 6. organization.rs
+    let (org_job2, org_hash2) = insert_ready_job(&bridge, &profile, &["20"]).await;
+    assert_eq!(
+        bridge
+            .apply_organization(org_job2, org_hash2)
+            .await
+            .unwrap_err(),
+        ErrorCode::WritePaused
+    );
+
+    // 7. maintenance.rs
+    assert_eq!(
+        bridge
+            .confirm_cleanup(
+                profile.clone(),
+                rev,
+                vec![Id::new("10").unwrap(), Id::new("11").unwrap()],
+                Id::new("10").unwrap(),
+                true,
+                false,
+            )
+            .await
+            .unwrap_err(),
+        ErrorCode::WritePaused
+    );
+
+    // Persists across Bridge::open reopen, and carries writePaused in HelloResult.
+    drop(ws);
+    bridge.shutdown().await.unwrap();
+    let reopened = Bridge::open(&db_path, creds).await.unwrap();
+    reopened.set_allowed_origin(origin());
+    let persisted = reopened
+        .state()
+        .await
+        .profiles
+        .into_iter()
+        .find(|p| p.profile_id == profile)
+        .unwrap();
+    assert!(persisted.write_paused);
+
+    let probe2 = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+    let port2 = probe2.local_addr().unwrap().port();
+    drop(probe2);
+    reopened.start(port2).await.unwrap();
+    let url2 = format!("ws://127.0.0.1:{port2}/");
+    let mut ws2 = ws_connect_with_origin(&url2, Some(origin().as_str()))
+        .await
+        .unwrap();
+    let hello2 = hello(&profile, "wp-inst", "wp-s2", "");
+    ws2.send(Message::Text(
+        String::from_utf8(encode_frame(&hello2).unwrap())
+            .unwrap()
+            .into(),
+    ))
+    .await
+    .unwrap();
+    let WireMessage::HelloResult {
+        payload: hello_res2,
+        ..
+    } = next_frame(&mut ws2).await
+    else {
+        panic!("expected hello_result");
+    };
+    assert!(hello_res2.accepted);
+    assert!(hello_res2.write_paused);
+    let WireMessage::GetTree {
+        request_id: req2, ..
+    } = next_frame(&mut ws2).await
+    else {
+        panic!("expected get_tree");
+    };
+    tree[4].title = Title::new("TreeFull While Paused").unwrap();
+    let full2 = envelope(
+        "tree_full",
+        &profile,
+        &Id::new("wp-s2").unwrap(),
+        req2.0,
+        serde_json::to_value(TreeSnapshot {
+            source_epoch: SourceEpoch::new(1).unwrap(),
+            revision: Counter::new(0).unwrap(),
+            barrier_seq: Counter::new(0).unwrap(),
+            nodes: tree,
+        })
+        .unwrap(),
+    )
+    .unwrap();
+    ws2.send(Message::Text(
+        String::from_utf8(encode_frame(&full2).unwrap())
+            .unwrap()
+            .into(),
+    ))
+    .await
+    .unwrap();
+    tokio::time::timeout(Duration::from_secs(2), async {
+        loop {
+            if reopened
+                .state()
+                .await
+                .profiles
+                .iter()
+                .any(|p| p.profile_id == profile && p.connection == BridgeConnection::Live)
+            {
+                break;
+            }
+            tokio::time::sleep(Duration::from_millis(10)).await;
+        }
+    })
+    .await
+    .unwrap();
+    assert_eq!(
+        cached_tree(&reopened, &profile)
+            .await
+            .iter()
+            .find(|n| n.chrome_id.as_str() == "20")
+            .unwrap()
+            .title
+            .as_str(),
+        "TreeFull While Paused"
+    );
+
+    // Unpause restores browser writes.
+    reopened
+        .set_write_paused(profile.clone(), false)
+        .await
+        .unwrap();
+    let rev2 = revision_of(&reopened, &profile).await;
+    let writable_preview = reopened
+        .preview_edit(
+            profile.clone(),
+            rev2,
+            EditAction::Update {
+                chrome_id: Id::new("20").unwrap(),
+                title: Some(Title::new("Restored Write").unwrap()),
+                url: None,
+            },
+        )
+        .await
+        .unwrap();
+    assert!(writable_preview.writable);
+    assert_eq!(writable_preview.error_code.0, None);
+    let restored_apply = reopened
+        .apply_edit(
+            profile,
+            rev2,
+            EditAction::Update {
+                chrome_id: Id::new("20").unwrap(),
+                title: Some(Title::new("Restored Write").unwrap()),
+                url: None,
+            },
+            false,
+        )
+        .await
+        .unwrap();
+    assert_eq!(restored_apply.state, OperationState::Applying);
+    let WireMessage::ApplyOperation { .. } = next_frame(&mut ws2).await else {
+        panic!("expected apply_operation after unpause");
+    };
+    drop(ws2);
+    reopened.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn ignore_profile_flushes_pause_sync_before_close_rejects_background_hello_and_resumes_via_user_or_desktop()
+ {
+    let hello_triggered = |profile: &Id, instance: &str, session: &str, user_initiated: bool| {
+        envelope(
+            "hello",
+            profile,
+            &Id::new(session).unwrap(),
+            Some(Id::new("hello-req").unwrap()),
+            serde_json::json!({
+                "instanceId": instance,
+                "userInitiated": user_initiated
+            }),
+        )
+        .unwrap()
+    };
+
+    let dir = tempfile::tempdir().unwrap();
+    let db_path = dir.path().join("cache.sqlite");
+    let creds = Arc::new(MemoryCredentials::default());
+    let bridge = Bridge::open_with_allowed_origin(&db_path, creds.clone(), origin())
+        .await
+        .unwrap();
+    let probe1 = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+    let port1 = probe1.local_addr().unwrap().port();
+    drop(probe1);
+    bridge.start(port1).await.unwrap();
+    let url1 = format!("ws://127.0.0.1:{port1}/");
+
+    let mut ws1 = ws_connect_with_origin(&url1, Some(origin().as_str()))
+        .await
+        .unwrap();
+    ws1.send(Message::Text(
+        String::from_utf8(
+            encode_frame(&hello_triggered(
+                &Id::new("pending").unwrap(),
+                "ign-inst",
+                "ign-s1",
+                false,
+            ))
+            .unwrap(),
+        )
+        .unwrap()
+        .into(),
+    ))
+    .await
+    .unwrap();
+    let WireMessage::HelloResult { payload, .. } = next_frame(&mut ws1).await else {
+        panic!("expected hello_result");
+    };
+    assert!(payload.accepted);
+    let profile = payload.profile_id.0.unwrap();
+    let WireMessage::GetTree { request_id, .. } = next_frame(&mut ws1).await else {
+        panic!("expected get_tree");
+    };
+    let snap_nodes = vec![
+        fixture_node("0", None, 0, true, "root", None),
+        fixture_node("1", Some("0"), 0, true, "Bar", None),
+        fixture_node(
+            "20",
+            Some("1"),
+            0,
+            false,
+            "Ignored Check",
+            Some("https://example.com/check"),
+        ),
+    ];
+    let full1 = envelope(
+        "tree_full",
+        &profile,
+        &Id::new("ign-s1").unwrap(),
+        request_id.0,
+        serde_json::to_value(TreeSnapshot {
+            source_epoch: SourceEpoch::new(1).unwrap(),
+            revision: Counter::new(0).unwrap(),
+            barrier_seq: Counter::new(0).unwrap(),
+            nodes: snap_nodes.clone(),
+        })
+        .unwrap(),
+    )
+    .unwrap();
+    ws1.send(Message::Text(
+        String::from_utf8(encode_frame(&full1).unwrap())
+            .unwrap()
+            .into(),
+    ))
+    .await
+    .unwrap();
+    tokio::time::timeout(Duration::from_secs(2), async {
+        loop {
+            if bridge
+                .state()
+                .await
+                .profiles
+                .iter()
+                .any(|p| p.profile_id == profile && p.connection == BridgeConnection::Live)
+            {
+                break;
+            }
+            tokio::time::sleep(Duration::from_millis(10)).await;
+        }
+    })
+    .await
+    .unwrap();
+
+    let ignored_state = bridge.ignore_profile(profile.clone()).await.unwrap();
+    let ignored_view = ignored_state
+        .profiles
+        .iter()
+        .find(|p| p.profile_id == profile)
+        .unwrap();
+    assert!(ignored_view.ignored);
+    assert_eq!(ignored_view.connection, BridgeConnection::Ignored);
+
+    // Real WebSocket client MUST receive PauseSync BEFORE disconnect/close!
+    let pause_msg = tokio::time::timeout(Duration::from_secs(2), ws1.next())
+        .await
+        .unwrap()
+        .expect("expected PauseSync frame before stream end")
+        .expect("expected valid frame before disconnect");
+    let Message::Text(pause_text) = pause_msg else {
+        panic!("expected Text frame containing pause_sync, got {pause_msg:?}");
+    };
+    let WireMessage::PauseSync {
+        payload: pause_payload,
+        ..
+    } = serde_json::from_str(&pause_text).unwrap()
+    else {
+        panic!("expected PauseSync wire message");
+    };
+    assert_eq!(pause_payload.reason, ErrorCode::ProfileIgnored);
+    tokio::time::timeout(Duration::from_secs(2), async {
+        loop {
+            match ws1.next().await {
+                None | Some(Ok(Message::Close(_))) | Some(Err(_)) => break,
+                Some(Ok(Message::Ping(_))) | Some(Ok(Message::Pong(_))) => {}
+                Some(Ok(other)) => panic!("unexpected frame after PauseSync: {other:?}"),
+            }
+        }
+    })
+    .await
+    .unwrap();
+
+    // Ignored profile blocks browser writes with ProfileIgnored.
+    let rev = revision_of(&bridge, &profile).await;
+    let ignored_preview = bridge
+        .preview_edit(
+            profile.clone(),
+            rev,
+            EditAction::Update {
+                chrome_id: Id::new("20").unwrap(),
+                title: Some(Title::new("Blocked").unwrap()),
+                url: None,
+            },
+        )
+        .await
+        .unwrap();
+    assert!(!ignored_preview.writable);
+    assert_eq!(
+        ignored_preview.error_code.0,
+        Some(ErrorCode::ProfileIgnored)
+    );
+    assert_eq!(
+        bridge
+            .apply_edit(
+                profile.clone(),
+                rev,
+                EditAction::Update {
+                    chrome_id: Id::new("20").unwrap(),
+                    title: Some(Title::new("Blocked").unwrap()),
+                    url: None,
+                },
+                false,
+            )
+            .await
+            .unwrap_err(),
+        ErrorCode::ProfileIgnored
+    );
+    bridge.shutdown().await.unwrap();
+
+    // Persists across Bridge::open reopen, and rejects background Hello { userInitiated: false }.
+    let reopened = Bridge::open_with_allowed_origin(&db_path, creds.clone(), origin())
+        .await
+        .unwrap();
+    let persisted = reopened
+        .state()
+        .await
+        .profiles
+        .into_iter()
+        .find(|p| p.profile_id == profile)
+        .unwrap();
+    assert!(persisted.ignored);
+    assert_eq!(persisted.connection, BridgeConnection::Ignored);
+
+    let probe2 = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+    let port2 = probe2.local_addr().unwrap().port();
+    drop(probe2);
+    reopened.start(port2).await.unwrap();
+    let url2 = format!("ws://127.0.0.1:{port2}/");
+
+    let mut ws2 = ws_connect_with_origin(&url2, Some(origin().as_str()))
+        .await
+        .unwrap();
+    ws2.send(Message::Text(
+        String::from_utf8(
+            encode_frame(&hello_triggered(&profile, "ign-inst", "ign-s2", false)).unwrap(),
+        )
+        .unwrap()
+        .into(),
+    ))
+    .await
+    .unwrap();
+    let WireMessage::HelloResult {
+        payload: rejected, ..
+    } = next_frame(&mut ws2).await
+    else {
+        panic!("expected hello_result rejection");
+    };
+    assert!(!rejected.accepted);
+    assert_eq!(rejected.error_code, Some(ErrorCode::ProfileIgnored));
+    tokio::time::timeout(Duration::from_secs(2), async {
+        loop {
+            match ws2.next().await {
+                None | Some(Ok(Message::Close(_))) | Some(Err(_)) => break,
+                Some(Ok(Message::Ping(_))) | Some(Ok(Message::Pong(_))) => {}
+                Some(Ok(other)) => panic!("unexpected frame after rejection: {other:?}"),
+            }
+        }
+    })
+    .await
+    .unwrap();
+
+    // User-initiated Hello { userInitiated: true } un-ignores and restores Live sync.
+    let mut ws3 = ws_connect_with_origin(&url2, Some(origin().as_str()))
+        .await
+        .unwrap();
+    ws3.send(Message::Text(
+        String::from_utf8(
+            encode_frame(&hello_triggered(&profile, "ign-inst", "ign-s3", true)).unwrap(),
+        )
+        .unwrap()
+        .into(),
+    ))
+    .await
+    .unwrap();
+    let WireMessage::HelloResult {
+        payload: accepted_user,
+        ..
+    } = next_frame(&mut ws3).await
+    else {
+        panic!("expected hello_result acceptance");
+    };
+    assert!(accepted_user.accepted);
+    assert_eq!(accepted_user.error_code, None);
+    let WireMessage::GetTree {
+        request_id: req3, ..
+    } = next_frame(&mut ws3).await
+    else {
+        panic!("expected get_tree");
+    };
+    let full3 = envelope(
+        "tree_full",
+        &profile,
+        &Id::new("ign-s3").unwrap(),
+        req3.0,
+        serde_json::to_value(TreeSnapshot {
+            source_epoch: SourceEpoch::new(1).unwrap(),
+            revision: Counter::new(0).unwrap(),
+            barrier_seq: Counter::new(0).unwrap(),
+            nodes: snap_nodes.clone(),
+        })
+        .unwrap(),
+    )
+    .unwrap();
+    ws3.send(Message::Text(
+        String::from_utf8(encode_frame(&full3).unwrap())
+            .unwrap()
+            .into(),
+    ))
+    .await
+    .unwrap();
+    tokio::time::timeout(Duration::from_secs(2), async {
+        loop {
+            if reopened.state().await.profiles.iter().any(|p| {
+                p.profile_id == profile && !p.ignored && p.connection == BridgeConnection::Live
+            }) {
+                break;
+            }
+            tokio::time::sleep(Duration::from_millis(10)).await;
+        }
+    })
+    .await
+    .unwrap();
+    drop(ws3);
+    reopened.shutdown().await.unwrap();
+
+    // Reopen verifies ignored = false persisted; test desktop resume_profile() path.
+    let reopened2 = Bridge::open_with_allowed_origin(&db_path, creds, origin())
+        .await
+        .unwrap();
+    assert!(
+        !reopened2
+            .state()
+            .await
+            .profiles
+            .iter()
+            .find(|p| p.profile_id == profile)
+            .unwrap()
+            .ignored
+    );
+    let probe3 = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+    let port3 = probe3.local_addr().unwrap().port();
+    drop(probe3);
+    reopened2.start(port3).await.unwrap();
+    let url3 = format!("ws://127.0.0.1:{port3}/");
+
+    let mut ws4 = ws_connect_with_origin(&url3, Some(origin().as_str()))
+        .await
+        .unwrap();
+    ws4.send(Message::Text(
+        String::from_utf8(
+            encode_frame(&hello_triggered(&profile, "ign-inst", "ign-s4", false)).unwrap(),
+        )
+        .unwrap()
+        .into(),
+    ))
+    .await
+    .unwrap();
+    let WireMessage::HelloResult { .. } = next_frame(&mut ws4).await else {
+        panic!("expected hello_result");
+    };
+    let WireMessage::GetTree {
+        request_id: req4, ..
+    } = next_frame(&mut ws4).await
+    else {
+        panic!("expected get_tree");
+    };
+    let full4 = envelope(
+        "tree_full",
+        &profile,
+        &Id::new("ign-s4").unwrap(),
+        req4.0,
+        serde_json::to_value(TreeSnapshot {
+            source_epoch: SourceEpoch::new(1).unwrap(),
+            revision: Counter::new(0).unwrap(),
+            barrier_seq: Counter::new(0).unwrap(),
+            nodes: snap_nodes.clone(),
+        })
+        .unwrap(),
+    )
+    .unwrap();
+    ws4.send(Message::Text(
+        String::from_utf8(encode_frame(&full4).unwrap())
+            .unwrap()
+            .into(),
+    ))
+    .await
+    .unwrap();
+    tokio::time::timeout(Duration::from_secs(2), async {
+        loop {
+            if reopened2
+                .state()
+                .await
+                .profiles
+                .iter()
+                .any(|p| p.profile_id == profile && p.connection == BridgeConnection::Live)
+            {
+                break;
+            }
+            tokio::time::sleep(Duration::from_millis(10)).await;
+        }
+    })
+    .await
+    .unwrap();
+
+    reopened2.ignore_profile(profile.clone()).await.unwrap();
+    let WireMessage::PauseSync {
+        payload: pause2, ..
+    } = next_frame(&mut ws4).await
+    else {
+        panic!("expected PauseSync on second ignore");
+    };
+    assert_eq!(pause2.reason, ErrorCode::ProfileIgnored);
+    drop(ws4);
+
+    let resumed = reopened2.resume_profile(profile.clone()).await.unwrap();
+    let resumed_view = resumed
+        .profiles
+        .iter()
+        .find(|p| p.profile_id == profile)
+        .unwrap();
+    assert!(!resumed_view.ignored);
+    assert_eq!(resumed_view.connection, BridgeConnection::CachedReadOnly);
+
+    let mut ws5 = ws_connect_with_origin(&url3, Some(origin().as_str()))
+        .await
+        .unwrap();
+    ws5.send(Message::Text(
+        String::from_utf8(
+            encode_frame(&hello_triggered(&profile, "ign-inst", "ign-s5", false)).unwrap(),
+        )
+        .unwrap()
+        .into(),
+    ))
+    .await
+    .unwrap();
+    let WireMessage::HelloResult {
+        payload: accepted_desktop,
+        ..
+    } = next_frame(&mut ws5).await
+    else {
+        panic!("expected hello_result after desktop resume");
+    };
+    assert!(accepted_desktop.accepted);
+    let WireMessage::GetTree {
+        request_id: req5, ..
+    } = next_frame(&mut ws5).await
+    else {
+        panic!("expected get_tree after desktop resume");
+    };
+    let full5 = envelope(
+        "tree_full",
+        &profile,
+        &Id::new("ign-s5").unwrap(),
+        req5.0,
+        serde_json::to_value(TreeSnapshot {
+            source_epoch: SourceEpoch::new(1).unwrap(),
+            revision: Counter::new(0).unwrap(),
+            barrier_seq: Counter::new(0).unwrap(),
+            nodes: snap_nodes,
+        })
+        .unwrap(),
+    )
+    .unwrap();
+    ws5.send(Message::Text(
+        String::from_utf8(encode_frame(&full5).unwrap())
+            .unwrap()
+            .into(),
+    ))
+    .await
+    .unwrap();
+    tokio::time::timeout(Duration::from_secs(2), async {
+        loop {
+            if reopened2.state().await.profiles.iter().any(|p| {
+                p.profile_id == profile && !p.ignored && p.connection == BridgeConnection::Live
+            }) {
+                break;
+            }
+            tokio::time::sleep(Duration::from_millis(10)).await;
+        }
+    })
+    .await
+    .unwrap();
+    drop(ws5);
+    reopened2.shutdown().await.unwrap();
 }

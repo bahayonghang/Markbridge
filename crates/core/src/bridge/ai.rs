@@ -3,8 +3,7 @@ use std::sync::Arc;
 
 use markbridge_protocol::{
     AiApplyResult, AiConnection, AiDraft, AiFailure, AiSettings, AiSuggestion, ApplyResult,
-    BridgeConnection, EditAction, ErrorCode, Id, OperationState, RequiredNullable, TagCommand,
-    Title,
+    EditAction, ErrorCode, Id, OperationState, RequiredNullable, TagCommand, Title,
 };
 
 use super::{Bridge, Result, credentials::CredentialStore};
@@ -139,7 +138,7 @@ impl Bridge {
     }
 
     pub async fn apply_ai(&self, draft: AiDraft) -> Result<AiApplyResult> {
-        let (memory_title, memory_url, live, revision) = {
+        let (memory_title, memory_url, write_check, revision) = {
             let inner = self.inner.lock().await;
             let profile = inner
                 .profiles
@@ -150,13 +149,15 @@ impl Bridge {
                 .iter()
                 .find(|node| node.chrome_id == draft.chrome_id)
                 .ok_or(ErrorCode::InvalidMessage)?;
-            let live = profile.view.connection == BridgeConnection::Live
-                && !profile.writes_blocked
-                && !profile.busy;
+            let write_check = profile.check_browser_writable().and_then(|()| {
+                (!profile.writes_blocked && !profile.busy)
+                    .then_some(())
+                    .ok_or(ErrorCode::ReadOnly)
+            });
             (
                 node.title.as_str().to_owned(),
                 node.url.as_ref().map(|url| url.as_str().to_owned()),
-                live,
+                write_check,
                 profile.view.revision.get(),
             )
         };
@@ -184,8 +185,8 @@ impl Bridge {
             Ok(plan) => plan,
             Err(refusal) => return Ok(refusal),
         };
-        if plan.title.is_some() && !live {
-            return Err(ErrorCode::ReadOnly);
+        if plan.title.is_some() {
+            write_check?;
         }
         if !storage.claim_ai_job(plan.job_id.clone()).await? {
             return Ok(refused(plan.job_id, AiFailure::Cancelled));

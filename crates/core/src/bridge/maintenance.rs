@@ -306,10 +306,28 @@ impl Bridge {
             .profiles
             .get(profile_id.as_str())
             .ok_or(ErrorCode::WrongProfile)?;
-        if profile.view.connection != BridgeConnection::Live
-            || profile.session.is_none()
-            || profile.outbound.is_none()
-        {
+        match profile.check_browser_writable() {
+            Ok(()) => {}
+            Err(error @ (ErrorCode::WritePaused | ErrorCode::ProfileIgnored)) => {
+                return Err(error);
+            }
+            Err(ErrorCode::ReadOnly) => {
+                return self
+                    .assemble(AssembleArgs {
+                        inner,
+                        profile_id,
+                        chrome_ids,
+                        request_id,
+                        cleanup: Some(view),
+                        failure: Some(ErrorCode::ReadOnly),
+                        failure_message: Some(MSG_OFFLINE.to_owned()),
+                        running: false,
+                    })
+                    .await;
+            }
+            Err(error) => return Err(error),
+        }
+        if profile.session.is_none() || profile.outbound.is_none() {
             return self
                 .assemble(AssembleArgs {
                     inner,

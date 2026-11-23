@@ -156,13 +156,12 @@ async fn get_bridge_state(
     Ok(bridge.state().await)
 }
 #[tauri::command]
-async fn start_bridge(
+async fn retry_bridge_listener(
     window: tauri::WebviewWindow,
     bridge: tauri::State<'_, Bridge>,
-    port: u16,
 ) -> Result<BridgeState, ErrorCode> {
     trusted(&window)?;
-    bridge.start(port).await
+    bridge.start_auto().await
 }
 #[tauri::command]
 async fn rename_profile(
@@ -201,15 +200,6 @@ async fn resume_profile(
 ) -> Result<BridgeState, ErrorCode> {
     trusted(&window)?;
     bridge.resume_profile(profile_id).await
-}
-#[tauri::command]
-async fn revoke_pairing(
-    window: tauri::WebviewWindow,
-    bridge: tauri::State<'_, Bridge>,
-    profile_id: Id,
-) -> Result<BridgeState, ErrorCode> {
-    trusted(&window)?;
-    bridge.revoke_pairing(profile_id).await
 }
 #[tauri::command]
 async fn reconnect_profile(
@@ -1213,6 +1203,7 @@ fn main() {
                 )),
             )) {
                 Ok(bridge) => {
+                    let _ = tauri::async_runtime::block_on(bridge.start_auto());
                     let mut states = bridge.subscribe();
                     let handle = app.handle().clone();
                     tauri::async_runtime::spawn(async move {
@@ -1250,12 +1241,11 @@ fn main() {
             list_installed_fonts,
             get_startup_state,
             get_bridge_state,
-            start_bridge,
+            retry_bridge_listener,
             rename_profile,
             set_profile_write_paused,
             ignore_profile,
             resume_profile,
-            revoke_pairing,
             reconnect_profile,
             ensure_local_library,
             enumerate_chrome_user_data,

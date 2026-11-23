@@ -124,18 +124,24 @@ impl Bridge {
         if plan.steps.len() > 1000 {
             return Err(ErrorCode::LimitExceeded);
         }
+        let write_check = profile.check_browser_writable();
+        let error_code = if !plan.conflicts.is_empty() {
+            Some(ErrorCode::Conflict)
+        } else if let Err(error @ (ErrorCode::WritePaused | ErrorCode::ProfileIgnored)) =
+            write_check
+        {
+            Some(error)
+        } else {
+            None
+        };
         Ok(UndoPreview {
             profile_id,
             source_epoch: profile.identity.source_epoch,
             operation_id,
             expected_revision: profile.view.revision,
-            writable: profile.view.connection == BridgeConnection::Live
-                && !profile.writes_blocked
-                && !profile.busy,
+            writable: write_check.is_ok() && !profile.writes_blocked && !profile.busy,
             affected: Counter::new(plan.affected)?,
-            error_code: RequiredNullable(
-                (!plan.conflicts.is_empty()).then_some(ErrorCode::Conflict),
-            ),
+            error_code: RequiredNullable(error_code),
             steps: plan.steps,
             conflicts: plan.conflicts,
         })
