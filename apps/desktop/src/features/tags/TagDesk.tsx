@@ -23,6 +23,7 @@ type TagDeskProps = {
   profileId: string;
   revision: number;
   live: boolean;
+  writePaused?: boolean;
   allowTitleEncoding?: boolean;
   chromeIds: string[];
   filterTagId: string | null;
@@ -40,7 +41,7 @@ export function TagDesk(props: TagDeskProps) {
   return <TagEditor key={`${props.profileId}:${props.chromeIds.join(',')}:${props.resetDraft ?? 0}`} {...props} />;
 }
 
-function TagEditor({ profileId, revision, live, allowTitleEncoding = true, chromeIds, filterTagId, onFilter, onCatalog, onChanged, onDirtyChange, sourceEpoch, onDiscardDraft, refreshVersion = 0 }: TagDeskProps) {
+function TagEditor({ profileId, revision, live, writePaused = false, allowTitleEncoding = true, chromeIds, filterTagId, onFilter, onCatalog, onChanged, onDirtyChange, sourceEpoch, onDiscardDraft, refreshVersion = 0 }: TagDeskProps) {
   const selectionKey = chromeIds.join('\n');
   const [catalog, setCatalog] = useState<TagCatalog | null>(null);
   const [loadedEpoch, setLoadedEpoch] = useState<number | null>(null);
@@ -264,27 +265,32 @@ function TagEditor({ profileId, revision, live, allowTitleEncoding = true, chrom
 
   return (
     <div className="tag-desk" aria-busy={busy}>
-      <p className="secondary metadata-note">标签和备注只写入本机。Chrome 标题和网址保持不变。{!live ? '离线也可保存。' : ''}</p>
-      {failed && <p role="alert">无法读取或保存本地内容。<button type="button" onClick={() => setReload((value) => value + 1)}>重新读取本地内容</button></p>}
-      {staleEpoch && <p role="alert">书签身份已变化，旧草稿不能写入新书签。未保存输入仍保留，请复制需要的内容。{onDiscardDraft && <button type="button" onClick={onDiscardDraft}>放弃旧身份草稿</button>}</p>}
-      {chromeIds.length === 0 && <p className="secondary">选择书签后可以添加标签。</p>}
-      <label htmlFor="tag-note">备注</label>
-      <textarea id="tag-note" readOnly={!canEditDraft} value={note} maxLength={4096} onChange={(event) => { noteDirtyRef.current = true; setNoteDirty(true); setNote(event.target.value); }} />
-      {mixedNote && <p className="secondary">所选书签的备注不同。</p>}
-      {noteDirty && <p className="draft-notice" role="status">备注尚未保存</p>}
-      <div className="edit-actions">
-        <button type="button" disabled={!canEditSelection} onClick={() => void run({ kind: 'set_note', chromeIds, note })}>保存备注</button>
+      <div className="well-group">
+        <p className="secondary metadata-note">标签和备注只写入本机。Chrome 标题和网址保持不变。{!live ? '离线也可保存。' : ''}</p>
+        {failed && <p role="alert">无法读取或保存本地内容。<button type="button" onClick={() => setReload((value) => value + 1)}>重新读取本地内容</button></p>}
+        {staleEpoch && <p role="alert">书签身份已变化，旧草稿不能写入新书签。未保存输入仍保留，请复制需要的内容。{onDiscardDraft && <button type="button" onClick={onDiscardDraft}>放弃旧身份草稿</button>}</p>}
+        {chromeIds.length === 0 && <p className="secondary">选择书签后可以添加标签。</p>}
+        <label htmlFor="tag-note">备注</label>
+        <textarea id="tag-note" readOnly={!canEditDraft} value={note} maxLength={4096} onChange={(event) => { noteDirtyRef.current = true; setNoteDirty(true); setNote(event.target.value); }} />
+        {mixedNote && <p className="secondary">所选书签的备注不同。</p>}
+        {noteDirty && <p className="draft-notice" role="status">备注尚未保存</p>}
+        <div className="edit-actions">
+          <button type="button" className={!pendingMerge && !preview ? 'primary-button' : undefined} disabled={!canEditSelection} onClick={() => void run({ kind: 'set_note', chromeIds, note })}>保存备注</button>
+        </div>
+        <label htmlFor="tag-name">添加标签
+          <input id="tag-name" readOnly={!canEditDraft} value={tagName} maxLength={32} onChange={(event) => setTagName(event.target.value)} />
+        </label>
+        <div className="edit-actions">
+          <button type="button" disabled={!canEditSelection || !tagName.trim()} onClick={() => void run({ kind: 'add', chromeIds, name: tagName })}>添加标签</button>
+        </div>
+        {linkedTags.length > 0 && <ul className="local-tags" aria-label="当前标签">
+          {linkedTags.map((tag) => <li key={tag.tagId}><span>{tag.name}{chromeIds.length > 1 ? `（${catalog?.entries.filter((entry) => entry.tagIds.includes(tag.tagId)).length}/${chromeIds.length}）` : ''}</span><button type="button" disabled={!canEditSelection} onClick={() => void run({ kind: 'remove', chromeIds, tagId: tag.tagId })}>移除</button></li>)}
+        </ul>}
+        <div className="edit-actions">
+          <button type="button" disabled={!canMutate || !catalog?.journalId} onClick={() => { if (catalog?.journalId) void run({ kind: 'undo', journalId: catalog.journalId }); }}>撤销上次标签变更</button>
+        </div>
       </div>
-      <label htmlFor="tag-name">添加标签
-        <input id="tag-name" readOnly={!canEditDraft} value={tagName} maxLength={32} onChange={(event) => setTagName(event.target.value)} />
-      </label>
-      <div className="edit-actions">
-        <button type="button" disabled={!canEditSelection || !tagName.trim()} onClick={() => void run({ kind: 'add', chromeIds, name: tagName })}>添加标签</button>
-      </div>
-      {linkedTags.length > 0 && <ul className="local-tags" aria-label="当前标签">
-        {linkedTags.map((tag) => <li key={tag.tagId}><span>{tag.name}{chromeIds.length > 1 ? ` · ${catalog?.entries.filter((entry) => entry.tagIds.includes(tag.tagId)).length}/${chromeIds.length}` : ''}</span><button type="button" disabled={!canEditSelection} onClick={() => void run({ kind: 'remove', chromeIds, tagId: tag.tagId })}>移除</button></li>)}
-      </ul>}
-      {tags.length > 0 && <details className="detail-disclosure"><summary>管理标签</summary>
+      {tags.length > 0 && <details className="detail-disclosure well-group"><summary>管理标签</summary>
       <label htmlFor="tag-filter">按标签筛选
         <select id="tag-filter" value={filterTagId ?? ''} onChange={(event) => onFilter(event.target.value || null)}>
           <option value="">全部书签</option>
@@ -312,37 +318,34 @@ function TagEditor({ profileId, revision, live, allowTitleEncoding = true, chrom
           <button type="button" disabled={!canMutate || !chosen} onClick={() => void run({ kind: 'delete', tagId: chosen })}>删除标签</button>
         </div>
       </details>}
-      {pendingMerge && <div className="edit-dialog" role="dialog" aria-label="确认合并">
+      {pendingMerge && <div className="edit-dialog output-well" role="dialog" aria-label="确认合并">
         <p>这两个标签规范化后相同。确认合并后，关联会转到目标标签。影响 {pendingMerge.affected} 项。</p>
-        <button type="button" disabled={!canMutate} onClick={() => void run({ kind: 'merge', sourceId: pendingMerge.sourceId, targetId: pendingMerge.targetId })}>确认合并</button>
+        <button type="button" className="primary-button" disabled={!canMutate} onClick={() => void run({ kind: 'merge', sourceId: pendingMerge.sourceId, targetId: pendingMerge.targetId })}>确认合并</button>
       </div>}
-      <div className="edit-actions">
-        <button type="button" disabled={!canMutate || !catalog?.journalId} onClick={() => { if (catalog?.journalId) void run({ kind: 'undo', journalId: catalog.journalId }); }}>撤销上次标签变更</button>
-      </div>
-      {allowTitleEncoding && <details className="detail-disclosure"><summary>可选：将标签写入标题</summary>
+      {allowTitleEncoding && <details className="detail-disclosure well-group"><summary>可选：将标签写入标题</summary>
       <label htmlFor="title-encoding">
         <input id="title-encoding" type="checkbox" disabled={!canMutate} checked={!!catalog?.encodingEnabled} onChange={(event) => void run({ kind: 'set_encoding', enabled: event.target.checked })} />
         启用标题编码
       </label>
       <p className="secondary">关闭编码不会改写 Chrome 标题。</p>
-      {!live && <p className="secondary">标题编码需要实时连接。当前不会写入 Chrome。</p>}
+      {!live && <p className="secondary">{writePaused ? '已暂停写入（只读保护）。当前不会写入 Chrome。' : '标题编码需要实时连接。当前不会写入 Chrome。'}</p>}
       {conflicted && <p role="status">外部标题已改变，这一条不会写入。</p>}
       <div className="edit-actions">
         <button type="button" disabled={!canEditSelection || !catalog?.encodingEnabled} onClick={() => void requestPreview(false)}>预览标题差异</button>
         <button type="button" disabled={!canEditSelection} onClick={() => void requestPreview(true)}>预览恢复原标题</button>
       </div>
-      {preview && <div className="edit-dialog" role="dialog" aria-label="标题差异">
+      </details>}
+      {preview && <div className="edit-dialog output-well" role="dialog" aria-label="标题差异">
         <h4>{previewRestore ? '恢复原标题' : '标题差异'}</h4>
         {preview.errorCode && <p role="status">{preview.errorCode}</p>}
         {preview.changes.length === 0 && <p>没有需要写入的标题。</p>}
         {preview.changes.map((change, index) => <p className="edit-change" key={`${change.before ?? ''}-${change.after ?? ''}-${index}`}>{change.before ?? '无'} → {change.after ?? '无'}</p>)}
         {preview.conflicts.map((conflict) => <p role="status" key={conflict.chromeId}>外部标题已改变，这一条不会写入。{conflict.chromeId}</p>)}
         <div className="edit-actions">
-          {canConfirm && <button type="button" disabled={busy} onClick={() => void confirmPreview()}>{previewRestore ? '确认恢复原标题' : '确认写入标题'}</button>}
+          {canConfirm && <button type="button" className="primary-button" disabled={busy} onClick={() => void confirmPreview()}>{previewRestore ? '确认恢复原标题' : '确认写入标题'}</button>}
           <button type="button" onClick={() => setPreview(null)}>取消</button>
         </div>
       </div>}
-      </details>}
       {notice && <p role="status">{notice}</p>}
     </div>
   );

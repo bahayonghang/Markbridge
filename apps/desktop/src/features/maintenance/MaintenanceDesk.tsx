@@ -6,8 +6,8 @@ import { OperationNotice } from '../history/OperationNotice';
 let nextRequest = 0;
 const verdicts = { unknown: '状态未知', alive: '可访问', pending: '待复查', candidate: '疑似失效，需人工确认' };
 
-export function MaintenanceDesk({ profileId, revision, sourceEpoch, live, chromeIds, onHistory }: {
-  profileId: string; revision: number; sourceEpoch?: number; live: boolean; chromeIds: string[]; onHistory?: () => void;
+export function MaintenanceDesk({ profileId, revision, sourceEpoch, live, writePaused = false, chromeIds, onHistory }: {
+  profileId: string; revision: number; sourceEpoch?: number; live: boolean; writePaused?: boolean; chromeIds: string[]; onHistory?: () => void;
 }) {
   const [report, setReport] = useState<MaintenanceReport | null>(null);
   const [reportFromLinkCheck, setReportFromLinkCheck] = useState(false);
@@ -80,36 +80,37 @@ export function MaintenanceDesk({ profileId, revision, sourceEpoch, live, chrome
   const previewed = fresh && report?.cleanup?.keeper.chromeId === keeper && !report.cleanup.operationId && scope.length > 1;
   const available = chromeIds.length > 0 && chromeIds.length <= 1000;
   return <section className="maint-desk" aria-label="库维护">
-    <h3>重复与链接</h3>
-    <p className="secondary">重复检查只读取本地缓存。链接检查会请求范围内的网址；403、429、超时等结果保留为未知，不自动删除。</p>
-    {!live && <p className="notice">当前只读。可以检查和审查，连接恢复后才能确认清理。</p>}
-    {chromeIds.length > 1000 && <p role="alert">每次最多检查 1000 个书签，请缩小范围。不会只检查前 1000 项。</p>}
-    <div className="edit-actions">
-      <button type="button" disabled={busy || !available} onClick={() => void run('inspect', () => inspectLibrary(profileId, chromeIds))}>检查重复</button>
-      <button type="button" disabled={busy || !available} onClick={() => {
-        const id = 'mnt' + Date.now() + '-' + nextRequest++;
-        requestId.current = id; setChecking(true);
-        void run('links', () => checkLinks(profileId, chromeIds, id));
-      }}>检查链接</button>
-      <button type="button" disabled={!checking} onClick={() => void cancelCheck()}>取消检查</button>
+    <div className="well-group">
+      <h3>重复与链接</h3>
+      <p className="secondary">重复检查只读取本地缓存。链接检查会请求范围内的网址；403、429、超时等结果保留为未知，不自动删除。</p>
+      {!live && <p className="notice">{writePaused ? '已暂停写入（只读保护）。可以检查和审查，恢复写入后才能确认清理。' : '当前只读。可以检查和审查，连接恢复后才能确认清理。'}</p>}
+      {chromeIds.length > 1000 && <p role="alert">每次最多检查 1000 个书签，请缩小范围。不会只检查前 1000 项。</p>}
+      <div className="edit-actions">
+        <button type="button" disabled={busy || !available} onClick={() => void run('inspect', () => inspectLibrary(profileId, chromeIds))}>检查重复</button>
+        <button type="button" disabled={busy || !available} onClick={() => {
+          const id = 'mnt' + Date.now() + '-' + nextRequest++;
+          requestId.current = id; setChecking(true);
+          void run('links', () => checkLinks(profileId, chromeIds, id));
+        }}>检查链接</button>
+        <button type="button" disabled={!checking} onClick={() => void cancelCheck()}>取消检查</button>
+        <button type="button" disabled={busy || !fresh || scope.length < 2} onClick={() => void run('preview', () => previewCleanup(profileId, revision, scope, keeper))}>预览清理</button>
+        <button type="button" className="danger-button" disabled={busy || !live || !previewed} onClick={() => void run('confirm', () => confirmCleanup(profileId, revision, scope, keeper, true, false))}>确认清理</button>
+        {message === '删除超过 20 项需要再次确认。' && <button type="button" className="danger-button" disabled={busy || !live || !previewed} onClick={() => void run('confirm', () => confirmCleanup(profileId, revision, scope, keeper, true, true))}>再次确认清理</button>}
+      </div>
+      {checking && <p role="status">正在检查 {chromeIds.length} 个网址，可以返回书签，稍后查看结果。</p>}
+      {message && <p role="status">{message}</p>}
+      {report && !fresh && <p className="notice">资料已变化。上次结果仅供参考，请重新检查后清理。</p>}
     </div>
-    {checking && <p role="status">正在检查 {chromeIds.length} 个网址，可以返回书签，稍后查看结果。</p>}
-    {message && <p role="status">{message}</p>}
-    {report && !fresh && <p className="notice">资料已变化。上次结果仅供参考，请重新检查后清理。</p>}
-    {report?.duplicates.map((item) => <fieldset className="duplicate-group" key={item.normalizedUrl}>
+    {report?.duplicates.map((item) => <fieldset className="duplicate-group well-group" key={item.normalizedUrl}>
       <legend>{item.members.length} 项重复候选</legend><p className="secondary">{item.normalizedUrl}</p>
-      {item.members.map((member) => <label key={member.chromeId}><input type="radio" name={'keeper-' + profileId} aria-label={member.title} checked={keeper === member.chromeId} disabled={busy || !fresh} onChange={() => { setKeeper(member.chromeId); setReport((value) => value ? { ...value, cleanup: null } : null); }} /><span><strong>{member.title || '未命名'}</strong><small>{member.tags.length ? member.tags.join('、') : '无本地标签'}{member.note ? ' · 有备注' : ''}</small></span><span className="secondary">保留此项</span></label>)}
+      {item.members.map((member) => <label key={member.chromeId}><input type="radio" name={'keeper-' + profileId} aria-label={member.title} checked={keeper === member.chromeId} disabled={busy || !fresh} onChange={() => { setKeeper(member.chromeId); setReport((value) => value ? { ...value, cleanup: null } : null); }} /><span><strong>{member.title || '未命名'}</strong><small className="maintenance-member-meta"><span>{member.tags.length ? member.tags.join('、') : '无本地标签'}</span>{member.note && <span>有备注</span>}</small></span><span className="secondary">保留此项</span></label>)}
     </fieldset>)}
-    {!!report?.links.length && <>
+    {!!report?.links.length && <div className="output-well">
+      <h4>链接检查结果</h4>
       {!reportFromLinkCheck && <p className="secondary">以下为已有链接状态，本次没有重新检查网址。</p>}
-      <ul className="link-results" aria-label="链接检查结果">{report.links.map((row) => <li key={row.chromeId}><span className="link-address">{row.url}</span><strong>{verdicts[row.verdict]}</strong><small>{row.httpStatus ? 'HTTP ' + row.httpStatus + ' · ' : ''}{row.checks ? '已检查 ' + row.checks + ' 次' : '尚未检查'}</small></li>)}</ul>
-    </>}
-    <div className="edit-actions">
-      <button type="button" disabled={busy || !fresh || scope.length < 2} onClick={() => void run('preview', () => previewCleanup(profileId, revision, scope, keeper))}>预览清理</button>
-      <button type="button" className="danger-button" disabled={busy || !live || !previewed} onClick={() => void run('confirm', () => confirmCleanup(profileId, revision, scope, keeper, true, false))}>确认清理</button>
-      {message === '删除超过 20 项需要再次确认。' && <button type="button" className="danger-button" disabled={busy || !live || !previewed} onClick={() => void run('confirm', () => confirmCleanup(profileId, revision, scope, keeper, true, true))}>再次确认清理</button>}
-    </div>
-    {report?.cleanup && <div className="cleanup-review" aria-label="清理差异"><h4>清理审查</h4><p>保留项 {report.cleanup.keeper.title}</p>{report.cleanup.removals.map((item) => <p key={item.chromeId}>移除 {item.title}</p>)}<p>标签并集 {report.cleanup.metadata.tagUnion.join('、')}</p>{report.cleanup.metadata.noteConflicts.map((item) => <p key={item.chromeId}>备注冲突 {item.note}</p>)}<p>{report.cleanup.metadata.handling}</p></div>}
+      <ul className="link-results" aria-label="链接检查结果">{report.links.map((row) => <li key={row.chromeId}><span className="link-address">{row.url}</span><strong>{verdicts[row.verdict]}</strong><small className="link-result-meta">{row.httpStatus && <span>HTTP {row.httpStatus}</span>}<span>{row.checks ? '已检查 ' + row.checks + ' 次' : '尚未检查'}</span></small></li>)}</ul>
+    </div>}
+    {report?.cleanup && <div className="cleanup-review output-well" aria-label="清理差异"><h4>清理审查</h4><p>保留项 {report.cleanup.keeper.title}</p>{report.cleanup.removals.map((item) => <p key={item.chromeId}>移除 {item.title}</p>)}<p>标签并集 {report.cleanup.metadata.tagUnion.join('、')}</p>{report.cleanup.metadata.noteConflicts.map((item) => <p key={item.chromeId}>备注冲突 {item.note}</p>)}<p>{report.cleanup.metadata.handling}</p></div>}
     {receipt && <OperationNotice key={receipt.operationId} profileId={profileId} result={receipt} onHistory={onHistory} />}
   </section>;
 }

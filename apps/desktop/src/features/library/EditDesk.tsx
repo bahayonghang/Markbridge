@@ -31,7 +31,7 @@ function noticeFor(state: string, errorCode: string | null): string {
   return '已发送，等待回执。发送成功还不是 Chrome 中的结果。';
 }
 
-export function EditDesk({ profileId, revision, node, siblingIds, folderId, insertParentId, insertPosition, request, nodes = [], creating = false, profileName, mode = 'edit', live = true }: {
+export function EditDesk({ profileId, revision, node, siblingIds, folderId, insertParentId, insertPosition, request, nodes = [], creating = false, profileName, mode = 'edit', live = true, writePaused = false }: {
   profileId: string;
   revision: number;
   node: BookmarkNode | null;
@@ -45,6 +45,7 @@ export function EditDesk({ profileId, revision, node, siblingIds, folderId, inse
   profileName?: string;
   mode?: 'edit';
   live?: boolean;
+  writePaused?: boolean;
 }) {
   const [drafts, setDrafts] = useState<Record<string, { title: string; url: string }>>({});
   const [createKind, setCreateKind] = useState<'bookmark' | 'folder'>('bookmark');
@@ -144,9 +145,9 @@ export function EditDesk({ profileId, revision, node, siblingIds, folderId, inse
   const position = nodes.length > 0 ? nodes.filter((item) => item.parentId === chosenTarget).length : insertPosition;
   return (
     <div className="edit-desk" onKeyDown={(event) => { if (event.key === 'Escape' && phase !== 'idle') { event.stopPropagation(); cancelPreview(); } }}>
-      {mode === 'edit' && <>
-        <h3>{create ? '新建' : '修改'}</h3><p className="secondary">预览和草稿不会修改 Chrome。确认后才会写入。</p>
-        {create && <div className="edit-actions" aria-label="新建类型">
+      {mode === 'edit' && <div className="well-group">
+        <h3>{create ? '新建' : '修改'}</h3><p className="secondary">{writePaused ? '已暂停写入（只读保护）。本地草稿不会写入 Chrome。' : '预览和草稿不会修改 Chrome。确认后才会写入。'}</p>
+        {create && <div className="segmented-control" role="group" aria-label="新建类型">
           <button type="button" aria-pressed={createKind === 'bookmark'} onClick={() => { cancelPreview(); setCreateKind('bookmark'); }}>书签</button>
           <button type="button" aria-pressed={createKind === 'folder'} onClick={() => { cancelPreview(); setCreateKind('folder'); }}>文件夹</button>
         </div>}
@@ -156,8 +157,8 @@ export function EditDesk({ profileId, revision, node, siblingIds, folderId, inse
           {(create || moving) && <FolderPicker nodes={nodes} value={chosenTarget} excluded={create || !node ? [] : [node.chromeId]} onChange={(id) => { cancelPreview(); setTarget(id); }} />}
           {create && !targetWritable && <p role="status">请选择可写的目标文件夹。</p>}
           <div className="edit-actions">
-            {create ? <button type="button" disabled={!live || !targetWritable || !title.trim() || (createKind === 'bookmark' && !url.trim()) || applying} onClick={() => { if (chosenTarget) void requestPreview({ kind: 'create', parentId: chosenTarget, position, title, ...(createKind === 'bookmark' ? { url } : {}) }); }}>{createKind === 'bookmark' ? '预览新书签' : '预览新文件夹'}</button> : node && <>
-              <button type="button" disabled={!live || applying} onClick={() => void requestPreview({ kind: 'update', chromeId: node.chromeId, title, ...(node.kind === 'bookmark' ? { url } : {}) })}>预览修改</button>
+            {create ? <button type="button" className={phase === 'idle' ? 'primary-button' : undefined} disabled={!live || !targetWritable || !title.trim() || (createKind === 'bookmark' && !url.trim()) || applying} onClick={() => { if (chosenTarget) void requestPreview({ kind: 'create', parentId: chosenTarget, position, title, ...(createKind === 'bookmark' ? { url } : {}) }); }}>{createKind === 'bookmark' ? '预览新书签' : '预览新文件夹'}</button> : node && <>
+              <button type="button" className={phase === 'idle' ? 'primary-button' : undefined} disabled={!live || applying} onClick={() => void requestPreview({ kind: 'update', chromeId: node.chromeId, title, ...(node.kind === 'bookmark' ? { url } : {}) })}>预览修改</button>
               <button type="button" disabled={!live || applying} onClick={() => { cancelPreview(); setMoving((value) => !value); }}>移动</button>
               {moving && <button type="button" disabled={!live || !targetWritable || chosenTarget === node.parentId || applying} onClick={() => { if (chosenTarget) void requestPreview({ kind: 'move', chromeId: node.chromeId, parentId: chosenTarget, position }); }}>预览移动</button>}
               <button type="button" disabled={!live || applying} onClick={() => void requestPreview({ kind: 'delete', chromeId: node.chromeId })}>预览删除</button>
@@ -166,9 +167,9 @@ export function EditDesk({ profileId, revision, node, siblingIds, folderId, inse
             </>}
           </div>
         </>}
-      </>}
-      {phase !== 'idle' && <div className="edit-dialog" role="dialog" aria-label="确认变更">
-        <p>资料：{profileName ?? profileId} · 影响 {preview?.affected ?? 0} 项</p>
+      </div>}
+      {phase !== 'idle' && <div className="edit-dialog output-well" role="dialog" aria-label="确认变更">
+        <div className="settings-facts"><span>资料：{profileName ?? profileId}</span><span>影响 {preview?.affected ?? 0} 项</span></div>
         {phase === 'loading' && <p role="status">正在读取预览。</p>}
         <h4>{phase === 'second' ? '再次确认' : '变更差异'}</h4>
         {phase === 'error' && <p role="alert">无法读取预览。</p>}
@@ -176,8 +177,8 @@ export function EditDesk({ profileId, revision, node, siblingIds, folderId, inse
         {preview?.changes.map((change, index) => <p className="edit-change" key={`${change.field}-${index}`}>{fields[change.field] ?? change.field}：{change.before ?? '无'} → {change.after ?? '无'}</p>)}
         {phase === 'second' && <p>这次变更影响 {preview?.affected ?? 0} 项。需要再次确认才会修改 Chrome。</p>}
         <div className="edit-actions">
-          {phase === 'ready' && <button disabled={!live || applying} type="button" onClick={() => void confirm(false)}>{preview?.requiresSecondConfirm ? '继续确认' : '确认变更'}</button>}
-          {phase === 'second' && <button disabled={!live || applying} type="button" onClick={() => void confirm(true)}>确认删除</button>}
+          {phase === 'ready' && <button className="primary-button" disabled={!live || applying} type="button" onClick={() => void confirm(false)}>{preview?.requiresSecondConfirm ? '继续确认' : '确认变更'}</button>}
+          {phase === 'second' && <button className="danger-button" disabled={!live || applying} type="button" onClick={() => void confirm(true)}>确认删除</button>}
           <button type="button" disabled={applying} onClick={cancelPreview}>取消</button>
         </div>
       </div>}

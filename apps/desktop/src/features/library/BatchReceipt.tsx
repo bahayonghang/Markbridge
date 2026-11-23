@@ -55,7 +55,7 @@ function ReceiptDetails({ profileId, operationId, initial }: Props) {
     finally { if (request === generation.current) { lock.current = false; setStopping(false); } }
   }
 
-  return <section className="batch-results" aria-label="逐项回执">
+  return <section className="batch-results output-well" aria-label="逐项回执">
     {!result && !notice && <p role="status">正在读取逐项回执。</p>}
     {result && <>
       <h4>{result.state === 'applied' ? '全部回执已确认' : result.state === 'rolled_back' ? '批次已撤销' : result.state === 'rolling_back' ? '正在撤销' : result.state === 'rollback_conflict' ? '撤销存在冲突' : result.stopped ? '批次已停止' : '正在等待回执'}</h4>

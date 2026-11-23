@@ -75,7 +75,7 @@ it('renders all 61 reviewed steps, cancels without writes and disables confirmat
   fireEvent.click(await screen.findByRole('button', { name: '撤销此记录' }));
   const differences = await screen.findByRole('list', { name: '完整撤销差异' });
   expect(within(differences).getAllByRole('listitem')).toHaveLength(61);
-  expect(within(differences).getByRole('heading', { name: '新建 · 恢复条目 60' })).toBeVisible();
+  expect(within(differences).getByRole('heading', { name: '新建：恢复条目 60' })).toBeVisible();
   fireEvent.click(screen.getByRole('button', { name: '取消撤销' }));
   expect(backend.applyEdit).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole('button', { name: '撤销此记录' }));
@@ -115,10 +115,12 @@ it('records manual review without relabeling an unknown result as success', asyn
   vi.mocked(backend.listOperations).mockResolvedValue({ operations: [unknown] });
   vi.mocked(backend.operationDetail).mockResolvedValue({ ...detail(), summary: unknown });
   vi.mocked(backend.reviewOperation).mockImplementation(async () => { vi.mocked(backend.listOperations).mockResolvedValue({ operations: [{ ...unknown, reviewed: true }] }); return { operations: [{ ...unknown, reviewed: true }] }; });
-  render(<HistoryWorkspace profileId="p" profileName="A" revision={4} live={false} />);
+  const { container } = render(<HistoryWorkspace profileId="p" profileName="A" revision={4} live={false} />);
   fireEvent.click(await screen.findByRole('button', { name: /查看详情/ }));
   fireEvent.click(await screen.findByRole('button', { name: '标记已核对' }));
-  expect(await screen.findByText('结果不确定 · 已核对')).toBeVisible();
+  expect(await screen.findByText('结果不确定')).toBeVisible();
+  expect(screen.getByText('已核对')).toBeVisible();
+  expect(container.textContent).not.toContain('·');
   expect(screen.queryByText('已完成')).toBeNull();
   await waitFor(() => expect(backend.reviewOperation).toHaveBeenCalledWith('p', 'op-a'));
 });
@@ -156,4 +158,32 @@ it('groups export desk in well-groups without middle dots, uses h3 headings, and
   fireEvent.click(primaries[0]!);
   await screen.findByText('文件已保存到所选位置。');
   expect(container.textContent).not.toContain('·');
+});
+
+it('shows writePaused notice and disables Chrome undo while keeping details and review usable', async () => {
+  const unknown = { ...summary, operationId: 'op-u', state: 'uncertain' as const };
+  vi.mocked(backend.listOperations).mockResolvedValue({ operations: [summary, unknown] });
+  vi.mocked(backend.operationDetail).mockResolvedValue({ ...detail(), summary: unknown });
+  vi.mocked(backend.reviewOperation).mockResolvedValue({ operations: [summary, { ...unknown, reviewed: true }] });
+  render(<HistoryWorkspace profileId="p" profileName="A" revision={4} live={false} writePaused />);
+  expect(await screen.findByText(/已暂停写入（只读保护）/)).toBeVisible();
+  for (const button of screen.getAllByRole('button', { name: '撤销此记录' })) expect(button).toBeDisabled();
+  fireEvent.click(screen.getAllByRole('button', { name: /查看详情/ })[1]!);
+  fireEvent.click(await screen.findByRole('button', { name: '标记已核对' }));
+  await waitFor(() => expect(backend.reviewOperation).toHaveBeenCalledWith('p', 'op-u'));
+  expect(backend.applyEdit).not.toHaveBeenCalled();
+});
+
+it('groups history header and details in well-groups, uses output-well for undo review, and keeps one primary button', async () => {
+  const { container } = render(<HistoryWorkspace profileId="p" profileName="A" revision={4} live />);
+  expect(await screen.findByRole('button', { name: '撤销此记录' })).toBeEnabled();
+  expect(container.querySelectorAll('.well-group').length).toBeGreaterThanOrEqual(1);
+  expect(container.querySelectorAll('button.primary-button')).toHaveLength(0);
+  fireEvent.click(screen.getByRole('button', { name: '撤销此记录' }));
+  const undoReview = await screen.findByRole('region', { name: '撤销预览' });
+  expect(undoReview).toHaveClass('output-well');
+  expect(container.querySelectorAll('.well-group').length).toBeGreaterThanOrEqual(2);
+  expect(undoReview.closest('.well-group')).toBeNull();
+  expect(container.querySelectorAll('button.primary-button')).toHaveLength(1);
+  expect(container.querySelector('button.primary-button')).toHaveTextContent('确认条件撤销');
 });

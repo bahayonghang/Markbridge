@@ -25,7 +25,8 @@ for (const [width, height] of [[1440, 900], [1100, 760], [640, 760], [1100, 480]
     await page.getByRole('radio', { name: '指定目录', exact: true }).check();
     await page.getByLabel('整理目录', { exact: true }).selectOption('1');
     await page.getByRole('button', { name: '使用此目录', exact: true }).click();
-    await expect(page.getByText(/本次范围：书签栏（含子目录） · 24 个书签/)).toBeVisible();
+    await expect(page.locator('.scope-bar')).toContainText('本次范围：书签栏（含子目录）');
+    await expect(page.locator('.scope-bar')).toContainText('24 个书签');
     await page.getByRole('tab', { name: '重复与链接', exact: true }).click();
     await page.getByRole('button', { name: '检查重复', exact: true }).click();
     await page.getByRole('radio', { name: 'Human Interface Guidelines', exact: true }).check();
