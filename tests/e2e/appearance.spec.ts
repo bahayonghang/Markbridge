@@ -330,3 +330,49 @@ for (const theme of ['light', 'dark']) {
     });
   }
 }
+
+test('T6 window theme syncs on startup, system changes, explicit theme selection, and reset without console errors', async ({ page }) => {
+  const consoleErrors: string[] = [];
+  const pageErrors: string[] = [];
+  page.on('console', (message) => {
+    if (message.type() === 'error') consoleErrors.push(message.text());
+  });
+  page.on('pageerror', (error) => {
+    pageErrors.push(error.message);
+  });
+
+  const readThemes = () => page.evaluate(() => (window as unknown as { __windowThemes?: string[] }).__windowThemes ?? []);
+
+  await page.emulateMedia({ colorScheme: 'light' });
+  await mockBridge(page, 'details');
+  await page.goto('/');
+
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  const startupThemes = await readThemes();
+  expect(startupThemes.length).toBeGreaterThanOrEqual(1);
+  expect(startupThemes.every((theme) => theme === 'system')).toBe(true);
+
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  const afterDarkMedia = await readThemes();
+  expect(afterDarkMedia.length).toBeGreaterThan(startupThemes.length);
+  expect(afterDarkMedia.at(-1)).toBe('system');
+
+  await page.getByRole('button', { name: '设置', exact: true }).click();
+  await page.getByRole('button', { name: '浅色', exact: true }).click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  const afterLight = await readThemes();
+  expect(afterLight.at(-1)).toBe('light');
+
+  await page.emulateMedia({ colorScheme: 'light' });
+  expect((await readThemes()).length).toBe(afterLight.length);
+
+  await page.getByRole('button', { name: '深色', exact: true }).click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  expect((await readThemes()).at(-1)).toBe('dark');
+
+  await page.getByRole('button', { name: '恢复默认外观', exact: true }).click();
+  expect((await readThemes()).at(-1)).toBe('system');
+  expect(consoleErrors).toEqual([]);
+  expect(pageErrors).toEqual([]);
+});
