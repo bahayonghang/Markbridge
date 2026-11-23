@@ -10,7 +10,7 @@ import { GeneralSettings } from './features/settings/GeneralSettings';
 import { resolveAppearanceMetrics, applyUiPreferences, readUiPreferences, saveUiPreferences, type UiPreferences } from './features/settings/ui-preferences';
 import { RowHeightsContext } from './features/library/VirtualRows';
 import { useBridge } from './useBridge';
-import { connectionLabels, fileLabels, type SourceRequest, type SourceTarget } from './features/settings/source-status';
+import { connectionStatusLabels, resolveSource, type SourceRequest, type SourceTarget } from './features/settings/source-status';
 
 const brandIcon = new URL('./assets/markbridge.png', import.meta.url).href;
 type Section = 'library' | 'organize' | 'semantic' | 'history' | 'settings';
@@ -50,13 +50,14 @@ export function App({ initialPreferences }: { initialPreferences?: UiPreferences
   const [exportHost, setExportHost] = useState<HTMLDivElement | null>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const title = sections.find((item) => item.id === section)!.label;
-  const selectedProfile = currentSource?.kind === 'profile' ? state?.profiles.find((profile) => profile.profileId === currentSource.id) : !currentSource ? state?.profiles[0] : undefined;
-  const selectedMirror = currentSource?.kind === 'mirror' ? state?.mirrors.find((mirror) => mirror.mirrorSourceId === currentSource.id) : !currentSource && !selectedProfile ? state?.mirrors[0] : undefined;
-  const connection = error === 'startup' ? '启动失败' : error === 'event' ? '连接错误 · 只读'
-    : !state ? '正在加载' : selectedProfile?.connection === 'live' ? '已连接 Chrome'
-      : selectedProfile?.connection === 'cached_read_only' ? '未连接 · 只读'
-        : selectedProfile ? connectionLabels[selectedProfile.connection]
-          : selectedMirror ? `${fileLabels[selectedMirror.fileStatus]} · 只读` : '未连接 · 只读';
+  const fallbackSource = currentSource ? null : resolveSource(state, null, null);
+  const selectedProfile = currentSource?.kind === 'profile'
+    ? state?.profiles.find((profile) => profile.profileId === currentSource.id)
+    : fallbackSource?.kind === 'profile' ? fallbackSource.profile : undefined;
+  const selectedMirror = currentSource?.kind === 'mirror'
+    ? state?.mirrors.find((mirror) => mirror.mirrorSourceId === currentSource.id)
+    : fallbackSource?.kind === 'mirror' ? fallbackSource.mirror : undefined;
+  const { header: connection, pill: pillConnection } = connectionStatusLabels(state, error, selectedProfile, selectedMirror);
   const onboarding = section === 'library' && !!state && !state.profiles.length && !state.mirrors.length;
 
   function browseSource(source: SourceTarget) {
@@ -84,7 +85,7 @@ export function App({ initialPreferences }: { initialPreferences?: UiPreferences
         {sections.map((item) => <button type="button" className="nav-button" key={item.id} aria-current={section === item.id ? 'page' : undefined} aria-label={item.label} title={item.label} onClick={() => { if (item.id === 'settings') chooseSettingsTab('general'); navigate(item.id); }}><WorkspaceIcon name={item.icon} /><span>{item.label}</span></button>)}
       </nav>
       <div className="sidebar-library" ref={setSidebarHost} hidden={section !== 'library'} />
-      <button type="button" className="connection-pill" aria-label={`连接状态：${connection}`} title={connection} onClick={() => { chooseSettingsTab('connection'); navigate('settings'); }}><WorkspaceIcon name="connection" /><span>{connection}</span></button>
+      <button type="button" className="connection-pill" aria-label={`连接状态：${pillConnection}`} title={pillConnection} onClick={() => { chooseSettingsTab('connection'); navigate('settings'); }}><WorkspaceIcon name="connection" /><span>{pillConnection}</span></button>
     </aside>
     <main id="main-content" className="app-main" tabIndex={-1}>
       <header className="workspace-heading"><h1 ref={heading} tabIndex={-1}>{title}</h1><span className="connection" role="status">{connection}</span></header>

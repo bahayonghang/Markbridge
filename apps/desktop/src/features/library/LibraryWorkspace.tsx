@@ -17,40 +17,12 @@ import { TagDesk } from '../tags/TagDesk';
 import { VirtualRows } from './VirtualRows';
 import { WorkspaceIcon } from './WorkspaceIcon';
 import { ConfirmDialog } from '../settings/ConfirmDialog';
-import { cacheTime, profileNextStep, type SourceRequest, type SourceTarget } from '../settings/source-status';
+import { cacheTime, profileNextStep, resolveSource, type Source, type SourceRequest, type SourceTarget } from '../settings/source-status';
 import {
   PAGE_SIZE, ancestorTitles, displayTitle, folderRows, folderPath, indexFlat, isHttpUrl,
   looseBookmarks, rootFolders, rowKey, querySnapshot, toListRow, type FolderRow, type ListRow,
 } from './model';
 import { useLibraryQuery } from './useLibraryQuery';
-
-type Profile = BridgeState['profiles'][number];
-type Mirror = BridgeState['mirrors'][number];
-type Source = { kind: 'profile'; id: string; profile: Profile } | { kind: 'mirror'; id: string; mirror: Mirror };
-
-function sourceFromToken(token: string, profiles: Profile[], mirrors: Mirror[]): Source | null {
-  const profileId = token.startsWith('profile:') ? token.slice('profile:'.length) : '';
-  const mirrorId = token.startsWith('mirror:') ? token.slice('mirror:'.length) : '';
-  const profile = profiles.find((item) => item.profileId === profileId);
-  if (profile) return { kind: 'profile', id: profile.profileId, profile };
-  const mirror = mirrors.find((item) => item.mirrorSourceId === mirrorId);
-  if (mirror) return { kind: 'mirror', id: mirror.mirrorSourceId, mirror };
-  return null;
-}
-
-function resolveSource(state: BridgeState | null, manual: string | null, focusMirrorId: string | null): Source | null {
-  const profiles = state?.profiles ?? [];
-  const mirrors = state?.mirrors ?? [];
-  const tokens = [manual, focusMirrorId ? `mirror:${focusMirrorId}` : null];
-  for (const token of tokens) {
-    if (!token) continue;
-    const source = sourceFromToken(token, profiles, mirrors);
-    if (source) return source;
-  }
-  if (profiles[0]) return { kind: 'profile', id: profiles[0].profileId, profile: profiles[0] };
-  if (mirrors[0]) return { kind: 'mirror', id: mirrors[0].mirrorSourceId, mirror: mirrors[0] };
-  return null;
-}
 
 function accessNote(source: Source): string {
   if (source.kind === 'mirror') {
@@ -640,7 +612,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
       {section !== 'export' || !exportHost ? toolbar : null}
       {!source && state && <div className="empty-state">
         <span className="empty-mark"><WorkspaceIcon name="bookmark" /></span><h2>连接你的 Chrome 书签</h2>
-        <p>尚未接入书签来源。配对 Chrome 或接入只读文件后，可在此浏览。</p>
+        <p>尚未接入书签来源。连接 Chrome 扩展或接入只读文件后，可在此浏览。</p>
         {!native && <p className="preview-note">浏览器预览：当前预览不能读取书签。请在桌面应用中连接。</p>}
         {onSettings && <button type="button" className="primary-button" onClick={onSettings}>连接 Chrome 或只读来源</button>}
       </div>}
@@ -771,7 +743,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
 
         </div>
         <div className="workspace-page" hidden={section !== 'organize'}>
-          {!profile && <><h2>整理书签</h2><p>只读文件来源不支持整理。请在书签来源中选择已配对资料。</p></>}
+          {!profile && <><h2>整理书签</h2><p>只读文件来源不支持整理。请在书签来源中选择 Chrome 资料。</p></>}
           {isLocalProfile && <><h2>整理书签</h2><p>本地 Skills 书签库由项目 Skills 或命令行维护目录结构，不支持浏览器整理写回。</p></>}
           {organizeVisited && profile && !isLocalProfile && epochRef.current.epoch !== null && <OrganizeWorkspace key={`organize:${sourceKey}:${epochRef.current.epoch}`} profileId={profile.profileId} profileName={profile.displayName} sourceEpoch={epochRef.current.epoch} revision={profile.revision} live={canWriteBrowser} writePaused={writePaused} active={active && section === 'organize'} nodes={nodes} selected={pickedBookmarks} folderId={folderId} onLibrary={onLibrary} onSettings={onAiSettings} onHistory={onHistory} onChanged={() => refreshMetadataSearch(true)} />}
         </div>

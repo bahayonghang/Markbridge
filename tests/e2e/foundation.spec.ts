@@ -14,9 +14,11 @@ for (const size of [{ width: 1100, height: 760 }, { width: 640, height: 480 }]) 
     await expect(page.getByRole('link', { name: '跳至内容' })).toBeFocused();
     await expect(page.getByText(/浏览器预览 · 仅显示界面/)).toBeVisible();
     await page.getByRole('button', { name: '设置', exact: true }).click();
-  await page.getByRole('tab', { name: 'Chrome 连接', exact: true }).click();
-    await expect(page.getByRole('button', { name: '启动连接' })).toBeDisabled();
-    await expect(page.getByRole('button', { name: '生成配对串' })).toBeDisabled();
+    await page.getByRole('tab', { name: 'Chrome 连接', exact: true }).click();
+    await expect(page.getByRole('button', { name: '重试监听', exact: true })).toBeDisabled();
+    await expect(page.getByRole('button', { name: '启用本地 Skills 书签库', exact: true })).toBeDisabled();
+    await expect(page.getByLabel('端口', { exact: true })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: '生成配对串' })).toHaveCount(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.screenshot({ path: `${evidence}/browser-preview-${size.width}x${size.height}.png`, fullPage: true });
 
@@ -28,17 +30,19 @@ for (const size of [{ width: 1100, height: 760 }, { width: 640, height: 480 }]) 
     await page.goto('/?harness=bridge');
     await expect(page.getByRole('status').filter({ hasText: '已连接 Chrome' })).toHaveText('已连接 Chrome');
     await page.getByRole('button', { name: '设置', exact: true }).click();
-  await page.getByRole('tab', { name: 'Chrome 连接', exact: true }).click();
+    await page.getByRole('tab', { name: 'Chrome 连接', exact: true }).click();
+    await expect(page.getByText('127.0.0.1:49153', { exact: true })).toBeVisible();
     await expect(page.getByText('27', { exact: true })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.screenshot({ path: `${evidence}/browser-diagnostics-mock-${size.width}x${size.height}.png`, fullPage: true });
     await page.getByRole('button', { name: '重新连接' }).click();
     await expect(page.locator('.workspace-heading .connection')).toHaveText('核对中 · 只读');
-    await page.getByRole('button', { name: '吊销配对' }).click();
-    await page.getByRole('button', { name: '确认吊销配对', exact: true }).click();
-    await expect(page.locator('.workspace-heading .connection')).toHaveText('未配对 · 只读');
+    await page.getByRole('button', { name: '断开并忽略' }).click();
+    await page.getByRole('button', { name: '确认断开并忽略', exact: true }).click();
+    await expect(page.locator('.workspace-heading .connection')).toHaveText('已忽略 · 只读');
     await expect(page.getByText('27', { exact: true })).toBeVisible();
-    await expect(page.getByRole('button', { name: '吊销配对' })).toBeDisabled();
+    await expect(page.getByRole('button', { name: '重新连接' })).toBeDisabled();
+    await expect(page.getByRole('button', { name: '恢复连接' })).toBeEnabled();
   });
 }
 
@@ -49,21 +53,19 @@ test('startup failure hides raw backend details', async ({ page }) => {
   await expect(page.getByText('sensitive-raw-error')).toHaveCount(0);
 });
 
-test('port conflict allows an edited retry without exposing rejection details', async ({ page }) => {
+test('port conflict allows safe listener retry without exposing rejection details', async ({ page }) => {
   await mockBridge(page, 'port-conflict');
   await page.goto('/?harness=bridge');
+  await expect(page.locator('.connection-pill span')).toHaveText('端口已占满 · 只读');
   await page.getByRole('button', { name: '设置', exact: true }).click();
   await page.getByRole('tab', { name: 'Chrome 连接', exact: true }).click();
-  await expect(page.getByRole('button', { name: '启动连接' })).toBeEnabled();
-  await page.getByText('高级：连接端口', { exact: true }).click();
-  await page.getByLabel('端口').fill('70000');
-  await page.getByRole('button', { name: '启动连接' }).click();
-  await expect(page.getByRole('alert')).toContainText('1024–65535');
-  await page.getByLabel('端口').fill('49153');
-  await page.getByRole('button', { name: '启动连接' }).click();
-  await expect(page.getByRole('alert')).toContainText('请检查端口是否占用');
-  await page.getByLabel('端口').fill('49154');
-  await page.getByRole('button', { name: '启动连接' }).click();
+  await expect(page.getByRole('alert')).toContainText('49153–49160');
+  const retry = page.getByRole('button', { name: '重试监听', exact: true });
+  await expect(retry).toBeEnabled();
+  await retry.click();
+  await expect(page.getByRole('alert').first()).toContainText('49153–49160');
+  await retry.click();
   await expect(page.getByText('127.0.0.1:49154', { exact: true })).toBeVisible();
+  await expect(page.locator('.connection-pill span')).toHaveText('监听就绪 · :49154');
   await expect(page.getByRole('alert')).toHaveCount(0);
 });

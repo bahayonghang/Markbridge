@@ -53,11 +53,11 @@ for (const theme of ['light', 'dark']) for (const fontSize of [12, 14, 20]) for 
     }
     await writeFile(join(output, `${theme}-${fontSize}-${width}x${height}.json`), `${JSON.stringify(geometry, null, 2)}\n`);
     await page.getByRole('tab', { name: 'Chrome 连接', exact: true }).click();
-    await page.getByRole('button', { name: '吊销配对', exact: true }).first().click();
-    await expect(page.getByRole('dialog', { name: /^吊销“.+”的配对？$/ })).toBeVisible();
+    await page.getByRole('button', { name: '断开并忽略', exact: true }).first().click();
+    await expect(page.getByRole('dialog', { name: /^断开并忽略“.+”？$/ })).toBeVisible();
     await page.screenshot({ path: join(output, `${theme}-${fontSize}-confirmation-${width}x${height}.png`) });
     await page.keyboard.press('Escape');
-    await expect(page.getByRole('button', { name: '吊销配对', exact: true }).first()).toBeFocused();
+    await expect(page.getByRole('button', { name: '断开并忽略', exact: true }).first()).toBeFocused();
   });
 }
 
@@ -247,11 +247,11 @@ for (const theme of ['light', 'dark']) {
     await page.keyboard.press('ArrowUp'); await page.keyboard.press('ArrowDown');
     await expect(category).toBeFocused();
     await checkConsumer('selected category keyboard', category, false, true);
-    await page.getByText('选择只读文件目录', { exact: true }).click();
+    await page.getByText('其他接入方式：只读文件来源', { exact: true }).click();
     const pathInput = page.getByLabel('用户数据目录', { exact: true });
     await expect(pathInput).toHaveCSS('border-radius', '12px');
     await checkConsumer('text control', pathInput, true);
-    const disabled = page.getByRole('button', { name: '连接已启动', exact: true });
+    const disabled = page.getByRole('button', { name: '重新读取', exact: true });
     await expect(disabled).toBeDisabled();
     await checkConsumer('disabled listener', disabled);
     const disabledFill = await disabled.evaluate(node => getComputedStyle(node).backgroundColor);
@@ -284,10 +284,10 @@ for (const theme of ['light', 'dark']) {
     await checkConsumer('primary pressed', primary);
     await page.mouse.move(0, 0); await page.mouse.up();
     await page.getByRole('tab', { name: 'Chrome 连接', exact: true }).click();
-    await page.getByRole('button', { name: '吊销配对', exact: true }).first().click();
-    const dialog = page.getByRole('dialog', { name: /^吊销“.+”的配对？$/ });
+    await page.getByRole('button', { name: '断开并忽略', exact: true }).first().click();
+    const dialog = page.getByRole('dialog', { name: /^断开并忽略“.+”？$/ });
     await expect(dialog).toHaveCSS('border-radius', '16px');
-    const confirm = dialog.getByRole('button', { name: '确认吊销配对', exact: true });
+    const confirm = dialog.getByRole('button', { name: '确认断开并忽略', exact: true });
     await checkConsumer('confirmation action', confirm, true);
     await checkConsumer('confirmation copy', dialog.locator('p').first());
     await page.keyboard.press('Tab'); await expect(confirm).toBeFocused();
@@ -322,8 +322,9 @@ for (const theme of ['light', 'dark']) {
       if (scenario !== 'startup-error') {
         await page.getByRole('button', { name: '设置', exact: true }).click();
         await page.getByRole('tab', { name: 'Chrome 连接', exact: true }).click();
-        await expect(page.getByRole('button', { name: '连接已启动', exact: true })).toBeDisabled();
-        await page.getByRole('button', { name: '连接已启动', exact: true }).scrollIntoViewIfNeeded();
+        await page.getByText('其他接入方式：只读文件来源', { exact: true }).click();
+        await expect(page.getByRole('button', { name: '重新读取', exact: true })).toBeDisabled();
+        await page.getByRole('button', { name: '重新读取', exact: true }).scrollIntoViewIfNeeded();
         await page.screenshot({ path: join(output, `${theme}-large-disabled-${scenario}-640x480.png`) });
       }
     });

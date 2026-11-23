@@ -6,14 +6,18 @@ for (const size of [{ width: 1440, height: 900 }, { width: 1100, height: 760 }, 
   test(`R02 onboarding and read-only route ${size.width}x${size.height}`, async ({ page }) => {
     await page.setViewportSize(size);
     await page.goto('/');
-    await expect(page.getByRole('region', { name: '首次接入' })).toBeVisible();
-    await expect(page.getByLabel('端口', { exact: true })).not.toBeVisible();
+    const onboarding = page.getByRole('region', { name: '首次接入' });
+    await expect(onboarding).toBeVisible();
+    await expect(page.getByLabel('端口', { exact: true })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: '启动连接' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: '生成配对串' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: '确认配对' })).toHaveCount(0);
     await expect(page.getByLabel('启用 AI')).toHaveCount(0);
+    await expect(page.getByRole('button', { name: '重试监听', exact: true })).toBeDisabled();
+    await expect(page.getByRole('button', { name: '启用本地 Skills 书签库', exact: true })).toBeDisabled();
+    await expect(page.getByLabel('用户数据目录')).not.toBeVisible();
     await page.screenshot({ path: `${evidence}/onboarding-${size.width}x${size.height}.png` });
-    await page.getByText('高级：连接端口', { exact: true }).click();
-    await expect(page.getByLabel('端口', { exact: true })).toBeVisible();
-    await expect(page.getByRole('button', { name: '启动连接', exact: true })).toBeDisabled();
-    await page.getByRole('button', { name: '只读浏览文件' }).click();
+    await page.getByText('其他接入方式：只读文件来源', { exact: true }).click();
     await expect(page.getByLabel('用户数据目录')).toBeVisible();
     await expect(page.getByRole('button', { name: '枚举资料' })).toBeDisabled();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(size.width);
@@ -60,21 +64,79 @@ test('R02 source-switch confirmation keeps focus and separates identical Chrome 
   expect(errors).toEqual([]);
 });
 
-test('R02 revocation requires a second action and Escape returns to its trigger', async ({ page }) => {
+test('R02 ignore requires confirmation, Escape restores focus, and resume restores cached browsing', async ({ page }) => {
   await mockBridge(page);
   await page.goto('/');
   await page.locator('.connection-pill').click();
   await expect(page.getByRole('tab', { name: 'Chrome 连接', exact: true })).toHaveAttribute('aria-selected', 'true');
-  const revoke = page.getByRole('button', { name: '吊销配对', exact: true });
-  await revoke.click();
+  const ignore = page.getByRole('button', { name: '断开并忽略', exact: true });
+  await ignore.click();
   await expect(page.getByRole('dialog')).toContainText('本机缓存、标签和备注都会保留');
   await expect(page.getByRole('button', { name: '留在当前页面' })).toBeFocused();
   await page.keyboard.press('Escape');
-  await expect(revoke).toBeFocused();
+  await expect(ignore).toBeFocused();
   await expect(page.getByText('实时同步', { exact: true })).toBeVisible();
-  await revoke.click();
-  await page.screenshot({ path: `${evidence}/revoke-confirmation.png` });
-  await page.getByRole('button', { name: '确认吊销配对', exact: true }).click();
+  await ignore.click();
+  await page.screenshot({ path: `${evidence}/ignore-confirmation.png` });
+  await page.getByRole('button', { name: '确认断开并忽略', exact: true }).click();
   await expect(page.locator('.workspace-heading .connection')).toHaveText('已忽略 · 只读');
   await expect(page.locator('.connection-pill span')).toHaveText('已忽略 · 只读');
+  await page.getByRole('button', { name: '恢复连接', exact: true }).click();
+  await expect(page.locator('.workspace-heading .connection')).toHaveText('未连接 · 只读');
+  await expect(page.locator('.connection-pill span')).toHaveText('未连接 · 只读');
+});
+
+test('T7 zero-click onboarding auto-enters workbench without yanking Settings, and supports rename & writePaused', async ({ page }) => {
+  await mockBridge(page, 'onboarding');
+  await page.goto('/');
+  await expect(page.getByRole('region', { name: '首次接入' })).toBeVisible();
+  await expect(page.getByText('127.0.0.1:49153', { exact: true })).toBeVisible();
+  await expect(page.locator('.connection-pill span')).toHaveText('监听就绪 · :49153');
+
+  // When first live Chrome profile arrives during initial onboarding, auto-enter workbench and skip ignored profiles.
+  await page.evaluate(() => {
+    (window as unknown as { __s02state: (patch: unknown) => void }).__s02state({
+      profiles: [
+        { profileId: 'profile-ignored', instanceId: 'instance-ignored', displayName: '旧资料', connection: 'ignored', writePaused: false, ignored: true, nodeCount: 3, revision: 1, lastSyncedAt: null, errorCode: null },
+        { profileId: 'profile-test', instanceId: 'instance-test', displayName: '测试研究资料', connection: 'live', writePaused: false, ignored: false, nodeCount: 27, revision: 8, lastSyncedAt: null, errorCode: null },
+      ],
+    });
+  });
+  await expect(page.getByRole('heading', { level: 1, name: '书签', exact: true })).toBeVisible();
+  await expect(page.getByLabel('书签来源')).toHaveValue('profile:profile-test');
+  await expect(page.locator('.connection-pill span')).toHaveText('已连接 Chrome');
+
+  // Inline rename validation and submission, plus immediate writePaused toggle.
+  await page.locator('.connection-pill').click();
+  const renameInput = page.getByLabel('资料名称', { exact: true }).last();
+  await renameInput.fill('   ');
+  await page.getByRole('button', { name: '保存名称', exact: true }).last().click();
+  await expect(page.getByRole('alert')).toContainText('1–128');
+
+  await renameInput.fill('  工作资料  ');
+  await page.getByRole('button', { name: '保存名称', exact: true }).last().click();
+  await expect(page.getByRole('heading', { level: 3, name: '工作资料', exact: true })).toBeVisible();
+
+  const targetCard = page.getByRole('article').filter({ hasText: '工作资料' });
+  await targetCard.getByRole('button', { name: '暂停写入（只读）', exact: true }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(targetCard.getByText('已暂停写入（只读保护）', { exact: true })).toBeVisible();
+  await expect(page.locator('.connection-pill span')).toHaveText('已暂停写入 · 只读');
+  await targetCard.getByRole('button', { name: '恢复写入', exact: true }).click();
+  await expect(page.locator('.connection-pill span')).toHaveText('已连接 Chrome');
+});
+
+test('T7 keeps user in Settings when first Chrome profile arrives while viewing Settings', async ({ page }) => {
+  await mockBridge(page, 'onboarding');
+  await page.goto('/');
+  await expect(page.getByRole('region', { name: '首次接入' })).toBeVisible();
+  await page.getByRole('button', { name: '设置', exact: true }).click();
+  await expect(page.getByRole('heading', { level: 1, name: '设置', exact: true })).toBeVisible();
+  await page.evaluate(() => {
+    (window as unknown as { __s02state: (patch: unknown) => void }).__s02state({
+      profiles: [{ profileId: 'profile-test', instanceId: 'instance-test', displayName: '测试研究资料', connection: 'live', writePaused: false, ignored: false, nodeCount: 27, revision: 8, lastSyncedAt: null, errorCode: null }],
+    });
+  });
+  await expect(page.getByRole('heading', { level: 1, name: '设置', exact: true })).toBeVisible();
+  await expect(page.locator('.connection-pill span')).toHaveText('已连接 Chrome');
 });

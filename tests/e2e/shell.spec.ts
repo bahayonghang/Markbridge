@@ -69,9 +69,8 @@ for (const size of sizes) {
     await expect(page.getByRole('heading', { name: '设置', level: 1 })).toBeVisible();
     await expect(page.getByRole('tab', { name: 'Chrome 连接', exact: true })).toHaveAttribute('aria-selected', 'true');
     await expect(page.locator('.sidebar-library')).toHaveAttribute('hidden', '');
-    await expect(page.getByLabel('端口', { exact: true })).not.toBeVisible();
-    await page.getByText('高级：连接端口', { exact: true }).click();
-    await expect(page.getByLabel('端口', { exact: true })).toBeVisible();
+    await expect(page.getByLabel('端口', { exact: true })).toHaveCount(0);
+    await expect(page.getByText('127.0.0.1:49153', { exact: true })).toBeVisible();
     await page.getByRole('tab', { name: 'AI', exact: true }).click();
     await page.keyboard.press('Home');
     await expect(page.getByRole('tab', { name: '通用' })).toBeFocused();

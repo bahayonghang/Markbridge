@@ -181,8 +181,13 @@ it('browses a stale file mirror without offering a browser write', async () => {
   render(<App />);
   fireEvent.click(screen.getByRole('button', { name: '设置' }));
   fireEvent.click(screen.getByRole('tab', { name: 'Chrome 连接' }));
+  const otherSources = document.querySelector('details.other-sources') as HTMLDetailsElement;
+  expect(otherSources).not.toBeNull();
+  expect(otherSources.open).toBe(false);
+  fireEvent.click(screen.getByText('其他接入方式：只读文件来源'));
   expect(await screen.findByText('文件陈旧 · 保留缓存')).toBeVisible();
-  expect(screen.getByText('独立只读 · 正在监听')).toBeVisible();
+  expect(screen.getByText('独立只读')).toBeVisible();
+  expect(screen.getByText('正在监听')).toBeVisible();
   expect(screen.getByText('浏览器写入已禁用。在线资料优先于已关联的文件来源。')).toBeVisible();
   expect(screen.queryByRole('button', { name: /写入|应用/ })).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: '浏览缓存' }));
@@ -199,7 +204,11 @@ it('keeps browser preview unpaired and disables native actions', async () => {
   fireEvent.click(screen.getByRole('tab', { name: 'Chrome 连接' }));
   await waitFor(() => expect(document.querySelector('.workspace-heading .connection')).toHaveTextContent('未连接 · 只读'));
   expect(screen.getByText(/浏览器预览 · 仅显示界面/)).toBeVisible();
-  expect(screen.getByRole('button', { name: '启动连接' })).toBeDisabled();
+  expect(screen.queryByLabelText('端口')).toBeNull();
+  expect(screen.queryByRole('button', { name: '启动连接' })).toBeNull();
+  expect(screen.queryByRole('button', { name: '生成配对串' })).toBeNull();
+  expect(screen.getByRole('button', { name: '重试监听' })).toBeDisabled();
+  expect(screen.getByRole('button', { name: '启用本地 Skills 书签库' })).toBeDisabled();
   expect(backend.retryBridgeListener).not.toHaveBeenCalled();
 });
 
@@ -220,7 +229,7 @@ it('subscribes before hydration and ignores older hydrate and command replies', 
   fireEvent.click(screen.getByRole('tab', { name: 'Chrome 连接' }));
   await waitFor(() => expect(backend.getBridgeState).toHaveBeenCalled());
   expect(vi.mocked(backend.subscribeBridgeState).mock.invocationCallOrder[0]).toBeLessThan(vi.mocked(backend.getBridgeState).mock.invocationCallOrder[0]!);
-  act(() => { receive({ ...initial, revision: 3, profiles: [profile] }); });
+  act(() => { receive({ ...initial, revision: 3, port: 49153, profiles: [profile] }); });
   await act(async () => { hydrate(initial); });
   expect(screen.getByText('实时同步')).toBeVisible();
   vi.mocked(backend.reconnectProfile).mockResolvedValue({ ...initial, revision: 2 });
@@ -229,55 +238,69 @@ it('subscribes before hydration and ignores older hydrate and command replies', 
   expect(screen.getByText('实时同步')).toBeVisible();
 });
 
-it('retries the local bridge listener once and disables the trigger once bound', async () => {
+it('shows PORT_EXHAUSTED recovery guidance, retries listener once, and clears retry trigger once bound', async () => {
+  vi.mocked(backend.getBridgeState).mockResolvedValue({ ...initial, revision: 1, port: null, errorCode: 'PORT_EXHAUSTED' });
   render(<App />);
   fireEvent.click(screen.getByRole('button', { name: '设置' }));
   fireEvent.click(screen.getByRole('tab', { name: 'Chrome 连接' }));
-  await waitFor(() => expect(document.querySelector('.workspace-heading .connection')).toHaveTextContent('未连接 · 只读'));
-  vi.mocked(backend.retryBridgeListener).mockResolvedValue({ ...initial, revision: 2, port: 49154 });
-  fireEvent.click(screen.getByRole('button', { name: '启动连接' }));
+  await waitFor(() => expect(document.querySelector('.connection-pill')).toHaveTextContent('端口已占满 · 只读'));
+  expect(screen.getByRole('alert')).toHaveTextContent('49153–49160');
+  vi.mocked(backend.retryBridgeListener).mockResolvedValue({ ...initial, revision: 2, port: 49154, errorCode: null });
+  fireEvent.click(screen.getByRole('button', { name: '重试监听' }));
   expect(await screen.findByText('127.0.0.1:49154')).toBeVisible();
   expect(backend.retryBridgeListener).toHaveBeenCalledExactlyOnceWith();
-  expect(screen.getByLabelText('端口')).toBeDisabled();
-  expect(screen.getByRole('button', { name: '连接已启动' })).toBeDisabled();
+  expect(screen.queryByRole('button', { name: '重试监听' })).toBeNull();
+  expect(document.querySelector('.connection-pill')).toHaveTextContent('监听就绪 · :49154');
 });
 
-it('shows reconciling and ignored cache as read-only', async () => {
-  vi.mocked(backend.getBridgeState).mockResolvedValue({ ...initial, profiles: [profile] });
-  vi.mocked(backend.reconnectProfile).mockResolvedValue({ ...initial, revision: 2, profiles: [{ ...profile, connection: 'reconciling' }] });
-  vi.mocked(backend.ignoreProfile).mockResolvedValue({ ...initial, revision: 3, profiles: [{ ...profile, connection: 'ignored', ignored: true }] });
+it('shows reconciling, ignored cache as read-only, and supports resumeProfile', async () => {
+  vi.mocked(backend.getBridgeState).mockResolvedValue({ ...initial, port: 49153, profiles: [profile] });
+  vi.mocked(backend.reconnectProfile).mockResolvedValue({ ...initial, revision: 2, port: 49153, profiles: [{ ...profile, connection: 'reconciling' }] });
+  vi.mocked(backend.ignoreProfile).mockResolvedValue({ ...initial, revision: 3, port: 49153, profiles: [{ ...profile, connection: 'ignored', ignored: true }] });
+  vi.mocked(backend.resumeProfile).mockResolvedValue({ ...initial, revision: 4, port: 49153, profiles: [{ ...profile, connection: 'cached_read_only', ignored: false }] });
   render(<App />);
   fireEvent.click(screen.getByRole('button', { name: '设置' }));
   fireEvent.click(screen.getByRole('tab', { name: 'Chrome 连接' }));
   await screen.findByText('实时同步');
   fireEvent.click(screen.getByRole('button', { name: '重新连接' }));
-  expect(await screen.findByRole('status')).toHaveTextContent('核对中 · 只读');
-  fireEvent.click(screen.getByRole('button', { name: '吊销配对' }));
+  await waitFor(() => expect(document.querySelector('.workspace-heading .connection')).toHaveTextContent('核对中 · 只读'));
+  expect((await screen.findAllByText('核对中 · 只读')).length).toBeGreaterThanOrEqual(2);
+  const ignoreButton = screen.getByRole('button', { name: '断开并忽略' });
+  fireEvent.click(ignoreButton);
   expect(backend.ignoreProfile).not.toHaveBeenCalled();
   expect(screen.getByRole('dialog')).toHaveTextContent('本机缓存、标签和备注都会保留');
   fireEvent.click(screen.getByRole('button', { name: '留在当前页面' }));
   expect(backend.ignoreProfile).not.toHaveBeenCalled();
-  fireEvent.click(screen.getByRole('button', { name: '吊销配对' }));
-  fireEvent.click(screen.getByRole('button', { name: '确认吊销配对' }));
+  expect(ignoreButton).toHaveFocus();
+  fireEvent.click(ignoreButton);
+  fireEvent.click(screen.getByRole('button', { name: '确认断开并忽略' }));
   await waitFor(() => expect(document.querySelector('.workspace-heading .connection')).toHaveTextContent('已忽略 · 只读'));
+  expect(document.querySelector('.connection-pill')).toHaveTextContent('已忽略 · 只读');
   expect(screen.getByText('17')).toBeVisible();
   expect(screen.getByRole('button', { name: '重新连接' })).toBeDisabled();
-  expect(screen.getByRole('button', { name: '吊销配对' })).toBeDisabled();
+  expect(screen.queryByRole('button', { name: '断开并忽略' })).toBeNull();
+  const resumeButton = screen.getByRole('button', { name: '恢复连接' });
+  expect(resumeButton).toBeEnabled();
+  fireEvent.click(resumeButton);
+  await waitFor(() => expect(backend.resumeProfile).toHaveBeenCalledExactlyOnceWith('profile-a'));
+  expect(await screen.findByText('缓存 · 只读')).toBeVisible();
+  expect(document.querySelector('.workspace-heading .connection')).toHaveTextContent('未连接 · 只读');
 });
 
-it('keeps disconnected cache available for explicit reconnect and revocation', async () => {
-  vi.mocked(backend.getBridgeState).mockResolvedValue({ ...initial, profiles: [{ ...profile, connection: 'cached_read_only' }] });
+it('keeps disconnected cache available for explicit reconnect, write-pause, and ignore', async () => {
+  vi.mocked(backend.getBridgeState).mockResolvedValue({ ...initial, port: 49153, profiles: [{ ...profile, connection: 'cached_read_only' }] });
   render(<App />);
   fireEvent.click(screen.getByRole('button', { name: '设置' }));
   fireEvent.click(screen.getByRole('tab', { name: 'Chrome 连接' }));
   await screen.findByText('缓存 · 只读');
   expect(screen.getByText('17')).toBeVisible();
   expect(screen.getByRole('button', { name: '重新连接' })).toBeEnabled();
-  expect(screen.getByRole('button', { name: '吊销配对' })).toBeEnabled();
+  expect(screen.getByRole('button', { name: '暂停写入（只读）' })).toBeEnabled();
+  expect(screen.getByRole('button', { name: '断开并忽略' })).toBeEnabled();
 });
 
 it('rejects invalid events without exposing the last live state as usable', async () => {
-  vi.mocked(backend.getBridgeState).mockResolvedValue({ ...initial, profiles: [profile] });
+  vi.mocked(backend.getBridgeState).mockResolvedValue({ ...initial, port: 49153, profiles: [profile] });
   render(<App />);
   fireEvent.click(screen.getByRole('button', { name: '设置' }));
   fireEvent.click(screen.getByRole('tab', { name: 'Chrome 连接' }));
@@ -285,7 +308,7 @@ it('rejects invalid events without exposing the last live state as usable', asyn
   act(() => { invalid(); });
   expect(screen.getByRole('alert')).toHaveTextContent('收到无效连接状态');
   expect(screen.getByText('状态无效 · 只读')).toBeVisible();
-  expect(screen.getByRole('button', { name: '吊销配对' })).toBeDisabled();
+  expect(screen.getByRole('button', { name: '断开并忽略' })).toBeDisabled();
 });
 
 it('unsubscribes after unmount even when listener registration resolves late', async () => {
@@ -310,19 +333,32 @@ it('development remount subscribes safely without duplicate actions', async () =
   expect(unsubscribe).toHaveBeenCalledTimes(2);
 });
 
-it('introduces extension and read-only routes without AI or automatic directory reads', async () => {
+it('renders minimal 1-step zero-click onboarding and collapsed other-sources without pairing or port forms', async () => {
+  vi.mocked(backend.getBridgeState).mockResolvedValue({ ...initial, port: 49153 });
   render(<App />);
-  expect(await screen.findByRole('region', { name: '首次接入' })).toBeVisible();
-  expect(screen.getByRole('heading', { name: '1. 准备 Chrome 扩展' })).toBeVisible();
-  expect(screen.getByLabelText('端口')).not.toBeVisible();
-  expect(screen.getByRole('button', { name: '启动连接' })).toBeEnabled();
+  const region = await screen.findByRole('region', { name: '首次接入' });
+  expect(region).toBeVisible();
+  expect(screen.getByText(/chrome:\/\/extensions/)).toBeVisible();
+  expect(screen.getByText('127.0.0.1:49153')).toBeVisible();
+  expect(screen.getByRole('button', { name: '启用本地 Skills 书签库' })).toBeVisible();
+
+  const otherDetails = region.querySelector('details.other-sources') as HTMLDetailsElement;
+  expect(otherDetails).not.toBeNull();
+  expect(otherDetails.open).toBe(false);
+  expect(screen.getByLabelText('用户数据目录')).not.toBeVisible();
+
+  expect(screen.queryByLabelText('端口')).toBeNull();
+  expect(screen.queryByRole('button', { name: '启动连接' })).toBeNull();
+  expect(screen.queryByRole('button', { name: '生成配对串' })).toBeNull();
+  expect(screen.queryByRole('button', { name: '确认配对' })).toBeNull();
+  expect(region.textContent).not.toMatch(/120\s*[秒s]/);
   expect(backend.aiSettings).not.toHaveBeenCalled();
   expect(backend.retryBridgeListener).not.toHaveBeenCalled();
-  fireEvent.click(screen.getByRole('button', { name: '只读浏览文件' }));
+  expect(backend.enumerateChromeUserData).not.toHaveBeenCalled();
+
+  fireEvent.click(screen.getByText('其他接入方式：只读文件来源'));
   expect(screen.getByLabelText('用户数据目录')).toBeVisible();
   expect(screen.getByRole('button', { name: '枚举资料' })).toBeEnabled();
-  expect(backend.enumerateChromeUserData).not.toHaveBeenCalled();
-  expect(screen.getByText(/无需扩展，可浏览最后有效/)).toBeVisible();
   fireEvent.click(screen.getByRole('button', { name: '枚举资料' }));
   expect(screen.getByRole('alert')).toBeVisible();
   expect(screen.getByRole('alert')).toHaveTextContent('请输入 Chrome 用户数据目录');
@@ -330,13 +366,13 @@ it('introduces extension and read-only routes without AI or automatic directory 
 
 it('uses the selected source for status even when another profile is live', async () => {
   const cached = { ...profile, profileId: 'profile-b', displayName: '离线资料', connection: 'cached_read_only' as const };
-  vi.mocked(backend.getBridgeState).mockResolvedValue({ ...initial, profiles: [profile, cached] });
+  vi.mocked(backend.getBridgeState).mockResolvedValue({ ...initial, port: 49153, profiles: [profile, cached] });
   render(<App />);
   await waitFor(() => expect(document.querySelector('.workspace-heading .connection')).toHaveTextContent('已连接 Chrome'));
   fireEvent.change(screen.getByLabelText('书签来源'), { target: { value: 'profile:profile-b' } });
   expect(document.querySelector('.workspace-heading .connection')).toHaveTextContent('未连接 · 只读');
   expect(screen.getByText(/缓存时间：尚无同步时间/)).toBeVisible();
-  act(() => receive({ ...initial, revision: 2, profiles: [profile, { ...cached, connection: 'reconciling' }] }));
+  act(() => receive({ ...initial, revision: 2, port: 49153, profiles: [profile, { ...cached, connection: 'reconciling' }] }));
   expect(document.querySelector('.workspace-heading .connection')).toHaveTextContent('核对中 · 只读');
   expect(backend.applyEdit).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole('button', { name: '设置' }));
@@ -351,7 +387,7 @@ it('uses the selected source for status even when another profile is live', asyn
   expect(screen.getByLabelText('书签来源')).toHaveValue('profile:profile-a');
 });
 
-it('enables and browses the isolated local Skills library from settings without exposing Chrome pairing or tree-write controls', async () => {
+it('enables and browses the isolated local Skills library from settings without exposing Chrome controls', async () => {
   const mirror: BridgeState['mirrors'][number] = {
     mirrorSourceId: 'mirror-local-check', displayName: '独立镜像', association: 'independent', pairedProfileId: null,
     fileStatus: 'current', watching: true, nodeCount: 1, revision: 1, lastSyncedAt: null, errorCode: null, canWriteBrowser: false,
@@ -362,7 +398,7 @@ it('enables and browses the isolated local Skills library from settings without 
   };
   render(<App />);
   expect(await screen.findByRole('region', { name: '首次接入' })).toBeVisible();
-  expect(screen.queryByRole('button', { name: '启用本地 Skills 书签库' })).toBeNull();
+  expect(screen.getByRole('button', { name: '启用本地 Skills 书签库' })).toBeVisible();
 
   fireEvent.click(screen.getByRole('button', { name: '设置' }));
   fireEvent.click(screen.getByRole('tab', { name: 'Chrome 连接' }));
@@ -402,8 +438,11 @@ it('enables and browses the isolated local Skills library from settings without 
   fireEvent.click(screen.getByRole('tab', { name: 'Chrome 连接' }));
   expect(screen.queryByRole('button', { name: '启用本地 Skills 书签库' })).toBeNull();
   expect(screen.queryByRole('button', { name: '重新连接' })).toBeNull();
-  expect(screen.queryByRole('button', { name: '吊销配对' })).toBeNull();
-  expect(screen.queryByRole('combobox', { name: '已配对资料' })).toBeNull();
+  expect(screen.queryByRole('button', { name: '断开并忽略' })).toBeNull();
+  expect(screen.queryByRole('button', { name: '暂停写入（只读）' })).toBeNull();
+  expect(screen.queryByLabelText('资料名称')).toBeNull();
+  fireEvent.click(screen.getByText('其他接入方式：只读文件来源'));
+  expect(screen.queryByRole('combobox', { name: '关联 Chrome 资料' })).toBeNull();
   expect(screen.queryByRole('button', { name: '验证关联' })).toBeNull();
 });
 
@@ -480,4 +519,116 @@ it('navigates all 5 settings tabs via keyboard and structures General with segme
   expect(document.documentElement.style.getPropertyValue('--text-size')).toBe('16px');
   expect(screen.getByRole('button', { name: '16 px' })).toHaveAttribute('aria-pressed', 'true');
   expect(container.querySelectorAll('.settings-tabs > button[role="tab"]')).toHaveLength(5);
+});
+
+it('auto-enters bookmark workbench when first active Chrome profile connects during onboarding and skips ignored profiles', async () => {
+  vi.mocked(backend.getBridgeState).mockResolvedValue({ ...initial, port: 49153 });
+  render(<App />);
+  expect(await screen.findByRole('region', { name: '首次接入' })).toBeVisible();
+  expect(document.querySelector('.connection-pill')).toHaveTextContent('监听就绪 · :49153');
+
+  const ignored: BridgeState['profiles'][number] = {
+    ...profile, profileId: 'profile-ignored', instanceId: 'instance-ignored', displayName: '已忽略旧资料',
+    connection: 'ignored', ignored: true,
+  };
+  act(() => {
+    receive({ ...initial, revision: 2, port: 49153, profiles: [ignored, profile] });
+  });
+
+  expect(await screen.findByRole('heading', { level: 1, name: '书签' })).toBeVisible();
+  expect(screen.queryByRole('region', { name: '首次接入' })).toBeNull();
+  expect(screen.getByLabelText('书签来源')).toHaveValue('profile:profile-a');
+  expect(document.querySelector('.workspace-heading .connection')).toHaveTextContent('已连接 Chrome');
+  expect(document.querySelector('.connection-pill')).toHaveTextContent('已连接 Chrome');
+});
+
+it('keeps a user who intentionally opened Settings there when the first Chrome profile connects', async () => {
+  vi.mocked(backend.getBridgeState).mockResolvedValue({ ...initial, port: 49153 });
+  render(<App />);
+  expect(await screen.findByRole('region', { name: '首次接入' })).toBeVisible();
+
+  fireEvent.click(screen.getByRole('button', { name: '设置' }));
+  expect(screen.getByRole('heading', { level: 1, name: '设置' })).toBeVisible();
+
+  act(() => {
+    receive({ ...initial, revision: 2, port: 49153, profiles: [profile] });
+  });
+
+  expect(screen.getByRole('heading', { level: 1, name: '设置' })).toBeVisible();
+  expect(screen.getByRole('tab', { name: '通用' })).toHaveAttribute('aria-selected', 'true');
+  expect(document.querySelector('.connection-pill')).toHaveTextContent('已连接 Chrome');
+});
+
+it('reflects PORT_EXHAUSTED, CONFLICT, writePaused, and multi-live profile count in connection-pill', async () => {
+  vi.mocked(backend.getBridgeState).mockResolvedValue({ ...initial, revision: 1, port: null, errorCode: 'PORT_EXHAUSTED' });
+  render(<App />);
+  await waitFor(() => expect(document.querySelector('.connection-pill')).toHaveTextContent('端口已占满 · 只读'));
+
+  act(() => {
+    receive({ ...initial, revision: 2, port: null, errorCode: 'CONFLICT' });
+  });
+  expect(document.querySelector('.connection-pill')).toHaveTextContent('监听冲突 · 只读');
+
+  act(() => {
+    receive({ ...initial, revision: 3, port: 49153, errorCode: null, profiles: [{ ...profile, writePaused: true }] });
+  });
+  expect(document.querySelector('.connection-pill')).toHaveTextContent('已暂停写入 · 只读');
+  expect(document.querySelector('.workspace-heading .connection')).toHaveTextContent('已暂停写入 · 只读');
+
+  const second = { ...profile, profileId: 'profile-b', instanceId: 'instance-b', displayName: '第二份资料' };
+  act(() => {
+    receive({ ...initial, revision: 4, port: 49153, errorCode: null, profiles: [profile, second] });
+  });
+  expect(document.querySelector('.connection-pill')).toHaveTextContent('已连接 Chrome（2 个）');
+});
+
+it('validates inline profile rename, immediately toggles writePaused, and uses single-column well-groups', async () => {
+  vi.mocked(backend.getBridgeState).mockResolvedValue({ ...initial, port: 49153, profiles: [profile] });
+  vi.mocked(backend.renameProfile).mockResolvedValue({ ...initial, revision: 2, port: 49153, profiles: [{ ...profile, displayName: '工作资料' }] });
+  vi.mocked(backend.setProfileWritePaused)
+    .mockResolvedValueOnce({ ...initial, revision: 3, port: 49153, profiles: [{ ...profile, displayName: '工作资料', writePaused: true }] })
+    .mockResolvedValueOnce({ ...initial, revision: 4, port: 49153, profiles: [{ ...profile, displayName: '工作资料', writePaused: false }] });
+
+  render(<App />);
+  fireEvent.click(screen.getByRole('button', { name: '设置' }));
+  fireEvent.click(screen.getByRole('tab', { name: 'Chrome 连接' }));
+
+  const renameInput = await screen.findByLabelText('资料名称');
+  const panel = screen.getByRole('tabpanel', { name: 'Chrome 连接' });
+  expect(panel.querySelectorAll('.well-group').length).toBeGreaterThanOrEqual(4);
+  expect(panel.querySelectorAll('.well-group .well-group')).toHaveLength(0);
+  expect(panel.querySelectorAll('button.primary-button').length).toBeLessThanOrEqual(1);
+  expect(panel.textContent).not.toMatch(/\s[·•]\s[^\n]*\s[·•]\s/);
+  expect(panel.querySelector('[aria-label="诊断导出"]')).toHaveClass('well-group');
+  fireEvent.change(renameInput, { target: { value: '   ' } });
+  fireEvent.click(screen.getByRole('button', { name: '保存名称' }));
+  expect(screen.getByRole('alert')).toHaveTextContent('1–128');
+  expect(backend.renameProfile).not.toHaveBeenCalled();
+
+  const tooLong = '字'.repeat(129);
+  fireEvent.change(renameInput, { target: { value: tooLong } });
+  fireEvent.click(screen.getByRole('button', { name: '保存名称' }));
+  expect(screen.getByRole('alert')).toHaveTextContent('128');
+  expect(renameInput).toHaveValue(tooLong);
+  expect(backend.renameProfile).not.toHaveBeenCalled();
+
+  fireEvent.change(renameInput, { target: { value: 'local-skills' } });
+  fireEvent.click(screen.getByRole('button', { name: '保存名称' }));
+  expect(screen.getByRole('alert')).toHaveTextContent('local-skills');
+  expect(backend.renameProfile).not.toHaveBeenCalled();
+
+  fireEvent.change(renameInput, { target: { value: '  工作资料  ' } });
+  fireEvent.click(screen.getByRole('button', { name: '保存名称' }));
+  await waitFor(() => expect(backend.renameProfile).toHaveBeenCalledExactlyOnceWith('profile-a', '工作资料'));
+  expect(await screen.findByRole('heading', { level: 3, name: '工作资料' })).toBeVisible();
+
+  fireEvent.click(screen.getByRole('button', { name: '暂停写入（只读）' }));
+  await waitFor(() => expect(backend.setProfileWritePaused).toHaveBeenCalledWith('profile-a', true));
+  expect(screen.queryByRole('dialog')).toBeNull();
+  expect(await screen.findByText('已暂停写入（只读保护）')).toBeVisible();
+  expect(document.querySelector('.connection-pill')).toHaveTextContent('已暂停写入 · 只读');
+
+  fireEvent.click(screen.getByRole('button', { name: '恢复写入' }));
+  await waitFor(() => expect(backend.setProfileWritePaused).toHaveBeenCalledWith('profile-a', false));
+  expect(document.querySelector('.connection-pill')).toHaveTextContent('已连接 Chrome');
 });

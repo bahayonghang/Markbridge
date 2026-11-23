@@ -26,7 +26,7 @@ for (const [width, height] of sizes) {
           return { x, y, width, height, scrollWidth: element.scrollWidth, scrollHeight: element.scrollHeight };
         };
         return { main: box('.app-main'), tabs: box('.settings-tabs'), content: box('.settings-scroll'),
-          connection: box('.connection-settings'), sources: box('.connection-sources'), setup: box('.connection-setup'),
+          connection: box('.connection-settings'),
           export: box('.export-desk'), documentWidth: document.documentElement.scrollWidth, documentHeight: document.documentElement.scrollHeight };
       });
       geometry.push({ tab, ...measurements });
@@ -36,12 +36,8 @@ for (const [width, height] of sizes) {
         await expect(page.getByRole('tablist', { name: '设置分类' })).toHaveAttribute('aria-orientation', 'vertical');
         expect(measurements.tabs!.x + measurements.tabs!.width).toBeLessThanOrEqual(measurements.content!.x);
         if (tab === 'Chrome 连接') {
-          const { connection, sources, setup } = measurements;
-          expect(connection!.width).toBeGreaterThan(0);
-          if (connection!.width >= 960) {
-            expect(sources!.x + sources!.width).toBeLessThanOrEqual(setup!.x);
-            expect(Math.abs(sources!.y - setup!.y)).toBeLessThanOrEqual(1);
-          } else expect(sources!.y + sources!.height).toBeLessThanOrEqual(setup!.y);
+          expect(measurements.connection!.width).toBeGreaterThan(0);
+          expect(measurements.connection!.width).toBeLessThanOrEqual(760);
         }
         const overflow = await panel.evaluate(element => element.scrollWidth > element.clientWidth);
         expect(overflow).toBe(false);
@@ -136,6 +132,7 @@ for (const [width, height] of sizes) {
     });
     await page.getByRole('button', { name: '设置', exact: true }).click();
     await page.getByRole('tab', { name: 'Chrome 连接', exact: true }).click();
+    await page.getByText('其他接入方式：只读文件来源', { exact: true }).click();
     expect(await page.locator('.settings-scroll').evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true);
     await mkdir(evidence, { recursive: true });
     await page.screenshot({ path: join(evidence, `pending-${width}x${height}.png`) });
@@ -158,7 +155,7 @@ for (const fontSize of [12, 14, 20]) {
     await mockBridge(page, 'sources');
     await page.goto('/');
     await page.getByRole('button', { name: '设置', exact: true }).click();
-    for (const tab of ['通用', 'AI', '语义检索', '备份导出']) {
+    for (const tab of ['通用', 'Chrome 连接', 'AI', '语义检索', '备份导出']) {
       await page.getByRole('tab', { name: tab, exact: true }).click();
       const sizesMeasured = await page.evaluate(() => {
         const px = (el: Element | null) => el ? parseFloat(getComputedStyle(el).fontSize) : 0;
@@ -185,7 +182,7 @@ for (const [width, height] of [[1440, 900], [1920, 1080], [2549, 1356]] as const
     const tabsBg = await page.locator('.settings-tabs').evaluate(el => getComputedStyle(el).backgroundColor);
     expect(tabsBg).toBe('rgba(0, 0, 0, 0)');
 
-    for (const [tab, expectedPrimary] of [['通用', 0], ['AI', 1], ['语义检索', 1], ['备份导出', 1]] as const) {
+    for (const [tab, expectedPrimary] of [['通用', 0], ['Chrome 连接', 0], ['AI', 1], ['语义检索', 1], ['备份导出', 1]] as const) {
       await page.getByRole('tab', { name: tab, exact: true }).click();
       const layout = await page.evaluate((tabName) => {
         const tabs = document.querySelector('.settings-tabs')!.getBoundingClientRect();
@@ -208,7 +205,9 @@ for (const [width, height] of [[1440, 900], [1920, 1080], [2549, 1356]] as const
           ? (panel.querySelector('.ai-desk')?.textContent ?? '')
           : tabName === '备份导出'
             ? (panel.querySelector('.export-desk')?.textContent ?? '')
-            : '';
+            : tabName === 'Chrome 连接'
+              ? [...panel.querySelectorAll('.settings-facts')].map(el => el.textContent ?? '').join(' ')
+              : '';
         return {
           tabsRight: tabs.x + tabs.width,
           contentX: contentBox.x,
@@ -237,7 +236,7 @@ for (const [width, height] of [[1440, 900], [1920, 1080], [2549, 1356]] as const
         expect(row.span, `${tab} label+gap span`).toBeLessThanOrEqual(260);
       }
       expect(layout.primaryButtons, `${tab} primary count`).toBe(expectedPrimary);
-      expect(layout.autoSubmitNonPrimary, `${tab} unclassed submit`).toBe(0);
+      if (tab !== 'Chrome 连接') expect(layout.autoSubmitNonPrimary, `${tab} unclassed submit`).toBe(0);
       expect(layout.hasMiddleDot, `${tab} middle dot`).toBe(false);
     }
 
