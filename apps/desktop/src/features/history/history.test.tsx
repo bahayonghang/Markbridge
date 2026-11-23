@@ -138,3 +138,22 @@ it.each(['rolled_back', 'rollback_conflict'] as const)('finishes an async undo n
   await waitFor(() => expect(screen.queryByText('已发送撤销，正在等待回执。')).toBeNull(), { timeout: 2000 });
   expect(screen.getByText(state === 'rolled_back' ? '撤销回执已确认。' : '撤销存在冲突，外部值保持不变。')).toBeVisible();
 });
+
+it('groups export desk in well-groups without middle dots, uses h3 headings, and marks a single primary action', async () => {
+  vi.mocked(backend.saveExport).mockResolvedValueOnce(result('saved'));
+  const { container } = render(<ExportDesk source={{ kind: 'profile', id: 'p' }} name="研究资料" cachedAt={1791800000000} />);
+  expect(container.querySelectorAll('.well-group').length).toBeGreaterThanOrEqual(1);
+  expect(container.querySelectorAll('h4')).toHaveLength(0);
+  expect(screen.getByRole('heading', { level: 3, name: '书签 HTML' })).toBeVisible();
+  expect(screen.getByRole('heading', { level: 3, name: '本地侧车 JSON' })).toBeVisible();
+  const primaries = container.querySelectorAll('button.primary-button');
+  expect(primaries).toHaveLength(1);
+  expect(primaries[0]).toHaveTextContent('导出 HTML');
+  expect(screen.getByRole('button', { name: '导出侧车 JSON' })).not.toHaveClass('primary-button');
+  expect(screen.getByText(/它不是全库恢复文件/)).toBeVisible();
+  expect(screen.getByText(/保存时捕获完整缓存，不需要连接 Chrome/)).toBeVisible();
+  expect(container.textContent).not.toContain('·');
+  fireEvent.click(primaries[0]!);
+  await screen.findByText('文件已保存到所选位置。');
+  expect(container.textContent).not.toContain('·');
+});

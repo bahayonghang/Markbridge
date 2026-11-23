@@ -106,4 +106,15 @@ describe('font picker and precise size', () => {
     fireEvent.click(screen.getByRole('button', { name: '恢复默认外观' }));
     expect(size).toHaveValue('14'); expect(screen.queryByRole('alert')).toBeNull();
   });
+  it('renders font presets as segmented control and marks only 使用此字体 as primary button', async () => {
+    vi.mocked(listInstalledFonts).mockResolvedValue(ready);
+    render(<GeneralSettings value={DEFAULT_UI_PREFERENCES} saveFailed={false} onChange={vi.fn()} />);
+    fireEvent.click(screen.getByRole('button', { name: '选择字体' }));
+    const dialog = await screen.findByRole('dialog');
+    expect(dialog.querySelector('.segmented-control.font-presets')).not.toBeNull();
+    const primaries = dialog.querySelectorAll('button.primary-button');
+    expect(primaries).toHaveLength(1);
+    expect(primaries[0]).toHaveTextContent('使用此字体');
+    expect(dialog.querySelector('.well-group.font-picker-sample')).not.toBeNull();
+  });
 });

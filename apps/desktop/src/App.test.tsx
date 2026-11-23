@@ -34,6 +34,8 @@ vi.mock('./backend', () => ({
   aiSettings: vi.fn(async () => ({ enabled: false, provider: null, endpointLabel: null, model: null, credentialConfigured: false, schemaSupported: null })),
   saveAiConfig: vi.fn(), setAiCredential: vi.fn(), clearAiCredential: vi.fn(), testAiConnection: vi.fn(),
   suggestAi: vi.fn(), cancelAi: vi.fn(), applyAi: vi.fn(),
+  semanticSettings: vi.fn(async () => ({ enabled: false, endpointLabel: 'http://localhost:11434', model: null, inputRecipeVersion: 1, maxInputChars: 8192, maxInputBytes: 32768 })),
+  semanticStatus: vi.fn(async () => ({ settings: { enabled: false, endpointLabel: 'http://localhost:11434', model: null, inputRecipeVersion: 1, maxInputChars: 8192, maxInputBytes: 32768 }, index: null })),
 }));
 const initial: BridgeState = { protocolVersion: 1, revision: 1, port: null, errorCode: null, profiles: [], mirrors: [] };
 const profile: BridgeState['profiles'][number] = {
@@ -435,4 +437,47 @@ it('groups all 5 primary nav items at top, hides sidebar-library off library, re
   expect(screen.getByRole('heading', { level: 1, name: '设置' })).toBeVisible();
   expect(screen.getByRole('tab', { name: 'Chrome 连接' })).toHaveAttribute('aria-selected', 'true');
   expect(sidebarLibrary).toHaveAttribute('hidden');
+});
+
+it('navigates all 5 settings tabs via keyboard and structures General with segmented controls and well groups', async () => {
+  vi.mocked(backend.getBridgeState).mockResolvedValue({ ...initial, profiles: [profile] });
+  const { container } = render(<App />);
+  await waitFor(() => expect(document.querySelector('.workspace-heading .connection')).toHaveTextContent('已连接 Chrome'));
+  fireEvent.click(screen.getByRole('button', { name: '设置' }));
+
+  const tabNames = ['通用', 'Chrome 连接', 'AI', '语义检索', '备份导出'];
+  const firstTab = screen.getByRole('tab', { name: '通用' });
+  firstTab.focus();
+  for (let i = 1; i < tabNames.length; i += 1) {
+    fireEvent.keyDown(document.activeElement!, { key: 'ArrowDown' });
+    expect(screen.getByRole('tab', { name: tabNames[i]! })).toHaveFocus();
+    expect(screen.getByRole('tab', { name: tabNames[i]! })).toHaveAttribute('aria-selected', 'true');
+  }
+  fireEvent.keyDown(document.activeElement!, { key: 'Home' });
+  expect(firstTab).toHaveFocus();
+  fireEvent.keyDown(document.activeElement!, { key: 'End' });
+  expect(screen.getByRole('tab', { name: '备份导出' })).toHaveFocus();
+  fireEvent.keyDown(document.activeElement!, { key: 'ArrowUp' });
+  expect(screen.getByRole('tab', { name: '语义检索' })).toHaveFocus();
+  fireEvent.keyDown(document.activeElement!, { key: 'Home' });
+
+  const generalPanel = screen.getByRole('tabpanel', { name: '通用' });
+  expect(generalPanel.querySelectorAll('.well-group').length).toBeGreaterThanOrEqual(2);
+  expect(generalPanel.querySelectorAll('.primary-button')).toHaveLength(0);
+  const themeGroup = generalPanel.querySelector('.segmented-control.theme-options');
+  expect(themeGroup).not.toBeNull();
+  expect(Array.from(themeGroup!.querySelectorAll('button')).map(b => b.textContent)).toEqual(['跟随系统', '浅色', '深色']);
+  const sizeGroup = generalPanel.querySelector('.segmented-control.font-size-options');
+  expect(sizeGroup).not.toBeNull();
+  expect(Array.from(sizeGroup!.querySelectorAll('button')).map(b => b.textContent)).toEqual(['13 px', '14 px', '16 px']);
+  expect(screen.getByLabelText('字号')).toHaveValue('14');
+  expect(generalPanel.querySelector('.appearance-sample')).not.toBeNull();
+  expect(screen.getByRole('button', { name: '选择字体' })).toBeVisible();
+  const resetButton = screen.getByRole('button', { name: '恢复默认外观' });
+  expect(resetButton).not.toHaveClass('primary-button');
+
+  fireEvent.click(screen.getByRole('button', { name: '16 px' }));
+  expect(document.documentElement.style.getPropertyValue('--text-size')).toBe('16px');
+  expect(screen.getByRole('button', { name: '16 px' })).toHaveAttribute('aria-pressed', 'true');
+  expect(container.querySelectorAll('.settings-tabs > button[role="tab"]')).toHaveLength(5);
 });

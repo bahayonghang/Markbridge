@@ -185,6 +185,7 @@ for (const theme of ['light', 'dark']) {
       await expect(page.getByRole('button', { name: '选择字体', exact: true })).toBeFocused();
 
       if (fallback === 'forced-colors') {
+        await page.getByRole('button', { name: '16 px', exact: true }).click();
         // Keep selected text and its descendants on the same system-colored surface;
         // UA text backplates otherwise hide labels inside manually painted highlights.
         const selected = [page.locator('.nav-button[aria-current="page"]'), page.getByRole('tab', { name: '通用', exact: true }), page.locator('.theme-options [aria-pressed="true"]'), page.locator('.font-size-options [aria-pressed="true"]')];
@@ -195,6 +196,8 @@ for (const theme of ['light', 'dark']) {
             for (const back of colors.fill) expect(contrastRatio(colors.ink, back)).toBeGreaterThanOrEqual(4.5);
           }
         }
+        await page.getByLabel('字号', { exact: true }).fill('20');
+        await page.getByLabel('字号', { exact: true }).press('Enter');
         const focus = await renderedContrastColors(page.getByRole('button', { name: '选择字体', exact: true }));
         expect(parseFloat(focus.outlineWidth)).toBeGreaterThanOrEqual(2);
         for (const back of focus.outside) expect(contrastRatio(focus.outline, back)).toBeGreaterThanOrEqual(3);

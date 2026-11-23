@@ -255,3 +255,19 @@ it('R07 keeps offline AI metadata local and prevents title writes', async () => 
   await waitFor(() => expect(applyAi).toHaveBeenCalledWith(expect.objectContaining({ applyTitle: false, applyTags: true })));
   expect(applyEdit).not.toHaveBeenCalled();
 });
+
+it('groups AI settings inside well-groups, marks a single primary button, preserves disclosures, and avoids middle dots', async () => {
+  vi.mocked(aiSettings).mockResolvedValue(settings);
+  const { container } = render(<AiSettingsPanel native />);
+  expect(await screen.findByText('默认关闭')).toBeVisible();
+  expect(container.querySelectorAll('.well-group').length).toBeGreaterThanOrEqual(2);
+  const primaries = container.querySelectorAll('button.primary-button');
+  expect(primaries).toHaveLength(1);
+  expect(primaries[0]).toHaveTextContent('保存配置');
+  expect(screen.getByRole('button', { name: '保存密钥' })).not.toHaveClass('primary-button');
+  expect(screen.getByRole('button', { name: '清除凭据' })).not.toHaveClass('primary-button');
+  expect(screen.getByRole('button', { name: '测试连接' })).not.toHaveClass('primary-button');
+  expect(screen.getByText(/模型只生成可编辑建议。确认前不写书签。密钥只进入系统凭据存储。/)).toBeVisible();
+  expect(screen.getByText(/保存配置不会连接模型。测试连接仅发送测试提示/)).toBeVisible();
+  expect(container.textContent).not.toContain('·');
+});
