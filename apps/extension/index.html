@@ -6,18 +6,23 @@
     <title>Markbridge · 签桥</title>
   </head>
   <body>
-    <main>
+    <main class="panel popup">
       <h1>Markbridge · 签桥</h1>
       <p id="status" role="status">正在读取连接状态</p>
+      <p id="write-paused" class="badge badge-caution" hidden>仅只读 · 桌面已暂停写入</p>
       <p id="details"></p>
-      <p>连接桌面后同步书签。只有在桌面审查并确认的修改才会写入 Chrome。</p>
-      <section>
+      <div class="actions">
+        <button id="reconnect" class="primary" type="button">重新连接</button>
+        <button id="pause" type="button">暂停同步</button>
+        <button id="options" type="button">连接状态页</button>
+      </div>
+      <p id="error" role="alert"></p>
+      <section class="well capture-section">
         <h2>采集当前页</h2>
         <p>只在你点击下面的按钮之后，读取当前标签页里的可见文字。不读取密码框、Cookie，也不读取其他标签页。</p>
         <button id="capture" type="button">采集当前页可见文字</button>
         <p id="capture-result"></p>
       </section>
-      <button id="options" type="button">打开配对设置</button>
     </main>
     <script type="module" src="/src/main.ts"></script>
   </body>
