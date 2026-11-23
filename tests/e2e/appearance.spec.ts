@@ -288,10 +288,10 @@ for (const theme of ['light', 'dark']) {
     const dialog = page.getByRole('dialog', { name: /^断开并忽略“.+”？$/ });
     await expect(dialog).toHaveCSS('border-radius', '16px');
     const confirm = dialog.getByRole('button', { name: '确认断开并忽略', exact: true });
-    await checkConsumer('confirmation action', confirm, true);
+    await checkConsumer('confirmation action', confirm);
     await checkConsumer('confirmation copy', dialog.locator('p').first());
     await page.keyboard.press('Tab'); await expect(confirm).toBeFocused();
-    await checkConsumer('confirmation keyboard', confirm, true, true);
+    await checkConsumer('confirmation keyboard', confirm, false, true);
     await mkdir(output, { recursive: true });
     await page.screenshot({ path: join(output, `${theme}-contrast-dialog.png`) });
     await page.keyboard.press('Escape');

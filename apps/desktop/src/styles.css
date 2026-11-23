@@ -716,12 +716,16 @@ button.danger-button:active:enabled { background: var(--danger-wash-pressed); bo
 .semantic-hit > span:first-child { min-width: 0; overflow-wrap: anywhere; }
 .semantic-hit > .secondary { flex: none; font-variant-numeric: tabular-nums; font-size: var(--text-caption); color: var(--output); }
 @media (max-width: 799px) {
-  .semantic-facts { grid-template-columns: 80px minmax(0, 1fr); gap: 8px 12px; }
+  .semantic-facts { grid-template-columns: 88px minmax(0, 1fr); gap: 8px 12px; }
   .semantic-heading, .semantic-workspace .scope-bar { align-items: flex-start; }
 }
 @media (max-height: 550px) {
+  .semantic-review { padding: 12px 16px; }
+  .semantic-review > h4:first-child { margin-bottom: 6px; }
+  .semantic-review .semantic-facts { gap: 4px 12px; margin-block: 6px; }
+  .semantic-review .edit-actions { margin: 8px 0 0; }
   .semantic-query-form, .semantic-hits { margin-block: 8px; }
-  .semantic-query > p { margin-block: 4px; }
+  .semantic-query > p, .semantic-review > p { margin-block: 4px; }
 }
 @media (max-width: 799px) {
   .organization-assignments .org-row { grid-template-columns: minmax(0, 1fr) 80px; gap: 8px 16px; }
