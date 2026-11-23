@@ -204,7 +204,7 @@ test('T1 wide icon-rail collapse, floating folder overlay, Ctrl+B avoidance, and
   expect(overlayStyle.top).toBe(70);
   expect(overlayStyle.width).toBe(320);
   expect(overlayStyle.borderRadius).toBe('16px');
-  expect(overlayStyle.backdropFilter).toBe('none');
+  expect(overlayStyle.backdropFilter).toBe('blur(20px) saturate(1.15)');
   expect(overlayStyle.libraryVisibility).toBe('visible');
   await expect(page.locator('.list-pane')).toBeVisible();
 
