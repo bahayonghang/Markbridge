@@ -122,8 +122,15 @@ test('T7 zero-click onboarding auto-enters workbench without yanking Settings, a
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(targetCard.getByText('已暂停写入（只读保护）', { exact: true })).toBeVisible();
   await expect(page.locator('.connection-pill span')).toHaveText('已暂停写入 · 只读');
+  await page.getByRole('button', { name: '书签', exact: true }).click();
+  await expect(page.locator('.library-toolbar').getByText(/已暂停写入（只读保护）/)).toBeVisible();
+  await page.locator('.source-guidance details > summary').click();
+  await expect(page.locator('.source-guidance').getByRole('button', { name: '检查连接设置', exact: true })).toBeVisible();
+  await page.locator('.source-guidance').getByRole('button', { name: '检查连接设置', exact: true }).click();
   await targetCard.getByRole('button', { name: '恢复写入', exact: true }).click();
   await expect(page.locator('.connection-pill span')).toHaveText('已连接 Chrome');
+  await page.getByRole('button', { name: '书签', exact: true }).click();
+  await expect(page.locator('details.source-guidance.source-guidance-compact > summary')).toHaveText('实时同步 · 已完成全树核对');
 });
 
 test('T7 keeps user in Settings when first Chrome profile arrives while viewing Settings', async ({ page }) => {

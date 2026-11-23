@@ -425,7 +425,7 @@ it('keeps duplicate urls, chinese text, and long titles through the cache reads'
   expect(screen.getByText(longTitle)).toHaveClass('library-title');
   expect(screen.getByText(/已加载 4 \/ 4 项/)).toBeVisible();
   expect(document.querySelector('.library-list-meta')?.textContent).not.toContain('·');
-  expect(document.querySelector('.library-status')?.textContent).not.toContain('·');
+  expect(document.querySelector('.library-status')).toBeNull();
   expect(invoke).toHaveBeenCalledWith('cache_tree', { profileId: 'profile-a', folderId: null, depth: 0 });
   expect(invoke).toHaveBeenCalledWith('cache_query', { profileId: 'profile-a', request: expect.objectContaining({ folderId: '1', offset: 0, limit: 200 }) });
   fireEvent.click(screen.getByRole('option', { name: /Alpha/ }));
@@ -1313,3 +1313,58 @@ it('T2-S5b preserves collapse-all across mirror revision refreshes and resets on
   expect(await screen.findByRole('treeitem', { name: '镜像分支B' })).toBeVisible();
   expect(screen.getByRole('treeitem', { name: '镜像根B' })).toHaveAttribute('aria-expanded', 'true');
 });
+
+it('T4 collapses source-guidance in healthy live/local state, preserves explicit risk guidance and recovery button in non-healthy states, and merges selection status into library-list-meta without shortcut noise', async () => {
+  const onSettings = vi.fn();
+  const liveProfile = profile('profile-a', '资料 A', 4, 'live');
+  const view = render(<LibraryWorkspace state={state([liveProfile])} invalid={false} native focusMirrorId={null} onSettings={onSettings} />);
+  fireEvent.click(await screen.findByRole('treeitem', { name: /栏/ }));
+  expect(await screen.findByRole('option', { name: /Alpha/ })).toBeVisible();
+
+  // Healthy live state: compact <details class="source-guidance source-guidance-compact">, closed by default
+  const compactLive = document.querySelector('details.source-guidance.source-guidance-compact') as HTMLDetailsElement | null;
+  expect(compactLive).not.toBeNull();
+  expect(compactLive!.open).toBe(false);
+  expect(compactLive!.querySelector('summary')).toHaveTextContent('实时同步 · 已完成全树核对');
+  expect(screen.queryByRole('button', { name: '检查连接设置' })).toBeNull();
+
+  // No bottom .library-status and no mechanical shortcut texts
+  expect(document.querySelector('.library-status')).toBeNull();
+  const meta = document.querySelector('.library-list-meta') as HTMLElement;
+  expect(meta).not.toBeNull();
+  expect(meta).toHaveTextContent('已加载 4 / 4 项');
+  expect(meta).not.toHaveTextContent('Ctrl+A');
+  expect(meta).not.toHaveTextContent('Ctrl+End');
+  expect(document.body.textContent).not.toContain('按 Chrome 顺序');
+  expect(document.body.textContent).not.toContain('方向键浏览，Enter 打开');
+
+  // Selecting an item merges "已选 1 项" into .library-list-meta
+  fireEvent.click(screen.getByRole('checkbox', { name: '选择 Alpha' }));
+  expect(meta).toHaveTextContent('已选 1 项');
+
+  // Healthy local Skills library state: also uses compact guidance
+  const localProfile = { ...liveProfile, profileId: 'local-skills', displayName: 'Skills 书签库', connection: 'local' as const };
+  view.rerender(<LibraryWorkspace state={state([localProfile])} invalid={false} native focusMirrorId={null} onSettings={onSettings} />);
+  const compactLocal = document.querySelector('details.source-guidance.source-guidance-compact') as HTMLDetailsElement | null;
+  expect(compactLocal).not.toBeNull();
+  expect(compactLocal!.querySelector('summary')).toHaveTextContent('本地 Skills 书签库');
+  expect(screen.queryByRole('button', { name: '检查连接设置' })).toBeNull();
+
+  // Non-healthy writePaused state: explicit risk warning & recovery button
+  const pausedProfile = { ...liveProfile, writePaused: true };
+  view.rerender(<LibraryWorkspace state={state([pausedProfile])} invalid={false} native focusMirrorId={null} onSettings={onSettings} />);
+  expect(document.querySelector('details.source-guidance-compact')).toBeNull();
+  expect(document.querySelector('.source-guidance .access-note')).toHaveTextContent('已暂停写入（只读保护）');
+  expect(document.querySelector('.source-guidance .access-note')).toHaveTextContent('缓存时间：');
+  const settingsBtn = screen.getByRole('button', { name: '检查连接设置' });
+  fireEvent.click(settingsBtn);
+  expect(onSettings).toHaveBeenCalledOnce();
+
+  // Non-healthy cached_read_only state: explicit risk warning & recovery button
+  const offlineProfile = { ...liveProfile, connection: 'cached_read_only' as const };
+  view.rerender(<LibraryWorkspace state={state([offlineProfile])} invalid={false} native focusMirrorId={null} onSettings={onSettings} />);
+  expect(document.querySelector('details.source-guidance-compact')).toBeNull();
+  expect(document.querySelector('.source-guidance .access-note')).toHaveTextContent('扩展未连接');
+  expect(screen.getByRole('button', { name: '检查连接设置' })).toBeInTheDocument();
+});
+

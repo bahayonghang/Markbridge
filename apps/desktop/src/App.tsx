@@ -197,6 +197,7 @@ export function App({ initialPreferences }: { initialPreferences?: UiPreferences
     : fallbackSource?.kind === 'mirror' ? fallbackSource.mirror : undefined;
   const { header: connection, pill: pillConnection } = connectionStatusLabels(state, error, selectedProfile, selectedMirror);
   const onboarding = section === 'library' && !!state && !state.profiles.length && !state.mirrors.length;
+  const isIconRail = layoutPrefs.sidebarCollapsed || viewport.width < 800;
 
   function browseSource(source: SourceTarget) {
     setSourceRequest((previous) => ({ ...source, request: (previous?.request ?? 0) + 1 }));
@@ -257,7 +258,7 @@ export function App({ initialPreferences }: { initialPreferences?: UiPreferences
       onKeyDown={handleSplitterKeyDown}
     />
     <main id="main-content" className="app-main" tabIndex={-1}>
-      <header className="workspace-heading"><h1 ref={heading} tabIndex={-1}>{title}</h1><span className="connection" role="status">{connection}</span></header>
+      <header className="workspace-heading"><h1 ref={heading} tabIndex={-1}>{title}</h1><span className={`connection${isIconRail ? '' : ' visually-hidden'}`} role="status">{connection}</span></header>
       {error === 'startup' ? <section className="empty-state" role="alert"><h2>无法读取启动状态</h2><p>请关闭窗口后重新打开应用。</p></section> : <>
         {error === 'event' && <p className="notice global-notice" role="alert">收到无效连接状态。请重新打开应用。</p>}
         <LibraryWorkspace state={state} invalid={error === 'event'} native={native} focusMirrorId={null} sourceRequest={sourceRequest} onCurrentSource={setCurrentSource}

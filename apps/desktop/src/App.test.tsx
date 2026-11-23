@@ -868,3 +868,29 @@ it('syncs native window theme on startup, preference changes, and system color-s
   darkView.unmount();
   query.mockRestore();
 });
+
+it('visually hides header connection status when sidebar is expanded and reveals it in 64px icon-rail modes while keeping role=status', async () => {
+  setViewport(1440, 900);
+  vi.mocked(backend.getBridgeState).mockResolvedValue({ ...initial, port: 49153, profiles: [profile] });
+  render(<App />);
+  await waitFor(() => expect(document.querySelector('.workspace-heading .connection')).toHaveTextContent('已连接 Chrome'));
+
+  const headerStatus = document.querySelector('.workspace-heading .connection') as HTMLElement;
+  const pill = document.querySelector('.connection-pill') as HTMLElement;
+  expect(headerStatus).toHaveAttribute('role', 'status');
+  expect(headerStatus).toHaveClass('visually-hidden');
+  expect(pill).toHaveTextContent('已连接 Chrome');
+
+  fireEvent.click(screen.getByRole('button', { name: '收起侧栏' }));
+  expect(headerStatus).not.toHaveClass('visually-hidden');
+  expect(headerStatus).toHaveAttribute('role', 'status');
+  expect(headerStatus).toHaveTextContent('已连接 Chrome');
+
+  fireEvent.click(screen.getByRole('button', { name: '展开侧栏' }));
+  expect(headerStatus).toHaveClass('visually-hidden');
+
+  act(() => { setViewport(640, 760); });
+  expect(headerStatus).not.toHaveClass('visually-hidden');
+  expect(headerStatus).toHaveTextContent('已连接 Chrome');
+});
+

@@ -577,6 +577,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
   const isLocalProfile = profile?.connection === 'local';
   const writePaused = !!profile && profile.connection === 'live' && !profile.ignored && !!profile.writePaused;
   const canWriteBrowser = profile?.connection === 'live' && !profile.writePaused && !profile.ignored;
+  const healthySource = !invalid && !!profile && ((profile.connection === 'live' && !writePaused && !profile.ignored) || isLocalProfile);
 
 
   const folderPane = source && native && !invalid ? (
@@ -675,10 +676,17 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
           {profile && <label htmlFor="library-tag">标签<select id="library-tag" value={filterTagId ?? ''} onChange={(event) => { const value = event.target.value || null; leaveMetadata(() => setFilterTagId(value)); }}><option value="">所有标签</option>{tags.map((tag) => <option key={tag.tagId} value={tag.tagId}>{tag.name}</option>)}</select></label>}
           {profile && <details><summary>更多搜索范围</summary><label className="checkbox-label"><input type="checkbox" checked={includeSummary} onChange={(event) => { const value = event.target.checked; leaveMetadata(() => setIncludeSummary(value)); }} />包含摘要</label><label className="checkbox-label"><input type="checkbox" checked={includeNote} onChange={(event) => { const value = event.target.checked; leaveMetadata(() => setIncludeNote(value)); }} />包含备注</label></details>}
         </div>}
-        {source && <div className="source-guidance">
-          <p className="access-note">{invalid ? '连接状态无效，已停止更新书签列表。' : accessNote(source)} 缓存时间：{cacheTime(profile?.lastSyncedAt ?? mirror?.lastSyncedAt ?? null)}</p>
-          {(profile?.connection !== 'live' || writePaused || profile?.ignored || invalid) && <details><summary>来源状态与恢复</summary><p>{profile ? (writePaused ? '此资料已启用只读保护。请在连接设置中恢复写入后再执行浏览器修改。' : profileNextStep(profile.connection)) : mirror?.watching ? '文件来自你选择的 Chrome 目录。文件陈旧或不可用时保留最后缓存；请检查目录后重新读取。' : '此文件来源已停止监听。若要更新，请在连接设置中重新接入同一目录。'}</p>{onSettings && <button type="button" onClick={onSettings}>检查连接设置</button>}</details>}
-        </div>}
+        {source && (healthySource ? (
+          <details className="source-guidance source-guidance-compact">
+            <summary><WorkspaceIcon name="chevron" /><span>{isLocalProfile ? '本地 Skills 书签库' : '实时同步 · 已完成全树核对'}</span></summary>
+            <p className="access-note">{accessNote(source)} 缓存时间：{cacheTime(profile?.lastSyncedAt ?? null)}</p>
+          </details>
+        ) : (
+          <div className="source-guidance">
+            <p className="access-note">{invalid ? '连接状态无效，已停止更新书签列表。' : accessNote(source)} 缓存时间：{cacheTime(profile?.lastSyncedAt ?? mirror?.lastSyncedAt ?? null)}</p>
+            <details><summary>来源状态与恢复</summary><p>{profile ? (writePaused ? '此资料已启用只读保护。请在连接设置中恢复写入后再执行浏览器修改。' : profileNextStep(profile.connection)) : mirror?.watching ? '文件来自你选择的 Chrome 目录。文件陈旧或不可用时保留最后缓存；请检查目录后重新读取。' : '此文件来源已停止监听。若要更新，请在连接设置中重新接入同一目录。'}</p>{onSettings && <button type="button" onClick={onSettings}>检查连接设置</button>}</details>
+          </div>
+        ))}
         {gap && <p role="status">来源版本不连续，已重新读取。</p>}
         {phase === 'stale' && <p role="status">无法刷新书签，仍显示上次结果。</p>}
         {phase === 'error' && <p role="alert">无法读取书签。请稍后重试。</p>}
@@ -725,8 +733,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
             {filtering && <span>标签：{tags.find((tag) => tag.tagId === filterTagId)?.name ?? '已选择'}</span>}
             {searching && includeSummary && <span>包含摘要</span>}
             {searching && includeNote && <span>包含备注</span>}
-            <span>Ctrl+A 已加载</span>
-            {hasMore && <span>Ctrl+End 末项</span>}
+            {selectionNotice ? <span>{selectionNotice}</span> : pickedIds.length > 0 ? <span>已选 {pickedIds.length} 项</span> : null}
           </div>
           {paging.restarted && <p role="status">来源版本已改变，已从第一页重新读取。</p>}
           {paging.failed && <p role="alert">无法读取列表。<button type="button" onClick={paging.refresh}>重试列表</button></p>}
@@ -872,7 +879,6 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
           {section === 'semantic' && (!profile || epochRef.current.epoch === null) && <><h2>本地语义检索</h2><p>{profile ? '正在确认此资料的缓存身份。完成后可选择索引范围。' : '请选择 Chrome 资料。只读文件来源不建立语义索引。'}</p><button type="button" onClick={onLibrary}>返回普通搜索</button></>}
         </div>
         {!exportHost && exportView}
-        {section === 'library' && <div className="library-status"><span role="status">{selectionNotice || (pickedIds.length > 0 ? `已选 ${pickedIds.length} 项` : `${visible.length} 项`)}</span><span className="library-status-hint"><span>按 Chrome 顺序</span><span>方向键浏览，Enter 打开</span></span></div>}
       </>}
     </section>
   </>;
