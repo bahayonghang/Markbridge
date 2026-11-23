@@ -17,11 +17,11 @@ function node(chromeId: string, parentId: string | null, position: number, kind:
 }
 
 function state(profiles: BridgeState['profiles'], mirrors: BridgeState['mirrors'] = [], revision = 1): BridgeState {
-  return { protocolVersion: 1, revision, port: 49153, errorCode: null, profiles, pending: [], mirrors };
+  return { protocolVersion: 1, revision, port: 49153, errorCode: null, profiles, mirrors };
 }
 
 function profile(id: string, name: string, revision = 4, connection: BridgeState['profiles'][number]['connection'] = 'live'): BridgeState['profiles'][number] {
-  return { profileId: id, instanceId: `instance-${id}`, displayName: name, connection, nodeCount: 4, revision, lastSyncedAt: null, errorCode: null };
+  return { profileId: id, instanceId: `instance-${id}`, displayName: name, connection, writePaused: false, ignored: false, nodeCount: 4, revision, lastSyncedAt: null, errorCode: null };
 }
 
 const root = node('0', null, 0, 'folder', '根');

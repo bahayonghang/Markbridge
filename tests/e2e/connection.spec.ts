@@ -74,5 +74,5 @@ test('R02 revocation requires a second action and Escape returns to its trigger'
   await revoke.click();
   await page.screenshot({ path: `${evidence}/revoke-confirmation.png` });
   await page.getByRole('button', { name: '确认吊销配对', exact: true }).click();
-  await expect(page.locator('.workspace-heading .connection')).toHaveText('未配对 · 只读');
+  await expect(page.locator('.workspace-heading .connection')).toHaveText('已忽略 · 只读');
 });

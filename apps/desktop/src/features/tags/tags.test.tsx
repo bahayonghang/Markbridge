@@ -39,8 +39,8 @@ const beta = node('11', '1', 1, 'Beta');
 
 function profile(connection: BridgeState['profiles'][number]['connection'] = 'cached_read_only'): BridgeState {
   return {
-    protocolVersion: 1, revision: 1, port: 49153, errorCode: null, pending: [], mirrors: [],
-    profiles: [{ profileId: 'profile-a', instanceId: 'instance-profile-a', displayName: '资料 A', connection, nodeCount: 4, revision: 4, lastSyncedAt: null, errorCode: null }],
+    protocolVersion: 1, revision: 1, port: 49153, errorCode: null, mirrors: [],
+    profiles: [{ profileId: 'profile-a', instanceId: 'instance-profile-a', displayName: '资料 A', connection, writePaused: false, ignored: false, nodeCount: 4, revision: 4, lastSyncedAt: null, errorCode: null }],
   };
 }
 

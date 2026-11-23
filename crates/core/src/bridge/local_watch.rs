@@ -88,6 +88,8 @@ impl Bridge {
             instance_id,
             display_name,
             connection: BridgeConnection::Local,
+            write_paused: false,
+            ignored: false,
             node_count,
             revision,
             last_synced_at,

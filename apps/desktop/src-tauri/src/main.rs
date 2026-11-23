@@ -6,7 +6,7 @@ use markbridge_protocol::{
     BridgeState, ChromeProfileList, ContentPreview, Counter, EditAction, EditDocument, EditPreview,
     ErrorCode, Id, LibraryCount, LibraryDetail, LibraryNodes, LibraryPage, LibrarySearch,
     MaintenanceReport, MirrorTree, OperationList, OrganizationFolder, OrganizationPlan,
-    PairingOffer, SourceEpoch, TagCatalog, TagCommand, TextSearchPage, TitleEncodingPreview,
+    SourceEpoch, TagCatalog, TagCommand, TextSearchPage, TitleEncodingPreview,
 };
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -165,32 +165,42 @@ async fn start_bridge(
     bridge.start(port).await
 }
 #[tauri::command]
-async fn begin_pairing(
+async fn rename_profile(
     window: tauri::WebviewWindow,
     bridge: tauri::State<'_, Bridge>,
+    profile_id: Id,
     display_name: String,
-) -> Result<PairingOffer, ErrorCode> {
+) -> Result<BridgeState, ErrorCode> {
     trusted(&window)?;
-    bridge.begin_pairing(display_name).await
+    bridge.rename_profile(profile_id, display_name).await
 }
 #[tauri::command]
-async fn confirm_pairing(
+async fn set_profile_write_paused(
     window: tauri::WebviewWindow,
     bridge: tauri::State<'_, Bridge>,
     profile_id: Id,
-    instance_id: Id,
+    paused: bool,
 ) -> Result<BridgeState, ErrorCode> {
     trusted(&window)?;
-    bridge.confirm_pairing(profile_id, instance_id).await
+    bridge.set_write_paused(profile_id, paused).await
 }
 #[tauri::command]
-async fn cancel_pairing(
+async fn ignore_profile(
     window: tauri::WebviewWindow,
     bridge: tauri::State<'_, Bridge>,
     profile_id: Id,
 ) -> Result<BridgeState, ErrorCode> {
     trusted(&window)?;
-    bridge.cancel_pairing(profile_id).await
+    bridge.ignore_profile(profile_id).await
+}
+#[tauri::command]
+async fn resume_profile(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    profile_id: Id,
+) -> Result<BridgeState, ErrorCode> {
+    trusted(&window)?;
+    bridge.resume_profile(profile_id).await
 }
 #[tauri::command]
 async fn revoke_pairing(
@@ -1241,9 +1251,10 @@ fn main() {
             get_startup_state,
             get_bridge_state,
             start_bridge,
-            begin_pairing,
-            confirm_pairing,
-            cancel_pairing,
+            rename_profile,
+            set_profile_write_paused,
+            ignore_profile,
+            resume_profile,
             revoke_pairing,
             reconnect_profile,
             ensure_local_library,

@@ -24,6 +24,9 @@ export type ErrorCode =
       | 'MIGRATION_FAILED'
       | 'CONFLICT'
       | 'CANCELLED'
+      | 'PROFILE_IGNORED'
+      | 'WRITE_PAUSED'
+      | 'PORT_EXHAUSTED'
     )
   | 'PATH_UNAVAILABLE';
 export type MirrorAssociation = 'independent' | 'confirmed';
@@ -42,19 +45,14 @@ export type RequiredNullable4 = Id | null;
 /**
  * A required JSON field whose value can be null. Unlike Option, absence is rejected.
  */
-export type RequiredNullable5 = string | null;
-/**
- * A required JSON field whose value can be null. Unlike Option, absence is rejected.
- */
 export type RequiredNullable = number | null;
 export type BridgeConnection =
-  'unpaired' | 'connecting' | 'reconciling' | 'live' | 'cached_read_only' | 'local' | 'error';
+  'ignored' | 'connecting' | 'reconciling' | 'live' | 'cached_read_only' | 'local' | 'error';
 export type Version = number;
 
 export interface BridgeState {
   errorCode: RequiredNullable2;
   mirrors: MirrorSourceState[];
-  pending: PendingPairing[];
   port: RequiredNullable;
   profiles: BridgeProfile[];
   protocolVersion: Version;
@@ -76,20 +74,15 @@ export interface MirrorSourceState {
   revision: Counter;
   watching: boolean;
 }
-export interface PendingPairing {
-  displayName: DisplayName;
-  expiresAt: Counter;
-  instanceId: RequiredNullable4;
-  origin: RequiredNullable5;
-  profileId: Id;
-}
 export interface BridgeProfile {
   connection: BridgeConnection;
   displayName: DisplayName;
   errorCode: RequiredNullable2;
+  ignored: boolean;
   instanceId: Id;
   lastSyncedAt: RequiredNullable3;
   nodeCount: Counter;
   profileId: Id;
   revision: Counter;
+  writePaused: boolean;
 }

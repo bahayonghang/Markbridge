@@ -34,6 +34,9 @@ export type ErrorCode =
       | 'MIGRATION_FAILED'
       | 'CONFLICT'
       | 'CANCELLED'
+      | 'PROFILE_IGNORED'
+      | 'WRITE_PAUSED'
+      | 'PORT_EXHAUSTED'
     )
   | 'PATH_UNAVAILABLE';
 export type OperationState =

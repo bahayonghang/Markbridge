@@ -1,3 +1,9 @@
+export const PROTOCOL_VERSION = 1 as const;
+export const OFFICIAL_EXTENSION_ID = 'dfgpiejnjammdmmmdpdaembpclmgdbpf' as const;
+export const OFFICIAL_EXTENSION_ORIGIN = 'chrome-extension://dfgpiejnjammdmmmdpdaembpclmgdbpf' as const;
+export const BRIDGE_PORT_START = 49153 as const;
+export const BRIDGE_PORT_END = 49160 as const;
+
 export * from './startup';
 export * from './wire';
 export * from './bridge';

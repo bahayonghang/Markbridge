@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import type { BridgeState, ChromeProfileList, PairingOffer } from '@markbridge/protocol';
+import type { BridgeState, ChromeProfileList } from '@markbridge/protocol';
 import { DiagnosticExport } from './DiagnosticExport';
 import {
-  associateFileMirror, attachFileMirror, beginPairing, cancelPairing, confirmPairing,
+  associateFileMirror, attachFileMirror,
   detachFileMirror, ensureLocalLibrary, enumerateChromeUserData,
   reconnectProfile, rescanFileMirrors, revokePairing, startBridge,
 } from '../../backend';
@@ -37,8 +37,6 @@ export function ConnectionSettings({ state, error, native, accept, onBrowseSourc
   onboarding?: boolean;
 }) {
   const [port, setPort] = useState('49153');
-  const [displayName, setDisplayName] = useState('Chrome 资料');
-  const [offer, setOffer] = useState<PairingOffer | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [userDataPath, setUserDataPath] = useState('');
@@ -46,7 +44,6 @@ export function ConnectionSettings({ state, error, native, accept, onBrowseSourc
   const [profileChoice, setProfileChoice] = useState('');
   const [path, setPath] = useState<'connect' | 'readonly'>('connect');
   const [revoke, setRevoke] = useState<BridgeState['profiles'][number] | null>(null);
-  const [now, setNow] = useState(Date.now);
   const [listedPath, setListedPath] = useState('');
   const mounted = useRef(false);
   const actionGeneration = useRef(0);
@@ -55,21 +52,6 @@ export function ConnectionSettings({ state, error, native, accept, onBrowseSourc
     mounted.current = true;
     return () => { mounted.current = false; actionGeneration.current += 1; };
   }, []);
-
-  useEffect(() => {
-    const deadlines = [...(state?.pending.map((candidate) => candidate.expiresAt) ?? []), ...(offer ? [offer.expiresAt] : [])].filter((deadline) => deadline > now);
-    if (!deadlines.length) return;
-    const timer = window.setTimeout(() => {
-      setNow(Date.now());
-      setMessage('配对串已到期。请重新生成配对串，并在扩展中重新粘贴。');
-      setOffer(null);
-    }, Math.max(0, Math.min(...deadlines) - Date.now()));
-    return () => window.clearTimeout(timer);
-  }, [offer, state?.pending, now]);
-
-  useEffect(() => {
-    if (offer && state?.profiles.some((profile) => profile.profileId === offer.profileId)) setOffer(null);
-  }, [state, offer]);
 
   async function act(work: () => Promise<void>, failure = '操作未完成。请检查连接状态后重试。') {
     if (busy || !native) return;
@@ -95,20 +77,6 @@ export function ConnectionSettings({ state, error, native, accept, onBrowseSourc
     void act(async () => { accept(await startBridge(value)); }, '无法启动本机连接。请检查端口是否占用，或更换端口后重试。');
   }
 
-  function pair(event: FormEvent) {
-    event.preventDefault();
-    const name = displayName.trim();
-    if (!name || [...name].length > 128) { setMessage('资料名称须为 1–128 个字符。'); return; }
-    void act(async () => {
-      for (const candidate of state?.pending ?? []) {
-        if (candidate.expiresAt <= Date.now()) accept(await cancelPairing(candidate.profileId));
-      }
-      const next = await beginPairing(name);
-      if (mounted.current) setOffer(next);
-    });
-  }
-
-  const pending = state?.pending.filter((candidate) => candidate.expiresAt > now) ?? [];
   const pairedChromeProfiles = state?.profiles.filter((profile) => profile.connection !== 'local') ?? [];
   const hasLocalLibrary = !!state?.profiles.some((profile) => profile.connection === 'local');
   const unavailable = !native || busy || !state || error === 'event';
@@ -116,10 +84,10 @@ export function ConnectionSettings({ state, error, native, accept, onBrowseSourc
   const setup = (
     <div key="setup" className="connection-setup" hidden={onboarding && path !== 'connect'}>
     {hasSources && !onboarding && <h2 className="settings-group-title">接入新的 Chrome 资料</h2>}
-    <details className="connection-panel extension-instructions" open={!hasSources || pending.length > 0 || !!offer}>
+    <details className="connection-panel extension-instructions" open={!hasSources}>
       <summary><h2 id="extension-title">1. 准备 Chrome 扩展</h2></summary>
       <p>在要接入的 Chrome 资料中打开 <code>chrome://extensions</code>，启用开发者模式，选择“加载已解压的扩展程序”，选择 Markbridge 扩展目录。</p>
-      <p className="secondary">加载后打开扩展的“配对设置”。应用不会自动安装或扫描 Chrome。</p>
+      <p className="secondary">加载后扩展将直接自动探测本地端口连接，无需复制配对串。</p>
       <details className="connection-advanced"><summary>开发构建：扩展目录</summary><p className="secondary">从源码构建时，扩展目录为 <code>apps/extension/dist</code>。开发和验收请使用单独的临时 Chrome 资料。</p></details>
     </details>
             <section className="connection-panel" aria-labelledby="listener-title">
@@ -129,30 +97,6 @@ export function ConnectionSettings({ state, error, native, accept, onBrowseSourc
                 <button disabled={unavailable || state?.port != null} type="submit">{state?.port ? '连接已启动' : '启动连接'}</button>
               </form>
               <p className="secondary">默认端口 49153。端口占用时，更换端口后重试。</p>
-            </section>
-            <section className="connection-panel" aria-labelledby="pairing-title">
-              <div className="panel-heading"><h2 id="pairing-title">3. 配对 Chrome 扩展</h2><span className="secondary">需在两端确认</span></div>
-              <form className="inline-form" onSubmit={pair} noValidate>
-                <label htmlFor="profile-name">资料名称<input id="profile-name" value={displayName} onChange={(event) => setDisplayName(event.target.value)} disabled={unavailable || pending.length > 0} /></label>
-                <button type="submit" disabled={unavailable || !state?.port || pending.length > 0 || !!offer}>生成配对串</button>
-              </form>
-              <p className="secondary">复制配对串到扩展选项页，再核对下方的扩展身份。配对串有效期为 120 秒。</p>
-              {offer && <div className="pairing-offer">
-                <label htmlFor="pairing-code">一次性配对串<textarea id="pairing-code" readOnly value={offer.pairingCode} spellCheck={false} /></label>
-                <div className="actions">
-                  <button disabled={busy} onClick={() => { void act(async () => { await navigator.clipboard.writeText(offer.pairingCode); if (mounted.current) setMessage('配对串已复制。请粘贴到扩展选项页。'); }); }}>复制配对串</button>
-                  {!pending.some((candidate) => candidate.profileId === offer.profileId) && <button disabled={busy} onClick={() => { void act(async () => { accept(await cancelPairing(offer.profileId)); if (mounted.current) { setOffer(null); setMessage('配对已取消。可重新生成配对串。'); } }); }}>取消配对</button>}
-                </div>
-              </div>}
-              {pending.map((candidate) => <div className="pending-pair" key={candidate.profileId}>
-                <h3>{candidate.displayName}</h3><p className="secondary">配对有效至 {cacheTime(candidate.expiresAt)}</p>
-                {candidate.instanceId && candidate.origin ? <>
-                  <p>请与扩展选项页显示的身份核对。只有你发起的请求才能确认；不认识的请求请取消配对。</p>
-                  <dl className="identity"><dt>扩展身份</dt><dd>{candidate.instanceId}</dd><dt>扩展来源</dt><dd>{candidate.origin}</dd></dl>
-                  <button disabled={unavailable} onClick={() => { void act(async () => { accept(await confirmPairing(candidate.profileId, candidate.instanceId!)); if (mounted.current) setOffer(null); }); }}>确认此扩展</button>
-                </> : <p>等待扩展连接。请将配对串粘贴到扩展选项页。</p>}
-                <button className="secondary-button" disabled={unavailable} onClick={() => { void act(async () => { accept(await cancelPairing(candidate.profileId)); if (mounted.current) { setOffer(null); setMessage('配对已取消。可重新生成配对串。'); } }); }}>取消配对</button>
-              </div>)}
             </section>
     </div>
   );
@@ -169,8 +113,8 @@ export function ConnectionSettings({ state, error, native, accept, onBrowseSourc
                   <p className="secondary">{profileNextStep(profile.connection)}</p>
                   <div className="actions">
                     <button type="button" disabled={unavailable} onClick={() => onBrowseSource({ kind: 'profile', id: profile.profileId })}>浏览此资料</button>
-                    {!isLocal && <button disabled={unavailable || profile.connection === 'unpaired'} onClick={() => { void act(async () => { accept(await reconnectProfile(profile.profileId)); }); }}>重新连接</button>}
-                    {!isLocal && <button className="secondary-button" disabled={unavailable || profile.connection === 'unpaired'} onClick={() => setRevoke(profile)}>吊销配对</button>}
+                    {!isLocal && <button disabled={unavailable || profile.connection === 'ignored'} onClick={() => { void act(async () => { accept(await reconnectProfile(profile.profileId)); }); }}>重新连接</button>}
+                    {!isLocal && <button className="secondary-button" disabled={unavailable || profile.connection === 'ignored'} onClick={() => setRevoke(profile)}>吊销配对</button>}
                   </div>
                 </article>;
               })}

@@ -4,8 +4,15 @@ import { copyFile, mkdir, mkdtemp, readFile, realpath, rm, writeFile } from 'nod
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
+import { extensionIdFromKey, OFFICIAL_EXTENSION_ID } from './check-artifacts.mjs';
 
 const readJson = async (path) => JSON.parse(await readFile(new URL(`../${path}`, import.meta.url), 'utf8'));
+
+test('extension manifest locks the fixed 32-char official Chrome extension ID without private key', async () => {
+  const manifest = await readJson('apps/extension/public/manifest.json');
+  assert.equal(extensionIdFromKey(manifest.key), OFFICIAL_EXTENSION_ID);
+  assert.equal(JSON.stringify(manifest).includes('PRIVATE KEY'), false);
+});
 
 test('native dev preserves JSON arguments, desktop cwd, port and CLI exit status', async (t) => {
   const root = await mkdtemp(join(tmpdir(), 'markbridge dev & '));

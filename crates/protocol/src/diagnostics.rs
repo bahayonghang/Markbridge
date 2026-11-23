@@ -23,7 +23,7 @@ pub enum DiagnosticArchitecture {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct DiagnosticConnections {
-    pub unpaired: Counter,
+    pub ignored: Counter,
     pub connecting: Counter,
     pub reconciling: Counter,
     pub live: Counter,

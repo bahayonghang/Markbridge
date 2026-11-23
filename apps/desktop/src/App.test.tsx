@@ -9,8 +9,8 @@ import { DEFAULT_UI_PREFERENCES, UI_PREFERENCES_KEY } from './features/settings/
 vi.mock('./backend', () => ({
   getStartupState: vi.fn(), getBridgeState: vi.fn(), subscribeBridgeState: vi.fn(),
   listInstalledFonts: vi.fn(async () => ({ status: 'ready', families: [] })),
-  hasNativeBridge: vi.fn(), startBridge: vi.fn(), beginPairing: vi.fn(),
-  confirmPairing: vi.fn(), cancelPairing: vi.fn(), revokePairing: vi.fn(), reconnectProfile: vi.fn(), ensureLocalLibrary: vi.fn(),
+  hasNativeBridge: vi.fn(), startBridge: vi.fn(), renameProfile: vi.fn(),
+  setProfileWritePaused: vi.fn(), ignoreProfile: vi.fn(), resumeProfile: vi.fn(), revokePairing: vi.fn(), reconnectProfile: vi.fn(), ensureLocalLibrary: vi.fn(),
   readCacheQuery: vi.fn(async () => ({ items: [], total: 0, offset: 0, nextOffset: null, sourceEpoch: 1, revision: 1 })),
   readTagState: vi.fn(async () => ({ affected: 0, encodingEnabled: false, entries: [], filterTagId: null, journalId: null, matches: [], mergeRequired: false, profileId: 'local-skills', sourceTagId: null, tags: [], targetTagId: null })),
   tagCommand: vi.fn(),
@@ -35,10 +35,10 @@ vi.mock('./backend', () => ({
   saveAiConfig: vi.fn(), setAiCredential: vi.fn(), clearAiCredential: vi.fn(), testAiConnection: vi.fn(),
   suggestAi: vi.fn(), cancelAi: vi.fn(), applyAi: vi.fn(),
 }));
-const initial: BridgeState = { protocolVersion: 1, revision: 1, port: null, errorCode: null, profiles: [], pending: [], mirrors: [] };
+const initial: BridgeState = { protocolVersion: 1, revision: 1, port: null, errorCode: null, profiles: [], mirrors: [] };
 const profile: BridgeState['profiles'][number] = {
   profileId: 'profile-a', instanceId: 'instance-a', displayName: '研究资料', connection: 'live',
-  nodeCount: 17, revision: 4, lastSyncedAt: null, errorCode: null,
+  writePaused: false, ignored: false, nodeCount: 17, revision: 4, lastSyncedAt: null, errorCode: null,
 };
 let receive: (state: BridgeState) => void;
 let invalid: () => void;
@@ -198,7 +198,6 @@ it('keeps browser preview unpaired and disables native actions', async () => {
   expect(await screen.findByText('未连接 · 只读')).toBeVisible();
   expect(screen.getByText(/浏览器预览 · 仅显示界面/)).toBeVisible();
   expect(screen.getByRole('button', { name: '启动连接' })).toBeDisabled();
-  expect(screen.getByRole('button', { name: '生成配对串' })).toBeDisabled();
   expect(backend.startBridge).not.toHaveBeenCalled();
 });
 
@@ -246,46 +245,10 @@ it('validates port locally and sends a corrected port once', async () => {
   expect(screen.getByRole('button', { name: '连接已启动' })).toBeDisabled();
 });
 
-it('requires explicit confirmation of a validated candidate and clears the offer', async () => {
-  vi.mocked(backend.getBridgeState).mockResolvedValue({ ...initial, port: 49153 });
-  vi.mocked(backend.beginPairing).mockResolvedValue({ profileId: 'profile-a', pairingCode: 'synthetic-one-time-code', expiresAt: Date.now() + 120000 });
-  render(<App />);
-  fireEvent.click(screen.getByRole('button', { name: '设置' }));
-  fireEvent.click(screen.getByRole('tab', { name: 'Chrome 连接' }));
-  await screen.findByText('未连接 · 只读');
-  fireEvent.click(screen.getByRole('button', { name: '生成配对串' }));
-  expect(await screen.findByLabelText('一次性配对串')).toHaveValue('synthetic-one-time-code');
-  expect(backend.confirmPairing).not.toHaveBeenCalled();
-  act(() => { receive({ ...initial, revision: 2, port: 49153, pending: [{
-    profileId: 'profile-a', displayName: '研究资料', instanceId: 'instance-a',
-    origin: 'chrome-extension://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', expiresAt: Date.now() + 120000,
-  }] }); });
-  expect(screen.getByText('instance-a')).toBeVisible();
-  vi.mocked(backend.confirmPairing).mockResolvedValue({ ...initial, revision: 3, port: 49153, profiles: [profile] });
-  fireEvent.click(screen.getByRole('button', { name: '确认此扩展' }));
-  expect(await screen.findByText('实时同步')).toBeVisible();
-  expect(backend.confirmPairing).toHaveBeenCalledExactlyOnceWith('profile-a', 'instance-a');
-  expect(screen.queryByLabelText('一次性配对串')).not.toBeInTheDocument();
-});
-
-it('does not offer confirmation before verified identity exists and allows cancel', async () => {
-  vi.mocked(backend.getBridgeState).mockResolvedValue({ ...initial, port: 49153, pending: [{
-    profileId: 'profile-a', displayName: '研究资料', instanceId: null, origin: null, expiresAt: Date.now() + 120000,
-  }] });
-  vi.mocked(backend.cancelPairing).mockResolvedValue({ ...initial, revision: 2, port: 49153 });
-  render(<App />);
-  fireEvent.click(screen.getByRole('button', { name: '设置' }));
-  fireEvent.click(screen.getByRole('tab', { name: 'Chrome 连接' }));
-  await screen.findByText('等待扩展连接。请将配对串粘贴到扩展选项页。');
-  expect(screen.queryByRole('button', { name: '确认此扩展' })).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button', { name: '取消配对' }));
-  await waitFor(() => expect(backend.cancelPairing).toHaveBeenCalledExactlyOnceWith('profile-a'));
-});
-
-it('shows reconciling and revoked cache as read-only', async () => {
+it('shows reconciling and ignored cache as read-only', async () => {
   vi.mocked(backend.getBridgeState).mockResolvedValue({ ...initial, profiles: [profile] });
   vi.mocked(backend.reconnectProfile).mockResolvedValue({ ...initial, revision: 2, profiles: [{ ...profile, connection: 'reconciling' }] });
-  vi.mocked(backend.revokePairing).mockResolvedValue({ ...initial, revision: 3, profiles: [{ ...profile, connection: 'unpaired' }] });
+  vi.mocked(backend.revokePairing).mockResolvedValue({ ...initial, revision: 3, profiles: [{ ...profile, connection: 'ignored', ignored: true }] });
   render(<App />);
   fireEvent.click(screen.getByRole('button', { name: '设置' }));
   fireEvent.click(screen.getByRole('tab', { name: 'Chrome 连接' }));
@@ -299,7 +262,7 @@ it('shows reconciling and revoked cache as read-only', async () => {
   expect(backend.revokePairing).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole('button', { name: '吊销配对' }));
   fireEvent.click(screen.getByRole('button', { name: '确认吊销配对' }));
-  await waitFor(() => expect(document.querySelector('.workspace-heading .connection')).toHaveTextContent('未配对 · 只读'));
+  await waitFor(() => expect(document.querySelector('.workspace-heading .connection')).toHaveTextContent('已忽略 · 只读'));
   expect(screen.getByText('17')).toBeVisible();
   expect(screen.getByRole('button', { name: '重新连接' })).toBeDisabled();
   expect(screen.getByRole('button', { name: '吊销配对' })).toBeDisabled();
@@ -350,36 +313,6 @@ it('development remount subscribes safely without duplicate actions', async () =
   expect(unsubscribe).toHaveBeenCalledTimes(2);
 });
 
-it('removes the one-time code when the offer expires', async () => {
-  vi.mocked(backend.getBridgeState).mockResolvedValue({ ...initial, port: 49153 });
-  render(<App />);
-  fireEvent.click(screen.getByRole('button', { name: '设置' }));
-  fireEvent.click(screen.getByRole('tab', { name: 'Chrome 连接' }));
-  await screen.findByText('未连接 · 只读');
-  vi.useFakeTimers();
-  vi.mocked(backend.beginPairing).mockResolvedValue({ profileId: 'profile-a', pairingCode: 'synthetic-expiring-code', expiresAt: Date.now() + 120000 });
-  await act(async () => { fireEvent.click(screen.getByRole('button', { name: '生成配对串' })); });
-  expect(screen.getByLabelText('一次性配对串')).toHaveValue('synthetic-expiring-code');
-  act(() => { vi.advanceTimersByTime(120000); });
-  expect(screen.queryByLabelText('一次性配对串')).not.toBeInTheDocument();
-  expect(screen.getByRole('alert')).toHaveTextContent('配对串已到期');
-});
-
-it('ignores a pairing action that completes after unmount', async () => {
-  vi.mocked(backend.getBridgeState).mockResolvedValue({ ...initial, port: 49153 });
-  let complete!: (offer: Awaited<ReturnType<typeof backend.beginPairing>>) => void;
-  vi.mocked(backend.beginPairing).mockReturnValue(new Promise((resolve) => { complete = resolve; }));
-  const view = render(<App />);
-  fireEvent.click(screen.getByRole('button', { name: '设置' }));
-  fireEvent.click(screen.getByRole('tab', { name: 'Chrome 连接' }));
-  await screen.findByText('未连接 · 只读');
-  fireEvent.click(screen.getByRole('button', { name: '生成配对串' }));
-  view.unmount();
-  await act(async () => { complete({ profileId: 'profile-a', pairingCode: 'synthetic-late-code', expiresAt: Date.now() + 120000 }); });
-  expect(screen.queryByLabelText('一次性配对串')).not.toBeInTheDocument();
-  expect(unsubscribe).toHaveBeenCalledOnce();
-});
-
 it('introduces extension and read-only routes without AI or automatic directory reads', async () => {
   render(<App />);
   expect(await screen.findByRole('region', { name: '首次接入' })).toBeVisible();
@@ -421,26 +354,6 @@ it('uses the selected source for status even when another profile is live', asyn
   expect(screen.getByLabelText('书签来源')).toHaveValue('profile:profile-a');
 });
 
-it('expires hydrated pending candidates and allows an explicit fresh offer', async () => {
-  const expiresAt = Date.now() + 120000;
-  vi.mocked(backend.getBridgeState).mockResolvedValue({ ...initial, port: 49153, pending: [{ profileId: 'expired', displayName: '旧资料', instanceId: 'old-instance', origin: 'chrome-extension://test', expiresAt }] });
-  render(<App />);
-  await screen.findByRole('button', { name: '确认此扩展' });
-  vi.useFakeTimers();
-  // Re-render a new deadline so the timer is registered under fake time.
-  act(() => receive({ ...initial, revision: 2, port: 49153, pending: [{ profileId: 'expired', displayName: '旧资料', instanceId: 'old-instance', origin: 'chrome-extension://test', expiresAt: expiresAt + 1 }] }));
-  act(() => vi.advanceTimersByTime(120001));
-  expect(screen.queryByRole('button', { name: '确认此扩展' })).not.toBeInTheDocument();
-  expect(screen.getByRole('button', { name: '生成配对串' })).toBeEnabled();
-  expect(backend.confirmPairing).not.toHaveBeenCalled();
-  vi.mocked(backend.cancelPairing).mockResolvedValue({ ...initial, revision: 3, port: 49153 });
-  vi.mocked(backend.beginPairing).mockResolvedValue({ profileId: 'fresh', pairingCode: 'synthetic-fresh', expiresAt: Date.now() + 120000 });
-  await act(async () => fireEvent.click(screen.getByRole('button', { name: '生成配对串' })));
-  expect(backend.cancelPairing).toHaveBeenCalledExactlyOnceWith('expired');
-  expect(screen.getByLabelText('一次性配对串')).toHaveValue('synthetic-fresh');
-});
-
-
 it('enables and browses the isolated local Skills library from settings without exposing Chrome pairing or tree-write controls', async () => {
   const mirror: BridgeState['mirrors'][number] = {
     mirrorSourceId: 'mirror-local-check', displayName: '独立镜像', association: 'independent', pairedProfileId: null,
@@ -448,7 +361,7 @@ it('enables and browses the isolated local Skills library from settings without 
   };
   const localProfile: BridgeState['profiles'][number] = {
     profileId: 'local-skills', instanceId: 'local-skills', displayName: 'Skills 书签库', connection: 'local',
-    nodeCount: 2, revision: 2, lastSyncedAt: 1791800000000, errorCode: null,
+    writePaused: false, ignored: false, nodeCount: 2, revision: 2, lastSyncedAt: 1791800000000, errorCode: null,
   };
   render(<App />);
   expect(await screen.findByRole('region', { name: '首次接入' })).toBeVisible();

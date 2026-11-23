@@ -126,20 +126,16 @@ for (const scenario of ['preview', 'loading'] as const) {
 }
 
 for (const [width, height] of sizes) {
-  test(`S02 pending pairing and long file source ${width}x${height}`, async ({ page }) => {
+  test(`S02 ignored source and long file source ${width}x${height}`, async ({ page }) => {
     await page.setViewportSize({ width, height }); await mockBridge(page, 'sources'); await page.goto('/');
     await expect(page.locator('#library-source')).toBeVisible();
     await page.evaluate(() => {
       const fixture = window as unknown as { __s02state: (patch: unknown) => void; __r07patch: (patch: unknown) => void };
       fixture.__r07patch({ displayName: '资料名称与英文 LongReference'.repeat(4) });
-      fixture.__s02state({ mirrors: [{ mirrorSourceId: 'mirror-long', displayName: '只读文件资料'.repeat(8), association: 'independent', pairedProfileId: null, fileStatus: 'stale', watching: true, nodeCount: 19, revision: 3, lastSyncedAt: null, errorCode: null, canWriteBrowser: false }], pending: [{ profileId: 'pending-fixture', displayName: '接入中的新资料', instanceId: 'fixture-instance', origin: 'chrome-extension://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', expiresAt: Date.now() + 120000 }] });
+      fixture.__s02state({ mirrors: [{ mirrorSourceId: 'mirror-long', displayName: '只读文件资料'.repeat(8), association: 'independent', pairedProfileId: null, fileStatus: 'stale', watching: true, nodeCount: 19, revision: 3, lastSyncedAt: null, errorCode: null, canWriteBrowser: false }] });
     });
     await page.getByRole('button', { name: '设置', exact: true }).click();
     await page.getByRole('tab', { name: 'Chrome 连接', exact: true }).click();
-    await expect(page.locator('.extension-instructions')).toHaveAttribute('open', '');
-    const confirm = page.getByRole('button', { name: '确认此扩展', exact: true });
-    await confirm.scrollIntoViewIfNeeded(); await expect(confirm).toBeVisible();
-    await expect(page.getByRole('button', { name: '生成配对串', exact: true })).toBeDisabled();
     expect(await page.locator('.settings-scroll').evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true);
     await mkdir(evidence, { recursive: true });
     await page.screenshot({ path: join(evidence, `pending-${width}x${height}.png`) });

@@ -31,6 +31,9 @@ pub enum ErrorCode {
     Cancelled,
     /// The selected Chrome directory is missing, unreadable, or not a User Data directory.
     PathUnavailable,
+    ProfileIgnored,
+    WritePaused,
+    PortExhausted,
 }
 impl std::fmt::Display for ErrorCode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -77,7 +80,6 @@ bounded_string!(Id, 1, 128, true);
 bounded_string!(Title, 0, 4096, false);
 bounded_string!(Url, 1, 16384, false);
 bounded_string!(DisplayName, 1, 128, false);
-bounded_string!(Credential, 32, 1024, false);
 
 macro_rules! bounded_number {
     ($name:ident, $min:expr, $max:expr) => {
@@ -398,30 +400,27 @@ pub struct OperationStep {
 }
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct PairPayload {
-    pub instance_id: Id,
-    pub credential: Credential,
-    pub display_name: DisplayName,
-}
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct PairResultPayload {
-    pub accepted: bool,
-    pub credential: Option<Credential>,
-    pub error_code: Option<ErrorCode>,
-}
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct HelloPayload {
     pub instance_id: Id,
-    pub credential: Credential,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub display_name_hint: Option<DisplayName>,
+    #[serde(default)]
+    pub user_initiated: bool,
 }
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct HelloResultPayload {
     pub accepted: bool,
+    pub profile_id: RequiredNullable<Id>,
+    pub display_name: RequiredNullable<DisplayName>,
     pub source_epoch: SourceEpoch,
+    pub write_paused: bool,
     pub error_code: Option<ErrorCode>,
+}
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PauseSyncPayload {
+    pub reason: ErrorCode,
 }
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
@@ -500,7 +499,7 @@ macro_rules! wire_message {
     };
 }
 wire_message! {
-    Pair(PairPayload), PairResult(PairResultPayload), Hello(HelloPayload), HelloResult(HelloResultPayload),
+    Hello(HelloPayload), HelloResult(HelloResultPayload), PauseSync(PauseSyncPayload),
     Ping(EmptyPayload), Pong(EmptyPayload), GetTree(EmptyPayload), TreeFull(TreeSnapshot), Event(EventPayload),
     ResyncRequired(ResyncPayload), ApplyOperation(ApplyPayload), OperationReceipt(Box<Receipt>), GetOperationStatus(StatusPayload),
 }

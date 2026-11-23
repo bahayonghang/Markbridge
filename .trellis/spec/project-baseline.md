@@ -33,7 +33,7 @@ Checked on 2026-10-10 against primary documentation:
 
 ## Terms
 
-Use `profileId` for an application-owned paired profile identity, `chromeId` for the browser node ID, and `bookmarkId` for the local persistent identity. Use `sourceEpoch` for an identity reset and `sessionId` for a transport connection. A display name is not an authenticated identity.
+Use `profileId` for an application-owned Chrome profile identity (per ADR-0001, connected zero-click via fixed extension Origin `manifest.key` and persistent `instanceId`), `chromeId` for the browser node ID, and `bookmarkId` for the local persistent identity. Use `sourceEpoch` for an identity reset and `sessionId` for a transport connection. A display name is not an authenticated identity.
 
 A proposal is unapplied. An operation is confirmed for execution. A snapshot records before-state. A receipt records an observed result. A snapshot alone does not prove successful rollback.
 

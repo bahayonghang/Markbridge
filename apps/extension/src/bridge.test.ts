@@ -18,7 +18,7 @@ class Socket {
   send(frame: string) { this.sent.push(parseWireFrame(frame)); }
   close() { this.readyState = 3; this.onclose?.(); }
   receive(message: WireMessage) { this.onmessage?.({ data: encodeWireFrame(message) }); }
-  reply(type: 'pair_result' | 'hello_result' | 'get_tree' | 'ping' | 'pong' | 'resync_required', payload: unknown = {}) {
+  reply(type: 'hello_result' | 'get_tree' | 'ping' | 'pong' | 'resync_required', payload: unknown = {}) {
     const base = type === 'pong' ? [...this.sent].reverse().find(message => message.type === 'ping')! : this.sent.at(-1)!;
     this.receive({ ...base, type, requestId: type === 'resync_required' ? null : base.requestId, seq: null, payload } as WireMessage);
   }
@@ -58,7 +58,7 @@ function setup(localData: Record<string, unknown> = {}, sessionData: Record<stri
 }
 async function authenticate(ctx: ReturnType<typeof setup>) {
   await ctx.bridge.start(); const socket = ctx.sockets.at(-1)!; socket.open();
-  socket.reply('hello_result', { accepted: true, sourceEpoch: 1 }); await flush();
+  socket.reply('hello_result', { accepted: true, profileId: auth.profileId, displayName: 'Chrome 资料 1', sourceEpoch: 1, writePaused: false, errorCode: null }); await flush();
   return socket;
 }
 async function synchronize(ctx: ReturnType<typeof setup>) {
@@ -75,19 +75,15 @@ describe('pairing boundary', () => {
       expect(() => parsePairingCode(JSON.stringify({ ...JSON.parse(pairing()), ...patch }))).toThrow();
     }
   });
-  it('stores long credentials locally only after desktop confirms; pending retries stop at expiry', async () => {
+  it('stores auth locally after hello_result confirms; pending retries stop at expiry', async () => {
     const ctx = setup(); await ctx.bridge.start(); await ctx.bridge.command({ type: 'pair', code: pairing() });
     const socket = ctx.sockets[0]; socket.open();
-    expect(socket.sent[0].type).toBe('pair');
-    socket.reply('pair_result', { accepted: false, errorCode: 'UNPAIRED' }); await flush();
-    expect(ctx.bridge.getStatus().state).toBe('pending'); expect(ctx.localData['markbridge-auth']).toBeUndefined();
-    await vi.advanceTimersByTimeAsync(1000); expect(ctx.sockets).toHaveLength(2);
-    const second = ctx.sockets[1]; second.open(); second.reply('pair_result', { accepted: true, credential }); await flush();
+    expect(socket.sent[0].type).toBe('hello');
+    socket.reply('hello_result', { accepted: true, profileId: auth.profileId, displayName: 'Chrome 资料 1', sourceEpoch: 1, writePaused: false, errorCode: null }); await flush();
     expect(ctx.localData['markbridge-auth']).toEqual(auth); expect(ctx.sessionData['markbridge-pending']).toBeUndefined();
-    expect(second.sent.at(-1)?.type).toBe('hello'); expect(ctx.urls).toEqual(['ws://127.0.0.1:49153/', 'ws://127.0.0.1:49153/']);
+    expect(ctx.urls).toEqual(['ws://127.0.0.1:49153/']);
     expect(ctx.api.storage.local.setAccessLevel).toHaveBeenCalledWith({ accessLevel: 'TRUSTED_CONTEXTS' });
     expect(ctx.api.storage.sync.set).not.toHaveBeenCalled();
-    second.reply('hello_result', { accepted: true, sourceEpoch: 1 }); await flush();
     expect(ctx.bridge.getStatus().state).toBe('reconciling');
   });
   it('does not retain an expired pending code or leave unauthenticated sockets open', async () => {
@@ -96,11 +92,11 @@ describe('pairing boundary', () => {
     await vi.advanceTimersByTimeAsync(120_000); expect(ctx.bridge.getStatus().state).toBe('unpaired');
     expect(ctx.sessionData['markbridge-pending']).toBeUndefined();
   });
-  it('rejects wrong profile/session and failed credentials before reading the tree; alarm cannot replay', async () => {
-    for (const failure of ['profile', 'session', 'credential']) {
+  it('rejects wrong profile/session and rejected hello before reading the tree; alarm cannot replay', async () => {
+    for (const failure of ['profile', 'session', 'rejected']) {
       const ctx = setup({ 'markbridge-auth': auth }); await ctx.bridge.start(); const socket = ctx.sockets[0]; socket.open();
-      if (failure === 'credential') socket.reply('hello_result', { accepted: false, sourceEpoch: 1, errorCode: 'UNPAIRED' });
-      else socket.receive({ ...socket.sent[0], profileId: failure === 'profile' ? 'profile-b' : auth.profileId, sessionId: failure === 'session' ? 'wrong' : socket.sent[0].sessionId, type: 'hello_result', payload: { accepted: true, sourceEpoch: 1 } });
+      if (failure === 'rejected') socket.reply('hello_result', { accepted: false, profileId: null, displayName: null, sourceEpoch: 1, writePaused: false, errorCode: 'PROFILE_IGNORED' });
+      else socket.receive({ ...socket.sent[0], profileId: failure === 'profile' ? 'profile-b' : auth.profileId, sessionId: failure === 'session' ? 'wrong' : socket.sent[0].sessionId, type: 'hello_result', payload: { accepted: true, profileId: auth.profileId, displayName: 'Chrome', sourceEpoch: 1, writePaused: false, errorCode: null } });
       await flush(); expect(ctx.api.bookmarks.getTree).not.toHaveBeenCalled(); expect(ctx.localData['markbridge-auth']).toBeUndefined();
       ctx.api.alarms.onAlarm.emit({ name: RECOVERY_ALARM }); await flush(); expect(ctx.sockets).toHaveLength(1);
     }

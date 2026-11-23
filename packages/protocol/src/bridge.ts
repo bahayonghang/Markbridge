@@ -1,5 +1,4 @@
 import validateBridge from './generated/bridge-state.validator.js';
-import validatePairing from './generated/pairing-offer.validator.js';
 import validateMirrorTree from './generated/mirror-tree.validator.js';
 import validateChromeProfiles from './generated/chrome-profiles.validator.js';
 import validateLibraryNodes from './generated/library-nodes.validator.js';
@@ -38,7 +37,6 @@ import validateTitleEncoding from './generated/title-encoding.validator.js';
 import validateContentPreview from './generated/content-preview.validator.js';
 import validateWebPreview from './generated/web-preview.validator.js';
 import type { BridgeState } from './generated/bridge-state';
-import type { PairingOffer } from './generated/pairing-offer';
 import type { MirrorTree } from './generated/mirror-tree';
 import type { ChromeProfileList } from './generated/chrome-profiles';
 import type { LibraryNodes } from './generated/library-nodes';
@@ -56,7 +54,6 @@ import type { ContentPreview } from './generated/content-preview';
 import type { WebPreviewState } from './generated/web-preview';
 
 export type { BridgeState } from './generated/bridge-state';
-export type { PairingOffer } from './generated/pairing-offer';
 export type { MirrorTree } from './generated/mirror-tree';
 export type { ChromeProfileList, ChromeProfileChoice } from './generated/chrome-profiles';
 export type { LibraryNodes } from './generated/library-nodes';
@@ -75,11 +72,6 @@ export type { WebPreviewState, WebPreviewPhase, WebPreviewNotice } from './gener
 
 export function parseBridgeState(value: unknown): BridgeState {
   if (!validateBridge(value)) throw new Error('INVALID_BRIDGE_STATE');
-  return value;
-}
-
-export function parsePairingOffer(value: unknown): PairingOffer {
-  if (!validatePairing(value)) throw new Error('INVALID_PAIRING_OFFER');
   return value;
 }
 

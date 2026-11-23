@@ -25,10 +25,18 @@ use std::{
     sync::Arc,
     time::{SystemTime, UNIX_EPOCH},
 };
-use subtle::ConstantTimeEq;
 use tokio::sync::{Mutex, mpsc, watch};
 
 type Result<T> = std::result::Result<T, ErrorCode>;
+
+#[derive(Debug)]
+pub(super) struct AuthSession {
+    pub profile_id: Id,
+    pub display_name: DisplayName,
+    pub source_epoch: SourceEpoch,
+    pub write_paused: bool,
+    pub closed: watch::Receiver<bool>,
+}
 
 #[derive(Clone)]
 pub struct Bridge {
@@ -46,11 +54,6 @@ pub struct Bridge {
     preview: Gate,
     links: Gate,
     link_net: Arc<std::sync::Mutex<Arc<dyn crate::preview::Network>>>,
-}
-struct Pending {
-    view: PendingPairing,
-    credential: String,
-    approved: bool,
 }
 struct ActiveProfile {
     identity: StoredIdentity,
@@ -70,24 +73,10 @@ struct Listener {
     stop: watch::Sender<bool>,
     task: tokio::task::JoinHandle<()>,
 }
-// Cancellation after an OS write must not leave an unreferenced usable credential.
-struct NewCredential {
-    store: Arc<dyn CredentialStore>,
-    reference: Id,
-    committed: bool,
-}
-impl Drop for NewCredential {
-    fn drop(&mut self) {
-        if !self.committed {
-            let _ = self.store.delete(self.reference.as_str());
-        }
-    }
-}
 struct Inner {
     edit_previews: HashMap<String, batch_edit::Prepared>,
     storage: Option<Storage>,
     profiles: BTreeMap<String, ActiveProfile>,
-    pending: BTreeMap<String, Pending>,
     mirrors: BTreeMap<String, file_mirror::ActiveMirror>,
     listener: Option<Listener>,
     revision: u64,
@@ -174,9 +163,11 @@ impl Bridge {
                 display_name: profile.display_name.clone(),
                 connection: match &profile.origin {
                     ProfileOrigin::LocalSkills => BridgeConnection::Local,
-                    ProfileOrigin::Chrome(_) if stored.revoked => BridgeConnection::Unpaired,
+                    ProfileOrigin::Chrome(_) if stored.revoked => BridgeConnection::Ignored,
                     ProfileOrigin::Chrome(_) => BridgeConnection::CachedReadOnly,
                 },
+                write_paused: false,
+                ignored: stored.revoked,
                 node_count: Counter::new(nodes.len() as u64)?,
                 revision: cursor
                     .as_ref()
@@ -207,7 +198,6 @@ impl Bridge {
             edit_previews: HashMap::new(),
             storage: Some(storage),
             profiles,
-            pending: BTreeMap::new(),
             mirrors,
             listener: None,
             revision: 0,
@@ -242,11 +232,7 @@ impl Bridge {
         self.state.subscribe()
     }
     pub async fn state(&self) -> BridgeState {
-        let mut inner = self.inner.lock().await;
-        if inner.expire() {
-            self.publish(&mut inner);
-        }
-        inner.view()
+        self.inner.lock().await.view()
     }
     fn publish(&self, inner: &mut Inner) {
         inner.revision += 1;
@@ -291,62 +277,42 @@ impl Bridge {
         self.publish(&mut inner);
         Ok(inner.view())
     }
-    pub async fn begin_pairing(&self, display_name: String) -> Result<PairingOffer> {
-        let display_name = DisplayName::new(display_name)?;
-        let mut inner = self.inner.lock().await;
-        inner.expire();
-        let port = inner.port.ok_or(ErrorCode::ReadOnly)?;
-        if inner.pending.len() >= 8 {
-            return Err(ErrorCode::LimitExceeded);
-        }
-        let profile_id = random_id("p")?;
-        let credential = random_secret()?;
-        let expires_at = Counter::new(now()? + 120_000)?;
-        let pairing_code = serde_json::json!({ "protocolVersion": 1, "port": port, "profileId": profile_id, "credential": credential, "expiresAt": expires_at }).to_string();
-        inner.pending.insert(
-            profile_id.as_str().to_owned(),
-            Pending {
-                view: PendingPairing {
-                    profile_id: profile_id.clone(),
-                    display_name,
-                    instance_id: RequiredNullable(None),
-                    origin: RequiredNullable(None),
-                    expires_at,
-                },
-                credential,
-                approved: false,
-            },
-        );
-        self.publish(&mut inner);
-        Ok(PairingOffer {
-            profile_id,
-            pairing_code,
-            expires_at,
-        })
-    }
-    pub async fn confirm_pairing(&self, profile_id: Id, instance_id: Id) -> Result<BridgeState> {
-        let mut inner = self.inner.lock().await;
-        inner.expire();
-        let pending = inner
-            .pending
-            .get_mut(profile_id.as_str())
-            .ok_or(ErrorCode::Unpaired)?;
-        if pending.view.instance_id.0.as_ref() != Some(&instance_id)
-            || pending.view.origin.0.is_none()
-        {
-            return Err(ErrorCode::WrongProfile);
-        }
-        pending.approved = true;
-        self.publish(&mut inner);
-        Ok(inner.view())
-    }
-    pub async fn cancel_pairing(&self, profile_id: Id) -> Result<BridgeState> {
-        let mut inner = self.inner.lock().await;
-        inner.pending.remove(profile_id.as_str());
-        self.publish(&mut inner);
-        Ok(inner.view())
-    }
     pub async fn revoke_pairing(&self, profile_id: Id) -> Result<BridgeState> {
+        self.ignore_profile(profile_id).await
+    }
+    pub async fn rename_profile(
+        &self,
+        profile_id: Id,
+        display_name: String,
+    ) -> Result<BridgeState> {
+        let display_name = DisplayName::new(display_name.trim())?;
+        let mut inner = self.inner.lock().await;
+        let profile = inner
+            .profiles
+            .get_mut(profile_id.as_str())
+            .ok_or(ErrorCode::WrongProfile)?;
+        if matches!(profile.identity.origin, ProfileOrigin::LocalSkills) {
+            return Err(ErrorCode::ReadOnly);
+        }
+        profile.identity.display_name = display_name.clone();
+        profile.view.display_name = display_name;
+        self.publish(&mut inner);
+        Ok(inner.view())
+    }
+    pub async fn set_write_paused(&self, profile_id: Id, paused: bool) -> Result<BridgeState> {
+        let mut inner = self.inner.lock().await;
+        let profile = inner
+            .profiles
+            .get_mut(profile_id.as_str())
+            .ok_or(ErrorCode::WrongProfile)?;
+        if matches!(profile.identity.origin, ProfileOrigin::LocalSkills) {
+            return Err(ErrorCode::ReadOnly);
+        }
+        profile.view.write_paused = paused;
+        self.publish(&mut inner);
+        Ok(inner.view())
+    }
+    pub async fn ignore_profile(&self, profile_id: Id) -> Result<BridgeState> {
         let mut inner = self.inner.lock().await;
         let profile = inner
             .profiles
@@ -356,6 +322,7 @@ impl Bridge {
             return Err(ErrorCode::ReadOnly);
         }
         profile.revoked = true;
+        profile.view.ignored = true;
         profile.disconnect();
         let reference = profile.identity.credential_reference.clone();
         self.publish(&mut inner);
@@ -370,6 +337,21 @@ impl Bridge {
         if let Some(reference) = reference {
             self.delete_credential(reference).await?;
         }
+        Ok(inner.view())
+    }
+    pub async fn resume_profile(&self, profile_id: Id) -> Result<BridgeState> {
+        let mut inner = self.inner.lock().await;
+        let profile = inner
+            .profiles
+            .get_mut(profile_id.as_str())
+            .ok_or(ErrorCode::WrongProfile)?;
+        if matches!(profile.identity.origin, ProfileOrigin::LocalSkills) {
+            return Err(ErrorCode::ReadOnly);
+        }
+        profile.revoked = false;
+        profile.view.ignored = false;
+        profile.view.connection = BridgeConnection::CachedReadOnly;
+        self.publish(&mut inner);
         Ok(inner.view())
     }
     pub async fn reconnect_profile(&self, profile_id: Id) -> Result<BridgeState> {
@@ -432,7 +414,6 @@ impl Bridge {
         let listener = {
             let mut inner = self.inner.lock().await;
             inner.port = None;
-            inner.pending.clear();
             for profile in inner.profiles.values_mut() {
                 profile.disconnect();
             }
@@ -536,100 +517,11 @@ impl Bridge {
             .await
             .map_err(|_| ErrorCode::StorageError)?
     }
-    async fn pair(&self, origin: &PairedOrigin, message: &WireMessage) -> Result<Option<String>> {
-        let WireMessage::Pair {
-            profile_id,
-            payload,
-            ..
-        } = message
-        else {
-            return Err(ErrorCode::InvalidMessage);
-        };
-        let mut inner = self.inner.lock().await;
-        inner.expire();
-        let pending = inner
-            .pending
-            .get_mut(profile_id.as_str())
-            .ok_or(ErrorCode::Unpaired)?;
-        if !constant_equal(&pending.credential, payload.credential.as_str()) {
-            return Err(ErrorCode::Unpaired);
-        }
-        if let Some(instance) = &pending.view.instance_id.0 {
-            if instance != &payload.instance_id
-                || pending.view.origin.0.as_deref() != Some(origin.as_str())
-            {
-                return Err(ErrorCode::WrongProfile);
-            }
-        } else {
-            pending.view.instance_id.0 = Some(payload.instance_id.clone());
-            pending.view.origin.0 = Some(origin.as_str().to_owned());
-        }
-        if !pending.approved {
-            self.publish(&mut inner);
-            return Ok(None);
-        }
-        let display_name = pending.view.display_name.clone();
-        let secret = random_secret()?;
-        let reference = random_id("credential")?;
-        let store = self.credentials.clone();
-        let key = reference.clone();
-        let value = secret.clone();
-        let mut credential = tokio::task::spawn_blocking(move || {
-            store.set(key.as_str(), &value)?;
-            Ok::<_, ErrorCode>(NewCredential {
-                store,
-                reference: key,
-                committed: false,
-            })
-        })
-        .await
-        .map_err(|_| ErrorCode::StorageError)??;
-        let identity = Profile {
-            id: profile_id.clone(),
-            instance_id: payload.instance_id.clone(),
-            source_epoch: SourceEpoch::new(1)?,
-            display_name: display_name.clone(),
-            paired_origin: origin.clone(),
-            credential_reference: Some(reference.clone()),
-        };
-        inner.storage()?.create_profile(identity.clone()).await?;
-        credential.committed = true;
-        let view = BridgeProfile {
-            profile_id: profile_id.clone(),
-            instance_id: payload.instance_id.clone(),
-            display_name,
-            connection: BridgeConnection::Connecting,
-            node_count: Counter::new(0)?,
-            revision: Counter::new(0)?,
-            last_synced_at: RequiredNullable(None),
-            error_code: RequiredNullable(None),
-        };
-        inner.profiles.insert(
-            profile_id.as_str().to_owned(),
-            ActiveProfile {
-                identity: identity.into(),
-                view,
-                revoked: false,
-                session: None,
-                close: None,
-                nodes: vec![],
-                seq: 0,
-                awaiting_tree: None,
-                outbound: None,
-                busy: false,
-                writes_blocked: false,
-                batch_hold: None,
-            },
-        );
-        inner.pending.remove(profile_id.as_str());
-        self.publish(&mut inner);
-        Ok(Some(secret))
-    }
     async fn authenticate(
         &self,
         origin: &PairedOrigin,
         message: &WireMessage,
-    ) -> Result<(SourceEpoch, watch::Receiver<bool>)> {
+    ) -> Result<AuthSession> {
         let WireMessage::Hello {
             profile_id,
             session_id,
@@ -640,27 +532,84 @@ impl Bridge {
             return Err(ErrorCode::InvalidMessage);
         };
         let mut inner = self.inner.lock().await;
+        let existing_key = inner
+            .profiles
+            .iter()
+            .find(|(_, profile)| {
+                !matches!(profile.identity.origin, ProfileOrigin::LocalSkills)
+                    && profile.identity.instance_id == payload.instance_id
+            })
+            .map(|(key, _)| key.clone());
+        let resolved_key = if let Some(key) = existing_key {
+            if profile_id.as_str() != "pending" && profile_id.as_str() != key {
+                return Err(ErrorCode::WrongProfile);
+            }
+            key
+        } else {
+            if profile_id.as_str() != "pending" && inner.profiles.contains_key(profile_id.as_str())
+            {
+                return Err(ErrorCode::WrongProfile);
+            }
+            let new_profile_id = random_id("p")?;
+            let chrome_count = inner
+                .profiles
+                .values()
+                .filter(|item| !matches!(item.identity.origin, ProfileOrigin::LocalSkills))
+                .count()
+                + 1;
+            let display_name = payload.display_name_hint.clone().unwrap_or_else(|| {
+                DisplayName::new(format!("Chrome 资料 {chrome_count}")).expect("default name")
+            });
+            let identity = Profile {
+                id: new_profile_id.clone(),
+                instance_id: payload.instance_id.clone(),
+                source_epoch: SourceEpoch::new(1)?,
+                display_name: display_name.clone(),
+                paired_origin: origin.clone(),
+                credential_reference: None,
+            };
+            inner.storage()?.create_profile(identity.clone()).await?;
+            let view = BridgeProfile {
+                profile_id: new_profile_id.clone(),
+                instance_id: payload.instance_id.clone(),
+                display_name,
+                connection: BridgeConnection::Connecting,
+                write_paused: false,
+                ignored: false,
+                node_count: Counter::new(0)?,
+                revision: Counter::new(0)?,
+                last_synced_at: RequiredNullable(None),
+                error_code: RequiredNullable(None),
+            };
+            let key = new_profile_id.as_str().to_owned();
+            inner.profiles.insert(
+                key.clone(),
+                ActiveProfile {
+                    identity: identity.into(),
+                    view,
+                    revoked: false,
+                    session: None,
+                    close: None,
+                    nodes: vec![],
+                    seq: 0,
+                    awaiting_tree: None,
+                    outbound: None,
+                    busy: false,
+                    writes_blocked: false,
+                    batch_hold: None,
+                },
+            );
+            key
+        };
         let profile = inner
             .profiles
-            .get_mut(profile_id.as_str())
-            .ok_or(ErrorCode::Unpaired)?;
-        if profile.revoked
-            || profile.identity.instance_id != payload.instance_id
-            || profile.identity.origin != ProfileOrigin::Chrome(origin.clone())
-        {
+            .get_mut(&resolved_key)
+            .ok_or(ErrorCode::WrongProfile)?;
+        if profile.identity.origin != ProfileOrigin::Chrome(origin.clone()) {
             return Err(ErrorCode::WrongProfile);
         }
-        let reference = profile
-            .identity
-            .credential_reference
-            .clone()
-            .ok_or(ErrorCode::Unpaired)?;
-        let store = self.credentials.clone();
-        let secret = tokio::task::spawn_blocking(move || store.get(reference.as_str()))
-            .await
-            .map_err(|_| ErrorCode::StorageError)??;
-        if !constant_equal(&secret, payload.credential.as_str()) {
-            return Err(ErrorCode::Unpaired);
+        if profile.revoked {
+            return Err(ErrorCode::ProfileIgnored);
         }
         // A session ID cannot be reused by a second transport.
         if profile.session.as_ref() == Some(session_id) {
@@ -673,9 +622,15 @@ impl Bridge {
         profile.close = Some(close);
         profile.view.connection = BridgeConnection::Reconciling;
         profile.view.error_code.0 = None;
-        let epoch = profile.identity.source_epoch;
+        let auth = AuthSession {
+            profile_id: profile.identity.id.clone(),
+            display_name: profile.identity.display_name.clone(),
+            source_epoch: profile.identity.source_epoch,
+            write_paused: profile.view.write_paused,
+            closed,
+        };
         self.publish(&mut inner);
-        Ok((epoch, closed))
+        Ok(auth)
     }
     async fn request_tree(&self, profile_id: &Id, session_id: &Id) -> Result<Option<WireMessage>> {
         let mut inner = self.inner.lock().await;
@@ -842,7 +797,7 @@ impl ActiveProfile {
         self.outbound = None;
         self.busy = false;
         self.view.connection = if self.revoked {
-            BridgeConnection::Unpaired
+            BridgeConnection::Ignored
         } else {
             BridgeConnection::CachedReadOnly
         };
@@ -862,13 +817,6 @@ impl Inner {
         }
         Ok(profile)
     }
-    fn expire(&mut self) -> bool {
-        let before = self.pending.len();
-        let now = now().unwrap_or(u64::MAX);
-        self.pending
-            .retain(|_, pending| pending.view.expires_at.get() > now);
-        self.pending.len() != before
-    }
     fn view(&self) -> BridgeState {
         BridgeState {
             protocol_version: Version::new(1).expect("constant"),
@@ -876,7 +824,6 @@ impl Inner {
             port: RequiredNullable(self.port),
             error_code: RequiredNullable(self.error),
             profiles: self.profiles.values().map(|p| p.view.clone()).collect(),
-            pending: self.pending.values().map(|p| p.view.clone()).collect(),
             mirrors: self
                 .mirrors
                 .values()
@@ -900,9 +847,6 @@ fn random_secret() -> Result<String> {
 }
 fn random_id(prefix: &str) -> Result<Id> {
     Id::new(format!("{prefix}:{}", random_secret()?))
-}
-fn constant_equal(a: &str, b: &str) -> bool {
-    bool::from(a.as_bytes().ct_eq(b.as_bytes()))
 }
 fn profile_nodes<'a>(inner: &'a Inner, profile_id: &Id) -> Result<&'a [BookmarkNode]> {
     inner

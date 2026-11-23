@@ -51,39 +51,26 @@ async fn fixture() -> (Bridge, tempfile::TempDir, Arc<MemoryCredentials>) {
     bridge.start(port).await.unwrap();
     (bridge, directory, store)
 }
-fn pair_message(offer: &PairingOffer, instance: &str) -> WireMessage {
-    let code: serde_json::Value = serde_json::from_str(&offer.pairing_code).unwrap();
-    envelope("pair", &offer.profile_id, &Id::new("session-pair").unwrap(), Some(Id::new("pair-request").unwrap()), serde_json::json!({"instanceId":instance, "credential":code["credential"], "displayName":"untrusted display"})).unwrap()
-}
-async fn paired(bridge: &Bridge, instance: &str) -> (Id, String) {
-    let before = bridge.state().await.profiles.len();
-    let offer = bridge
-        .begin_pairing("trusted display".into())
-        .await
-        .unwrap();
-    let message = pair_message(&offer, instance);
-    assert!(bridge.pair(&origin(), &message).await.unwrap().is_none());
-    assert_eq!(bridge.state().await.profiles.len(), before);
-    bridge
-        .confirm_pairing(offer.profile_id.clone(), Id::new(instance).unwrap())
-        .await
-        .unwrap();
-    let secret = bridge.pair(&origin(), &message).await.unwrap().unwrap();
-    assert_eq!(
-        bridge.pair(&origin(), &message).await.unwrap_err(),
-        ErrorCode::Unpaired
-    );
-    (offer.profile_id, secret)
-}
-fn hello(profile: &Id, instance: &str, session: &str, secret: &str) -> WireMessage {
+fn hello(profile: &Id, instance: &str, session: &str, _secret: &str) -> WireMessage {
     envelope(
         "hello",
         profile,
         &Id::new(session).unwrap(),
         Some(Id::new("hello-request").unwrap()),
-        serde_json::json!({"instanceId":instance,"credential":secret}),
+        serde_json::json!({"instanceId": instance}),
     )
     .unwrap()
+}
+async fn paired(bridge: &Bridge, instance: &str) -> (Id, String) {
+    let before = bridge.state().await.profiles.len();
+    let pending = Id::new("pending").unwrap();
+    let session = format!("init-{instance}");
+    let auth = bridge
+        .authenticate(&origin(), &hello(&pending, instance, &session, ""))
+        .await
+        .unwrap();
+    assert_eq!(bridge.state().await.profiles.len(), before + 1);
+    (auth.profile_id, String::new())
 }
 fn nodes() -> Vec<BookmarkNode> {
     serde_json::from_value(serde_json::json!([
@@ -251,63 +238,63 @@ async fn local_metadata_and_title_drafts_reject_reused_chrome_ids_after_epoch_re
 }
 
 #[tokio::test]
-async fn pairing_requires_confirmation_and_binds_origin_instance_and_expiry() {
-    let (bridge, _dir, credentials) = fixture().await;
-    let offer = bridge.begin_pairing("Desktop name".into()).await.unwrap();
-    let code: serde_json::Value = serde_json::from_str(&offer.pairing_code).unwrap();
-    assert_eq!(code["credential"].as_str().unwrap().len(), 64);
-    assert!(offer.expires_at.get() >= now().unwrap() + 119_000);
-    assert!(
-        bridge
-            .confirm_pairing(offer.profile_id.clone(), Id::new("i").unwrap())
-            .await
-            .is_err()
-    );
-    let valid = pair_message(&offer, "i");
-    let mut bad = serde_json::to_value(&valid).unwrap();
-    bad["payload"]["credential"] = serde_json::json!("wrong".repeat(12));
+async fn direct_hello_binds_origin_instance_and_supports_profile_controls() {
+    let (bridge, _dir, _credentials) = fixture().await;
+    let pending = Id::new("pending").unwrap();
+    let first = bridge
+        .authenticate(&origin(), &hello(&pending, "inst-a", "s1", ""))
+        .await
+        .unwrap();
     assert_eq!(
-        bridge
-            .pair(&origin(), &serde_json::from_value(bad).unwrap())
-            .await
-            .unwrap_err(),
-        ErrorCode::Unpaired
+        bridge.state().await.profiles[0].display_name.as_str(),
+        "Chrome 资料 1"
     );
-    assert!(bridge.state().await.pending[0].instance_id.0.is_none());
-    assert!(bridge.pair(&origin(), &valid).await.unwrap().is_none());
     let other = PairedOrigin::new(format!("chrome-extension://{}", "b".repeat(32))).unwrap();
     assert_eq!(
-        bridge.pair(&other, &valid).await.unwrap_err(),
+        bridge
+            .authenticate(&other, &hello(&first.profile_id, "inst-a", "s2", ""))
+            .await
+            .unwrap_err(),
         ErrorCode::WrongProfile
     );
-    assert!(credentials.0.lock().unwrap().is_empty());
-    {
-        bridge
-            .inner
-            .lock()
-            .await
-            .pending
-            .get_mut(offer.profile_id.as_str())
-            .unwrap()
-            .view
-            .expires_at = Counter::new(0).unwrap();
-    }
+    bridge
+        .rename_profile(first.profile_id.clone(), "工作资料".into())
+        .await
+        .unwrap();
     assert_eq!(
-        bridge.pair(&origin(), &valid).await.unwrap_err(),
-        ErrorCode::Unpaired
+        bridge.state().await.profiles[0].display_name.as_str(),
+        "工作资料"
     );
-    assert!(
+    bridge
+        .set_write_paused(first.profile_id.clone(), true)
+        .await
+        .unwrap();
+    assert!(bridge.state().await.profiles[0].write_paused);
+    bridge
+        .ignore_profile(first.profile_id.clone())
+        .await
+        .unwrap();
+    assert!(bridge.state().await.profiles[0].ignored);
+    assert_eq!(
+        bridge.state().await.profiles[0].connection,
+        BridgeConnection::Ignored
+    );
+    assert_eq!(
         bridge
-            .inner
-            .lock()
+            .authenticate(&origin(), &hello(&first.profile_id, "inst-a", "s3", ""))
             .await
-            .storage()
-            .unwrap()
-            .profiles()
-            .await
-            .unwrap()
-            .is_empty()
+            .unwrap_err(),
+        ErrorCode::ProfileIgnored
     );
+    bridge
+        .resume_profile(first.profile_id.clone())
+        .await
+        .unwrap();
+    assert!(!bridge.state().await.profiles[0].ignored);
+    bridge
+        .authenticate(&origin(), &hello(&first.profile_id, "inst-a", "s4", ""))
+        .await
+        .unwrap();
     bridge.shutdown().await.unwrap();
 }
 
@@ -338,7 +325,7 @@ async fn reconnect_uses_persisted_revision_and_revocation_preserves_cache() {
     bridge.revoke_pairing(profile.clone()).await.unwrap();
     assert_eq!(
         bridge.state().await.profiles[0].connection,
-        BridgeConnection::Unpaired
+        BridgeConnection::Ignored
     );
     assert!(bridge.reconnect_profile(profile.clone()).await.is_err());
     assert!(credentials.0.lock().unwrap().is_empty());
@@ -355,7 +342,7 @@ async fn reconnect_uses_persisted_revision_and_revocation_preserves_cache() {
         .unwrap();
     assert_eq!(
         bridge.state().await.profiles[0].connection,
-        BridgeConnection::Unpaired
+        BridgeConnection::Ignored
     );
     assert!(
         bridge
@@ -468,7 +455,6 @@ async fn equal_chrome_ids_and_wrong_auth_never_cross_profiles() {
     let (one, secret) = paired(&bridge, "i1").await;
     let (two, other_secret) = paired(&bridge, "i2").await;
     for message in [
-        hello(&one, "i1", "bad", &other_secret),
         hello(&one, "i2", "bad", &secret),
         hello(&two, "i1", "bad", &secret),
     ] {
@@ -547,27 +533,6 @@ async fn real_websocket_rejects_headers_identity_version_and_unauthenticated_idl
     request
         .headers_mut()
         .insert("Origin", origin().as_str().parse().unwrap());
-    let offer = bridge.begin_pairing("token check".into()).await.unwrap();
-    let mut bad_token = serde_json::to_value(pair_message(&offer, "bad-instance")).unwrap();
-    bad_token["payload"]["credential"] = serde_json::json!("x".repeat(64));
-    let (mut ws, _) = connect_async(request.clone()).await.unwrap();
-    ws.send(Message::Text(bad_token.to_string().into()))
-        .await
-        .unwrap();
-    let token_result = ws.next().await.unwrap().unwrap().into_text().unwrap();
-    assert!(matches!(
-        parse_frame(token_result.as_bytes()).unwrap(),
-        WireMessage::PairResult {
-            payload: PairResultPayload {
-                accepted: false,
-                credential: None,
-                error_code: Some(ErrorCode::Unpaired),
-            },
-            ..
-        }
-    ));
-    assert_eq!(persisted_rows(&database), (0, 0));
-    bridge.cancel_pairing(offer.profile_id).await.unwrap();
     let (mut ws, _) = connect_async(request.clone()).await.unwrap();
     assert!(
         tokio::time::timeout(Duration::from_secs(6), ws.next())
@@ -576,7 +541,7 @@ async fn real_websocket_rejects_headers_identity_version_and_unauthenticated_idl
     );
     assert_eq!(persisted_rows(&database), (0, 0));
     let (mut ws, _) = connect_async(request.clone()).await.unwrap();
-    ws.send(Message::Text(serde_json::json!({"type":"hello","protocolVersion":2,"profileId":"p","sessionId":"s","requestId":"r","seq":null,"payload":{"instanceId":"i","credential":"x".repeat(64)}}).to_string().into())).await.unwrap();
+    ws.send(Message::Text(serde_json::json!({"type":"hello","protocolVersion":2,"profileId":"p","sessionId":"s","requestId":"r","seq":null,"payload":{"instanceId":"i"}}).to_string().into())).await.unwrap();
     let version_result = tokio::time::timeout(Duration::from_secs(1), ws.next())
         .await
         .unwrap()

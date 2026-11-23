@@ -84,91 +84,82 @@ async fn connection(bridge: Bridge, socket: TcpStream, mut stopped: watch::Recei
     };
     let mut binding = None;
     let mut closed = None;
-    // A successful pair exchange still requires hello. Pending human confirmation closes immediately.
-    for _ in 0..2 {
-        let text = tokio::select! {
-            _ = stopped.changed() => break,
-            result = timeout_at(deadline, read_text(&mut ws)) => match result { Ok(Ok(text)) => text, _ => break },
-        };
-        let message = match parse_frame(text.as_bytes()) {
-            Ok(message) => message,
+    let text = tokio::select! {
+        _ = stopped.changed() => String::new(),
+        result = timeout_at(deadline, read_text(&mut ws)) => match result { Ok(Ok(text)) => text, _ => String::new() },
+    };
+    if !text.is_empty() {
+        match parse_frame(text.as_bytes()) {
+            Ok(message @ WireMessage::Hello { .. }) => {
+                let request = match &message {
+                    WireMessage::Hello { request_id, .. } => request_id.0.clone(),
+                    _ => None,
+                };
+                let (requested_profile, session) = message.identity();
+                let authenticated = tokio::select! {
+                    _ = stopped.changed() => None,
+                    result = timeout_at(deadline, bridge.authenticate(&origin, &message)) => result.ok(),
+                };
+                if let Some(authenticated) = authenticated {
+                    let (accepted, resolved_profile, display_name, epoch, write_paused, error) =
+                        match &authenticated {
+                            Ok(auth) => (
+                                true,
+                                Some(auth.profile_id.clone()),
+                                Some(auth.display_name.clone()),
+                                auth.source_epoch,
+                                auth.write_paused,
+                                None,
+                            ),
+                            Err(error) => (
+                                false,
+                                None,
+                                None,
+                                SourceEpoch::new(1).expect("constant"),
+                                false,
+                                Some(*error),
+                            ),
+                        };
+                    let envelope_profile = resolved_profile.as_ref().unwrap_or(requested_profile);
+                    let response = envelope(
+                        "hello_result",
+                        envelope_profile,
+                        session,
+                        request,
+                        serde_json::json!({
+                            "accepted": accepted,
+                            "profileId": resolved_profile,
+                            "displayName": display_name,
+                            "sourceEpoch": epoch,
+                            "writePaused": write_paused,
+                            "errorCode": error,
+                        }),
+                    );
+                    if let Ok(auth) = authenticated {
+                        binding = Some((auth.profile_id, session.clone()));
+                        closed = Some(auth.closed);
+                    }
+                    if let Ok(response) = response
+                        && !matches!(
+                            timeout_at(deadline, send(&mut ws, response)).await,
+                            Ok(Ok(()))
+                        )
+                    {
+                        if let Some((ref profile, ref sess)) = binding {
+                            bridge
+                                .disconnected(profile, sess, Some(ErrorCode::ReadOnly))
+                                .await;
+                        }
+                        binding = None;
+                    }
+                }
+            }
+            Ok(_) => {}
             Err(_) => {
                 if let Some(rejection) = unsupported_version_result(&text) {
                     let _ = timeout_at(deadline, send(&mut ws, rejection)).await;
                 }
-                break;
             }
-        };
-        let request = match &message {
-            WireMessage::Pair { request_id, .. } | WireMessage::Hello { request_id, .. } => {
-                request_id.0.clone()
-            }
-            _ => break,
-        };
-        let (profile, session) = message.identity();
-        if matches!(message, WireMessage::Pair { .. }) {
-            let result = tokio::select! {
-                _ = stopped.changed() => break,
-                result = timeout_at(deadline, bridge.pair(&origin, &message)) => match result { Ok(result) => result, Err(_) => break },
-            };
-            let (accepted, credential, error) = match result {
-                Ok(Some(secret)) => (true, Some(secret), None),
-                Ok(None) => (false, None, Some(ErrorCode::Unpaired)),
-                Err(error) => (false, None, Some(error)),
-            };
-            let response = envelope(
-                "pair_result",
-                profile,
-                session,
-                request,
-                serde_json::json!({"accepted":accepted,"credential":credential,"errorCode":error}),
-            );
-            if let Ok(response) = response
-                && !matches!(
-                    timeout_at(deadline, send(&mut ws, response)).await,
-                    Ok(Ok(()))
-                )
-            {
-                break;
-            }
-            if !accepted {
-                break;
-            }
-        } else {
-            let authenticated = tokio::select! {
-                _ = stopped.changed() => break,
-                result = timeout_at(deadline, bridge.authenticate(&origin, &message)) => match result { Ok(result) => result, Err(_) => break },
-            };
-            let (accepted, epoch, error) = match &authenticated {
-                Ok((epoch, _)) => (true, *epoch, None),
-                Err(error) => (false, SourceEpoch::new(1).expect("constant"), Some(*error)),
-            };
-            let response = envelope(
-                "hello_result",
-                profile,
-                session,
-                request,
-                serde_json::json!({"accepted":accepted,"sourceEpoch":epoch,"errorCode":error}),
-            );
-            if let Ok((_, receiver)) = authenticated {
-                binding = Some((profile.clone(), session.clone()));
-                closed = Some(receiver);
-            }
-            if let Ok(response) = response
-                && !matches!(
-                    timeout_at(deadline, send(&mut ws, response)).await,
-                    Ok(Ok(()))
-                )
-            {
-                if binding.is_some() {
-                    bridge
-                        .disconnected(profile, session, Some(ErrorCode::ReadOnly))
-                        .await;
-                }
-                binding = None;
-                break;
-            }
-            break;
         }
     }
     if let (Some((profile, session)), Some(mut closed)) = (binding, closed) {
@@ -316,17 +307,19 @@ fn unsupported_version_result(text: &str) -> Option<WireMessage> {
     }
     let kind = match value.get("type").and_then(|item| item.as_str())? {
         "hello" => "hello_result",
-        "pair" => "pair_result",
         _ => return None,
     };
     let profile = Id::new(value.get("profileId")?.as_str()?).ok()?;
     let session = Id::new(value.get("sessionId")?.as_str()?).ok()?;
     let request = Id::new(value.get("requestId")?.as_str()?).ok()?;
-    let payload = if kind == "hello_result" {
-        serde_json::json!({"accepted":false,"sourceEpoch":1,"errorCode":ErrorCode::UnsupportedVersion})
-    } else {
-        serde_json::json!({"accepted":false,"credential":null,"errorCode":ErrorCode::UnsupportedVersion})
-    };
+    let payload = serde_json::json!({
+        "accepted": false,
+        "profileId": null,
+        "displayName": null,
+        "sourceEpoch": 1,
+        "writePaused": false,
+        "errorCode": ErrorCode::UnsupportedVersion
+    });
     envelope(kind, &profile, &session, Some(request), payload).ok()
 }
 async fn read_text(ws: &mut WebSocketStream<TcpStream>) -> Result<String> {

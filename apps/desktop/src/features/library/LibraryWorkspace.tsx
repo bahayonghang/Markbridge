@@ -65,7 +65,7 @@ function accessNote(source: Source): string {
     case 'reconciling': return '正在核对书签。当前只读。';
     case 'cached_read_only': return '扩展未连接。显示本机缓存，当前只读。';
     case 'error': return '连接出错。显示本机缓存，当前只读。';
-    case 'unpaired': return '资料未配对。显示本机缓存，当前只读。';
+    case 'ignored': return '资料已断开并忽略。显示本机缓存，当前只读。';
   }
 }
 

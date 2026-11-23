@@ -133,22 +133,11 @@ async fn disposable_chrome_b100_apply_interrupt_and_rollback() {
     assert!(batch.iter().all(|id| !stayed.iter().any(|item| item == id)));
     assert_eq!(batch.len() + stayed.len(), 100);
 
-    let offer = bridge.begin_pairing("disposable".into()).await.unwrap();
-    let code = serde_json::to_string(&offer.pairing_code).unwrap();
     page_cdp
-        .eval(&format!(
-            "chrome.runtime.sendMessage({{type:'pair', code:{code}}})"
-        ))
+        .eval("chrome.runtime.sendMessage({type:'reconnect'})")
         .await
-        .expect("pair command");
-    let profile = timeout(
-        Duration::from_secs(20),
-        confirm_when_seen(&bridge, &offer.profile_id),
-    )
-    .await
-    .expect("pairing instance")
-    .unwrap();
-    timeout(Duration::from_secs(20), wait_live(&bridge, &profile))
+        .expect("reconnect command");
+    let profile = timeout(Duration::from_secs(20), wait_first_live(&bridge))
         .await
         .expect("live tree");
     report.set("paired", serde_json::json!(true));
@@ -690,34 +679,15 @@ async fn ready_plan(
     current
 }
 
-async fn confirm_when_seen(bridge: &Bridge, profile: &Id) -> Result<Id, ()> {
+async fn wait_first_live(bridge: &Bridge) -> Id {
     loop {
         let state = bridge.state().await;
-        if let Some(pending) = state
-            .pending
-            .iter()
-            .find(|item| &item.profile_id == profile)
-            && let Some(instance) = pending.instance_id.0.clone()
-        {
-            bridge
-                .confirm_pairing(profile.clone(), instance)
-                .await
-                .map_err(|_| ())?;
-            return Ok(profile.clone());
-        }
-        sleep(Duration::from_millis(50)).await;
-    }
-}
-
-async fn wait_live(bridge: &Bridge, profile: &Id) {
-    loop {
-        let state = bridge.state().await;
-        if state
+        if let Some(item) = state
             .profiles
             .iter()
-            .any(|item| &item.profile_id == profile && item.connection == BridgeConnection::Live)
+            .find(|item| item.connection == BridgeConnection::Live)
         {
-            return;
+            return item.profile_id.clone();
         }
         sleep(Duration::from_millis(50)).await;
     }

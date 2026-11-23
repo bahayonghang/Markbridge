@@ -21,13 +21,14 @@ export function parsePairingCode(text: string, now = Date.now()): Pairing {
   if (!value || typeof value !== 'object') throw new Error('INVALID_MESSAGE');
   const data = value as Record<string, unknown>;
   if (Object.keys(data).sort().join(',') !== 'credential,expiresAt,port,profileId,protocolVersion'
+    || typeof data.credential !== 'string' || data.credential.length < 16
     || data.protocolVersion !== 1 || !Number.isInteger(data.port) || Number(data.port) < 1 || Number(data.port) > 65535
     || !Number.isSafeInteger(data.expiresAt) || Number(data.expiresAt) <= now || Number(data.expiresAt) > now + 120_000) {
     throw new Error('INVALID_MESSAGE');
   }
-  // The existing wire schema owns identity, credential and Unicode limits.
-  parseWireMessage({ protocolVersion: 1, type: 'pair', profileId: data.profileId, sessionId: 'validation',
-    requestId: 'validation', seq: null, payload: { instanceId: 'validation', displayName: 'Chrome', credential: data.credential } });
+  // The existing wire schema owns identity and Unicode limits.
+  parseWireMessage({ protocolVersion: 1, type: 'hello', profileId: data.profileId, sessionId: 'validation',
+    requestId: 'validation', seq: null, payload: { instanceId: 'validation', displayNameHint: 'Chrome', userInitiated: true } });
   return data as Pairing;
 }
 
@@ -187,9 +188,8 @@ export class ExtensionBridge {
     const identity = this.auth ?? this.pending;
     if (!identity) return;
     this.authRequestId = crypto.randomUUID();
-    const base = this.envelope(this.auth ? 'hello' : 'pair', this.authRequestId);
-    if (this.auth) this.send({ ...base, type: 'hello', payload: { instanceId: this.instanceId, credential: identity.credential } });
-    else this.send({ ...base, type: 'pair', payload: { instanceId: this.instanceId, credential: identity.credential, displayName: 'Chrome' } });
+    const base = this.envelope('hello', this.authRequestId);
+    this.send({ ...base, type: 'hello', payload: { instanceId: this.instanceId, displayNameHint: 'Chrome', userInitiated: Boolean(this.pending) } });
   }
   private envelope<T extends WireMessage['type']>(type: T, requestId: string | null = null) {
     return { protocolVersion: 1, profileId: (this.auth ?? this.pending)!.profileId, sessionId: this.sessionId, type, requestId, seq: null };
@@ -202,20 +202,13 @@ export class ExtensionBridge {
     const identity = this.auth ?? this.pending;
     if (!identity || message.profileId !== identity.profileId || message.sessionId !== this.sessionId) { await this.reject('WRONG_PROFILE'); return; }
     this.lastReceived = Date.now();
-    if (message.type === 'pair_result' && !this.authenticated && this.pending && message.requestId === this.authRequestId) {
-      if (!message.payload.accepted) {
-        if (message.payload.errorCode === 'UNPAIRED' && this.pending.expiresAt > Date.now()) {
-          this.disconnectAndRetry(); this.setStatus('pending');
-        } else await this.reject(message.payload.errorCode ?? 'UNPAIRED');
-        return;
-      }
-      if (!message.payload.credential) { await this.reject('INVALID_MESSAGE'); return; }
-      this.auth = { port: this.pending.port, profileId: identity.profileId, credential: message.payload.credential };
-      await this.api.storage.local.set({ [AUTH_KEY]: this.auth });
-      this.pending = null; await this.api.storage.session.remove(PENDING_KEY); this.sendAuth(); return;
-    }
-    if (message.type === 'hello_result' && !this.authenticated && this.auth && message.requestId === this.authRequestId) {
+    if (message.type === 'hello_result' && !this.authenticated && (this.auth || this.pending) && message.requestId === this.authRequestId) {
       if (!message.payload.accepted) { await this.reject(message.payload.errorCode ?? 'UNPAIRED'); return; }
+      if (this.pending && message.payload.profileId) {
+        this.auth = { port: this.pending.port, profileId: message.payload.profileId, credential: this.pending.credential };
+        await this.api.storage.local.set({ [AUTH_KEY]: this.auth });
+        this.pending = null; await this.api.storage.session.remove(PENDING_KEY);
+      }
       this.authenticated = true; this.epoch = message.payload.sourceEpoch; this.retry = 0;
       clearTimeout(this.authTimer); this.setStatus('reconciling');
       this.heartbeat = setInterval(() => {

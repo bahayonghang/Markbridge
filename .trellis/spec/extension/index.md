@@ -10,19 +10,19 @@ Protect roots and managed nodes from API properties and topology. Do not hard-co
 
 Preserve all four folderType values: bookmarks-bar, other, mobile and managed. Validate complete folder children arrays before sending a snapshot. Register listeners before asynchronous initialization and getTree. Discard a snapshot if events occur during the read; retry at most three times before delaying.
 
-## Pairing and liveness
+## Fixed extension identity and liveness (ADR-0001)
 
-Bind desktop communication to loopback. Pair each installation explicitly. The extension cannot read arbitrary desktop token files with bookmark permission. Separate bootstrap pairing from subsequent authentication.
+Bind desktop communication to loopback (`127.0.0.1:49153–49160`). The extension locks a global fixed 32-character Chrome extension ID via the RSA public key embedded in `manifest.json` (`key` field; the private key is never committed to the repository). The desktop handshake restricts transport access to that fixed `chrome-extension://` Origin (same-user local trust boundary; test environments inject a test Origin explicitly).
 
-Authenticate before tree or command exchange. Check origin and token. Never put secrets in URL query strings.
+No manual pairing ticket, pairing code, or cross-window confirmation is used. On startup, installation, or alarm wakeup, the extension probes `49153–49160` and sends a direct `hello` frame carrying its persistent `instanceId`, optional `displayNameHint`, and `userInitiated` flag. Desktop identifies or creates a Chrome Profile by `instanceId` and replies with `hello_result` carrying the resolved `profileId`, `displayName`, `sourceEpoch`, and `writePaused`. Never put tokens or private details in URL query strings.
 
 Exchange application messages within the worker activity window. Use persistent wake/reconnect recovery; a stopped worker has no reliable in-memory timer. Reconcile fully after restart. Live latency targets exclude disconnection and OS suspension.
 
-Use a new session ID for each transport. Proactive refresh sends resync_required and waits for desktop get_tree. A tree_full response must echo the pending request ID. Suppress deltas while reconciling. The desktop assigns the persisted revision; extension-local sequence state may reset at worker restart.
+Use a new session ID for each transport. Proactive refresh sends `resync_required` and waits for desktop `get_tree`. A `tree_full` response must echo the pending request ID. Suppress deltas while reconciling. The desktop assigns the persisted revision; extension-local sequence state may reset at worker restart.
 
-Store long-lived credentials in chrome.storage.local with TRUSTED_CONTEXTS access. Keep the temporary pairing ticket in session storage only until expiry. Clear the options input before messaging. Do not persist a pairing ticket in URLs or diagnostic output. Pair only after the desktop confirms the observed instance and transport Origin.
+Store extension connection preferences (`lastPort`, `profileId`, `displayName`, `paused`) and persistent `instanceId` in `chrome.storage.local` with `TRUSTED_CONTEXTS` access. When the user triggers "断开并忽略" on the desktop, the desktop sends `pause_sync` before closing the socket and rejects background `hello` (`userInitiated: false`) with `PROFILE_IGNORED`; the extension persists `paused = true` and stops automatic reconnect alarms until the user explicitly triggers reconnect from the popup/options UI (`userInitiated: true`) or resumes the profile on the desktop.
 
-Popup and options share status rendering but have different controls: the popup directs users to pairing settings, while options may say to paste into the current form. Display the extension identity and Origin for the desktop confirmation. Keep a rejected input's action error visible across status polls. Clearing the local pairing requires a separate confirmation; after confirmation/cancel, focus returns to a visible control. Extension connection feedback must defer to the desktop's reconciled live state before promising write availability.
+Popup and options share a minimal status panel with no credential input or pairing-code UI: they display connection status, profile display name, connected port, node count, write-paused protection status, and one-click Reconnect / Pause controls, while preserving single-tab page capture in the popup. Extension connection feedback must defer to the desktop's reconciled live state and `writePaused` flag before promising write availability.
 
 MV3 CSP prohibits runtime Function/eval compilation. Consume static Ajv standalone validators generated from Rust schemas by scripts/protocol.mjs. pnpm protocol:check compares these validators as well as schemas/types. Production scanning and the Node code-generation-disabled regression must pass.
 

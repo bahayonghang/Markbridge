@@ -2,9 +2,9 @@ import { expect, it } from 'vitest';
 import { parseDiagnosticReport, parseDiagnosticSaveResult } from './diagnostics';
 
 const report = {
-  formatVersion: 1, appVersion: '0.1.0', protocolVersion: 1, schemaVersion: 7,
+  formatVersion: 1, appVersion: '0.1.0', protocolVersion: 1, schemaVersion: 8,
   platform: 'windows', architecture: 'x86_64', bridgeListening: false, bridgeErrorCode: null,
-  connections: { unpaired: 0, connecting: 0, reconciling: 0, live: 0, cachedReadOnly: 0, error: 0 },
+  connections: { ignored: 0, connecting: 0, reconciling: 0, live: 0, cachedReadOnly: 0, error: 0 },
   mirrors: { current: 0, stale: 0, unavailable: 0 },
 };
 it('accepts only the fixed report, known enums and safe counts', () => {

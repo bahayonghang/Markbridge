@@ -241,3 +241,151 @@ fn reviewed_subtrees_validate_before_state_shape_and_size_with_legacy_compatibil
         .remove("expectedSubtree");
     assert!(parse(&legacy).is_ok());
 }
+
+#[test]
+fn fixed_extension_identity_constants_and_zero_click_wire_contract() {
+    assert_eq!(OFFICIAL_EXTENSION_ID.len(), 32);
+    assert!(
+        OFFICIAL_EXTENSION_ID
+            .bytes()
+            .all(|byte| (b'a'..=b'p').contains(&byte))
+    );
+    assert_eq!(
+        OFFICIAL_EXTENSION_ORIGIN,
+        format!("chrome-extension://{OFFICIAL_EXTENSION_ID}")
+    );
+    assert_eq!(BRIDGE_PORT_START, 49153);
+    assert_eq!(BRIDGE_PORT_END, 49160);
+
+    let hello_minimal = json!({
+        "protocolVersion": 1,
+        "type": "hello",
+        "profileId": "pending",
+        "sessionId": "session-1",
+        "requestId": "req-hello",
+        "seq": null,
+        "payload": {
+            "instanceId": "inst-1"
+        }
+    });
+    assert!(parse(&hello_minimal).is_ok());
+
+    let hello_full = json!({
+        "protocolVersion": 1,
+        "type": "hello",
+        "profileId": "profile-1",
+        "sessionId": "session-1",
+        "requestId": "req-hello-2",
+        "seq": null,
+        "payload": {
+            "instanceId": "inst-1",
+            "displayNameHint": "工作资料",
+            "userInitiated": true
+        }
+    });
+    assert!(parse(&hello_full).is_ok());
+
+    let hello_with_legacy_credential = json!({
+        "protocolVersion": 1,
+        "type": "hello",
+        "profileId": "profile-1",
+        "sessionId": "session-1",
+        "requestId": "req-hello-3",
+        "seq": null,
+        "payload": {
+            "instanceId": "inst-1",
+            "credential": "x".repeat(32)
+        }
+    });
+    assert!(parse(&hello_with_legacy_credential).is_err());
+
+    let legacy_pair = json!({
+        "protocolVersion": 1,
+        "type": "pair",
+        "profileId": "profile-1",
+        "sessionId": "session-1",
+        "requestId": "req-pair",
+        "seq": null,
+        "payload": {
+            "instanceId": "inst-1",
+            "credential": "x".repeat(32),
+            "displayName": "Chrome"
+        }
+    });
+    assert!(parse(&legacy_pair).is_err());
+
+    let hello_result = json!({
+        "protocolVersion": 1,
+        "type": "hello_result",
+        "profileId": "profile-1",
+        "sessionId": "session-1",
+        "requestId": "req-hello",
+        "seq": null,
+        "payload": {
+            "accepted": true,
+            "profileId": "profile-1",
+            "displayName": "Chrome 资料 1",
+            "sourceEpoch": 1,
+            "writePaused": true,
+            "errorCode": null
+        }
+    });
+    assert!(parse(&hello_result).is_ok());
+
+    let pause_sync = json!({
+        "protocolVersion": 1,
+        "type": "pause_sync",
+        "profileId": "profile-1",
+        "sessionId": "session-1",
+        "requestId": "req-pause",
+        "seq": null,
+        "payload": {
+            "reason": "PROFILE_IGNORED"
+        }
+    });
+    assert!(parse(&pause_sync).is_ok());
+
+    let mut invalid_pause_sync = pause_sync.clone();
+    invalid_pause_sync["requestId"] = Value::Null;
+    assert!(parse(&invalid_pause_sync).is_err());
+
+    let bridge_state: BridgeState = serde_json::from_value(json!({
+        "protocolVersion": 1,
+        "revision": 2,
+        "port": 49153,
+        "errorCode": "PORT_EXHAUSTED",
+        "profiles": [{
+            "profileId": "profile-1",
+            "instanceId": "inst-1",
+            "displayName": "Chrome 资料 1",
+            "connection": "ignored",
+            "writePaused": true,
+            "ignored": true,
+            "nodeCount": 12,
+            "revision": 3,
+            "lastSyncedAt": 1700000000000_u64,
+            "errorCode": "WRITE_PAUSED"
+        }],
+        "mirrors": []
+    }))
+    .unwrap();
+    assert_eq!(
+        bridge_state.profiles[0].connection,
+        BridgeConnection::Ignored
+    );
+    assert!(bridge_state.profiles[0].write_paused);
+    assert!(bridge_state.profiles[0].ignored);
+
+    assert!(
+        serde_json::from_value::<BridgeState>(json!({
+            "protocolVersion": 1,
+            "revision": 0,
+            "port": null,
+            "errorCode": null,
+            "profiles": [],
+            "pending": [],
+            "mirrors": []
+        }))
+        .is_err()
+    );
+}

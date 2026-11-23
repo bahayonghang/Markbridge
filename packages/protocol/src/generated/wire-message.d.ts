@@ -2,24 +2,6 @@
 
 export type WireMessage =
   | {
-      payload: PairPayload;
-      profileId: Id;
-      protocolVersion: Version;
-      requestId: RequiredNullable;
-      seq: RequiredNullable2;
-      sessionId: Id;
-      type: 'pair';
-    }
-  | {
-      payload: PairResultPayload;
-      profileId: Id;
-      protocolVersion: Version;
-      requestId: RequiredNullable;
-      seq: RequiredNullable2;
-      sessionId: Id;
-      type: 'pair_result';
-    }
-  | {
       payload: HelloPayload;
       profileId: Id;
       protocolVersion: Version;
@@ -36,6 +18,15 @@ export type WireMessage =
       seq: RequiredNullable2;
       sessionId: Id;
       type: 'hello_result';
+    }
+  | {
+      payload: PauseSyncPayload;
+      profileId: Id;
+      protocolVersion: Version;
+      requestId: RequiredNullable;
+      seq: RequiredNullable2;
+      sessionId: Id;
+      type: 'pause_sync';
     }
   | {
       payload: EmptyPayload;
@@ -118,7 +109,6 @@ export type WireMessage =
       sessionId: Id;
       type: 'get_operation_status';
     };
-export type Credential = string;
 export type DisplayName = string;
 export type Id = string;
 export type Version = number;
@@ -131,6 +121,10 @@ export type RequiredNullable = Id | null;
  */
 export type RequiredNullable2 = Counter | null;
 export type Counter = number;
+/**
+ * A required JSON field whose value can be null. Unlike Option, absence is rejected.
+ */
+export type RequiredNullable3 = DisplayName | null;
 export type ErrorCode =
   | (
       | 'INVALID_MESSAGE'
@@ -151,6 +145,9 @@ export type ErrorCode =
       | 'MIGRATION_FAILED'
       | 'CONFLICT'
       | 'CANCELLED'
+      | 'PROFILE_IGNORED'
+      | 'WRITE_PAUSED'
+      | 'PORT_EXHAUSTED'
     )
   | 'PATH_UNAVAILABLE';
 export type SourceEpoch = number;
@@ -243,24 +240,21 @@ export type OperationState =
   | 'rolled_back'
   | 'rollback_conflict';
 
-export interface PairPayload {
-  credential: Credential;
-  displayName: DisplayName;
-  instanceId: Id;
-}
-export interface PairResultPayload {
-  accepted: boolean;
-  credential?: Credential | null;
-  errorCode?: ErrorCode | null;
-}
 export interface HelloPayload {
-  credential: Credential;
+  displayNameHint?: DisplayName | null;
   instanceId: Id;
+  userInitiated?: boolean;
 }
 export interface HelloResultPayload {
   accepted: boolean;
+  displayName: RequiredNullable3;
   errorCode?: ErrorCode | null;
+  profileId: RequiredNullable;
   sourceEpoch: SourceEpoch;
+  writePaused: boolean;
+}
+export interface PauseSyncPayload {
+  reason: ErrorCode;
 }
 export interface EmptyPayload {}
 export interface TreeSnapshot {

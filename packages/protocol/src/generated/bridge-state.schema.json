@@ -12,12 +12,6 @@
         "$ref": "#/$defs/MirrorSourceState"
       }
     },
-    "pending": {
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/PendingPairing"
-      }
-    },
     "port": {
       "$ref": "#/$defs/RequiredNullable"
     },
@@ -41,14 +35,13 @@
     "port",
     "errorCode",
     "profiles",
-    "pending",
     "mirrors"
   ],
   "$defs": {
     "BridgeConnection": {
       "type": "string",
       "enum": [
-        "unpaired",
+        "ignored",
         "connecting",
         "reconciling",
         "live",
@@ -69,6 +62,9 @@
         "errorCode": {
           "$ref": "#/$defs/RequiredNullable2"
         },
+        "ignored": {
+          "type": "boolean"
+        },
         "instanceId": {
           "$ref": "#/$defs/Id"
         },
@@ -83,6 +79,9 @@
         },
         "revision": {
           "$ref": "#/$defs/Counter"
+        },
+        "writePaused": {
+          "type": "boolean"
         }
       },
       "additionalProperties": false,
@@ -91,6 +90,8 @@
         "instanceId",
         "displayName",
         "connection",
+        "writePaused",
+        "ignored",
         "nodeCount",
         "revision",
         "lastSyncedAt",
@@ -130,7 +131,10 @@
             "STORAGE_NEWER_SCHEMA",
             "MIGRATION_FAILED",
             "CONFLICT",
-            "CANCELLED"
+            "CANCELLED",
+            "PROFILE_IGNORED",
+            "WRITE_PAUSED",
+            "PORT_EXHAUSTED"
           ]
         },
         {
@@ -215,34 +219,6 @@
         "canWriteBrowser"
       ]
     },
-    "PendingPairing": {
-      "type": "object",
-      "properties": {
-        "displayName": {
-          "$ref": "#/$defs/DisplayName"
-        },
-        "expiresAt": {
-          "$ref": "#/$defs/Counter"
-        },
-        "instanceId": {
-          "$ref": "#/$defs/RequiredNullable4"
-        },
-        "origin": {
-          "$ref": "#/$defs/RequiredNullable5"
-        },
-        "profileId": {
-          "$ref": "#/$defs/Id"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "profileId",
-        "displayName",
-        "instanceId",
-        "origin",
-        "expiresAt"
-      ]
-    },
     "RequiredNullable": {
       "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
       "type": [
@@ -284,13 +260,6 @@
         {
           "type": "null"
         }
-      ]
-    },
-    "RequiredNullable5": {
-      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
-      "type": [
-        "string",
-        "null"
       ]
     },
     "Version": {

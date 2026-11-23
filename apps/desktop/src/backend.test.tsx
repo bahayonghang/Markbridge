@@ -2,12 +2,12 @@ import { afterEach, expect, it, vi } from 'vitest';
 import { invoke, isTauri } from '@tauri-apps/api/core';
 import { listen, type Event } from '@tauri-apps/api/event';
 import { saveDiagnostics, ensureLocalLibrary } from './backend';
-import { aiSettings, applyAi, applyEdit, applyTitleEncoding, beginPairing, cancelAi, clearAiCredential, clearWebPreviewSession, enumerateChromeUserData, exportHtml, getBridgeState, getMirrorTree, openHttpUrl, openWebPreview, previewEdit, previewTitleEncoding, readCacheCount, readCacheList, readCacheNode, readCacheSearch, readCacheTree, readTagState, saveAiConfig, setAiCredential, startBridge, subscribeBridgeState, subscribeWebPreview, suggestAi, tagCommand, testAiConnection, webPreviewAction, webPreviewState } from './backend';
+import { aiSettings, applyAi, applyEdit, applyTitleEncoding, cancelAi, clearAiCredential, clearWebPreviewSession, enumerateChromeUserData, exportHtml, getBridgeState, getMirrorTree, ignoreProfile, openHttpUrl, openWebPreview, previewEdit, previewTitleEncoding, readCacheCount, readCacheList, readCacheNode, readCacheSearch, readCacheTree, readTagState, renameProfile, resumeProfile, saveAiConfig, setAiCredential, setProfileWritePaused, startBridge, subscribeBridgeState, subscribeWebPreview, suggestAi, tagCommand, testAiConnection, webPreviewAction, webPreviewState } from './backend';
 
 vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn(), isTauri: vi.fn() }));
 vi.mock('@tauri-apps/api/event', () => ({ listen: vi.fn() }));
 afterEach(() => { vi.resetAllMocks(); });
-const state = { protocolVersion: 1, revision: 1, port: null, errorCode: null, profiles: [], pending: [], mirrors: [] };
+const state = { protocolVersion: 1, revision: 1, port: null, errorCode: null, profiles: [], mirrors: [] };
 
 it('browser preview never invokes or subscribes to native endpoints', async () => {
   vi.mocked(isTauri).mockReturnValue(false);
@@ -15,6 +15,10 @@ it('browser preview never invokes or subscribes to native endpoints', async () =
   expect(await getBridgeState()).toMatchObject({ profiles: [], port: null });
   await subscribeBridgeState(vi.fn(), vi.fn());
   await expect(startBridge(49153)).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
+  await expect(renameProfile('profile-a', '工作')).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
+  await expect(setProfileWritePaused('profile-a', true)).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
+  await expect(ignoreProfile('profile-a')).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
+  await expect(resumeProfile('profile-a')).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
   await expect(enumerateChromeUserData('D:\\User Data')).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
   await expect(getMirrorTree('mirror-a')).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
   await expect(readCacheTree('profile-a', null, 1)).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
@@ -47,12 +51,15 @@ it('browser preview never invokes or subscribes to native endpoints', async () =
   expect(listen).not.toHaveBeenCalled();
 });
 
-it('validates unknown IPC responses before exposing state or offer', async () => {
+it('validates unknown IPC responses before exposing bridge state', async () => {
   vi.mocked(isTauri).mockReturnValue(true);
   vi.mocked(invoke).mockResolvedValue({ ...state, credential: 'unexpected-secret' });
   await expect(getBridgeState()).rejects.toThrow('INVALID_BRIDGE_STATE');
-  vi.mocked(invoke).mockResolvedValue({ profileId: 'profile-a', pairingCode: 'synthetic', expiresAt: 'invalid' });
-  await expect(beginPairing('Chrome 资料')).rejects.toThrow('INVALID_PAIRING_OFFER');
+  vi.mocked(invoke).mockResolvedValue({ ...state, revision: 2 });
+  expect(await renameProfile('profile-a', '工作')).toEqual({ ...state, revision: 2 });
+  expect(await setProfileWritePaused('profile-a', true)).toEqual({ ...state, revision: 2 });
+  expect(await ignoreProfile('profile-a')).toEqual({ ...state, revision: 2 });
+  expect(await resumeProfile('profile-a')).toEqual({ ...state, revision: 2 });
 });
 
 it('rejects a cache page that is not the list contract', async () => {
@@ -110,6 +117,8 @@ it('invokes ensure_local_library and validates the local profile connection stat
       instanceId: 'local-skills',
       displayName: 'Skills 书签库',
       connection: 'local' as const,
+      writePaused: false,
+      ignored: false,
       nodeCount: 1,
       revision: 1,
       lastSyncedAt: 1791800000000,
