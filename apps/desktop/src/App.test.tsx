@@ -1,5 +1,5 @@
 import { StrictMode } from 'react';
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import type { BridgeState } from '@markbridge/protocol';
 import { App } from './App';
@@ -867,4 +867,66 @@ it('syncs native window theme on startup, preference changes, and system color-s
   expect(backend.setWindowTheme).toHaveBeenCalledWith('dark');
   darkView.unmount();
   query.mockRestore();
+});
+
+it('renders three-tier profile actions with at most one primary-button per card and no legacy button class', async () => {
+  const legacyClass = ['secondary', 'button'].join('-');
+  const profiles: BridgeState['profiles'] = [
+    { ...profile, profileId: 'p-live', instanceId: 'i-live', displayName: '实时资料', connection: 'live', ignored: false },
+    { ...profile, profileId: 'p-conn', instanceId: 'i-conn', displayName: '连接中资料', connection: 'connecting', ignored: false },
+    { ...profile, profileId: 'p-reconcile', instanceId: 'i-reconcile', displayName: '核对中资料', connection: 'reconciling', ignored: false },
+    { ...profile, profileId: 'p-local', instanceId: 'i-local', displayName: '本地库', connection: 'local', ignored: false },
+    { ...profile, profileId: 'p-cached', instanceId: 'i-cached', displayName: '断开缓存', connection: 'cached_read_only', ignored: false },
+    { ...profile, profileId: 'p-error', instanceId: 'i-error', displayName: '出错资料', connection: 'error', ignored: false },
+    { ...profile, profileId: 'p-ignored', instanceId: 'i-ignored', displayName: '已忽略资料', connection: 'ignored', ignored: true },
+  ];
+  const mirror: BridgeState['mirrors'][number] = {
+    mirrorSourceId: 'mirror-1', displayName: '镜像来源', association: 'independent', pairedProfileId: null,
+    fileStatus: 'current', watching: true, nodeCount: 5, revision: 1, lastSyncedAt: null, errorCode: null, canWriteBrowser: false,
+  };
+  vi.mocked(backend.getBridgeState).mockResolvedValue({ ...initial, port: 49153, profiles, mirrors: [mirror] });
+
+  render(<App />);
+  fireEvent.click(screen.getByRole('button', { name: '设置' }));
+  fireEvent.click(screen.getByRole('tab', { name: 'Chrome 连接' }));
+
+  const panel = screen.getByRole('tabpanel', { name: 'Chrome 连接' });
+  const liveCard = (await screen.findByRole('heading', { level: 3, name: '实时资料' })).closest('article.profile-well') as HTMLElement;
+  expect(liveCard.querySelectorAll('button.primary-button')).toHaveLength(1);
+  expect(within(liveCard).getByRole('button', { name: '浏览此资料' })).toHaveClass('primary-button');
+  expect(within(liveCard).getByRole('button', { name: '重新连接' })).not.toHaveClass('primary-button');
+  expect(within(liveCard).getByRole('button', { name: '断开并忽略' })).toHaveClass('danger-button');
+
+  for (const name of ['连接中资料', '核对中资料', '本地库']) {
+    const card = screen.getByRole('heading', { level: 3, name }).closest('article.profile-well') as HTMLElement;
+    expect(card.querySelectorAll('button.primary-button')).toHaveLength(1);
+    expect(within(card).getByRole('button', { name: '浏览此资料' })).toHaveClass('primary-button');
+    if (name !== '本地库') {
+      expect(within(card).getByRole('button', { name: '重新连接' })).not.toHaveClass('primary-button');
+      expect(within(card).getByRole('button', { name: '断开并忽略' })).toHaveClass('danger-button');
+    }
+  }
+
+  for (const name of ['断开缓存', '出错资料']) {
+    const card = screen.getByRole('heading', { level: 3, name }).closest('article.profile-well') as HTMLElement;
+    expect(card.querySelectorAll('button.primary-button')).toHaveLength(1);
+    expect(within(card).getByRole('button', { name: '重新连接' })).toHaveClass('primary-button');
+    expect(within(card).getByRole('button', { name: '浏览此资料' })).not.toHaveClass('primary-button');
+    expect(within(card).getByRole('button', { name: '断开并忽略' })).toHaveClass('danger-button');
+  }
+
+  const ignoredCard = screen.getByRole('heading', { level: 3, name: '已忽略资料' }).closest('article.profile-well') as HTMLElement;
+  expect(ignoredCard.querySelectorAll('button.primary-button').length).toBeLessThanOrEqual(1);
+  expect(within(ignoredCard).getByRole('button', { name: '恢复连接' })).not.toHaveClass('primary-button');
+  expect(within(ignoredCard).queryByRole('button', { name: '断开并忽略' })).toBeNull();
+
+  for (const title of ['Chrome 扩展安装与连接说明', '其他接入方式：只读文件来源']) {
+    const summary = within(panel).getByText(title).closest('summary');
+    expect(summary).not.toBeNull();
+    expect(summary!.querySelector(':scope > svg.workspace-icon')).toHaveAttribute('aria-hidden', 'true');
+  }
+
+  fireEvent.click(screen.getByText('其他接入方式：只读文件来源'));
+  expect(within(panel).getByRole('button', { name: '停止监听' })).not.toHaveClass(legacyClass);
+  expect(panel.querySelectorAll(`.${legacyClass}`)).toHaveLength(0);
 });

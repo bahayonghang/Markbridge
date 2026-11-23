@@ -14,7 +14,9 @@ afterEach(cleanup);
 
 it('closes after pointer selection and keeps the full selected path visible', () => {
   render(<Picker />);
-  const summary = screen.getByText('目标文件夹：请选择'); fireEvent.click(summary);
+  const summary = screen.getByText('目标文件夹：请选择').closest('summary')!;
+  expect(summary.querySelector('svg.workspace-icon')).toHaveAttribute('aria-hidden', 'true');
+  fireEvent.click(summary);
   fireEvent.click(screen.getByRole('option', { name: '书签 / 书签栏 / 阅读归档' }));
   expect(summary.parentElement).not.toHaveAttribute('open');
   expect(summary).toHaveTextContent('目标文件夹：书签 / 书签栏 / 阅读归档');
@@ -23,7 +25,9 @@ it('closes after pointer selection and keeps the full selected path visible', ()
 
 it('keeps arrow navigation open and closes on Enter while restoring summary focus', () => {
   render(<Picker />);
-  const summary = screen.getByText('目标文件夹：请选择'); fireEvent.click(summary);
+  const summary = screen.getByText('目标文件夹：请选择').closest('summary')!;
+  expect(summary.querySelector('svg.workspace-icon')).toHaveAttribute('aria-hidden', 'true');
+  fireEvent.click(summary);
   const list = screen.getByRole('listbox', { name: '目标文件夹' });
   fireEvent.keyDown(list, { key: 'ArrowDown' });
   expect(summary.parentElement).toHaveAttribute('open');

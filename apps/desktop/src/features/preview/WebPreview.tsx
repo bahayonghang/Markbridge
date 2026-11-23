@@ -4,6 +4,7 @@ import {
   clearWebPreviewSession, openHttpUrl, openWebPreview, subscribeWebPreview, webPreviewAction, webPreviewState,
 } from '../../backend';
 import { isHttpUrl } from '../library/model';
+import { WorkspaceIcon } from '../library/WorkspaceIcon';
 
 let nextRequest = 0;
 
@@ -122,7 +123,7 @@ export function WebPreviewPanel({ profileId, profileName, chromeId, url, native 
         <button type="button" disabled={!controls} onClick={() => { void run(() => webPreviewAction('reload'), '应用内网页没有刷新。'); }}>刷新</button>
         <button type="button" disabled={!native || !windowOpen} onClick={() => { void run(() => webPreviewAction('close'), '预览窗口没有关闭。'); }}>关闭预览</button>
       </div>}
-      <details className="detail-disclosure"><summary>网页会话与隐私</summary>
+      <details className="detail-disclosure"><summary><WorkspaceIcon name="chevron" /><span>网页会话与隐私</span></summary>
         <p>网页会运行站点自己的脚本。这里的登录只保存在当前资料的预览会话里。不是每个网站都能在这里打开。</p>
         <p>关闭预览窗口后，当前资料的预览会话会保留。清除后，该资料的预览 Cookie 和本地存储会被删除。主窗口和其他资料使用各自的存储。</p>
         <div className="edit-actions">
