@@ -19,6 +19,10 @@ for (const theme of ['light', 'dark']) test(`C02 ${theme} installed font preview
   const globalFont = await page.locator('.appearance-sample').evaluate(node => getComputedStyle(node).fontFamily);
   const trigger = page.getByRole('button', { name: '选择字体', exact: true }); await trigger.click();
   const dialog = page.getByRole('dialog', { name: '选择字体' });
+  await expect(dialog).toHaveCSS('border-radius', '16px');
+  await expect(dialog.locator('.segmented-control.font-presets')).toBeVisible();
+  await expect(dialog.locator('.well-group.font-picker-sample')).toBeVisible();
+  await expect(dialog.locator('button.primary-button')).toHaveCount(1);
   const search = dialog.getByLabel('搜索已安装字体'); await expect(search).toBeFocused();
   await expect(dialog.getByText('找到 1002 个字体族')).toBeVisible();
   expect(await dialog.getByRole('option').count()).toBeLessThan(20);
