@@ -1,5 +1,5 @@
 import { type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { hasNativeBridge } from './backend';
+import { hasNativeBridge, setWindowTheme } from './backend';
 import { AiSettings } from './features/ai/AiSettings';
 import { SemanticSettings } from './features/semantic/SemanticSettings';
 import { LibraryWorkspace } from './features/library/LibraryWorkspace';
@@ -48,7 +48,10 @@ export function App({ initialPreferences }: { initialPreferences?: UiPreferences
   const [saveFailed, setSaveFailed] = useState(false);
   useLayoutEffect(() => {
     const media = window.matchMedia('(prefers-color-scheme: dark)');
-    const apply = () => applyUiPreferences(preferences, media.matches);
+    const apply = () => {
+      applyUiPreferences(preferences, media.matches);
+      void setWindowTheme(preferences.theme);
+    };
     apply();
     if (preferences.theme !== 'system') return;
     media.addEventListener('change', apply);

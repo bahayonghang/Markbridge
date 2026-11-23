@@ -37,6 +37,35 @@ async fn list_installed_fonts(
         }))
 }
 
+fn parse_window_theme(theme: &str) -> Result<Option<tauri::Theme>, ErrorCode> {
+    match theme {
+        "system" => Ok(None),
+        "light" => Ok(Some(tauri::Theme::Light)),
+        "dark" => Ok(Some(tauri::Theme::Dark)),
+        _ => Err(ErrorCode::InvalidMessage),
+    }
+}
+
+fn resolve_window_theme_command(
+    caller_label: &str,
+    theme: &str,
+) -> Result<Option<tauri::Theme>, ErrorCode> {
+    if !preview::caller_may_control(caller_label) {
+        return Err(ErrorCode::ReadOnly);
+    }
+    parse_window_theme(theme)
+}
+
+#[tauri::command]
+fn set_window_theme(window: tauri::WebviewWindow, theme: String) -> Result<(), ErrorCode> {
+    trusted(&window)?;
+    let target = resolve_window_theme_command(window.label(), &theme)?;
+    window
+        .set_theme(target)
+        .map_err(|_| ErrorCode::StorageError)?;
+    Ok(())
+}
+
 use markbridge_protocol::{
     SemanticConfig, SemanticModelCheck, SemanticQuery, SemanticQueryResult, SemanticScope,
     SemanticScopeReview, SemanticSettings, SemanticStatus,
@@ -1239,6 +1268,7 @@ fn main() {
         })
         .invoke_handler(tauri::generate_handler![
             list_installed_fonts,
+            set_window_theme,
             get_startup_state,
             get_bridge_state,
             retry_bridge_listener,
@@ -1339,7 +1369,10 @@ mod tests {
         CREATE_NO_WINDOW, CREATE_SUSPENDED, absolute_pidfile, open_http_creation_flags,
         suspend_requested,
     };
-    use super::{credential_namespace, flatten_cache, startup_response, validate_http_url};
+    use super::{
+        credential_namespace, flatten_cache, parse_window_theme, resolve_window_theme_command,
+        startup_response, validate_http_url,
+    };
 
     #[test]
     fn acceptance_override_disables_automatic_main_creation_before_sdk_conversion() {
@@ -1822,5 +1855,54 @@ mod tests {
         );
         hold.release().await;
         bridge.shutdown().await.unwrap();
+    }
+
+    #[test]
+    fn parse_window_theme_maps_known_values_and_rejects_unknown() {
+        assert_eq!(parse_window_theme("system"), Ok(None));
+        assert_eq!(parse_window_theme("light"), Ok(Some(tauri::Theme::Light)));
+        assert_eq!(parse_window_theme("dark"), Ok(Some(tauri::Theme::Dark)));
+        assert_eq!(parse_window_theme("sepia"), Err(ErrorCode::InvalidMessage));
+        assert_eq!(parse_window_theme(""), Err(ErrorCode::InvalidMessage));
+        assert_eq!(parse_window_theme("DARK"), Err(ErrorCode::InvalidMessage));
+    }
+
+    #[test]
+    fn resolve_window_theme_command_rejects_non_main_callers() {
+        assert_eq!(resolve_window_theme_command("main", "system"), Ok(None));
+        assert_eq!(
+            resolve_window_theme_command("main", "light"),
+            Ok(Some(tauri::Theme::Light))
+        );
+        assert_eq!(
+            resolve_window_theme_command("main", "dark"),
+            Ok(Some(tauri::Theme::Dark))
+        );
+        assert_eq!(
+            resolve_window_theme_command("main", "sepia"),
+            Err(ErrorCode::InvalidMessage)
+        );
+        assert_eq!(
+            resolve_window_theme_command("main", ""),
+            Err(ErrorCode::InvalidMessage)
+        );
+        for label in ["preview-active", "preview-1", "", "other"] {
+            assert_eq!(
+                resolve_window_theme_command(label, "dark"),
+                Err(ErrorCode::ReadOnly)
+            );
+            assert_eq!(
+                resolve_window_theme_command(label, "light"),
+                Err(ErrorCode::ReadOnly)
+            );
+            assert_eq!(
+                resolve_window_theme_command(label, "system"),
+                Err(ErrorCode::ReadOnly)
+            );
+            assert_eq!(
+                resolve_window_theme_command(label, "sepia"),
+                Err(ErrorCode::ReadOnly)
+            );
+        }
     }
 }

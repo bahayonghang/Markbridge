@@ -28,6 +28,15 @@ export async function listInstalledFonts(): Promise<InstalledFontCatalog> {
   return parseInstalledFontCatalog(await invoke<unknown>('list_installed_fonts'));
 }
 
+export async function setWindowTheme(theme: 'system' | 'light' | 'dark'): Promise<void> {
+  if (!isTauri()) return;
+  try {
+    await invoke('set_window_theme', { theme });
+  } catch {
+    /* Best-effort native titlebar sync. */
+  }
+}
+
 export async function semanticSettings(): Promise<SemanticSettings> {
   if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
   const { parseSemanticSettings } = await loadSemantic();

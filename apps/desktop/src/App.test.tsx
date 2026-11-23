@@ -10,6 +10,7 @@ import { LAYOUT_PREFERENCES_KEY } from './features/settings/layout-preferences';
 vi.mock('./backend', () => ({
   getStartupState: vi.fn(), getBridgeState: vi.fn(), subscribeBridgeState: vi.fn(),
   listInstalledFonts: vi.fn(async () => ({ status: 'ready', families: [] })),
+  setWindowTheme: vi.fn().mockResolvedValue(undefined),
   hasNativeBridge: vi.fn(), retryBridgeListener: vi.fn(), renameProfile: vi.fn(),
   setProfileWritePaused: vi.fn(), ignoreProfile: vi.fn(), resumeProfile: vi.fn(), reconnectProfile: vi.fn(), ensureLocalLibrary: vi.fn(),
   readCacheQuery: vi.fn(async () => ({ items: [], total: 0, offset: 0, nextOffset: null, sourceEpoch: 1, revision: 1 })),
@@ -61,6 +62,7 @@ beforeEach(() => {
   Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: initialInnerWidth });
   Object.defineProperty(window, 'innerHeight', { configurable: true, writable: true, value: initialInnerHeight });
   vi.mocked(backend.hasNativeBridge).mockReturnValue(true);
+  vi.mocked(backend.setWindowTheme).mockResolvedValue(undefined);
   vi.mocked(backend.getStartupState).mockResolvedValue({ protocolVersion: 1, state: 'unpaired' });
   vi.mocked(backend.getBridgeState).mockResolvedValue(initial);
   vi.mocked(backend.subscribeBridgeState).mockImplementation(async (onState, onInvalid) => {
@@ -823,4 +825,46 @@ it('keeps layout preferences isolated when resetting appearance defaults', async
   expect(JSON.parse(localStorage.getItem(LAYOUT_PREFERENCES_KEY)!)).toEqual(customLayout);
   expect(workspace.style.getPropertyValue('--sidebar-width')).toBe('340px');
   expect(workspace).toHaveClass('is-sidebar-collapsed');
+});
+
+it('syncs native window theme on startup, preference changes, and system color-scheme updates', async () => {
+  const listeners = new Set<() => void>();
+  const media = { matches: false, addEventListener: (_: string, fn: () => void) => listeners.add(fn), removeEventListener: (_: string, fn: () => void) => listeners.delete(fn) };
+  const query = vi.spyOn(window, 'matchMedia').mockReturnValue(media as unknown as MediaQueryList);
+  const view = render(<App />);
+  expect(backend.setWindowTheme).toHaveBeenCalledWith('system');
+
+  vi.mocked(backend.setWindowTheme).mockClear();
+  act(() => { media.matches = true; listeners.forEach(fn => fn()); });
+  expect(backend.setWindowTheme).toHaveBeenCalledExactlyOnceWith('system');
+
+  fireEvent.click(screen.getByRole('button', { name: '设置' }));
+  vi.mocked(backend.setWindowTheme).mockClear();
+  fireEvent.click(screen.getByRole('button', { name: '浅色' }));
+  expect(backend.setWindowTheme).toHaveBeenCalledExactlyOnceWith('light');
+
+  vi.mocked(backend.setWindowTheme).mockClear();
+  act(() => { media.matches = false; listeners.forEach(fn => fn()); });
+  expect(backend.setWindowTheme).not.toHaveBeenCalled();
+
+  fireEvent.click(screen.getByRole('button', { name: '深色' }));
+  expect(backend.setWindowTheme).toHaveBeenCalledExactlyOnceWith('dark');
+
+  vi.mocked(backend.setWindowTheme).mockClear();
+  fireEvent.click(screen.getByRole('button', { name: '跟随系统' }));
+  expect(backend.setWindowTheme).toHaveBeenCalledExactlyOnceWith('system');
+
+  vi.mocked(backend.setWindowTheme).mockClear();
+  fireEvent.click(screen.getByRole('button', { name: '浅色' }));
+  vi.mocked(backend.setWindowTheme).mockClear();
+  fireEvent.click(screen.getByRole('button', { name: '恢复默认外观' }));
+  expect(backend.setWindowTheme).toHaveBeenCalledExactlyOnceWith('system');
+
+  view.unmount();
+
+  vi.mocked(backend.setWindowTheme).mockClear();
+  const darkView = render(<App initialPreferences={{ ...DEFAULT_UI_PREFERENCES, theme: 'dark' }} />);
+  expect(backend.setWindowTheme).toHaveBeenCalledWith('dark');
+  darkView.unmount();
+  query.mockRestore();
 });
