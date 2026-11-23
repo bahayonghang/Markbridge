@@ -13,8 +13,8 @@ mod ui_fonts;
 pub use ui_fonts::*;
 
 pub const PROTOCOL_VERSION: u8 = 1;
-pub const OFFICIAL_EXTENSION_ID: &str = "dfgpiejnjammdmmmdpdaembpclmgdbpf";
-pub const OFFICIAL_EXTENSION_ORIGIN: &str = "chrome-extension://dfgpiejnjammdmmmdpdaembpclmgdbpf";
+pub const OFFICIAL_EXTENSION_ID: &str = "caimbneegiphplhknaokehleclahckoa";
+pub const OFFICIAL_EXTENSION_ORIGIN: &str = "chrome-extension://caimbneegiphplhknaokehleclahckoa";
 pub const BRIDGE_PORT_START: u16 = 49153;
 pub const BRIDGE_PORT_END: u16 = 49160;
 

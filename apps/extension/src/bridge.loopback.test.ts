@@ -7,6 +7,7 @@ import {
   BRIDGE_PORT_END,
   BRIDGE_PORT_START,
   encodeWireFrame,
+  OFFICIAL_EXTENSION_ID,
   OFFICIAL_EXTENSION_ORIGIN,
   parseWireFrame,
   type WireMessage,
@@ -259,7 +260,7 @@ function createMockChrome(localData: Record<string, unknown> = {}) {
     },
     alarms: { create: vi.fn(async () => {}), onAlarm: new EventHub() },
     runtime: {
-      id: 'dfgpiejnjammdmmmdpdaembpclmgdbpf',
+      id: OFFICIAL_EXTENSION_ID,
       getURL: (path: string) => `${OFFICIAL_EXTENSION_ORIGIN}/${path}`,
       onStartup: new EventHub(),
       onInstalled: new EventHub(),
