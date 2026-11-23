@@ -166,7 +166,7 @@ export function AiSuggest({ profileId, chromeId, url, revision, settings = null,
         {!live && <p className="notice">{writePaused ? '已暂停写入（只读保护）。本地标签和摘要仍可保存；恢复写入后才能保存标题或撤销标题。' : '当前浏览器只读。本地标签和摘要仍可保存；连接恢复后才能保存标题或撤销标题。'}</p>}
         <div className="edit-actions">
           <button type="button" className={draft?.state !== 'ready' ? 'primary-button' : undefined} disabled={busy || !settings?.enabled} onClick={() => { void generate(); }}>生成建议</button>
-          <button type="button" className="secondary-button" disabled={!!writeRef.current || (!draft && !busy)} onClick={cancel}>取消</button>
+          <button type="button" disabled={!!writeRef.current || (!draft && !busy)} onClick={cancel}>取消</button>
           {operationId && <button type="button" disabled={busy || !live} onClick={() => { void undoTitle(); }}>撤销标题</button>}
         </div>
         {message && <p role="status">{message}</p>}

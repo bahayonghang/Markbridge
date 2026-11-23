@@ -125,7 +125,7 @@ export function AiSettings({ native }: { native: boolean }) {
         <div className="settings-row"><label htmlFor="ai-secret">模型密钥</label><input id="ai-secret" ref={secretRef} type="password" autoComplete="new-password" spellCheck={false} disabled={!native || busy} /></div>
         <div className="edit-actions">
           <button type="button" disabled={!native || busy} onClick={storeSecret}>保存密钥</button>
-          <button type="button" className="secondary-button" disabled={!native || busy} onClick={clearSecret}>清除凭据</button>
+          <button type="button" disabled={!native || busy} onClick={clearSecret}>清除凭据</button>
           <button type="button" disabled={!native || busy} onClick={() => {
             void run(async () => {
               const result = await testAiConnection();

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { BookmarkNode, HistoryKind, OperationDetail, OperationList, UndoPreview } from '@markbridge/protocol';
 import { applyEdit, listOperations, operationDetail, previewUndo, refreshOperations, reviewOperation } from '../../backend';
 import { BatchReceipt } from '../library/BatchReceipt';
+import { WorkspaceIcon } from '../library/WorkspaceIcon';
 
 type Summary = OperationList['operations'][number];
 const kinds: Record<HistoryKind, string> = { create: '新建', update: '修改', move: '移动', delete: '删除', reorder: '调整顺序', mixed: '组合变更', undo: '条件撤销' };
@@ -150,17 +151,17 @@ function HistoryDetail({ profileId, operationId, profileName, revision, refreshT
       {detail && <>
         <h3>记录详情</h3>
         <p>{states[detail.summary.state]}{detail.summary.reviewed ? '，已人工核对' : ''}。{detail.summary.state === 'uncertain' && '未收到可靠结果，不能当作失败重试。'}</p>
-        <details className="history-differences"><summary>查看前后值（{detail.steps.length} 步）</summary><ol>{detail.steps.map((step) => <li key={step.requestId}>
+        <details className="history-differences"><summary><WorkspaceIcon name="chevron" /><span>查看前后值（{detail.steps.length} 步）</span></summary><ol>{detail.steps.map((step) => <li key={step.requestId}>
           <h4>{kinds[step.mutation.kind]}：{step.before?.title || (step.mutation.kind === 'create' ? step.mutation.title : '书签条目')}</h4>
           <p className="secondary">{step.receipt ? states[step.receipt.state] : '没有确认回执'}</p>
           <ValuePair before={step.receipt?.before ?? step.before} after={step.receipt?.after ?? null} names={names} unknown={!step.receipt || !['applied', 'rolled_back'].includes(step.receipt.state)} />
-          {!!step.deletedDescendants?.length && <details><summary>删除前的子项（{step.deletedDescendants.length} 项）</summary><ul>{step.deletedDescendants.map((node) => <li key={node.chromeId}><p>{node.title || '未命名'}</p>{node.url && <p className="secondary">{node.url}</p>}</li>)}</ul></details>}
+          {!!step.deletedDescendants?.length && <details><summary><WorkspaceIcon name="chevron" /><span>删除前的子项（{step.deletedDescendants.length} 项）</span></summary><ul>{step.deletedDescendants.map((node) => <li key={node.chromeId}><p>{node.title || '未命名'}</p>{node.url && <p className="secondary">{node.url}</p>}</li>)}</ul></details>}
           {step.receipt?.beforeChildIds && <p>变更前顺序：{step.receipt.beforeChildIds.map((id) => names.get(id) || id).join(' / ')}</p>}
           {step.receipt?.afterChildIds && <p>观察到的顺序：{step.receipt.afterChildIds.map((id) => names.get(id) || id).join(' / ')}</p>}
         </li>)}</ol></details>
         {detail.summary.conflicts.length > 0 && <p className="history-readonly">冲突 {detail.summary.conflicts.length} 项：{detail.summary.conflicts.map((item) => fields[item.field]).join('、')}。外部值保持不变。</p>}
         {['uncertain', 'partial', 'rollback_conflict'].includes(detail.summary.state) && !detail.summary.reviewed && <div><p className="secondary">核对 Chrome 与逐项回执后，可记录人工核对。此标记不会把未知结果改成成功。</p><button disabled={busy} type="button" onClick={() => void reviewed()}>标记已核对</button></div>}
-        <details className="history-diagnostics"><summary>诊断与恢复关联</summary><p>记录：{operationId}</p><p>来源世代：{detail.sourceEpoch}</p>{detail.undoOf && <p>撤销原记录：{detail.undoOf}</p>}{detail.restored.map((item) => <p key={item.oldChromeId}>恢复 ID：{item.oldChromeId} → {item.newChromeId}（原本机身份 {item.bookmarkId}）</p>)}</details>
+        <details className="history-diagnostics"><summary><WorkspaceIcon name="chevron" /><span>诊断与恢复关联</span></summary><p>记录：{operationId}</p><p>来源世代：{detail.sourceEpoch}</p>{detail.undoOf && <p>撤销原记录：{detail.undoOf}</p>}{detail.restored.map((item) => <p key={item.oldChromeId}>恢复 ID：{item.oldChromeId} → {item.newChromeId}（原本机身份 {item.bookmarkId}）</p>)}</details>
       </>}
     </div>}
     {reading && <p role="status">正在检查可撤销的变更。</p>}

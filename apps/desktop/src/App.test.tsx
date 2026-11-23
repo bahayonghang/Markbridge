@@ -1,14 +1,16 @@
 import { StrictMode } from 'react';
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import type { BridgeState } from '@markbridge/protocol';
 import { App } from './App';
 import * as backend from './backend';
 import { DEFAULT_UI_PREFERENCES, UI_PREFERENCES_KEY } from './features/settings/ui-preferences';
+import { LAYOUT_PREFERENCES_KEY } from './features/settings/layout-preferences';
 
 vi.mock('./backend', () => ({
   getStartupState: vi.fn(), getBridgeState: vi.fn(), subscribeBridgeState: vi.fn(),
   listInstalledFonts: vi.fn(async () => ({ status: 'ready', families: [] })),
+  setWindowTheme: vi.fn().mockResolvedValue(undefined),
   hasNativeBridge: vi.fn(), retryBridgeListener: vi.fn(), renameProfile: vi.fn(),
   setProfileWritePaused: vi.fn(), ignoreProfile: vi.fn(), resumeProfile: vi.fn(), reconnectProfile: vi.fn(), ensureLocalLibrary: vi.fn(),
   readCacheQuery: vi.fn(async () => ({ items: [], total: 0, offset: 0, nextOffset: null, sourceEpoch: 1, revision: 1 })),
@@ -46,9 +48,21 @@ let receive: (state: BridgeState) => void;
 let invalid: () => void;
 const unsubscribe = vi.fn();
 
+const initialInnerWidth = window.innerWidth;
+const initialInnerHeight = window.innerHeight;
+
+function setViewport(width: number, height = 900) {
+  Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: width });
+  Object.defineProperty(window, 'innerHeight', { configurable: true, writable: true, value: height });
+  fireEvent(window, new Event('resize'));
+}
+
 beforeEach(() => {
   localStorage.clear();
+  Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: initialInnerWidth });
+  Object.defineProperty(window, 'innerHeight', { configurable: true, writable: true, value: initialInnerHeight });
   vi.mocked(backend.hasNativeBridge).mockReturnValue(true);
+  vi.mocked(backend.setWindowTheme).mockResolvedValue(undefined);
   vi.mocked(backend.getStartupState).mockResolvedValue({ protocolVersion: 1, state: 'unpaired' });
   vi.mocked(backend.getBridgeState).mockResolvedValue(initial);
   vi.mocked(backend.subscribeBridgeState).mockImplementation(async (onState, onInvalid) => {
@@ -57,7 +71,13 @@ beforeEach(() => {
     return unsubscribe;
   });
 });
-afterEach(() => { cleanup(); vi.useRealTimers(); vi.resetAllMocks(); });
+afterEach(() => {
+  cleanup();
+  vi.useRealTimers();
+  vi.resetAllMocks();
+  Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: initialInnerWidth });
+  Object.defineProperty(window, 'innerHeight', { configurable: true, writable: true, value: initialInnerHeight });
+});
 
 it('opens General for ordinary settings, follows system with cleanup, and never saves during StrictMode mount', async () => {
   const listeners = new Set<() => void>();
@@ -631,4 +651,307 @@ it('validates inline profile rename, immediately toggles writePaused, and uses s
   fireEvent.click(screen.getByRole('button', { name: '恢复写入' }));
   await waitFor(() => expect(backend.setProfileWritePaused).toHaveBeenCalledWith('profile-a', false));
   expect(document.querySelector('.connection-pill')).toHaveTextContent('已连接 Chrome');
+});
+
+it('renders default 256px sidebar, splitter ARIA, and brand collapse toggle without saving on StrictMode mount', async () => {
+  setViewport(1440, 900);
+  const save = vi.spyOn(Storage.prototype, 'setItem');
+  const { container } = render(<StrictMode><App /></StrictMode>);
+  await waitFor(() => expect(document.querySelector('.workspace-heading .connection')).toHaveTextContent('未连接 · 只读'));
+
+  const workspace = container.querySelector('.workspace') as HTMLElement;
+  const sidebar = container.querySelector('aside#app-sidebar.app-sidebar');
+  const splitter = screen.getByRole('separator', { name: '调整侧栏宽度' });
+  const collapseBtn = screen.getByRole('button', { name: '收起侧栏' });
+
+  expect(sidebar).not.toBeNull();
+  expect(workspace.style.getPropertyValue('--sidebar-width')).toBe('256px');
+  expect(workspace).not.toHaveClass('is-sidebar-collapsed');
+  expect(splitter).toHaveAttribute('aria-orientation', 'vertical');
+  expect(splitter).toHaveAttribute('aria-controls', 'app-sidebar');
+  expect(splitter).toHaveAttribute('aria-valuemin', '200');
+  expect(splitter).toHaveAttribute('aria-valuemax', '420');
+  expect(splitter).toHaveAttribute('aria-valuenow', '256');
+  expect(splitter).toHaveAttribute('tabindex', '0');
+  expect(collapseBtn).toHaveAttribute('aria-expanded', 'true');
+  expect(collapseBtn).toHaveAttribute('aria-controls', 'app-sidebar');
+  expect(collapseBtn.getAttribute('title')).toContain('(Ctrl+B)');
+  expect(save).not.toHaveBeenCalled();
+  save.mockRestore();
+});
+
+it('resizes sidebar via keyboard steps, Home, and End and persists to layout-preferences.v1', async () => {
+  setViewport(1440, 900);
+  const { container } = render(<App />);
+  await waitFor(() => expect(document.querySelector('.workspace-heading .connection')).toHaveTextContent('未连接 · 只读'));
+
+  const workspace = container.querySelector('.workspace') as HTMLElement;
+  const splitter = screen.getByRole('separator', { name: '调整侧栏宽度' });
+
+  fireEvent.keyDown(splitter, { key: 'ArrowRight' });
+  expect(workspace.style.getPropertyValue('--sidebar-width')).toBe('272px');
+  expect(splitter).toHaveAttribute('aria-valuenow', '272');
+  expect(JSON.parse(localStorage.getItem(LAYOUT_PREFERENCES_KEY)!)).toEqual({ version: 1, sidebarWidthPx: 272, sidebarCollapsed: false });
+
+  fireEvent.keyDown(splitter, { key: 'ArrowRight', shiftKey: true });
+  expect(workspace.style.getPropertyValue('--sidebar-width')).toBe('304px');
+  expect(splitter).toHaveAttribute('aria-valuenow', '304');
+
+  fireEvent.keyDown(splitter, { key: 'ArrowLeft' });
+  expect(workspace.style.getPropertyValue('--sidebar-width')).toBe('288px');
+
+  fireEvent.keyDown(splitter, { key: 'ArrowLeft', shiftKey: true });
+  expect(workspace.style.getPropertyValue('--sidebar-width')).toBe('256px');
+
+  fireEvent.keyDown(splitter, { key: 'End' });
+  expect(workspace.style.getPropertyValue('--sidebar-width')).toBe('420px');
+  expect(splitter).toHaveAttribute('aria-valuenow', '420');
+
+  fireEvent.keyDown(splitter, { key: 'Home' });
+  expect(workspace.style.getPropertyValue('--sidebar-width')).toBe('200px');
+  expect(splitter).toHaveAttribute('aria-valuenow', '200');
+  expect(JSON.parse(localStorage.getItem(LAYOUT_PREFERENCES_KEY)!)).toEqual({ version: 1, sidebarWidthPx: 200, sidebarCollapsed: false });
+});
+
+it('supports pointer drag preview, save on pointerUp, Escape cancel, and double-click reset', async () => {
+  setViewport(1440, 900);
+  const { container } = render(<App />);
+  await waitFor(() => expect(document.querySelector('.workspace-heading .connection')).toHaveTextContent('未连接 · 只读'));
+
+  const workspace = container.querySelector('.workspace') as HTMLElement;
+  const splitter = screen.getByRole('separator', { name: '调整侧栏宽度' });
+  const save = vi.spyOn(Storage.prototype, 'setItem');
+
+  fireEvent.pointerDown(splitter, { pointerId: 1, button: 0, clientX: 270 });
+  fireEvent.pointerMove(splitter, { pointerId: 1, clientX: 354 });
+  expect(workspace.style.getPropertyValue('--sidebar-width')).toBe('340px');
+  expect(splitter).toHaveAttribute('aria-valuenow', '340');
+  expect(save).not.toHaveBeenCalled();
+
+  fireEvent.pointerUp(splitter, { pointerId: 1, clientX: 354 });
+  expect(save).toHaveBeenCalledWith(LAYOUT_PREFERENCES_KEY, JSON.stringify({ version: 1, sidebarWidthPx: 340, sidebarCollapsed: false }));
+
+  save.mockClear();
+  fireEvent.pointerDown(splitter, { pointerId: 2, button: 0, clientX: 354 });
+  fireEvent.pointerMove(splitter, { pointerId: 2, clientX: 414 });
+  expect(workspace.style.getPropertyValue('--sidebar-width')).toBe('400px');
+  fireEvent.keyDown(window, { key: 'Escape' });
+  expect(workspace.style.getPropertyValue('--sidebar-width')).toBe('340px');
+  fireEvent.pointerUp(splitter, { pointerId: 2, clientX: 414 });
+  expect(save).not.toHaveBeenCalled();
+
+  fireEvent.doubleClick(splitter);
+  expect(workspace.style.getPropertyValue('--sidebar-width')).toBe('256px');
+  expect(JSON.parse(localStorage.getItem(LAYOUT_PREFERENCES_KEY)!)).toEqual({ version: 1, sidebarWidthPx: 256, sidebarCollapsed: false });
+  save.mockRestore();
+});
+
+it('clamps effective sidebar width dynamically on viewport resize without losing saved wider width', async () => {
+  setViewport(1440, 900);
+  localStorage.setItem(LAYOUT_PREFERENCES_KEY, JSON.stringify({ version: 1, sidebarWidthPx: 400, sidebarCollapsed: false }));
+  const { container } = render(<App />);
+  await waitFor(() => expect(document.querySelector('.workspace-heading .connection')).toHaveTextContent('未连接 · 只读'));
+
+  const workspace = container.querySelector('.workspace') as HTMLElement;
+  const splitter = screen.getByRole('separator', { name: '调整侧栏宽度' });
+  expect(workspace.style.getPropertyValue('--sidebar-width')).toBe('400px');
+
+  act(() => { setViewport(860, 760); });
+  expect(splitter).toHaveAttribute('aria-valuemax', '338');
+  expect(workspace.style.getPropertyValue('--sidebar-width')).toBe('338px');
+  expect(splitter).toHaveAttribute('aria-valuenow', '338');
+
+  act(() => { setViewport(1440, 900); });
+  expect(splitter).toHaveAttribute('aria-valuemax', '420');
+  expect(workspace.style.getPropertyValue('--sidebar-width')).toBe('400px');
+});
+
+it('toggles icon rail via brand button and Ctrl+B/Cmd+B while respecting editable targets and narrow viewports', async () => {
+  setViewport(1440, 900);
+  vi.mocked(backend.getBridgeState).mockResolvedValue({ ...initial, profiles: [profile] });
+  localStorage.setItem(LAYOUT_PREFERENCES_KEY, JSON.stringify({ version: 1, sidebarWidthPx: 332, sidebarCollapsed: false }));
+  const { container } = render(<App />);
+  await waitFor(() => expect(document.querySelector('.workspace-heading .connection')).toHaveTextContent('已连接 Chrome'));
+
+  const workspace = container.querySelector('.workspace') as HTMLElement;
+  fireEvent.click(screen.getByRole('button', { name: '收起侧栏' }));
+  expect(workspace).toHaveClass('is-sidebar-collapsed');
+  const expandBtn = screen.getByRole('button', { name: '展开侧栏' });
+  expect(expandBtn).toHaveAttribute('aria-expanded', 'false');
+  expect(JSON.parse(localStorage.getItem(LAYOUT_PREFERENCES_KEY)!)).toEqual({ version: 1, sidebarWidthPx: 332, sidebarCollapsed: true });
+
+  const searchInput = screen.getByLabelText('搜索标题或网址');
+  searchInput.focus();
+  fireEvent.keyDown(searchInput, { key: 'b', ctrlKey: true });
+  expect(workspace).toHaveClass('is-sidebar-collapsed');
+
+  const editableDiv = document.createElement('div');
+  editableDiv.setAttribute('contenteditable', 'true');
+  editableDiv.tabIndex = 0;
+  document.body.appendChild(editableDiv);
+  editableDiv.focus();
+  fireEvent.keyDown(editableDiv, { key: 'b', ctrlKey: true });
+  expect(workspace).toHaveClass('is-sidebar-collapsed');
+  editableDiv.remove();
+
+  fireEvent.keyDown(window, { key: 'b', ctrlKey: true });
+  expect(workspace).not.toHaveClass('is-sidebar-collapsed');
+  expect(workspace.style.getPropertyValue('--sidebar-width')).toBe('332px');
+
+  fireEvent.keyDown(window, { key: 'B', metaKey: true });
+  expect(workspace).toHaveClass('is-sidebar-collapsed');
+
+  act(() => { setViewport(799, 760); });
+  fireEvent.keyDown(window, { key: 'b', ctrlKey: true });
+  expect(workspace).toHaveClass('is-sidebar-collapsed');
+});
+
+it('keeps layout preferences isolated when resetting appearance defaults', async () => {
+  setViewport(1440, 900);
+  const customLayout = { version: 1, sidebarWidthPx: 340, sidebarCollapsed: true };
+  localStorage.setItem(LAYOUT_PREFERENCES_KEY, JSON.stringify(customLayout));
+  localStorage.setItem(UI_PREFERENCES_KEY, JSON.stringify({ version: 2, theme: 'dark', font: { kind: 'preset', value: 'yahei' }, fontSizePx: 16 }));
+  const { container } = render(<App />);
+  await waitFor(() => expect(document.querySelector('.workspace-heading .connection')).toHaveTextContent('未连接 · 只读'));
+
+  const workspace = container.querySelector('.workspace') as HTMLElement;
+  expect(workspace.style.getPropertyValue('--sidebar-width')).toBe('340px');
+  expect(workspace).toHaveClass('is-sidebar-collapsed');
+
+  fireEvent.click(screen.getByRole('button', { name: '设置' }));
+  fireEvent.click(screen.getByRole('button', { name: '恢复默认外观' }));
+
+  expect(JSON.parse(localStorage.getItem(UI_PREFERENCES_KEY)!)).toEqual(DEFAULT_UI_PREFERENCES);
+  expect(JSON.parse(localStorage.getItem(LAYOUT_PREFERENCES_KEY)!)).toEqual(customLayout);
+  expect(workspace.style.getPropertyValue('--sidebar-width')).toBe('340px');
+  expect(workspace).toHaveClass('is-sidebar-collapsed');
+});
+
+it('syncs native window theme on startup, preference changes, and system color-scheme updates', async () => {
+  const listeners = new Set<() => void>();
+  const media = { matches: false, addEventListener: (_: string, fn: () => void) => listeners.add(fn), removeEventListener: (_: string, fn: () => void) => listeners.delete(fn) };
+  const query = vi.spyOn(window, 'matchMedia').mockReturnValue(media as unknown as MediaQueryList);
+  const view = render(<App />);
+  expect(backend.setWindowTheme).toHaveBeenCalledWith('system');
+
+  vi.mocked(backend.setWindowTheme).mockClear();
+  act(() => { media.matches = true; listeners.forEach(fn => fn()); });
+  expect(backend.setWindowTheme).toHaveBeenCalledExactlyOnceWith('system');
+
+  fireEvent.click(screen.getByRole('button', { name: '设置' }));
+  vi.mocked(backend.setWindowTheme).mockClear();
+  fireEvent.click(screen.getByRole('button', { name: '浅色' }));
+  expect(backend.setWindowTheme).toHaveBeenCalledExactlyOnceWith('light');
+
+  vi.mocked(backend.setWindowTheme).mockClear();
+  act(() => { media.matches = false; listeners.forEach(fn => fn()); });
+  expect(backend.setWindowTheme).not.toHaveBeenCalled();
+
+  fireEvent.click(screen.getByRole('button', { name: '深色' }));
+  expect(backend.setWindowTheme).toHaveBeenCalledExactlyOnceWith('dark');
+
+  vi.mocked(backend.setWindowTheme).mockClear();
+  fireEvent.click(screen.getByRole('button', { name: '跟随系统' }));
+  expect(backend.setWindowTheme).toHaveBeenCalledExactlyOnceWith('system');
+
+  vi.mocked(backend.setWindowTheme).mockClear();
+  fireEvent.click(screen.getByRole('button', { name: '浅色' }));
+  vi.mocked(backend.setWindowTheme).mockClear();
+  fireEvent.click(screen.getByRole('button', { name: '恢复默认外观' }));
+  expect(backend.setWindowTheme).toHaveBeenCalledExactlyOnceWith('system');
+
+  view.unmount();
+
+  vi.mocked(backend.setWindowTheme).mockClear();
+  const darkView = render(<App initialPreferences={{ ...DEFAULT_UI_PREFERENCES, theme: 'dark' }} />);
+  expect(backend.setWindowTheme).toHaveBeenCalledWith('dark');
+  darkView.unmount();
+  query.mockRestore();
+});
+
+it('visually hides header connection status when sidebar is expanded and reveals it in 64px icon-rail modes while keeping role=status', async () => {
+  setViewport(1440, 900);
+  vi.mocked(backend.getBridgeState).mockResolvedValue({ ...initial, port: 49153, profiles: [profile] });
+  render(<App />);
+  await waitFor(() => expect(document.querySelector('.workspace-heading .connection')).toHaveTextContent('已连接 Chrome'));
+
+  const headerStatus = document.querySelector('.workspace-heading .connection') as HTMLElement;
+  const pill = document.querySelector('.connection-pill') as HTMLElement;
+  expect(headerStatus).toHaveAttribute('role', 'status');
+  expect(headerStatus).toHaveClass('visually-hidden');
+  expect(pill).toHaveTextContent('已连接 Chrome');
+
+  fireEvent.click(screen.getByRole('button', { name: '收起侧栏' }));
+  expect(headerStatus).not.toHaveClass('visually-hidden');
+  expect(headerStatus).toHaveAttribute('role', 'status');
+  expect(headerStatus).toHaveTextContent('已连接 Chrome');
+
+  fireEvent.click(screen.getByRole('button', { name: '展开侧栏' }));
+  expect(headerStatus).toHaveClass('visually-hidden');
+
+  act(() => { setViewport(640, 760); });
+  expect(headerStatus).not.toHaveClass('visually-hidden');
+  expect(headerStatus).toHaveTextContent('已连接 Chrome');
+});
+
+it('renders three-tier profile actions with at most one primary-button per card and no legacy button class', async () => {
+  const legacyClass = ['secondary', 'button'].join('-');
+  const profiles: BridgeState['profiles'] = [
+    { ...profile, profileId: 'p-live', instanceId: 'i-live', displayName: '实时资料', connection: 'live', ignored: false },
+    { ...profile, profileId: 'p-conn', instanceId: 'i-conn', displayName: '连接中资料', connection: 'connecting', ignored: false },
+    { ...profile, profileId: 'p-reconcile', instanceId: 'i-reconcile', displayName: '核对中资料', connection: 'reconciling', ignored: false },
+    { ...profile, profileId: 'p-local', instanceId: 'i-local', displayName: '本地库', connection: 'local', ignored: false },
+    { ...profile, profileId: 'p-cached', instanceId: 'i-cached', displayName: '断开缓存', connection: 'cached_read_only', ignored: false },
+    { ...profile, profileId: 'p-error', instanceId: 'i-error', displayName: '出错资料', connection: 'error', ignored: false },
+    { ...profile, profileId: 'p-ignored', instanceId: 'i-ignored', displayName: '已忽略资料', connection: 'ignored', ignored: true },
+  ];
+  const mirror: BridgeState['mirrors'][number] = {
+    mirrorSourceId: 'mirror-1', displayName: '镜像来源', association: 'independent', pairedProfileId: null,
+    fileStatus: 'current', watching: true, nodeCount: 5, revision: 1, lastSyncedAt: null, errorCode: null, canWriteBrowser: false,
+  };
+  vi.mocked(backend.getBridgeState).mockResolvedValue({ ...initial, port: 49153, profiles, mirrors: [mirror] });
+
+  render(<App />);
+  fireEvent.click(screen.getByRole('button', { name: '设置' }));
+  fireEvent.click(screen.getByRole('tab', { name: 'Chrome 连接' }));
+
+  const panel = screen.getByRole('tabpanel', { name: 'Chrome 连接' });
+  const liveCard = (await screen.findByRole('heading', { level: 3, name: '实时资料' })).closest('article.profile-well') as HTMLElement;
+  expect(liveCard.querySelectorAll('button.primary-button')).toHaveLength(1);
+  expect(within(liveCard).getByRole('button', { name: '浏览此资料' })).toHaveClass('primary-button');
+  expect(within(liveCard).getByRole('button', { name: '重新连接' })).not.toHaveClass('primary-button');
+  expect(within(liveCard).getByRole('button', { name: '断开并忽略' })).toHaveClass('danger-button');
+
+  for (const name of ['连接中资料', '核对中资料', '本地库']) {
+    const card = screen.getByRole('heading', { level: 3, name }).closest('article.profile-well') as HTMLElement;
+    expect(card.querySelectorAll('button.primary-button')).toHaveLength(1);
+    expect(within(card).getByRole('button', { name: '浏览此资料' })).toHaveClass('primary-button');
+    if (name !== '本地库') {
+      expect(within(card).getByRole('button', { name: '重新连接' })).not.toHaveClass('primary-button');
+      expect(within(card).getByRole('button', { name: '断开并忽略' })).toHaveClass('danger-button');
+    }
+  }
+
+  for (const name of ['断开缓存', '出错资料']) {
+    const card = screen.getByRole('heading', { level: 3, name }).closest('article.profile-well') as HTMLElement;
+    expect(card.querySelectorAll('button.primary-button')).toHaveLength(1);
+    expect(within(card).getByRole('button', { name: '重新连接' })).toHaveClass('primary-button');
+    expect(within(card).getByRole('button', { name: '浏览此资料' })).not.toHaveClass('primary-button');
+    expect(within(card).getByRole('button', { name: '断开并忽略' })).toHaveClass('danger-button');
+  }
+
+  const ignoredCard = screen.getByRole('heading', { level: 3, name: '已忽略资料' }).closest('article.profile-well') as HTMLElement;
+  expect(ignoredCard.querySelectorAll('button.primary-button').length).toBeLessThanOrEqual(1);
+  expect(within(ignoredCard).getByRole('button', { name: '恢复连接' })).not.toHaveClass('primary-button');
+  expect(within(ignoredCard).queryByRole('button', { name: '断开并忽略' })).toBeNull();
+
+  for (const title of ['Chrome 扩展安装与连接说明', '其他接入方式：只读文件来源']) {
+    const summary = within(panel).getByText(title).closest('summary');
+    expect(summary).not.toBeNull();
+    expect(summary!.querySelector(':scope > svg.workspace-icon')).toHaveAttribute('aria-hidden', 'true');
+  }
+
+  fireEvent.click(screen.getByText('其他接入方式：只读文件来源'));
+  expect(within(panel).getByRole('button', { name: '停止监听' })).not.toHaveClass(legacyClass);
+  expect(panel.querySelectorAll(`.${legacyClass}`)).toHaveLength(0);
 });

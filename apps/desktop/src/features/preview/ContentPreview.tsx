@@ -1,6 +1,7 @@
 import type { PreviewImage } from '@markbridge/protocol';
 import { useContentPreview } from './useContentPreview';
 import { cacheTime } from '../settings/source-status';
+import { WorkspaceIcon } from '../library/WorkspaceIcon';
 
 const mediaTypes = new Set(['image/png', 'image/jpeg', 'image/gif', 'image/webp']);
 
@@ -21,10 +22,10 @@ export function ContentPreviewPanel({ profileId, chromeId, url }: { profileId: s
         {view.phase === 'loading' && <p>正在读取页面内容</p>}
         {view.phase === 'message' && <p>{view.message}</p>}
         {preview?.status === 'failed' && <p>{preview.failureMessage ?? '页面响应无效'}</p>}
-        {http && <details className="detail-disclosure"><summary>登录或动态页面如何采集</summary><p className="secondary">在 Chrome 里点击扩展图标后采集。桌面不能授予扩展当前页权限。</p></details>}
+        {http && <details className="detail-disclosure"><summary><WorkspaceIcon name="chevron" /><span>登录或动态页面如何采集</span></summary><p className="secondary">在 Chrome 里点击扩展图标后采集。桌面不能授予扩展当前页权限。</p></details>}
         <div className="edit-actions">
           <button type="button" onClick={refresh}>重新读取</button>
-          <button type="button" className="secondary-button" onClick={cancel}>取消</button>
+          <button type="button" onClick={cancel}>取消</button>
         </div>
       </div>
       {preview && preview.status !== 'failed' && <div className="output-well preview-output">

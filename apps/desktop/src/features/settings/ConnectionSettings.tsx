@@ -12,6 +12,7 @@ import {
   type Profile, type SourceTarget,
 } from './source-status';
 import { ConfirmDialog } from './ConfirmDialog';
+import { WorkspaceIcon } from '../library/WorkspaceIcon';
 
 const associationLabels: Record<BridgeState['mirrors'][number]['association'], string> = {
   independent: '独立只读',
@@ -225,7 +226,7 @@ export function ConnectionSettings({ state, error, native, accept, onBrowseSourc
 
         {onboarding ? extensionGuide : (
           <details className="connection-advanced" open={!chromeProfiles.length || undefined}>
-            <summary>Chrome 扩展安装与连接说明</summary>
+            <summary><WorkspaceIcon name="chevron" /><span>Chrome 扩展安装与连接说明</span></summary>
             {extensionGuide}
           </details>
         )}
@@ -234,6 +235,8 @@ export function ConnectionSettings({ state, error, native, accept, onBrowseSourc
       {state?.profiles.map((profile) => {
         const isLocal = profile.connection === 'local';
         const isIgnored = profile.ignored || profile.connection === 'ignored';
+        const reconnectPrimary = !isLocal && !isIgnored && (profile.connection === 'cached_read_only' || profile.connection === 'error');
+        const browsePrimary = isLocal || (!isIgnored && (profile.connection === 'live' || profile.connection === 'connecting' || profile.connection === 'reconciling'));
         return (
           <article className="well-group profile-well" key={profile.profileId}>
             <div className="panel-heading">
@@ -273,6 +276,7 @@ export function ConnectionSettings({ state, error, native, accept, onBrowseSourc
             <div className="edit-actions">
               <button
                 type="button"
+                className={browsePrimary ? 'primary-button' : undefined}
                 disabled={unavailable}
                 onClick={() => onBrowseSource({ kind: 'profile', id: profile.profileId })}
               >
@@ -293,6 +297,7 @@ export function ConnectionSettings({ state, error, native, accept, onBrowseSourc
                   </button>
                   <button
                     type="button"
+                    className={reconnectPrimary ? 'primary-button' : undefined}
                     disabled={unavailable || isIgnored}
                     onClick={() => {
                       void act(async () => {
@@ -317,7 +322,7 @@ export function ConnectionSettings({ state, error, native, accept, onBrowseSourc
                   ) : (
                     <button
                       type="button"
-                      className="secondary-button"
+                      className="danger-button"
                       disabled={unavailable}
                       onClick={(event) => {
                         ignoreTriggerRef.current = event.currentTarget;
@@ -361,7 +366,7 @@ export function ConnectionSettings({ state, error, native, accept, onBrowseSourc
       )}
 
       <details className="other-sources well-group">
-        <summary>其他接入方式：只读文件来源</summary>
+        <summary><WorkspaceIcon name="chevron" /><span>其他接入方式：只读文件来源</span></summary>
         <p className="secondary">已接入 {state?.mirrors.length ?? 0} 个只读文件来源。无需扩展，直接读取本机 Chrome 书签文件缓存。不能写入 Chrome；文件时间不代表实时连接。</p>
         <form
           className="inline-form"
@@ -460,7 +465,6 @@ export function ConnectionSettings({ state, error, native, accept, onBrowseSourc
               </button>
               <button
                 type="button"
-                className="secondary-button"
                 disabled={unavailable || !mirror.watching}
                 onClick={() => {
                   void act(async () => {

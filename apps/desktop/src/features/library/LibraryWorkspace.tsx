@@ -61,13 +61,14 @@ function neighbor(ids: string[], current: string | null, delta: number): string 
   return ids[next] ?? null;
 }
 
-export function LibraryWorkspace({ state, invalid, native, focusMirrorId, section = 'library', active = true, sidebarHost, exportHost, onSettings, onLibrary, onExport, onOrganize, onAiSettings, onSemanticSettings, onHistory, sourceRequest, onCurrentSource }: {
+export function LibraryWorkspace({ state, invalid, native, focusMirrorId, section = 'library', active = true, sidebarCollapsed = false, sidebarHost, exportHost, onSettings, onLibrary, onExport, onOrganize, onAiSettings, onSemanticSettings, onHistory, sourceRequest, onCurrentSource }: {
   state: BridgeState | null;
   invalid: boolean;
   native: boolean;
   focusMirrorId: string | null;
   section?: 'library' | 'organize' | 'semantic' | 'history' | 'export';
   active?: boolean;
+  sidebarCollapsed?: boolean;
   sidebarHost?: HTMLDivElement | null;
   exportHost?: HTMLDivElement | null;
   onSettings?: () => void;
@@ -93,6 +94,11 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
   const [batchRequest, setBatchRequest] = useState<BatchRequest | null>(null);
   const [editingBatch, setEditingBatch] = useState(false);
   const [foldersOpen, setFoldersOpen] = useState(false);
+  const prevSidebarCollapsed = useRef(sidebarCollapsed);
+  useEffect(() => {
+    if (prevSidebarCollapsed.current && !sidebarCollapsed) setFoldersOpen(false);
+    prevSidebarCollapsed.current = sidebarCollapsed;
+  }, [sidebarCollapsed]);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const detailTrigger = useRef<HTMLButtonElement>(null);
   const detailReturn = useRef<HTMLButtonElement>(null);
@@ -141,6 +147,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
   const detailGen = useRef(0);
   const mirrorGen = useRef(0);
   const treeGen = useRef(0);
+  const expandedInitializedFor = useRef<string | null>(null);
 
   if (seenKey !== sourceKey) {
     sourceGeneration.current += 1;
@@ -159,6 +166,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
     setFolderId(null);
     setBookmarkId(null);
     setExpanded(new Set());
+    expandedInitializedFor.current = null;
     setPhase('loading');
     setGap(false);
     setOpenFailed(false);
@@ -224,6 +232,22 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
     setGap(previous != null && revision > previous + 1);
   }, [sourceKey, profile?.revision, mirror?.revision]);
 
+  function initializeRootExpansion(loadKey: string, roots: string[]) {
+    if (expandedInitializedFor.current !== loadKey && roots.length > 0) {
+      expandedInitializedFor.current = loadKey;
+      setExpanded(new Set(roots));
+    }
+  }
+
+  function expandFolderIds(ids: string[]) {
+    if (ids.length === 0) return;
+    setExpanded((current) => {
+      const next = new Set(current);
+      for (const id of ids) next.add(id);
+      return next;
+    });
+  }
+
   useEffect(() => {
     if (!profile || !native || invalid) return;
     const generation = ++treeGen.current;
@@ -234,7 +258,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
       setPhase('ready');
       const flat = indexFlat(tree.nodes);
       const roots = rootFolders(flat).map((node) => node.chromeId);
-      setExpanded((current) => current.size ? current : new Set(roots));
+      initializeRootExpansion(`profile:${profile.profileId}`, roots);
       setFolderId((current) => current && flat.nodes.get(current)?.kind === 'folder' ? current : roots[0] ?? null);
       setPicked((current) => new Set([...current].filter((id) => flat.nodes.has(id))));
       setBookmarkId((current) => current && flat.nodes.has(current) ? current : null);
@@ -274,7 +298,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
         setPhase('ready');
         const flat = indexFlat(tree.nodes);
         const roots = rootFolders(flat).map((node) => node.chromeId);
-        setExpanded((current) => current.size > 0 ? current : new Set(roots));
+        initializeRootExpansion(`mirror:${mirror.mirrorSourceId}`, roots);
         setFolderId((current) => current && flat.nodes.get(current)?.kind === 'folder' ? current : roots[0] ?? null);
         setPicked((current) => new Set([...current].filter((id) => flat.nodes.has(id))));
         setBookmarkId((current) => current && flat.nodes.has(current) ? current : !roots.length ? looseBookmarks(tree.nodes)[0]?.chromeId ?? null : null);
@@ -287,6 +311,16 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
 
   const activeIndex = useMemo(() => indexFlat(profile ? nodes : mirrorNodes), [profile != null, nodes, mirrorNodes]);
   const folders = useMemo(() => folderRows(activeIndex, expanded), [activeIndex, expanded]);
+  const expandableFolderIds = useMemo(() => {
+    const ids: string[] = [];
+    for (const node of activeIndex.nodes.values()) {
+      if (node.kind !== 'folder') continue;
+      const childFolders = (activeIndex.children.get(node.chromeId) ?? []).filter((child) => activeIndex.nodes.get(child)?.kind === 'folder');
+      if (!activeIndex.fetched.has(node.chromeId) || childFolders.length > 0) ids.push(node.chromeId);
+    }
+    return ids;
+  }, [activeIndex]);
+  const anyExpanded = expandableFolderIds.some((id) => expanded.has(id));
   const searching = query.length > 0;
   const filtering = profile != null && filterTagId != null;
   const folderScope = searching || filtering ? scope : 'children';
@@ -389,15 +423,19 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
     requestAnimationFrame(() => detailTrigger.current?.focus());
   }
 
-  function chooseFolder(chromeId: string, resetScope = false) {
+  function chooseFolder(chromeId: string, options?: { resetScope?: boolean; expandAncestors?: boolean }) {
+    const resetScope = options?.resetScope ?? false;
+    const expandAncestors = options?.expandAncestors ?? false;
     leaveMetadata(() => {
-    setCreating(false);
-    setFolderId(chromeId);
-    if (resetScope) setScope('all');
-    setBookmarkId(null);
-    setQuery('');
-    setFilterTagId(null);
-    setExpanded((current) => new Set([...current, ...folderPath(activeIndex, chromeId).map((node) => node.chromeId)]));
+      setCreating(false);
+      setFolderId(chromeId);
+      if (resetScope) setScope('all');
+      setBookmarkId(null);
+      setQuery('');
+      setFilterTagId(null);
+      if (expandAncestors) {
+        expandFolderIds(folderPath(activeIndex, chromeId).slice(0, -1).map((node) => node.chromeId));
+      }
     });
   }
 
@@ -406,19 +444,26 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
   }
 
   function onTreeKey(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.target instanceof HTMLButtonElement) return;
     const ids = folders.map((row) => row.chromeId);
     const current = chromeFromTarget(event, 'library-row-folder:') ?? folderId;
+    const moveTreeSelection = (nextId: string) => {
+      chooseFolder(nextId);
+      if (nextId === folderId && !metadataDirty) {
+        document.getElementById(`library-row-folder:${nextId}`)?.focus();
+      }
+    };
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault();
       const next = neighbor(ids, current, event.key === 'ArrowDown' ? 1 : -1);
-      if (next) chooseFolder(next);
+      if (next) moveTreeSelection(next);
     } else if (event.key === 'Home' || event.key === 'End') {
       event.preventDefault();
       const next = event.key === 'Home' ? ids[0] : ids[ids.length - 1];
-      if (next) chooseFolder(next);
+      if (next) moveTreeSelection(next);
     } else if (event.key === 'Enter' && current) {
       event.preventDefault();
-      chooseFolder(current);
+      moveTreeSelection(current);
       if (foldersOpen) closeFolders();
     } else if (event.key === 'ArrowRight' && current) {
       event.preventDefault();
@@ -426,7 +471,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
       if (row?.expandable && !row.expanded) void toggleFolder(current);
       else if (row?.expanded) {
         const children = (activeIndex.children.get(current) ?? []).filter((id) => activeIndex.nodes.get(id)?.kind === 'folder');
-        if (children[0]) chooseFolder(children[0]);
+        if (children[0]) moveTreeSelection(children[0]);
       }
     } else if (event.key === 'ArrowLeft' && current) {
       event.preventDefault();
@@ -439,7 +484,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
         });
       } else {
         const parent = activeIndex.nodes.get(current)?.parentId;
-        if (parent && activeIndex.nodes.get(parent)?.kind === 'folder') chooseFolder(parent);
+        if (parent && activeIndex.nodes.get(parent)?.kind === 'folder') moveTreeSelection(parent);
       }
     }
   }
@@ -482,7 +527,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
       const current = visible.find((row) => row.chromeId === (currentId ?? ids[0]));
       if (!current) return;
       if (current.kind === 'folder') {
-        chooseFolder(current.chromeId);
+        chooseFolder(current.chromeId, { expandAncestors: true });
       } else {
         leaveMetadata(() => {
           selectBookmark(current.chromeId);
@@ -533,11 +578,28 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
   const isLocalProfile = profile?.connection === 'local';
   const writePaused = !!profile && profile.connection === 'live' && !profile.ignored && !!profile.writePaused;
   const canWriteBrowser = profile?.connection === 'live' && !profile.writePaused && !profile.ignored;
+  const healthySource = !invalid && !!profile && ((profile.connection === 'live' && !writePaused && !profile.ignored) || isLocalProfile);
 
 
   const folderPane = source && native && !invalid ? (
         <div className={`library-pane folder-pane ${foldersOpen ? 'is-open' : ''}`} hidden={!active || section !== 'library'} onKeyDown={(event) => { if (event.key === 'Escape' && foldersOpen) { event.stopPropagation(); closeFolders(); } }}>
-          <div className="pane-heading"><h3>文件夹</h3><button className="folder-return" type="button" onClick={closeFolders}>返回列表</button></div>
+          <div className="pane-heading">
+            <h3>文件夹</h3>
+            <div className="folder-pane-actions">
+              {expandableFolderIds.length > 0 && (
+                <button
+                  type="button"
+                  className="icon-button folder-tree-action"
+                  aria-label={anyExpanded ? '全部收起' : '全部展开'}
+                  title={anyExpanded ? '全部收起' : '全部展开'}
+                  onClick={() => setExpanded(anyExpanded ? new Set() : new Set(expandableFolderIds))}
+                >
+                  <WorkspaceIcon name={anyExpanded ? 'collapse-all' : 'expand-all'} />
+                </button>
+              )}
+              <button className="folder-return" type="button" onClick={closeFolders}>返回列表</button>
+            </div>
+          </div>
           {(phase === 'loading' && folders.length === 0) || waitingForCache ? <p role="status">正在读取书签。</p> : folders.length === 0 ? <p>{visible.length > 0 ? '没有文件夹。' : phase === 'error' ? '没有可显示的文件夹。' : '此资料还没有书签。'}</p> : (
             <VirtualRows
               rows={folders}
@@ -546,12 +608,44 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
               role="tree"
               itemRole="treeitem"
               activeKey={folderId ? rowKey('folder', folderId) : null}
+              activateOnFocus={false}
               onActive={(key, reason) => { chooseFolder(key.slice('folder:'.length)); if (reason === 'pointer' && foldersOpen) closeFolders(); }}
+              onActivate={(row) => { if (row.expandable) void toggleFolder(row.chromeId); }}
               onKeyDown={onTreeKey}
-              rowProps={(row: FolderRow) => ({ 'aria-level': row.depth + 1, 'aria-posinset': row.positionInSet, 'aria-setsize': row.setSize, ...(row.expandable ? { 'aria-expanded': row.expanded } : {}) })}
+              rowProps={(row: FolderRow) => ({ 'aria-label': row.title, 'aria-level': row.depth + 1, 'aria-posinset': row.positionInSet, 'aria-setsize': row.setSize, ...(row.expandable ? { 'aria-expanded': row.expanded } : {}) })}
               dragId={canWriteBrowser ? (row) => row.chromeId : undefined}
               onDropRow={canWriteBrowser ? (row, sourceId) => dropBookmark(row.chromeId, sourceId) : undefined}
-              render={(row) => <span className="library-label" title={row.title} style={{ paddingLeft: Math.min(row.depth, 5) * 12 }}><span className="tree-icon"><WorkspaceIcon name="folder" /></span><span className="library-title">{row.title}</span></span>}
+              render={(row) => {
+                const indentLevel = Math.min(row.depth, 8);
+                return (
+                  <span className="tree-row-content" title={row.title} style={{ paddingLeft: indentLevel * 14 }}>
+                    {indentLevel > 0 && (
+                      <span className="tree-indent-guides" aria-hidden="true">
+                        {Array.from({ length: indentLevel }, (_, level) => (
+                          <span key={level} className="tree-indent-guide" style={{ left: level * 14 + 11 }} />
+                        ))}
+                      </span>
+                    )}
+                    {row.expandable ? (
+                      <button
+                        type="button"
+                        className="tree-chevron"
+                        tabIndex={-1}
+                        aria-label={row.expanded ? `收起 ${row.title}` : `展开 ${row.title}`}
+                        aria-expanded={row.expanded}
+                        onClick={(event) => { event.stopPropagation(); void toggleFolder(row.chromeId); }}
+                        onDoubleClick={(event) => event.stopPropagation()}
+                      >
+                        <WorkspaceIcon name="chevron" />
+                      </button>
+                    ) : (
+                      <span className="tree-chevron-spacer" aria-hidden="true" />
+                    )}
+                    <span className="tree-icon"><WorkspaceIcon name="folder" /></span>
+                    <span className="library-title">{row.title}</span>
+                  </span>
+                );
+              }}
             />
           )}
         </div>
@@ -581,12 +675,19 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
         {source && section === 'library' && <div className="library-filters" id="library-filters" hidden={!filtersOpen}>
           <label htmlFor="library-scope">搜索范围<select id="library-scope" value={scope} onChange={(event) => { const value = event.target.value as 'all' | 'subtree'; leaveMetadata(() => setScope(value)); }}><option value="all">全部书签</option><option value="subtree">当前目录及后代</option></select></label>
           {profile && <label htmlFor="library-tag">标签<select id="library-tag" value={filterTagId ?? ''} onChange={(event) => { const value = event.target.value || null; leaveMetadata(() => setFilterTagId(value)); }}><option value="">所有标签</option>{tags.map((tag) => <option key={tag.tagId} value={tag.tagId}>{tag.name}</option>)}</select></label>}
-          {profile && <details><summary>更多搜索范围</summary><label className="checkbox-label"><input type="checkbox" checked={includeSummary} onChange={(event) => { const value = event.target.checked; leaveMetadata(() => setIncludeSummary(value)); }} />包含摘要</label><label className="checkbox-label"><input type="checkbox" checked={includeNote} onChange={(event) => { const value = event.target.checked; leaveMetadata(() => setIncludeNote(value)); }} />包含备注</label></details>}
+          {profile && <details><summary><WorkspaceIcon name="chevron" /><span>更多搜索范围</span></summary><label className="checkbox-label"><input type="checkbox" checked={includeSummary} onChange={(event) => { const value = event.target.checked; leaveMetadata(() => setIncludeSummary(value)); }} />包含摘要</label><label className="checkbox-label"><input type="checkbox" checked={includeNote} onChange={(event) => { const value = event.target.checked; leaveMetadata(() => setIncludeNote(value)); }} />包含备注</label></details>}
         </div>}
-        {source && <div className="source-guidance">
-          <p className="access-note">{invalid ? '连接状态无效，已停止更新书签列表。' : accessNote(source)} 缓存时间：{cacheTime(profile?.lastSyncedAt ?? mirror?.lastSyncedAt ?? null)}</p>
-          {(profile?.connection !== 'live' || writePaused || profile?.ignored || invalid) && <details><summary>来源状态与恢复</summary><p>{profile ? (writePaused ? '此资料已启用只读保护。请在连接设置中恢复写入后再执行浏览器修改。' : profileNextStep(profile.connection)) : mirror?.watching ? '文件来自你选择的 Chrome 目录。文件陈旧或不可用时保留最后缓存；请检查目录后重新读取。' : '此文件来源已停止监听。若要更新，请在连接设置中重新接入同一目录。'}</p>{onSettings && <button type="button" onClick={onSettings}>检查连接设置</button>}</details>}
-        </div>}
+        {source && (healthySource ? (
+          <details className="source-guidance source-guidance-compact">
+            <summary><WorkspaceIcon name="chevron" /><span>{isLocalProfile ? '本地 Skills 书签库' : '实时同步 · 已完成全树核对'}</span></summary>
+            <p className="access-note">{accessNote(source)} 缓存时间：{cacheTime(profile?.lastSyncedAt ?? null)}</p>
+          </details>
+        ) : (
+          <div className="source-guidance">
+            <p className="access-note">{invalid ? '连接状态无效，已停止更新书签列表。' : accessNote(source)} 缓存时间：{cacheTime(profile?.lastSyncedAt ?? mirror?.lastSyncedAt ?? null)}</p>
+            <details><summary><WorkspaceIcon name="chevron" /><span>来源状态与恢复</span></summary><p>{profile ? (writePaused ? '此资料已启用只读保护。请在连接设置中恢复写入后再执行浏览器修改。' : profileNextStep(profile.connection)) : mirror?.watching ? '文件来自你选择的 Chrome 目录。文件陈旧或不可用时保留最后缓存；请检查目录后重新读取。' : '此文件来源已停止监听。若要更新，请在连接设置中重新接入同一目录。'}</p>{onSettings && <button type="button" onClick={onSettings}>检查连接设置</button>}</details>
+          </div>
+        ))}
         {gap && <p role="status">来源版本不连续，已重新读取。</p>}
         {phase === 'stale' && <p role="status">无法刷新书签，仍显示上次结果。</p>}
         {phase === 'error' && <p role="alert">无法读取书签。请稍后重试。</p>}
@@ -622,9 +723,9 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
           {!sidebarHost && folderPane}
         <div className="library-pane list-pane">
           <div className="browse-actions">
-          <div className="pane-heading browse-heading" aria-hidden={pickedIds.length > 0} inert={pickedIds.length > 0}><nav ref={breadcrumbs} className="library-breadcrumbs" aria-label="当前目录"><button type="button" onClick={() => { const root = rootFolders(activeIndex)[0]; if (root) chooseFolder(root.chromeId, true); }}>书签</button>{folderPath(activeIndex, folderId).map((node) => <button type="button" key={node.chromeId} title={displayTitle(node.title)} aria-current={node.chromeId === folderId ? 'location' : undefined} onClick={() => chooseFolder(node.chromeId)}>{displayTitle(node.title)}</button>)}</nav>
+          <div className="pane-heading browse-heading" aria-hidden={pickedIds.length > 0} inert={pickedIds.length > 0}><nav ref={breadcrumbs} className="library-breadcrumbs" aria-label="当前目录"><button type="button" onClick={() => { const root = rootFolders(activeIndex)[0]; if (root) chooseFolder(root.chromeId, { resetScope: true, expandAncestors: true }); }}>书签</button>{folderPath(activeIndex, folderId).map((node) => <button type="button" key={node.chromeId} title={displayTitle(node.title)} aria-current={node.chromeId === folderId ? 'location' : undefined} onClick={() => chooseFolder(node.chromeId, { expandAncestors: true })}>{displayTitle(node.title)}</button>)}</nav>
           <h2 className="visually-hidden">{filtering ? '标签筛选' : searching ? '搜索结果' : '书签列表'}</h2><button type="button" aria-expanded={filtersOpen} aria-controls="library-filters" onClick={() => setFiltersOpen((value) => !value)}>筛选</button>{!isLocalProfile && <button type="button" disabled={!canWriteBrowser || !folderId} onClick={() => leaveMetadata(() => { setBookmarkId(null); setCreating(true); setEditingBatch(false); showDetail(); requestAnimationFrame(() => document.getElementById('edit-title')?.focus()); })}>新建</button>}{(searching || filtering) && <button type="button" onClick={() => leaveMetadata(() => { setQuery(''); setFilterTagId(null); setIncludeNote(false); setIncludeSummary(false); })}>清空筛选</button>}{hasMore && <button type="button" disabled={busy} onClick={() => void loadMore()}>加载下一页</button>}</div>
-          {pickedIds.length > 0 && <div className="selection-toolbar" aria-label="所选项目操作"><details className="selection-path" onKeyDown={(event) => { if (event.key === 'Escape') { event.stopPropagation(); event.currentTarget.open = false; event.currentTarget.querySelector('summary')?.focus(); } }}><summary aria-label="查看当前目录完整路径" title={currentFolderPath.join(' / ')}>{currentFolderPath.at(-1) ?? '全部书签'}</summary><p tabIndex={0}>{currentFolderPath.join(' / ') || '全部书签'}</p></details><span>{pickedIds.length} 项待处理</span>{!isLocalProfile && (['move', 'delete'] as const).map((kind) => <button key={kind} type="button" disabled={!canWriteBrowser} onClick={() => leaveMetadata(() => { setCreating(false); setEditingBatch(true); setBatchRequest({ id: ++editSeq.current, kind, chromeIds: [...pickedIds] }); showDetail(); })}>{kind === 'move' ? '移动所选' : '删除所选'}</button>)}<button type="button" onClick={() => { setEditingBatch(false); setDetailTab('metadata'); showDetail(); requestAnimationFrame(() => document.getElementById('tag-name')?.focus()); }}>标签</button><button type="button" onClick={() => leaveMetadata(() => setPicked(new Set()))}>取消选择</button></div>}
+          {pickedIds.length > 0 && <div className="selection-toolbar" aria-label="所选项目操作"><details className="selection-path" onKeyDown={(event) => { if (event.key === 'Escape') { event.stopPropagation(); event.currentTarget.open = false; event.currentTarget.querySelector('summary')?.focus(); } }}><summary aria-label="查看当前目录完整路径" title={currentFolderPath.join(' / ')}><WorkspaceIcon name="chevron" /><span>{currentFolderPath.at(-1) ?? '全部书签'}</span></summary><p tabIndex={0}>{currentFolderPath.join(' / ') || '全部书签'}</p></details><span>{pickedIds.length} 项待处理</span>{!isLocalProfile && (['move', 'delete'] as const).map((kind) => <button key={kind} type="button" disabled={!canWriteBrowser} onClick={() => leaveMetadata(() => { setCreating(false); setEditingBatch(true); setBatchRequest({ id: ++editSeq.current, kind, chromeIds: [...pickedIds] }); showDetail(); })}>{kind === 'move' ? '移动所选' : '删除所选'}</button>)}<button type="button" onClick={() => { setEditingBatch(false); setDetailTab('metadata'); showDetail(); requestAnimationFrame(() => document.getElementById('tag-name')?.focus()); }}>标签</button><button type="button" onClick={() => leaveMetadata(() => setPicked(new Set()))}>取消选择</button></div>}
           </div>
           <div className="library-list-meta secondary" role="status">
             {busy && <span>正在读取</span>}
@@ -633,8 +734,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
             {filtering && <span>标签：{tags.find((tag) => tag.tagId === filterTagId)?.name ?? '已选择'}</span>}
             {searching && includeSummary && <span>包含摘要</span>}
             {searching && includeNote && <span>包含备注</span>}
-            <span>Ctrl+A 已加载</span>
-            {hasMore && <span>Ctrl+End 末项</span>}
+            {selectionNotice ? <span>{selectionNotice}</span> : pickedIds.length > 0 ? <span>已选 {pickedIds.length} 项</span> : null}
           </div>
           {paging.restarted && <p role="status">来源版本已改变，已从第一页重新读取。</p>}
           {paging.failed && <p role="alert">无法读取列表。<button type="button" onClick={paging.refresh}>重试列表</button></p>}
@@ -655,7 +755,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
                 }
                 else if (chromeId !== bookmarkId && !metadataDirty) setBookmarkId(chromeId);
               }}
-              onActivate={(row) => { if (row.kind === 'folder') chooseFolder(row.chromeId); else if (row.url && isHttpUrl(row.url)) void open(row.url); }}
+              onActivate={(row) => { if (row.kind === 'folder') chooseFolder(row.chromeId, { expandAncestors: true }); else if (row.url && isHttpUrl(row.url)) void open(row.url); }}
               selectedKeys={new Set(pickedIds.map((id) => rowKey(sourceKey, id)))}
               total={total}
               onKeyDown={onListKey}
@@ -695,7 +795,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
                     <dt>书签缓存更新</dt><dd>{cacheTime(profile?.lastSyncedAt ?? mirror?.lastSyncedAt ?? null)}</dd>
                   </dl>
                   {detailView.url && <button type="button" disabled={!native || !isHttpUrl(detailView.url)} onClick={() => { if (detailView.url) void open(detailView.url); }}>在浏览器中打开</button>}
-                  <details className="diagnostics"><summary>诊断信息</summary><dl className="identity"><dt>浏览器节点</dt><dd>{detailView.chromeId}</dd><dt>来源版本</dt><dd>{profile?.revision ?? mirror?.revision}</dd></dl></details>
+                  <details className="diagnostics"><summary><WorkspaceIcon name="chevron" /><span>诊断信息</span></summary><dl className="identity"><dt>浏览器节点</dt><dd>{detailView.chromeId}</dd><dt>来源版本</dt><dd>{profile?.revision ?? mirror?.revision}</dd></dl></details>
                 </>}
               </div>
             </div>
@@ -763,6 +863,9 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
               if (!node || node.kind !== 'bookmark') return false;
               leaveMetadata(() => {
                 setFolderId(node.parentId ?? folderId); setQuery(''); setFilterTagId(null);
+                if (node.parentId) {
+                  expandFolderIds(folderPath(activeIndex, node.parentId).map((item) => item.chromeId));
+                }
                 selectBookmark(chromeId); onLibrary?.();
               }, [chromeId]);
               return true;
@@ -770,7 +873,6 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
           {section === 'semantic' && (!profile || epochRef.current.epoch === null) && <><h2>本地语义检索</h2><p>{profile ? '正在确认此资料的缓存身份。完成后可选择索引范围。' : '请选择 Chrome 资料。只读文件来源不建立语义索引。'}</p><button type="button" onClick={onLibrary}>返回普通搜索</button></>}
         </div>
         {!exportHost && exportView}
-        {section === 'library' && <div className="library-status"><span role="status">{selectionNotice || (pickedIds.length > 0 ? `已选 ${pickedIds.length} 项` : `${visible.length} 项`)}</span><span className="library-status-hint"><span>按 Chrome 顺序</span><span>方向键浏览，Enter 打开</span></span></div>}
       </>}
     </section>
   </>;

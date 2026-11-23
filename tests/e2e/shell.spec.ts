@@ -153,6 +153,9 @@ for (const scenario of ['loading', 'cache-error', 'empty', 'readonly'] as const)
     if (scenario === 'empty') await expect(page.getByText('此资料还没有书签。')).toBeVisible();
     if (scenario === 'readonly') {
       await expect(page.getByText(/扩展未连接/)).toBeVisible();
+      await expect(page.getByText(/缓存时间：/)).toBeVisible();
+      await page.getByText('来源状态与恢复', { exact: true }).click();
+      await expect(page.getByRole('button', { name: '检查连接设置', exact: true })).toBeVisible();
       await page.getByRole('option', { name: /Human Interface Guidelines/ }).first().click();
       await expect(page.getByRole('button', { name: '预览修改' })).toBeDisabled();
     }
@@ -160,3 +163,96 @@ for (const scenario of ['loading', 'cache-error', 'empty', 'readonly'] as const)
     await page.screenshot({ path: `${evidence}/shell-${scenario}-1100x760.png` });
   });
 }
+
+test('T4 deduplicates connection status, compacts healthy library header to reclaim >=50px list height, and aligns sidebar brand/nav icons with 8px concentric radii', async ({ page }) => {
+  await mockBridge(page, 'library');
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+  await expect(page.getByRole('listbox', { name: '书签列表' })).toBeVisible();
+
+  // 1. Expanded sidebar: .workspace-heading .connection is visually clipped (1x1, inset(50%)), .connection-pill span is visible, role="status" reachable
+  const expandedConn = await page.locator('.workspace-heading .connection').evaluate((el) => {
+    const rect = el.getBoundingClientRect();
+    const style = getComputedStyle(el);
+    return { width: rect.width, height: rect.height, clipPath: style.clipPath, role: el.getAttribute('role'), text: el.textContent };
+  });
+  expect(expandedConn.role).toBe('status');
+  expect(expandedConn.text).toBe('已连接 Chrome');
+  expect(expandedConn.width).toBeLessThanOrEqual(1);
+  expect(expandedConn.height).toBeLessThanOrEqual(1);
+  expect(expandedConn.clipPath).toBe('inset(50%)');
+  await expect(page.locator('.connection-pill span')).toBeVisible();
+  await expect(page.locator('.connection-pill span')).toHaveText('已连接 Chrome');
+
+  // 2. Sidebar left-axis alignment (brand-mark x === all 5 nav-button icon x within 1px) & DA4 8px concentric inner radius (20px paper - 12px padding)
+  const sidebarAlignment = await page.evaluate(() => {
+    const sidebarStyle = getComputedStyle(document.querySelector('.app-sidebar')!);
+    const brandX = document.querySelector('.brand-mark')!.getBoundingClientRect().x;
+    const navIcons = [...document.querySelectorAll('.primary-navigation > .nav-button svg.workspace-icon')].map((el) => el.getBoundingClientRect().x);
+    const navRadii = [...document.querySelectorAll('.primary-navigation > .nav-button')].map((el) => getComputedStyle(el).borderRadius);
+    const folderRowRadius = getComputedStyle(document.querySelector('.folder-pane .library-row')!).borderRadius;
+    const pillRadius = getComputedStyle(document.querySelector('.connection-pill')!).borderRadius;
+    return {
+      paperRadius: sidebarStyle.borderRadius,
+      paperPaddingLeft: sidebarStyle.paddingLeft,
+      brandX,
+      navIcons,
+      navRadii,
+      folderRowRadius,
+      pillRadius,
+    };
+  });
+  expect(sidebarAlignment.paperRadius).toBe('20px');
+  expect(sidebarAlignment.paperPaddingLeft).toBe('12px');
+  expect(sidebarAlignment.navIcons).toHaveLength(5);
+  for (const iconX of sidebarAlignment.navIcons) {
+    expect(Math.abs(iconX - sidebarAlignment.brandX)).toBeLessThanOrEqual(1);
+  }
+  for (const r of sidebarAlignment.navRadii) expect(r).toBe('8px');
+  expect(sidebarAlignment.folderRowRadius).toBe('8px');
+  expect(sidebarAlignment.pillRadius).toBe('8px');
+
+  // 3. Healthy live source: compact single-line guidance, zero shortcut noise, >=50px vertical list height reclaimed vs 578px pre-T4 baseline
+  const compactGuidance = page.locator('details.source-guidance.source-guidance-compact');
+  await expect(compactGuidance).toBeVisible();
+  expect(await compactGuidance.evaluate((el: HTMLDetailsElement) => el.open)).toBe(false);
+  await expect(compactGuidance.locator('summary')).toHaveText('实时同步 · 已完成全树核对');
+  await expect(page.locator('.library-status')).toHaveCount(0);
+  const metaText = await page.locator('.library-list-meta').textContent();
+  expect(metaText).toContain('已加载 24 / 24 项');
+  expect(metaText).not.toContain('Ctrl+A');
+  expect(metaText).not.toContain('Ctrl+End');
+  expect(await page.locator('body').textContent()).not.toContain('按 Chrome 顺序');
+  expect(await page.locator('body').textContent()).not.toContain('方向键浏览，Enter 打开');
+
+  const virtualRowsBox = (await page.locator('.list-pane .virtual-rows').boundingBox())!;
+  // Pre-T4 baseline at 1440x900 (14px font) was 578px in live mode and 538px in local mode
+  expect(virtualRowsBox.height - 578).toBeGreaterThanOrEqual(50);
+  expect(virtualRowsBox.height).toBeGreaterThanOrEqual(635);
+
+  // Collapsed sidebar (Ctrl+B): .workspace-heading .connection becomes visibly rendered (width > 10)
+  await page.keyboard.press('Control+b');
+  const collapsedConn = await page.locator('.workspace-heading .connection').evaluate((el) => {
+    const rect = el.getBoundingClientRect();
+    return { width: rect.width, height: rect.height, clipPath: getComputedStyle(el).clipPath };
+  });
+  expect(collapsedConn.width).toBeGreaterThan(10);
+  expect(collapsedConn.height).toBeGreaterThan(10);
+  expect(collapsedConn.clipPath).toBe('none');
+
+  // Expand back via button -> clipped again
+  await page.getByRole('button', { name: '展开侧栏' }).click();
+  expect(await page.locator('.workspace-heading .connection').evaluate((el) => el.getBoundingClientRect().width)).toBeLessThanOrEqual(1);
+
+  // Narrow viewport (<800px): .workspace-heading .connection becomes visibly rendered (width > 10)
+  await page.setViewportSize({ width: 640, height: 760 });
+  const narrowConn = await page.locator('.workspace-heading .connection').evaluate((el) => {
+    const rect = el.getBoundingClientRect();
+    return { width: rect.width, height: rect.height, clipPath: getComputedStyle(el).clipPath };
+  });
+  expect(narrowConn.width).toBeGreaterThan(10);
+  expect(narrowConn.height).toBeGreaterThan(10);
+  expect(narrowConn.clipPath).toBe('none');
+  await noOverflow(page);
+});
+

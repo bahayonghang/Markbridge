@@ -12,18 +12,19 @@ type VirtualRowsProps<T> = {
   itemRole: 'option' | 'treeitem';
   activeKey: string | null;
   resetKey?: string;
+  activateOnFocus?: boolean;
   onActive: (key: string, reason?: 'pointer' | 'focus', event?: MouseEvent<HTMLDivElement>) => void;
   onActivate?: (row: T) => void;
   selectedKeys?: ReadonlySet<string>;
   total?: number;
   onKeyDown: (event: KeyboardEvent<HTMLDivElement>) => void;
-  rowProps?: (row: T) => { 'aria-disabled'?: boolean; 'aria-expanded'?: boolean; 'aria-level'?: number; 'aria-posinset'?: number; 'aria-setsize'?: number };
+  rowProps?: (row: T) => { 'aria-label'?: string; 'aria-disabled'?: boolean; 'aria-expanded'?: boolean; 'aria-level'?: number; 'aria-posinset'?: number; 'aria-setsize'?: number };
   dragId?: (row: T) => string;
   onDropRow?: (row: T, sourceId: string) => void;
   render: (row: T, active: boolean) => ReactNode;
 };
 
-export function VirtualRows<T>({ rows, rowHeight: explicitRowHeight, rowKey, label, role, itemRole, activeKey, resetKey, onActive, onActivate, selectedKeys, total, onKeyDown, rowProps, dragId, onDropRow, render }: VirtualRowsProps<T>) {
+export function VirtualRows<T>({ rows, rowHeight: explicitRowHeight, rowKey, label, role, itemRole, activeKey, resetKey, activateOnFocus = true, onActive, onActivate, selectedKeys, total, onKeyDown, rowProps, dragId, onDropRow, render }: VirtualRowsProps<T>) {
   const sizes = useContext(RowHeightsContext);
   const rowHeight = explicitRowHeight ?? (role === 'tree' ? sizes.folderRow : sizes.bookmarkRow);
   const scroller = useRef<HTMLDivElement>(null);
@@ -78,13 +79,17 @@ export function VirtualRows<T>({ rows, rowHeight: explicitRowHeight, rowKey, lab
     rememberPosition(element);
     // Geometry changes preserve the visible anchor; only navigation/replaced data reveals the active row.
   }, [activeIndex, activeKey, resetKey]);
+  const prevActiveKey = useRef(activeKey);
   useEffect(() => {
+    const activeChanged = prevActiveKey.current !== activeKey;
+    prevActiveKey.current = activeKey;
     if (!activeKey) return;
     const element = document.getElementById(`library-row-${activeKey}`);
     const host = scroller.current;
-    if (!element || !host || !host.contains(document.activeElement) || document.activeElement === element || document.activeElement instanceof HTMLInputElement) return;
+    if (!element || !host || !host.contains(document.activeElement) || document.activeElement === element || document.activeElement instanceof HTMLInputElement || document.activeElement instanceof HTMLButtonElement) return;
+    if (!activateOnFocus && !activeChanged && document.activeElement instanceof HTMLElement && document.activeElement.getAttribute('role') === itemRole) return;
     element.focus();
-  }, [activeKey, scrollTop, rows]);
+  }, [activeKey, scrollTop, rows, activateOnFocus, itemRole]);
   const view = height || 320;
   const start = Math.max(0, Math.floor(scrollTop / rowHeight) - 2);
   const end = Math.min(rows.length, start + Math.ceil(view / rowHeight) + 6);
@@ -114,6 +119,7 @@ export function VirtualRows<T>({ rows, rowHeight: explicitRowHeight, rowKey, lab
               id={`library-row-${key}`}
               key={key}
               role={itemRole}
+              aria-label={extra?.['aria-label']}
               aria-selected={selectedKeys ? selectedKeys.has(key) : active}
               aria-posinset={extra?.['aria-posinset'] ?? index + 1}
               aria-setsize={extra?.['aria-setsize'] ?? total ?? rows.length}
@@ -134,7 +140,7 @@ export function VirtualRows<T>({ rows, rowHeight: explicitRowHeight, rowKey, lab
               }}
               onClick={(event) => onActive(key, 'pointer', event)}
               onDoubleClick={() => onActivate?.(row)}
-              onFocus={(event) => { if (!active && event.target === event.currentTarget) onActive(key, 'focus'); }}
+              onFocus={(event) => { if (activateOnFocus && !active && event.target === event.currentTarget) onActive(key, 'focus'); }}
             >
               {render(row, active)}
             </div>

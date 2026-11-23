@@ -140,3 +140,174 @@ test('R04 long paths with classic scrollbars keep selection rows stationary and 
     expect((await row.boundingBox())!.y).toBeCloseTo(before!.y, 1);
   }
 });
+
+test('T2 decoupled folder tree chevrons, keyboard navigation, 8-level indent, smart toggle, and refresh persistence', async ({ page }) => {
+  await page.addInitScript(() => {
+    const folders = Array.from({ length: 9 }, (_, index) => ({
+      chromeId: `f-${index + 1}`,
+      parentId: index === 0 ? '1' : `f-${index}`,
+      position: 0,
+      kind: 'folder',
+      title: `第${index + 1}层目录`,
+      url: null,
+    }));
+    const siblingLeaf = { chromeId: 'f-leaf', parentId: '1', position: 1, kind: 'folder', title: '平级叶目录', url: null };
+    const bookmarks = [
+      { chromeId: 'bm-home', parentId: '1', position: 2, kind: 'bookmark', title: '首页指南', url: 'https://example.invalid/home' },
+      { chromeId: 'bm-deep', parentId: 'f-2', position: 1, kind: 'bookmark', title: '深层书签', url: 'https://example.invalid/deep' },
+      { chromeId: 'bm-leaf', parentId: 'f-leaf', position: 0, kind: 'bookmark', title: '叶目录书签', url: 'https://example.invalid/leaf' },
+    ];
+    Object.assign(window, { __r03nodes: [...folders, siblingLeaf, ...bookmarks] });
+  });
+  await mockBridge(page, 'sources');
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+
+  const rootRow = page.getByRole('treeitem', { name: '书签栏', exact: true });
+  const firstLevelRow = page.getByRole('treeitem', { name: '第1层目录', exact: true });
+  const leafRow = page.getByRole('treeitem', { name: '平级叶目录', exact: true });
+  await expect(firstLevelRow).toBeVisible();
+  await expect(leafRow).toBeVisible();
+
+  // AC1: 24x24 chevron vs equal spacer alignment & 40px folder row height & chevron transform
+  const rootChevron = rootRow.locator('button.tree-chevron');
+  const firstChevron = firstLevelRow.locator('button.tree-chevron');
+  const leafSpacer = leafRow.locator('.tree-chevron-spacer');
+  await expect(firstChevron).toHaveAttribute('aria-label', '展开 第1层目录');
+  await expect(firstChevron).toHaveAttribute('aria-expanded', 'false');
+  await expect(firstChevron).toHaveAttribute('tabindex', '-1');
+  await expect(leafRow.locator('button.tree-chevron')).toHaveCount(0);
+  await expect(leafSpacer).toHaveAttribute('aria-hidden', 'true');
+
+  const firstChevronBox = (await firstChevron.boundingBox())!;
+  const leafSpacerBox = (await leafSpacer.boundingBox())!;
+  expect(Math.round(firstChevronBox.width)).toBe(24);
+  expect(Math.round(firstChevronBox.height)).toBe(24);
+  expect(Math.round(leafSpacerBox.width)).toBe(24);
+  expect((await firstLevelRow.boundingBox())!.height).toBe(40);
+
+  const firstIconX = (await firstLevelRow.locator('.tree-icon').boundingBox())!.x;
+  const leafIconX = (await leafRow.locator('.tree-icon').boundingBox())!.x;
+  expect(firstIconX).toBeCloseTo(leafIconX, 1);
+
+  expect(await rootChevron.locator('.workspace-icon').evaluate((el) => getComputedStyle(el).transform)).not.toBe('none');
+  expect(await firstChevron.locator('.workspace-icon').evaluate((el) => getComputedStyle(el).transform)).toBe('none');
+
+  // AC2: Chevron click preserves active folder, query, and checked bookmarks
+  await leafRow.click();
+  await expect(leafRow).toHaveAttribute('aria-selected', 'true');
+  await page.getByLabel('搜索标题或网址').fill('叶目录书签');
+  const leafBookmarkCheck = page.getByRole('checkbox', { name: '选择 叶目录书签', exact: true });
+  await leafBookmarkCheck.check();
+  await expect(page.getByText('已选 1 项', { exact: true })).toBeVisible();
+
+  await firstChevron.click();
+  await expect(page.getByRole('treeitem', { name: '第2层目录', exact: true })).toBeVisible();
+  await expect(leafRow).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByLabel('搜索标题或网址')).toHaveValue('叶目录书签');
+  await expect(leafBookmarkCheck).toBeChecked();
+
+  // AC3: Single-click selects without expanding; dblclick toggles; breadcrumb expands ancestors
+  await page.getByRole('button', { name: '取消选择', exact: true }).click();
+  await page.getByRole('button', { name: '清空筛选', exact: true }).click();
+  await firstChevron.click();
+  await expect(page.getByRole('treeitem', { name: '第2层目录', exact: true })).toHaveCount(0);
+
+  await firstLevelRow.click();
+  await expect(firstLevelRow).toHaveAttribute('aria-selected', 'true');
+  await expect(firstLevelRow).toHaveAttribute('aria-expanded', 'false');
+  await expect(page.getByRole('treeitem', { name: '第2层目录', exact: true })).toHaveCount(0);
+
+  await firstLevelRow.dblclick();
+  const secondLevelRow = page.getByRole('treeitem', { name: '第2层目录', exact: true });
+  await expect(secondLevelRow).toBeVisible();
+  await expect(firstLevelRow).toHaveAttribute('aria-expanded', 'true');
+  await firstLevelRow.dblclick();
+  await expect(secondLevelRow).toHaveCount(0);
+
+  // Navigate to 第2层目录 via list dblclick -> collapses 书签栏 & 第1层目录 -> click breadcrumb 第2层目录
+  await page.getByRole('option', { name: /第2层目录/ }).dblclick();
+  await expect(secondLevelRow).toHaveAttribute('aria-selected', 'true');
+  await expect(secondLevelRow).toHaveAttribute('aria-expanded', 'false');
+  await firstChevron.click();
+  await rootChevron.click();
+  await expect(firstLevelRow).toHaveCount(0);
+  await page.getByRole('navigation', { name: '当前目录' }).getByRole('button', { name: '第2层目录', exact: true }).click();
+  await expect(secondLevelRow).toBeVisible();
+  await expect(secondLevelRow).toHaveAttribute('aria-selected', 'true');
+  await expect(secondLevelRow).toHaveAttribute('aria-expanded', 'false');
+
+  // AC4: Tab focus into tree causes zero side effects, Arrow/Home/End/Enter work cleanly
+  await page.getByLabel('搜索标题或网址').fill('深层');
+  await firstChevron.click();
+  await rootChevron.click();
+  await expect(firstLevelRow).toHaveCount(0);
+  const headerToggle = page.locator('.folder-tree-action');
+  await headerToggle.focus();
+  await page.keyboard.press('Tab');
+  await expect(rootRow).toBeFocused();
+  await expect(rootRow).toHaveAttribute('aria-selected', 'false');
+  await expect(page.getByLabel('搜索标题或网址')).toHaveValue('深层');
+
+  await page.keyboard.press('ArrowRight');
+  await expect(firstLevelRow).toBeVisible();
+  await expect(rootRow).toBeFocused();
+  await page.keyboard.press('ArrowDown');
+  await expect(firstLevelRow).toBeFocused();
+  await expect(firstLevelRow).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByLabel('搜索标题或网址')).toHaveValue('');
+  await page.keyboard.press('ArrowRight');
+  await expect(secondLevelRow).toBeVisible();
+  await page.keyboard.press('ArrowRight');
+  await expect(secondLevelRow).toBeFocused();
+  await page.keyboard.press('ArrowLeft');
+  await expect(firstLevelRow).toBeFocused();
+  await page.keyboard.press('ArrowLeft');
+  await expect(secondLevelRow).toHaveCount(0);
+  await page.keyboard.press('End');
+  await expect(leafRow).toBeFocused();
+  await page.keyboard.press('Home');
+  await expect(rootRow).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(rootRow).toHaveAttribute('aria-selected', 'true');
+
+  // AC5: Smart Collapse All / Expand All + 8-level 14px indent cap + indent guides
+  await page.getByRole('button', { name: '全部收起', exact: true }).click();
+  await expect(rootRow).toHaveAttribute('aria-expanded', 'false');
+  await expect(firstLevelRow).toHaveCount(0);
+
+  await page.getByRole('button', { name: '全部展开', exact: true }).click();
+  const eighthLevelRow = page.getByRole('treeitem', { name: '第8层目录', exact: true });
+  const ninthLevelRow = page.getByRole('treeitem', { name: '第9层目录', exact: true });
+  await expect(ninthLevelRow).toBeVisible();
+  await expect(ninthLevelRow).toHaveAttribute('aria-level', '10');
+  expect(await firstLevelRow.locator('.tree-row-content').evaluate((el) => getComputedStyle(el).paddingLeft)).toBe('14px');
+  expect(await eighthLevelRow.locator('.tree-row-content').evaluate((el) => getComputedStyle(el).paddingLeft)).toBe('112px');
+  expect(await ninthLevelRow.locator('.tree-row-content').evaluate((el) => getComputedStyle(el).paddingLeft)).toBe('112px');
+  await expect(firstLevelRow.locator('.tree-indent-guide')).toHaveCount(1);
+  await expect(eighthLevelRow.locator('.tree-indent-guide')).toHaveCount(8);
+  await expect(ninthLevelRow.locator('.tree-indent-guide')).toHaveCount(8);
+
+  // AC6: Collapse-all survives revision refresh; switching source resets to expanded roots
+  await page.getByRole('button', { name: '全部收起', exact: true }).click();
+  await expect(rootRow).toHaveAttribute('aria-expanded', 'false');
+  await page.evaluate(() => (window as unknown as { __r07patch: (patch: Record<string, unknown>) => void }).__r07patch({}));
+  await expect(rootRow).toHaveAttribute('aria-expanded', 'false');
+  await expect(firstLevelRow).toHaveCount(0);
+
+  await page.getByLabel('书签来源').selectOption('profile:profile-second');
+  await expect(rootRow).toHaveAttribute('aria-expanded', 'true');
+  await expect(firstLevelRow).toBeVisible();
+});
+
+test('T2 chevron respects prefers-reduced-motion', async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.assign(window, { __r03nodes: [{ chromeId: 'f-1', parentId: '1', position: 0, kind: 'folder', title: '子目录', url: null }] });
+  });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await mockBridge(page, 'library');
+  await page.goto('/');
+  const chevronIcon = page.getByRole('treeitem', { name: '书签栏', exact: true }).locator('button.tree-chevron .workspace-icon');
+  await expect(chevronIcon).toBeVisible();
+  expect(await chevronIcon.evaluate((el) => getComputedStyle(el).transitionDuration)).toBe('0s');
+});

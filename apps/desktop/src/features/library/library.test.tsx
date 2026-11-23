@@ -425,7 +425,7 @@ it('keeps duplicate urls, chinese text, and long titles through the cache reads'
   expect(screen.getByText(longTitle)).toHaveClass('library-title');
   expect(screen.getByText(/已加载 4 \/ 4 项/)).toBeVisible();
   expect(document.querySelector('.library-list-meta')?.textContent).not.toContain('·');
-  expect(document.querySelector('.library-status')?.textContent).not.toContain('·');
+  expect(document.querySelector('.library-status')).toBeNull();
   expect(invoke).toHaveBeenCalledWith('cache_tree', { profileId: 'profile-a', folderId: null, depth: 0 });
   expect(invoke).toHaveBeenCalledWith('cache_query', { profileId: 'profile-a', request: expect.objectContaining({ folderId: '1', offset: 0, limit: 200 }) });
   fireEvent.click(screen.getByRole('option', { name: /Alpha/ }));
@@ -867,3 +867,504 @@ it('unifies detail tabs with segmented-control, groups controls in well-groups, 
   expect(dialog).toHaveClass('output-well');
   expect(detailPane.querySelectorAll('.edit-desk button.primary-button')).toHaveLength(1);
 });
+
+it('T2-S1 renders 4-segment tree rows with isolated 24x24 chevron buttons and preserves active context', async () => {
+  const branch = node('1', '0', 0, 'folder', '分支');
+  const leaf = node('3', '1', 0, 'folder', '子叶');
+  const gamma = node('20', '2', 0, 'bookmark', 'Gamma', 'https://example.com/gamma');
+  const treeNodes = [root, branch, leaf, other, alpha, gamma];
+  install((command, args) => {
+    if (command === 'cache_tree') return { nodes: treeNodes };
+    if (command === 'tag_state') return {
+      profileId: args.profileId, encodingEnabled: false, journalId: null, affected: 0, mergeRequired: false,
+      sourceTagId: null, targetTagId: null, filterTagId: null,
+      tags: [{ tagId: 'tag-1', name: '待读', count: 1 }], entries: [], matches: [],
+    };
+    if (command === 'cache_query') {
+      const request = argsOf(args.request);
+      const q = String(request.query ?? '');
+      const tagIds = Array.isArray(request.tagIds) ? request.tagIds : [];
+      let items = request.folderScope === 'all' || q || tagIds.length
+        ? [alpha, gamma]
+        : request.folderId === '2' ? [gamma] : request.folderId === '1' ? [leaf, alpha] : [branch, other];
+      if (q) items = items.filter((item) => item.title.includes(q));
+      if (tagIds.length) items = items.filter((item) => item.chromeId === '20');
+      return { items, offset: 0, total: items.length, sourceEpoch: 1, revision: 4, nextOffset: null };
+    }
+    return undefined;
+  });
+
+  render(<LibraryWorkspace state={state([profile('profile-a', '资料 A')])} invalid={false} native focusMirrorId={null} />);
+
+  const rootItem = await screen.findByRole('treeitem', { name: '根' });
+  const branchItem = screen.getByRole('treeitem', { name: '分支' });
+  const otherItem = screen.getByRole('treeitem', { name: '其他' });
+
+  expect(rootItem.querySelector('.tree-chevron')).not.toBeNull();
+  expect(rootItem.querySelector('.tree-chevron')?.getAttribute('tabindex')).toBe('-1');
+  expect(rootItem.querySelector('.tree-chevron')).toHaveAttribute('aria-label', '收起 根');
+  expect(rootItem.querySelector('.tree-chevron')).toHaveAttribute('aria-expanded', 'true');
+  expect(branchItem.querySelector('.tree-chevron')).toHaveAttribute('aria-label', '展开 分支');
+  expect(branchItem.querySelector('.tree-chevron')).toHaveAttribute('aria-expanded', 'false');
+  expect(otherItem.querySelector('.tree-chevron')).toBeNull();
+  expect(otherItem.querySelector('.tree-chevron-spacer')).toHaveAttribute('aria-hidden', 'true');
+  expect(screen.queryByRole('treeitem', { name: '子叶' })).not.toBeInTheDocument();
+
+  fireEvent.click(otherItem);
+  fireEvent.click(screen.getByRole('button', { name: '筛选' }));
+  fireEvent.click(screen.getByText('更多搜索范围'));
+  fireEvent.click(screen.getByLabelText('包含摘要'));
+  fireEvent.click(screen.getByLabelText('包含备注'));
+  await waitFor(() => expect(screen.getByLabelText('标签', { selector: '#library-tag' })).toHaveTextContent('待读'));
+  fireEvent.change(screen.getByLabelText('标签', { selector: '#library-tag' }), { target: { value: 'tag-1' } });
+  fireEvent.change(screen.getByLabelText('搜索标题或网址'), { target: { value: 'Gamma' } });
+
+  const gammaCheckbox = await screen.findByRole('checkbox', { name: '选择 Gamma' });
+  fireEvent.click(gammaCheckbox);
+  expect(gammaCheckbox).toBeChecked();
+
+  const branchChevron = branchItem.querySelector('button.tree-chevron') as HTMLButtonElement;
+  branchChevron.focus();
+  fireEvent.click(branchChevron);
+
+  expect(await screen.findByRole('treeitem', { name: '子叶' })).toBeVisible();
+  const leafItem = screen.getByRole('treeitem', { name: '子叶' });
+  expect(leafItem.querySelector('.tree-chevron')).toBeNull();
+  expect(leafItem.querySelector('.tree-chevron-spacer')).toHaveAttribute('aria-hidden', 'true');
+  expect(branchChevron).toHaveAttribute('aria-expanded', 'true');
+  expect(branchChevron).toHaveAttribute('aria-label', '收起 分支');
+  expect(branchChevron).toHaveFocus();
+
+  expect(otherItem).toHaveAttribute('aria-selected', 'true');
+  expect(screen.getByLabelText('搜索标题或网址')).toHaveValue('Gamma');
+  expect(screen.getByLabelText('标签', { selector: '#library-tag' })).toHaveValue('tag-1');
+  expect(screen.getByLabelText('包含摘要')).toBeChecked();
+  expect(screen.getByLabelText('包含备注')).toBeChecked();
+  expect(screen.getByRole('checkbox', { name: '选择 Gamma' })).toBeChecked();
+
+  fireEvent.keyDown(branchChevron, { key: 'Enter' });
+  expect(otherItem).toHaveAttribute('aria-selected', 'true');
+  expect(screen.getByLabelText('搜索标题或网址')).toHaveValue('Gamma');
+});
+
+it('T2-S2 decouples single-click selection from double-click toggle and expands ancestors on deep navigation', async () => {
+  const branch = node('1', '0', 0, 'folder', '分支');
+  const sub = node('3', '1', 0, 'folder', '深枝');
+  const deepLeaf = node('4', '3', 0, 'folder', '最深叶');
+  const deepBm = node('30', '3', 1, 'bookmark', 'DeepMark', 'https://example.com/deep');
+  const treeNodes = [root, branch, sub, deepLeaf, other, alpha, deepBm];
+  install((command, args) => {
+    if (command === 'cache_tree') return { nodes: treeNodes };
+    if (command === 'cache_query') {
+      const request = argsOf(args.request);
+      const items = request.folderId === '3'
+        ? [deepLeaf, deepBm]
+        : request.folderId === '1'
+          ? [sub, alpha]
+          : request.folderId === '2'
+            ? []
+            : [branch, other];
+      return { items, offset: 0, total: items.length, sourceEpoch: 1, revision: 4, nextOffset: null };
+    }
+    if (command === 'semantic_status') {
+      return {
+        settings: { enabled: true, endpointLabel: 'http://127.0.0.1:11434', model: 'fixture-embed', inputRecipeVersion: 1, maxInputChars: 8192, maxInputBytes: 32768 },
+        index: { indexId: 'idx-1', profileId: 'profile-a', sourceEpoch: 1, generation: 1, phase: 'ready', model: 'fixture-embed', digest: 'a'.repeat(64), dimension: 768, total: 1, ready: 1, pending: 0, storedBytes: 3072, failure: null, failureMessage: null },
+      };
+    }
+    if (command === 'semantic_query') {
+      const q = argsOf(args.query);
+      return {
+        requestId: q.requestId, profileId: q.profileId, sourceEpoch: q.sourceEpoch, indexId: q.indexId, generation: q.generation,
+        hits: [{ bookmarkId: 'bm-30', chromeId: '30', title: 'DeepMark', score: 0.91 }],
+        failure: null, failureMessage: null,
+      };
+    }
+    return undefined;
+  });
+
+  const onLibrary = vi.fn();
+  const wsState = state([profile('profile-a', '资料 A')]);
+  const view = render(<LibraryWorkspace state={wsState} invalid={false} native focusMirrorId={null} section="library" onLibrary={onLibrary} />);
+
+  const branchItem = await screen.findByRole('treeitem', { name: '分支' });
+  expect(branchItem).toHaveAttribute('aria-expanded', 'false');
+
+  // Single-clicking row selects without expanding
+  fireEvent.click(branchItem);
+  expect(branchItem).toHaveAttribute('aria-selected', 'true');
+  expect(branchItem).toHaveAttribute('aria-expanded', 'false');
+  expect(screen.queryByRole('treeitem', { name: '深枝' })).not.toBeInTheDocument();
+  expect(await screen.findByRole('option', { name: /Alpha/ })).toBeVisible();
+
+  // Double-clicking row toggles expand and collapse
+  fireEvent.dblClick(branchItem);
+  expect(await screen.findByRole('treeitem', { name: '深枝' })).toBeVisible();
+  expect(branchItem).toHaveAttribute('aria-expanded', 'true');
+
+  // Double-clicking chevron stops propagation so row does not toggle twice
+  const branchChevron = branchItem.querySelector('button.tree-chevron') as HTMLButtonElement;
+  fireEvent.dblClick(branchChevron);
+  expect(branchItem).toHaveAttribute('aria-expanded', 'true');
+
+  fireEvent.dblClick(branchItem);
+  expect(branchItem).toHaveAttribute('aria-expanded', 'false');
+  expect(screen.queryByRole('treeitem', { name: '深枝' })).not.toBeInTheDocument();
+
+  // Double-clicking a folder inside the bookmark list expands ancestors only (not target itself)
+  const rootItem = screen.getByRole('treeitem', { name: '根' });
+  fireEvent.click(rootItem);
+  fireEvent.click(rootItem.querySelector('button.tree-chevron')!);
+  expect(screen.queryByRole('treeitem', { name: '分支' })).not.toBeInTheDocument();
+  const listBranchOption = await screen.findByRole('option', { name: /分支/ });
+  fireEvent.dblClick(listBranchOption);
+  const reappearedBranch = await screen.findByRole('treeitem', { name: '分支' });
+  expect(rootItem).toHaveAttribute('aria-expanded', 'true');
+  expect(reappearedBranch).toHaveAttribute('aria-expanded', 'false');
+  expect(reappearedBranch).toHaveAttribute('aria-selected', 'true');
+
+  // Breadcrumb navigation expands ancestors only
+  const listSubOption = await screen.findByRole('option', { name: /深枝/ });
+  fireEvent.dblClick(listSubOption);
+  expect(await screen.findByRole('treeitem', { name: '深枝' })).toHaveAttribute('aria-expanded', 'false');
+  fireEvent.click(screen.getByRole('treeitem', { name: '分支' }).querySelector('button.tree-chevron')!);
+  fireEvent.click(rootItem.querySelector('button.tree-chevron')!);
+  expect(screen.queryByRole('treeitem', { name: '深枝' })).not.toBeInTheDocument();
+  const crumbs = screen.getByRole('navigation', { name: '当前目录' });
+  fireEvent.click(crumbs.querySelectorAll('button')[3]!); // 深枝
+  expect(await screen.findByRole('treeitem', { name: '深枝' })).toHaveAttribute('aria-selected', 'true');
+  expect(screen.getByRole('treeitem', { name: '深枝' })).toHaveAttribute('aria-expanded', 'false');
+
+  // Semantic jump expands ancestors including node.parentId
+  fireEvent.click(rootItem.querySelector('button.tree-chevron')!);
+  expect(screen.queryByRole('treeitem', { name: '深枝' })).not.toBeInTheDocument();
+  view.rerender(<LibraryWorkspace state={wsState} invalid={false} native focusMirrorId={null} section="semantic" onLibrary={onLibrary} />);
+  await screen.findByRole('button', { name: '查询语义索引' });
+  fireEvent.change(screen.getByLabelText('描述想找的内容'), { target: { value: 'deep' } });
+  fireEvent.click(screen.getByRole('button', { name: '查询语义索引' }));
+  const hitButton = await screen.findByRole('button', { name: /DeepMark.*相似度/ });
+  fireEvent.click(hitButton);
+  expect(onLibrary).toHaveBeenCalled();
+  view.rerender(<LibraryWorkspace state={wsState} invalid={false} native focusMirrorId={null} section="library" onLibrary={onLibrary} />);
+  expect(await screen.findByRole('treeitem', { name: '深枝' })).toHaveAttribute('aria-selected', 'true');
+  expect(screen.getByRole('treeitem', { name: '最深叶' })).toBeVisible();
+});
+
+it('T2-S3 prevents Tab focus from changing folder or filters and preserves WAI-ARIA tree keys', async () => {
+  const branch = node('1', '0', 0, 'folder', '分支');
+  const leaf = node('3', '1', 0, 'folder', '子叶');
+  const treeNodes = [root, branch, leaf, other, alpha];
+  install((command, args) => {
+    if (command === 'cache_tree') return { nodes: treeNodes };
+    if (command === 'tag_state') return {
+      profileId: args.profileId, encodingEnabled: false, journalId: null, affected: 0, mergeRequired: false,
+      sourceTagId: null, targetTagId: null, filterTagId: null,
+      tags: [{ tagId: 'tag-1', name: '待读', count: 1 }], entries: [], matches: [],
+    };
+    if (command === 'cache_query') {
+      const request = argsOf(args.request);
+      const q = String(request.query ?? '');
+      const tagIds = Array.isArray(request.tagIds) ? request.tagIds : [];
+      let items = q || tagIds.length ? [alpha] : request.folderId === '1' ? [leaf, alpha] : request.folderId === '3' ? [] : [branch, other];
+      if (q) items = items.filter((item) => item.title.includes(q));
+      return { items, offset: 0, total: items.length, sourceEpoch: 1, revision: 4, nextOffset: null };
+    }
+    return undefined;
+  });
+
+  render(<LibraryWorkspace state={state([profile('profile-a', '资料 A')])} invalid={false} native focusMirrorId={null} />);
+
+  const branchItem = await screen.findByRole('treeitem', { name: '分支' });
+  fireEvent.click(branchItem);
+  expect(branchItem).toHaveAttribute('aria-selected', 'true');
+
+  fireEvent.click(screen.getByRole('button', { name: '筛选' }));
+  await waitFor(() => expect(screen.getByLabelText('标签', { selector: '#library-tag' })).toHaveTextContent('待读'));
+  fireEvent.change(screen.getByLabelText('标签', { selector: '#library-tag' }), { target: { value: 'tag-1' } });
+  fireEvent.change(screen.getByLabelText('搜索标题或网址'), { target: { value: 'Alpha' } });
+
+  const rootItem = screen.getByRole('treeitem', { name: '根' });
+  fireEvent.click(rootItem.querySelector('button.tree-chevron')!);
+  expect(screen.queryByRole('treeitem', { name: '分支' })).not.toBeInTheDocument();
+  expect(rootItem).toHaveAttribute('tabindex', '0');
+
+  // Simulate Tab focusing into the tree
+  act(() => { rootItem.focus(); });
+  expect(rootItem).toHaveFocus();
+  expect(rootItem).toHaveAttribute('aria-selected', 'false');
+  expect(screen.getByLabelText('搜索标题或网址')).toHaveValue('Alpha');
+  expect(screen.getByLabelText('标签', { selector: '#library-tag' })).toHaveValue('tag-1');
+
+  // Standard WAI-ARIA tree keys
+  fireEvent.keyDown(rootItem, { key: 'ArrowRight' });
+  const expandedBranch = await screen.findByRole('treeitem', { name: '分支' });
+  expect(rootItem).toHaveAttribute('aria-expanded', 'true');
+  expect(rootItem).toHaveFocus();
+  expect(expandedBranch).toHaveAttribute('aria-selected', 'true');
+
+  fireEvent.keyDown(rootItem, { key: 'ArrowDown' });
+  expect(expandedBranch).toHaveFocus();
+  expect(expandedBranch).toHaveAttribute('aria-selected', 'true');
+  expect(expandedBranch).toHaveAttribute('aria-expanded', 'false');
+
+  fireEvent.keyDown(expandedBranch, { key: 'ArrowRight' });
+  const leafItem = await screen.findByRole('treeitem', { name: '子叶' });
+  expect(expandedBranch).toHaveAttribute('aria-expanded', 'true');
+  fireEvent.keyDown(expandedBranch, { key: 'ArrowRight' });
+  expect(leafItem).toHaveFocus();
+  expect(leafItem).toHaveAttribute('aria-selected', 'true');
+
+  fireEvent.keyDown(leafItem, { key: 'ArrowLeft' });
+  expect(expandedBranch).toHaveFocus();
+  expect(expandedBranch).toHaveAttribute('aria-selected', 'true');
+
+  fireEvent.keyDown(expandedBranch, { key: 'ArrowLeft' });
+  expect(expandedBranch).toHaveAttribute('aria-expanded', 'false');
+  expect(screen.queryByRole('treeitem', { name: '子叶' })).not.toBeInTheDocument();
+
+  fireEvent.keyDown(expandedBranch, { key: 'End' });
+  const otherItem = screen.getByRole('treeitem', { name: '其他' });
+  expect(otherItem).toHaveFocus();
+  expect(otherItem).toHaveAttribute('aria-selected', 'true');
+
+  fireEvent.keyDown(otherItem, { key: 'Home' });
+  expect(rootItem).toHaveFocus();
+  expect(rootItem).toHaveAttribute('aria-selected', 'true');
+
+  fireEvent.keyDown(rootItem, { key: 'ArrowDown' });
+  expect(expandedBranch).toHaveFocus();
+  fireEvent.keyDown(expandedBranch, { key: 'Enter' });
+  expect(expandedBranch).toHaveAttribute('aria-selected', 'true');
+  expect(expandedBranch).toHaveAttribute('aria-expanded', 'false');
+});
+
+it('T2-S4a provides smart header expand-all / collapse-all toggle without resetting active context', async () => {
+  const branch = node('1', '0', 0, 'folder', '分支');
+  const leaf = node('3', '1', 0, 'folder', '子叶');
+  const loneRoot = node('2', null, 1, 'folder', '独立根');
+  const flatOnly = [node('100', null, 0, 'folder', '平级甲'), node('101', null, 1, 'folder', '平级乙')];
+  const currentNodes = [root, branch, leaf, loneRoot, alpha];
+  install((command, args) => {
+    if (command === 'cache_tree') {
+      return { nodes: args.profileId === 'profile-flat' ? flatOnly : currentNodes };
+    }
+    if (command === 'cache_query') {
+      const request = argsOf(args.request);
+      const q = String(request.query ?? '');
+      const items = q ? [alpha] : request.folderId === '1' ? [leaf, alpha] : [branch];
+      return { items, offset: 0, total: items.length, sourceEpoch: 1, revision: 4, nextOffset: null };
+    }
+    return undefined;
+  });
+
+  render(<LibraryWorkspace state={state([profile('profile-a', '资料 A'), profile('profile-flat', '纯平级')])} invalid={false} native focusMirrorId={null} />);
+
+  const branchItem = await screen.findByRole('treeitem', { name: '分支' });
+  fireEvent.click(branchItem);
+  fireEvent.change(screen.getByLabelText('搜索标题或网址'), { target: { value: 'Alpha' } });
+  const alphaCheck = await screen.findByRole('checkbox', { name: '选择 Alpha' });
+  fireEvent.click(alphaCheck);
+  expect(alphaCheck).toBeChecked();
+
+  const collapseBtn = screen.getByRole('button', { name: '全部收起' });
+  fireEvent.click(collapseBtn);
+
+  expect(screen.queryByRole('treeitem', { name: '分支' })).not.toBeInTheDocument();
+  expect(screen.getByRole('treeitem', { name: '根' })).toHaveAttribute('aria-expanded', 'false');
+  expect(screen.getByLabelText('搜索标题或网址')).toHaveValue('Alpha');
+  expect(screen.getByRole('checkbox', { name: '选择 Alpha' })).toBeChecked();
+
+  const expandBtn = screen.getByRole('button', { name: '全部展开' });
+  fireEvent.click(expandBtn);
+
+  expect(await screen.findByRole('treeitem', { name: '子叶' })).toBeVisible();
+  expect(screen.getByRole('treeitem', { name: '根' })).toHaveAttribute('aria-expanded', 'true');
+  const expandedBranch = screen.getByRole('treeitem', { name: '分支' });
+  expect(expandedBranch).toHaveAttribute('aria-expanded', 'true');
+  expect(expandedBranch).toHaveAttribute('aria-selected', 'true');
+  expect(screen.getByRole('button', { name: '全部收起' })).toBeVisible();
+
+  // Collapsing all expandable roots manually switches header button to 全部展开
+  fireEvent.click(screen.getByRole('treeitem', { name: '分支' }).querySelector('button.tree-chevron')!);
+  expect(screen.getByRole('button', { name: '全部收起' })).toBeVisible();
+  fireEvent.click(screen.getByRole('treeitem', { name: '根' }).querySelector('button.tree-chevron')!);
+  expect(screen.getByRole('button', { name: '全部展开' })).toBeVisible();
+
+  // Switch to profile with zero expandable folders: toggle button disappears
+  fireEvent.change(screen.getByLabelText('书签来源'), { target: { value: 'profile:profile-flat' } });
+  await screen.findByRole('treeitem', { name: '平级甲' });
+  expect(screen.queryByRole('button', { name: /全部(展开|收起)/ })).not.toBeInTheDocument();
+});
+
+it('T2-S4b caps visual indent at 8 levels (14px per level) with indent guides while preserving aria-level and rowHeight', async () => {
+  const chain = Array.from({ length: 10 }, (_, depth) =>
+    node(`d-${depth}`, depth === 0 ? null : `d-${depth - 1}`, 0, 'folder', `第${depth + 1}层`),
+  );
+  install((command) => {
+    if (command === 'cache_tree') return { nodes: chain };
+    if (command === 'cache_query') return { items: [], offset: 0, total: 0, sourceEpoch: 1, revision: 4, nextOffset: null };
+    return undefined;
+  });
+
+  render(<LibraryWorkspace state={state([profile('profile-a', '资料 A')])} invalid={false} native focusMirrorId={null} />);
+
+  await screen.findByRole('treeitem', { name: '第2层' });
+  fireEvent.click(screen.getByRole('button', { name: '全部收起' }));
+  fireEvent.click(screen.getByRole('button', { name: '全部展开' }));
+
+  const d0 = await screen.findByRole('treeitem', { name: '第1层' });
+  const d1 = screen.getByRole('treeitem', { name: '第2层' });
+  const d8 = screen.getByRole('treeitem', { name: '第9层' });
+  const d9 = screen.getByRole('treeitem', { name: '第10层' });
+
+  expect(d0).toHaveAttribute('aria-level', '1');
+  expect((d0.querySelector('.tree-row-content') as HTMLElement).style.paddingLeft).toBe('0px');
+  expect(d0.querySelectorAll('.tree-indent-guide')).toHaveLength(0);
+  expect(d0.style.height).toBe('40px');
+
+  expect(d1).toHaveAttribute('aria-level', '2');
+  expect((d1.querySelector('.tree-row-content') as HTMLElement).style.paddingLeft).toBe('14px');
+  expect(d1.querySelectorAll('.tree-indent-guide')).toHaveLength(1);
+
+  expect(d8).toHaveAttribute('aria-level', '9');
+  expect((d8.querySelector('.tree-row-content') as HTMLElement).style.paddingLeft).toBe('112px');
+  expect(d8.querySelectorAll('.tree-indent-guide')).toHaveLength(8);
+
+  expect(d9).toHaveAttribute('aria-level', '10');
+  expect((d9.querySelector('.tree-row-content') as HTMLElement).style.paddingLeft).toBe('112px');
+  expect(d9.querySelectorAll('.tree-indent-guide')).toHaveLength(8);
+  expect(d9.style.height).toBe('40px');
+});
+
+it('T2-S5a preserves collapse-all across profile revision refreshes and resets on source switch', async () => {
+  const branchA = node('1', '0', 0, 'folder', '分支A');
+  const rootB = node('b0', null, 0, 'folder', '根B');
+  const branchB = node('b1', 'b0', 0, 'folder', '分支B');
+  let treeCallsA = 0;
+  install((command, args) => {
+    if (command === 'cache_tree') {
+      if (args.profileId === 'profile-a') {
+        treeCallsA += 1;
+        return { nodes: [root, branchA, alpha] };
+      }
+      return { nodes: [rootB, branchB] };
+    }
+    if (command === 'cache_query') return { items: [], offset: 0, total: 0, sourceEpoch: 1, revision: 4, nextOffset: null };
+    return undefined;
+  });
+
+  const profB = profile('profile-b', '资料 B', 1);
+  const view = render(<LibraryWorkspace state={state([profile('profile-a', '资料 A', 4), profB])} invalid={false} native focusMirrorId={null} />);
+
+  expect(await screen.findByRole('treeitem', { name: '分支A' })).toBeVisible();
+  expect(screen.getByRole('treeitem', { name: '根' })).toHaveAttribute('aria-expanded', 'true');
+
+  fireEvent.click(screen.getByRole('button', { name: '全部收起' }));
+  expect(screen.queryByRole('treeitem', { name: '分支A' })).not.toBeInTheDocument();
+  expect(screen.getByRole('treeitem', { name: '根' })).toHaveAttribute('aria-expanded', 'false');
+
+  // Revision refresh on the same profile must NOT re-expand collapsed roots
+  view.rerender(<LibraryWorkspace state={state([profile('profile-a', '资料 A', 5), profB], [], 2)} invalid={false} native focusMirrorId={null} />);
+  await waitFor(() => expect(treeCallsA).toBeGreaterThanOrEqual(2));
+  await act(async () => {});
+  expect(screen.getByRole('treeitem', { name: '根' })).toHaveAttribute('aria-expanded', 'false');
+  expect(screen.queryByRole('treeitem', { name: '分支A' })).not.toBeInTheDocument();
+
+  // Switching to a new profile resets initialization and expands its roots
+  fireEvent.change(screen.getByLabelText('书签来源'), { target: { value: 'profile:profile-b' } });
+  expect(await screen.findByRole('treeitem', { name: '分支B' })).toBeVisible();
+  expect(screen.getByRole('treeitem', { name: '根B' })).toHaveAttribute('aria-expanded', 'true');
+});
+
+it('T2-S5b preserves collapse-all across mirror revision refreshes and resets on mirror switch', async () => {
+  const branchA = node('1', '0', 0, 'folder', '镜像分支A');
+  const rootB = node('mb0', null, 0, 'folder', '镜像根B');
+  const branchB = node('mb1', 'mb0', 0, 'folder', '镜像分支B');
+  let mirrorCallsA = 0;
+  install((command, args) => {
+    if (command === 'get_mirror_tree') {
+      if (args.mirrorSourceId === 'mirror-a') {
+        mirrorCallsA += 1;
+        return { mirrorSourceId: 'mirror-a', displayName: 'Mirror A', fileStatus: 'current', association: 'independent', revision: mirrorCallsA, lastSyncedAt: null, errorCode: null, canWriteBrowser: false, nodes: [root, branchA] };
+      }
+      return { mirrorSourceId: 'mirror-b', displayName: 'Mirror B', fileStatus: 'current', association: 'independent', revision: 1, lastSyncedAt: null, errorCode: null, canWriteBrowser: false, nodes: [rootB, branchB] };
+    }
+    return undefined;
+  });
+
+  const mkMirror = (id: string, name: string, rev: number) => ({
+    mirrorSourceId: id, displayName: name, association: 'independent' as const, pairedProfileId: null,
+    fileStatus: 'current' as const, watching: true, nodeCount: 2, revision: rev, lastSyncedAt: null, errorCode: null, canWriteBrowser: false as const,
+  });
+  const mirrorB = mkMirror('mirror-b', 'Mirror B', 1);
+  const view = render(<LibraryWorkspace state={state([], [mkMirror('mirror-a', 'Mirror A', 1), mirrorB])} invalid={false} native focusMirrorId={null} />);
+
+  expect(await screen.findByRole('treeitem', { name: '镜像分支A' })).toBeVisible();
+  fireEvent.click(screen.getByRole('button', { name: '全部收起' }));
+  expect(screen.getByRole('treeitem', { name: '根' })).toHaveAttribute('aria-expanded', 'false');
+
+  view.rerender(<LibraryWorkspace state={state([], [mkMirror('mirror-a', 'Mirror A', 2), mirrorB], 2)} invalid={false} native focusMirrorId={null} />);
+  await waitFor(() => expect(mirrorCallsA).toBeGreaterThanOrEqual(2));
+  await act(async () => {});
+  expect(screen.getByRole('treeitem', { name: '根' })).toHaveAttribute('aria-expanded', 'false');
+  expect(screen.queryByRole('treeitem', { name: '镜像分支A' })).not.toBeInTheDocument();
+
+  fireEvent.change(screen.getByLabelText('书签来源'), { target: { value: 'mirror:mirror-b' } });
+  expect(await screen.findByRole('treeitem', { name: '镜像分支B' })).toBeVisible();
+  expect(screen.getByRole('treeitem', { name: '镜像根B' })).toHaveAttribute('aria-expanded', 'true');
+});
+
+it('T4 collapses source-guidance in healthy live/local state, preserves explicit risk guidance and recovery button in non-healthy states, and merges selection status into library-list-meta without shortcut noise', async () => {
+  const onSettings = vi.fn();
+  const liveProfile = profile('profile-a', '资料 A', 4, 'live');
+  const view = render(<LibraryWorkspace state={state([liveProfile])} invalid={false} native focusMirrorId={null} onSettings={onSettings} />);
+  fireEvent.click(await screen.findByRole('treeitem', { name: /栏/ }));
+  expect(await screen.findByRole('option', { name: /Alpha/ })).toBeVisible();
+
+  // Healthy live state: compact <details class="source-guidance source-guidance-compact">, closed by default
+  const compactLive = document.querySelector('details.source-guidance.source-guidance-compact') as HTMLDetailsElement | null;
+  expect(compactLive).not.toBeNull();
+  expect(compactLive!.open).toBe(false);
+  expect(compactLive!.querySelector('summary')).toHaveTextContent('实时同步 · 已完成全树核对');
+  expect(screen.queryByRole('button', { name: '检查连接设置' })).toBeNull();
+
+  // No bottom .library-status and no mechanical shortcut texts
+  expect(document.querySelector('.library-status')).toBeNull();
+  const meta = document.querySelector('.library-list-meta') as HTMLElement;
+  expect(meta).not.toBeNull();
+  expect(meta).toHaveTextContent('已加载 4 / 4 项');
+  expect(meta).not.toHaveTextContent('Ctrl+A');
+  expect(meta).not.toHaveTextContent('Ctrl+End');
+  expect(document.body.textContent).not.toContain('按 Chrome 顺序');
+  expect(document.body.textContent).not.toContain('方向键浏览，Enter 打开');
+
+  // Selecting an item merges "已选 1 项" into .library-list-meta
+  fireEvent.click(screen.getByRole('checkbox', { name: '选择 Alpha' }));
+  expect(meta).toHaveTextContent('已选 1 项');
+
+  // Healthy local Skills library state: also uses compact guidance
+  const localProfile = { ...liveProfile, profileId: 'local-skills', displayName: 'Skills 书签库', connection: 'local' as const };
+  view.rerender(<LibraryWorkspace state={state([localProfile])} invalid={false} native focusMirrorId={null} onSettings={onSettings} />);
+  const compactLocal = document.querySelector('details.source-guidance.source-guidance-compact') as HTMLDetailsElement | null;
+  expect(compactLocal).not.toBeNull();
+  expect(compactLocal!.querySelector('summary')).toHaveTextContent('本地 Skills 书签库');
+  expect(screen.queryByRole('button', { name: '检查连接设置' })).toBeNull();
+
+  // Non-healthy writePaused state: explicit risk warning & recovery button
+  const pausedProfile = { ...liveProfile, writePaused: true };
+  view.rerender(<LibraryWorkspace state={state([pausedProfile])} invalid={false} native focusMirrorId={null} onSettings={onSettings} />);
+  expect(document.querySelector('details.source-guidance-compact')).toBeNull();
+  expect(document.querySelector('.source-guidance .access-note')).toHaveTextContent('已暂停写入（只读保护）');
+  expect(document.querySelector('.source-guidance .access-note')).toHaveTextContent('缓存时间：');
+  const settingsBtn = screen.getByRole('button', { name: '检查连接设置' });
+  fireEvent.click(settingsBtn);
+  expect(onSettings).toHaveBeenCalledOnce();
+
+  // Non-healthy cached_read_only state: explicit risk warning & recovery button
+  const offlineProfile = { ...liveProfile, connection: 'cached_read_only' as const };
+  view.rerender(<LibraryWorkspace state={state([offlineProfile])} invalid={false} native focusMirrorId={null} onSettings={onSettings} />);
+  expect(document.querySelector('details.source-guidance-compact')).toBeNull();
+  expect(document.querySelector('.source-guidance .access-note')).toHaveTextContent('扩展未连接');
+  expect(screen.getByRole('button', { name: '检查连接设置' })).toBeInTheDocument();
+});
+

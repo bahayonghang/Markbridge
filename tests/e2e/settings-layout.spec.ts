@@ -159,16 +159,26 @@ for (const fontSize of [12, 14, 20]) {
       await page.getByRole('tab', { name: tab, exact: true }).click();
       const sizesMeasured = await page.evaluate(() => {
         const px = (el: Element | null) => el ? parseFloat(getComputedStyle(el).fontSize) : 0;
+        const weight = (el: Element | null) => el ? getComputedStyle(el).fontWeight : '';
         const h1 = document.querySelector('.workspace-heading h1');
         const panel = document.querySelector('.settings-content > [role="tabpanel"]:not([hidden])')!;
         const h2 = panel.querySelector('h2');
         const h3 = panel.querySelector('h3');
-        return { h1: px(h1), h2: px(h2), h3: px(h3), body: px(document.body) };
+        return {
+          h1: px(h1),
+          h2: px(h2),
+          h3: px(h3),
+          body: px(document.body),
+          weights: [weight(h1), weight(h2), ...(h3 ? [weight(h3)] : [])],
+        };
       });
       expect(sizesMeasured.body, `${tab} body`).toBe(fontSize);
       expect(sizesMeasured.h1, `${tab} h1 > h2`).toBeGreaterThan(sizesMeasured.h2);
       expect(sizesMeasured.h2, `${tab} h2 > h3`).toBeGreaterThan(sizesMeasured.h3);
       expect(sizesMeasured.h3, `${tab} h3 > body`).toBeGreaterThan(sizesMeasured.body);
+      for (const w of sizesMeasured.weights) {
+        expect(w, `${tab} heading weight`).toBe('600');
+      }
     }
   });
 }
@@ -182,7 +192,7 @@ for (const [width, height] of [[1440, 900], [1920, 1080], [2549, 1356]] as const
     const tabsBg = await page.locator('.settings-tabs').evaluate(el => getComputedStyle(el).backgroundColor);
     expect(tabsBg).toBe('rgba(0, 0, 0, 0)');
 
-    for (const [tab, expectedPrimary] of [['通用', 0], ['Chrome 连接', 0], ['AI', 1], ['语义检索', 1], ['备份导出', 1]] as const) {
+    for (const [tab, expectedPrimary] of [['通用', 0], ['Chrome 连接', 2], ['AI', 1], ['语义检索', 1], ['备份导出', 1]] as const) {
       await page.getByRole('tab', { name: tab, exact: true }).click();
       const layout = await page.evaluate((tabName) => {
         const tabs = document.querySelector('.settings-tabs')!.getBoundingClientRect();
@@ -200,6 +210,27 @@ for (const [width, height] of [[1440, 900], [1920, 1080], [2549, 1356]] as const
           return { gap: last.x - (first.x + first.width), span: last.x - first.x };
         });
         const primaryButtons = panel.querySelectorAll('button.primary-button').length;
+        const profileCards = [...panel.querySelectorAll('.profile-well')].map(card => ({
+          primaryCount: card.querySelectorAll('button.primary-button').length,
+          hasDanger: card.querySelectorAll('button.danger-button').length === 1,
+        }));
+        const renameGaps = [...panel.querySelectorAll('.profile-rename-fields')].map(fields => {
+          const input = fields.querySelector('input')!.getBoundingClientRect();
+          const button = fields.querySelector('button[type="submit"]')!.getBoundingClientRect();
+          return button.left - input.right;
+        });
+        const summaries = [...panel.querySelectorAll('details > summary')].map(summary => {
+          const icon = summary.querySelector(':scope > svg.workspace-icon');
+          return {
+            listStyleType: getComputedStyle(summary).listStyleType,
+            hasIcon: Boolean(icon),
+          };
+        });
+        const headingWeights = [
+          ...document.querySelectorAll('.workspace-heading h1'),
+          ...panel.querySelectorAll('h2, h3'),
+        ].map(el => getComputedStyle(el).fontWeight);
+        const secondaryButtons = document.querySelectorAll('.secondary-button').length;
         const autoSubmitNonPrimary = [...panel.querySelectorAll('button[type="submit"]:not(.primary-button)')].length;
         const targetText = tabName === 'AI'
           ? (panel.querySelector('.ai-desk')?.textContent ?? '')
@@ -217,6 +248,11 @@ for (const [width, height] of [[1440, 900], [1920, 1080], [2549, 1356]] as const
           wells,
           rows,
           primaryButtons,
+          profileCards,
+          renameGaps,
+          summaries,
+          headingWeights,
+          secondaryButtons,
           autoSubmitNonPrimary,
           hasMiddleDot: targetText.includes('·'),
         };
@@ -236,11 +272,50 @@ for (const [width, height] of [[1440, 900], [1920, 1080], [2549, 1356]] as const
         expect(row.span, `${tab} label+gap span`).toBeLessThanOrEqual(260);
       }
       expect(layout.primaryButtons, `${tab} primary count`).toBe(expectedPrimary);
-      if (tab !== 'Chrome 连接') expect(layout.autoSubmitNonPrimary, `${tab} unclassed submit`).toBe(0);
+      expect(layout.secondaryButtons, `${tab} zero secondary-button`).toBe(0);
+      for (const weight of layout.headingWeights) {
+        expect(weight, `${tab} heading weight`).toBe('600');
+      }
+      for (const summary of layout.summaries) {
+        expect(summary.listStyleType, `${tab} summary list-style`).toBe('none');
+        expect(summary.hasIcon, `${tab} summary chevron icon`).toBe(true);
+      }
+      if (tab === 'Chrome 连接') {
+        expect(layout.profileCards.length).toBe(2);
+        for (const card of layout.profileCards) {
+          expect(card.primaryCount).toBeLessThanOrEqual(1);
+          expect(card.hasDanger).toBe(true);
+        }
+        for (const gap of layout.renameGaps) {
+          expect(gap).toBeGreaterThanOrEqual(8);
+          expect(gap).toBeLessThanOrEqual(16);
+        }
+      } else {
+        expect(layout.autoSubmitNonPrimary, `${tab} unclassed submit`).toBe(0);
+      }
       expect(layout.hasMiddleDot, `${tab} middle dot`).toBe(false);
     }
 
     await page.getByRole('tab', { name: 'Chrome 连接', exact: true }).click();
+    const otherSourcesSummary = page.locator('details.other-sources > summary');
+    const closedTransform = await otherSourcesSummary.locator('svg.workspace-icon').evaluate(el => getComputedStyle(el).transform);
+    expect(closedTransform).toBe('none');
+    await otherSourcesSummary.click();
+    const openTransform = await otherSourcesSummary.locator('svg.workspace-icon').evaluate(el => getComputedStyle(el).transform);
+    expect(openTransform).not.toBe('none');
+
+    const firstCard = page.locator('article.profile-well').nth(0);
+    const secondCard = page.locator('article.profile-well').nth(1);
+    await expect(firstCard.getByRole('button', { name: '浏览此资料' })).toHaveClass(/primary-button/);
+    await expect(secondCard.getByRole('button', { name: '浏览此资料' })).toHaveClass(/primary-button/);
+    await expect(secondCard.getByRole('button', { name: '重新连接' })).not.toHaveClass(/primary-button/);
+    await page.evaluate(() => (window as unknown as { __r02disconnect: () => void }).__r02disconnect());
+    await expect(firstCard.locator('button.primary-button')).toHaveCount(1);
+    await expect(secondCard.locator('button.primary-button')).toHaveCount(1);
+    await expect(firstCard.getByRole('button', { name: '浏览此资料' })).toHaveClass(/primary-button/);
+    await expect(secondCard.getByRole('button', { name: '重新连接' })).toHaveClass(/primary-button/);
+    await expect(secondCard.getByRole('button', { name: '浏览此资料' })).not.toHaveClass(/primary-button/);
+
     const connectionSubmits = await page.locator('#settings-panel-connection button[type="submit"]').evaluateAll(nodes =>
       nodes.map(node => getComputedStyle(node).backgroundColor),
     );

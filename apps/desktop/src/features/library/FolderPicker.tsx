@@ -2,6 +2,7 @@ import { useId, useMemo, useRef, useState } from 'react';
 import type { BookmarkNode } from '@markbridge/protocol';
 import { folderPath, indexFlat } from './model';
 import { VirtualRows } from './VirtualRows';
+import { WorkspaceIcon } from './WorkspaceIcon';
 
 export function writableFolder(nodes: BookmarkNode[], id: string | null): boolean {
   const index = indexFlat(nodes);
@@ -27,7 +28,7 @@ export function FolderPicker({ nodes, value, excluded = [], onChange }: {
   const rows = paths.filter((row) => row.path.toLocaleLowerCase().includes(query.toLocaleLowerCase()));
   function close() { if (details.current) details.current.open = false; summary.current?.focus(); }
   return <details className="folder-picker" ref={details}>
-    <summary ref={summary}>目标文件夹：{paths.find((row) => row.id === value)?.path ?? '请选择'}</summary>
+    <summary ref={summary}><WorkspaceIcon name="chevron" /><span>目标文件夹：{paths.find((row) => row.id === value)?.path ?? '请选择'}</span></summary>
     <label htmlFor={id}>搜索文件夹路径<input id={id} value={query} onChange={(event) => setQuery(event.target.value)} /></label>
     <div className="folder-picker-list"><VirtualRows rows={rows} rowKey={(row) => `${id}:${row.id}`} label="目标文件夹" role="listbox" itemRole="option" activeKey={value ? `${id}:${value}` : null}
       onKeyDown={(event) => {

@@ -13,6 +13,7 @@ export type Layer = {
   backdropFilter: string;
   isPaper: boolean;
   isRow?: boolean;
+  isOverlay?: boolean;
 };
 
 function parseColor(value: string): Color {
@@ -107,7 +108,9 @@ export function compositeBackgrounds(layers: Layer[]): string[] {
     let hasField = false;
     for (const layer of layers) {
       if (layer.backdropFilter !== 'none') {
-        throw new Error(`UNSUPPORTED_CONTRAST_BACKDROP: ${layer.backdropFilter}`);
+        if (!layer.isOverlay || layer.isPaper || layer.isRow) {
+          throw new Error(`UNSUPPORTED_CONTRAST_BACKDROP: ${layer.backdropFilter}`);
+        }
       }
       background = blend(parseColor(layer.color), background);
       if (layer.image !== 'none') {
@@ -143,6 +146,9 @@ export async function renderedContrastColors(locator: Locator) {
           backdropFilter: style.backdropFilter,
           isPaper: current.classList.contains('app-sidebar') || current.classList.contains('app-main'),
           isRow: current.classList.contains('library-row'),
+          isOverlay: current.matches(
+            '.detail-pane:not([hidden]) > .pane-heading, .detail-pane:not([hidden]) .detail-tabs, .confirmation-dialog[open], .font-picker[open], .selection-path[open] > p, .folder-pane.is-open:not([hidden])',
+          ),
         });
       }
       return collected;

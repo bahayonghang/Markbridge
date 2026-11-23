@@ -3,6 +3,7 @@ import type { TagCatalog, TitleEncodingPreview } from '@markbridge/protocol';
 import {
   applyTitleEncoding, listOperations, previewTitleEncoding, readTagState, tagCommand, type TagCommand,
 } from '../../backend';
+import { WorkspaceIcon } from '../library/WorkspaceIcon';
 
 function noticeFor(state: string, errorCode: string | null): string {
   if (errorCode === 'CONFLICT' || state === 'rollback_conflict') return '存在冲突，外部值保持不变。';
@@ -290,7 +291,7 @@ function TagEditor({ profileId, revision, live, writePaused = false, allowTitleE
           <button type="button" disabled={!canMutate || !catalog?.journalId} onClick={() => { if (catalog?.journalId) void run({ kind: 'undo', journalId: catalog.journalId }); }}>撤销上次标签变更</button>
         </div>
       </div>
-      {tags.length > 0 && <details className="detail-disclosure well-group"><summary>管理标签</summary>
+      {tags.length > 0 && <details className="detail-disclosure well-group"><summary><WorkspaceIcon name="chevron" /><span>管理标签</span></summary>
       <label htmlFor="tag-filter">按标签筛选
         <select id="tag-filter" value={filterTagId ?? ''} onChange={(event) => onFilter(event.target.value || null)}>
           <option value="">全部书签</option>
@@ -322,7 +323,7 @@ function TagEditor({ profileId, revision, live, writePaused = false, allowTitleE
         <p>这两个标签规范化后相同。确认合并后，关联会转到目标标签。影响 {pendingMerge.affected} 项。</p>
         <button type="button" className="primary-button" disabled={!canMutate} onClick={() => void run({ kind: 'merge', sourceId: pendingMerge.sourceId, targetId: pendingMerge.targetId })}>确认合并</button>
       </div>}
-      {allowTitleEncoding && <details className="detail-disclosure well-group"><summary>可选：将标签写入标题</summary>
+      {allowTitleEncoding && <details className="detail-disclosure well-group"><summary><WorkspaceIcon name="chevron" /><span>可选：将标签写入标题</span></summary>
       <label htmlFor="title-encoding">
         <input id="title-encoding" type="checkbox" disabled={!canMutate} checked={!!catalog?.encodingEnabled} onChange={(event) => void run({ kind: 'set_encoding', enabled: event.target.checked })} />
         启用标题编码
