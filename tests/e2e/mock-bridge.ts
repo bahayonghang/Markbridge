@@ -1,15 +1,15 @@
 import type { Page } from '@playwright/test';
 
 // The mock module exists only in this test route. Production browser previews stay unpaired.
-export async function mockBridge(page: Page, scenario: 'connected' | 'startup-error' | 'port-conflict' | 'library' | 'readonly' | 'loading' | 'cache-error' | 'empty' | 'sources' | 'editing' | 'details' = 'connected') {
+export async function mockBridge(page: Page, scenario: 'connected' | 'onboarding' | 'startup-error' | 'port-conflict' | 'library' | 'readonly' | 'loading' | 'cache-error' | 'empty' | 'sources' | 'editing' | 'details' = 'connected') {
   await page.route('**/src/backend.ts*', (route) => route.fulfill({
     contentType: 'application/javascript',
     body: `
-      const initial = { protocolVersion: 1, revision: 1, port: null, errorCode: null, profiles: [], pending: [], mirrors: [] };
+      const initial = { protocolVersion: 1, revision: 1, port: null, errorCode: null, profiles: [], mirrors: [] };
       let receive;
       let state = initial;
       let starts = 0;
-      const profile = { profileId: 'profile-test', instanceId: 'instance-test', displayName: '测试研究资料', connection: '${['readonly', 'details'].includes(scenario) ? 'cached_read_only' : 'live'}', nodeCount: 27, revision: 8, lastSyncedAt: null, errorCode: null };
+      const profile = { profileId: 'profile-test', instanceId: 'instance-test', displayName: '测试研究资料', connection: '${['readonly', 'details'].includes(scenario) ? 'cached_read_only' : 'live'}', writePaused: false, ignored: false, nodeCount: 27, revision: 8, lastSyncedAt: null, errorCode: null };
       const root = { chromeId: '1', parentId: ${scenario === 'editing' ? "'0'" : 'null'}, position: 0, kind: 'folder', title: '书签栏', url: null };
       const names = ['Human Interface Guidelines', '设计系统里的留白与秩序', 'TypeScript Handbook', 'Tauri 2 · 桌面应用开发', '可访问性：让键盘也能完成每一步', '长中文标题，跨设备浏览与本地整理的工作方式，以及更多值得保留的阅读笔记'];
       const rows = Array.from({ length: 24 }, (_, index) => ({ chromeId: String(index + 10), parentId: '1', position: index, kind: 'bookmark', title: names[index % names.length] + (index > 5 ? ' ' + (index + 1) : ''), url: 'https://example.com/reference/' + index + '?topic=design' }));
@@ -30,30 +30,54 @@ export async function mockBridge(page: Page, scenario: 'connected' | 'startup-er
       export async function getStartupState() { ${scenario === 'startup-error' ? "throw new Error('sensitive-raw-error');" : "return { protocolVersion: 1, state: 'unpaired' };"} }
       export async function getBridgeState() {
         ${['connected', 'library', 'readonly', 'loading', 'cache-error', 'empty', 'sources', 'editing', 'details'].includes(scenario) ? "state = { ...initial, revision: 3, port: 49153, profiles: [profile] };" : ''}
-        ${scenario === 'sources' ? "state.profiles.push({ ...profile, profileId: 'profile-second', displayName: '另一份资料' });" : ''}
+        ${scenario === 'onboarding' ? "state = { ...initial, revision: 2, port: 49153, profiles: [], mirrors: [] };" : ''}
+        ${scenario === 'port-conflict' ? "state = { ...initial, revision: 2, port: null, errorCode: 'PORT_EXHAUSTED' };" : ''}
+        ${scenario === 'sources' ? "state.profiles.push({ ...profile, profileId: 'profile-second', instanceId: 'instance-second', displayName: '另一份资料' });" : ''}
         receive?.(state);
         return state;
       }
-      export async function startBridge(port) {
+      export async function retryBridgeListener() {
         starts += 1;
-        ${scenario === 'port-conflict' ? "if (starts === 1) throw 'CONFLICT';" : ''}
-        state = { ...state, revision: state.revision + 1, port };
+        ${scenario === 'port-conflict' ? "if (starts === 1) throw 'PORT_EXHAUSTED';" : ''}
+        state = { ...state, revision: state.revision + 1, port: 49154, errorCode: null };
+        receive?.(state);
         return state;
       }
-      export async function beginPairing() { if (window.__t14PairingFailure) throw 'STORAGE_ERROR'; throw new Error('mock-offer-unavailable'); }
-      export async function confirmPairing() { throw new Error('mock-confirm-unavailable'); }
-      export async function cancelPairing() { return state; }
-      export async function reconnectProfile() {
-        state = { ...state, revision: state.revision + 1, profiles: [{ ...profile, connection: 'reconciling' }] };
+      export async function renameProfile(profileId, displayName) {
+        if (window.__t14StorageFailure) throw 'STORAGE_ERROR';
+        const trimmed = String(displayName ?? '').trim();
+        if (!trimmed || [...trimmed].length > 128 || trimmed === 'local-skills') throw 'INVALID_MESSAGE';
+        if (profileId === 'local-skills') throw 'READ_ONLY';
+        state = { ...state, revision: state.revision + 1, profiles: state.profiles.map((item) => item.profileId === profileId ? { ...item, displayName: trimmed } : item) };
         receive?.(state);
-        return initial;
+        return state;
       }
-      export async function revokePairing() {
-        state = { ...state, revision: state.revision + 1, profiles: [{ ...profile, connection: 'unpaired' }] };
+      export async function setProfileWritePaused(profileId, paused) {
+        if (window.__t14StorageFailure) throw 'STORAGE_ERROR';
+        state = { ...state, revision: state.revision + 1, profiles: state.profiles.map((item) => item.profileId === profileId ? { ...item, writePaused: Boolean(paused) } : item) };
+        receive?.(state);
+        return state;
+      }
+      export async function ignoreProfile(profileId) {
+        if (window.__t14StorageFailure) throw 'STORAGE_ERROR';
+        state = { ...state, revision: state.revision + 1, profiles: state.profiles.map((item) => item.profileId === profileId ? { ...item, connection: 'ignored', ignored: true } : item) };
+        receive?.(state);
+        return state;
+      }
+      export async function resumeProfile(profileId) {
+        if (window.__t14StorageFailure) throw 'STORAGE_ERROR';
+        state = { ...state, revision: state.revision + 1, profiles: state.profiles.map((item) => item.profileId === profileId ? { ...item, connection: 'cached_read_only', ignored: false } : item) };
+        receive?.(state);
+        return state;
+      }
+      export async function reconnectProfile(profileId) {
+        state = { ...state, revision: state.revision + 1, profiles: state.profiles.map((item) => item.profileId === profileId ? { ...item, connection: 'reconciling' } : item) };
+        receive?.(state);
         return state;
       }
       export async function ensureLocalLibrary() {
-        const localProfile = { profileId: 'local-skills', instanceId: 'local-skills', displayName: 'Skills 书签库', connection: 'local', nodeCount: 1, revision: 1, lastSyncedAt: 1791800000000, errorCode: null };
+        if (window.__t14StorageFailure) throw 'STORAGE_ERROR';
+        const localProfile = { profileId: 'local-skills', instanceId: 'local-skills', displayName: 'Skills 书签库', connection: 'local', writePaused: false, ignored: false, nodeCount: 1, revision: 1, lastSyncedAt: 1791800000000, errorCode: null };
         const exists = state.profiles.some((item) => item.profileId === 'local-skills');
         state = { ...state, revision: state.revision + 1, profiles: exists ? state.profiles : [...state.profiles, localProfile] };
         receive?.(state);

@@ -1,17 +1,21 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import type { BridgeState, ChromeProfileList, PairingOffer } from '@markbridge/protocol';
+import type { BridgeState, ChromeProfileList } from '@markbridge/protocol';
 import { DiagnosticExport } from './DiagnosticExport';
 import {
-  associateFileMirror, attachFileMirror, beginPairing, cancelPairing, confirmPairing,
+  associateFileMirror, attachFileMirror,
   detachFileMirror, ensureLocalLibrary, enumerateChromeUserData,
-  reconnectProfile, rescanFileMirrors, revokePairing, startBridge,
+  ignoreProfile, reconnectProfile, renameProfile, rescanFileMirrors,
+  resumeProfile, retryBridgeListener, setProfileWritePaused,
 } from '../../backend';
-
-import { cacheTime, connectionLabels, fileLabels, profileNextStep, type SourceTarget } from './source-status';
+import {
+  cacheTime, connectionLabels, fileLabels, listenerErrorMessage, profileNextStep,
+  type Profile, type SourceTarget,
+} from './source-status';
 import { ConfirmDialog } from './ConfirmDialog';
 
 const associationLabels: Record<BridgeState['mirrors'][number]['association'], string> = {
-  independent: '独立只读', confirmed: '已关联 · 只读',
+  independent: '独立只读',
+  confirmed: '已关联 · 只读',
 };
 
 function mirrorProblem(code: string | null): string | null {
@@ -24,8 +28,81 @@ function mirrorProblem(code: string | null): string | null {
 function safeError(code: string | null): string | null {
   if (!code) return null;
   if (code === 'CONFLICT') return '连接状态发生冲突。请检查端口和扩展后重试。';
+  if (code === 'PORT_EXHAUSTED') return '本地端口 49153–49160 均已被占用，请释放端口后重试监听。';
   if (code === 'STORAGE_ERROR') return '本机存储不可用。请检查缓存权限及系统凭据服务是否已解锁，再重试。';
   return '连接不可用。请检查扩展状态后重试。';
+}
+
+function statusTone(profile: Profile, invalid: boolean): 'output' | 'input' | 'neutral' {
+  if (invalid || profile.ignored || profile.connection === 'ignored' || profile.writePaused) return 'neutral';
+  if (profile.connection === 'live') return 'output';
+  if (profile.connection === 'connecting' || profile.connection === 'reconciling' || profile.connection === 'local') return 'input';
+  return 'neutral';
+}
+
+function validateProfileName(raw: string): { valid: true; trimmed: string } | { valid: false; message: string } {
+  const trimmed = raw.trim();
+  const length = [...trimmed].length;
+  if (length === 0) return { valid: false, message: '请输入 1–128 个字符的资料名称。' };
+  if (length > 128) return { valid: false, message: '资料名称不能超过 128 个字符。' };
+  if (trimmed === 'local-skills') return { valid: false, message: '不能使用保留名称 local-skills。' };
+  return { valid: true, trimmed };
+}
+
+function ProfileRenameForm({ profile, unavailable, onSubmit }: {
+  profile: Profile;
+  unavailable: boolean;
+  onSubmit: (profileId: string, trimmed: string) => Promise<void>;
+}) {
+  const [draft, setDraft] = useState(profile.displayName);
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const lastDisplayName = useRef(profile.displayName);
+  const inputId = `rename-${profile.profileId}`;
+  const errorId = `rename-error-${profile.profileId}`;
+
+  useEffect(() => {
+    if (lastDisplayName.current === profile.displayName) return;
+    lastDisplayName.current = profile.displayName;
+    setDraft(profile.displayName);
+    setValidationError(null);
+  }, [profile.displayName]);
+
+  function handleSubmit(event: FormEvent) {
+    event.preventDefault();
+    const check = validateProfileName(draft);
+    if (!check.valid) {
+      setValidationError(check.message);
+      return;
+    }
+    setValidationError(null);
+    if (check.trimmed === profile.displayName) return;
+    void onSubmit(profile.profileId, check.trimmed).catch((err: unknown) => {
+      setValidationError(err instanceof Error && err.message ? err.message : '未能保存资料名称。请检查连接或存储状态后重试。');
+    });
+  }
+
+  return (
+    <form className="profile-rename-form" onSubmit={handleSubmit} noValidate>
+      <div className="profile-rename-fields">
+        <label htmlFor={inputId}>
+          资料名称
+          <input
+            id={inputId}
+            value={draft}
+            disabled={unavailable}
+            aria-invalid={validationError ? true : undefined}
+            aria-describedby={validationError ? errorId : undefined}
+            onChange={(event) => {
+              setDraft(event.target.value);
+              if (validationError) setValidationError(null);
+            }}
+          />
+        </label>
+        <button type="submit" disabled={unavailable}>保存名称</button>
+      </div>
+      {validationError && <p id={errorId} className="notice" role="alert">{validationError}</p>}
+    </form>
+  );
 }
 
 export function ConnectionSettings({ state, error, native, accept, onBrowseSource, onboarding = false }: {
@@ -36,229 +113,421 @@ export function ConnectionSettings({ state, error, native, accept, onBrowseSourc
   onBrowseSource: (source: SourceTarget) => void;
   onboarding?: boolean;
 }) {
-  const [port, setPort] = useState('49153');
-  const [displayName, setDisplayName] = useState('Chrome 资料');
-  const [offer, setOffer] = useState<PairingOffer | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [userDataPath, setUserDataPath] = useState('');
   const [choices, setChoices] = useState<ChromeProfileList['profiles']>([]);
   const [profileChoice, setProfileChoice] = useState('');
-  const [path, setPath] = useState<'connect' | 'readonly'>('connect');
-  const [revoke, setRevoke] = useState<BridgeState['profiles'][number] | null>(null);
-  const [now, setNow] = useState(Date.now);
+  const [ignoreTarget, setIgnoreTarget] = useState<Profile | null>(null);
   const [listedPath, setListedPath] = useState('');
   const mounted = useRef(false);
   const actionGeneration = useRef(0);
+  const ignoreTriggerRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     mounted.current = true;
-    return () => { mounted.current = false; actionGeneration.current += 1; };
+    return () => {
+      mounted.current = false;
+      actionGeneration.current += 1;
+    };
   }, []);
 
-  useEffect(() => {
-    const deadlines = [...(state?.pending.map((candidate) => candidate.expiresAt) ?? []), ...(offer ? [offer.expiresAt] : [])].filter((deadline) => deadline > now);
-    if (!deadlines.length) return;
-    const timer = window.setTimeout(() => {
-      setNow(Date.now());
-      setMessage('配对串已到期。请重新生成配对串，并在扩展中重新粘贴。');
-      setOffer(null);
-    }, Math.max(0, Math.min(...deadlines) - Date.now()));
-    return () => window.clearTimeout(timer);
-  }, [offer, state?.pending, now]);
-
-  useEffect(() => {
-    if (offer && state?.profiles.some((profile) => profile.profileId === offer.profileId)) setOffer(null);
-  }, [state, offer]);
-
-  async function act(work: () => Promise<void>, failure = '操作未完成。请检查连接状态后重试。') {
-    if (busy || !native) return;
+  async function act(
+    work: () => Promise<void>,
+    failure = '操作未完成。请检查连接状态后重试。',
+    suppressMessage = false,
+  ): Promise<string | null> {
+    if (busy || !native) return null;
     const generation = ++actionGeneration.current;
     setBusy(true);
     setMessage(null);
-    try { await work(); } catch (code) {
-      if (mounted.current && generation === actionGeneration.current) {
-        setMessage(code === 'STORAGE_ERROR' ? safeError(code) : failure);
+    try {
+      await work();
+      return null;
+    } catch (code) {
+      const text = code === 'STORAGE_ERROR' || code === 'PORT_EXHAUSTED'
+        ? (safeError(code) ?? failure)
+        : failure;
+      if (!suppressMessage && mounted.current && generation === actionGeneration.current) {
+        setMessage(text);
       }
+      return text;
     } finally {
       if (mounted.current && generation === actionGeneration.current) setBusy(false);
     }
   }
 
-  function start(event: FormEvent) {
-    event.preventDefault();
-    const value = Number(port);
-    if (!/^\d+$/.test(port) || !Number.isInteger(value) || value < 1024 || value > 65535) {
-      setMessage('端口必须是 1024–65535 之间的整数。');
-      return;
-    }
-    void act(async () => { accept(await startBridge(value)); }, '无法启动本机连接。请检查端口是否占用，或更换端口后重试。');
-  }
-
-  function pair(event: FormEvent) {
-    event.preventDefault();
-    const name = displayName.trim();
-    if (!name || [...name].length > 128) { setMessage('资料名称须为 1–128 个字符。'); return; }
-    void act(async () => {
-      for (const candidate of state?.pending ?? []) {
-        if (candidate.expiresAt <= Date.now()) accept(await cancelPairing(candidate.profileId));
-      }
-      const next = await beginPairing(name);
-      if (mounted.current) setOffer(next);
-    });
-  }
-
-  const pending = state?.pending.filter((candidate) => candidate.expiresAt > now) ?? [];
-  const pairedChromeProfiles = state?.profiles.filter((profile) => profile.connection !== 'local') ?? [];
+  const chromeProfiles = state?.profiles.filter((profile) => profile.connection !== 'local') ?? [];
+  const activeChromeProfiles = chromeProfiles.filter((profile) => !profile.ignored && profile.connection !== 'ignored');
+  const selectedAssociateProfile = activeChromeProfiles.some((profile) => profile.profileId === profileChoice) ? profileChoice : '';
   const hasLocalLibrary = !!state?.profiles.some((profile) => profile.connection === 'local');
   const unavailable = !native || busy || !state || error === 'event';
-  const hasSources = !!(state?.profiles.length || state?.mirrors.length);
-  const setup = (
-    <div key="setup" className="connection-setup" hidden={onboarding && path !== 'connect'}>
-    {hasSources && !onboarding && <h2 className="settings-group-title">接入新的 Chrome 资料</h2>}
-    <details className="connection-panel extension-instructions" open={!hasSources || pending.length > 0 || !!offer}>
-      <summary><h2 id="extension-title">1. 准备 Chrome 扩展</h2></summary>
-      <p>在要接入的 Chrome 资料中打开 <code>chrome://extensions</code>，启用开发者模式，选择“加载已解压的扩展程序”，选择 Markbridge 扩展目录。</p>
-      <p className="secondary">加载后打开扩展的“配对设置”。应用不会自动安装或扫描 Chrome。</p>
-      <details className="connection-advanced"><summary>开发构建：扩展目录</summary><p className="secondary">从源码构建时，扩展目录为 <code>apps/extension/dist</code>。开发和验收请使用单独的临时 Chrome 资料。</p></details>
-    </details>
-            <section className="connection-panel" aria-labelledby="listener-title">
-              <div className="panel-heading"><h2 id="listener-title">2. 启动本机连接</h2><span className="secondary">{state?.port ? `127.0.0.1:${state.port}` : '监听尚未启动'}</span></div>
-              <form className="inline-form" onSubmit={start} noValidate>
-                <details className="connection-advanced"><summary>高级：连接端口</summary><label htmlFor="bridge-port">端口<input id="bridge-port" inputMode="numeric" value={state?.port?.toString() ?? port} onChange={(event) => setPort(event.target.value)} disabled={unavailable || state?.port != null} /></label></details>
-                <button disabled={unavailable || state?.port != null} type="submit">{state?.port ? '连接已启动' : '启动连接'}</button>
-              </form>
-              <p className="secondary">默认端口 49153。端口占用时，更换端口后重试。</p>
-            </section>
-            <section className="connection-panel" aria-labelledby="pairing-title">
-              <div className="panel-heading"><h2 id="pairing-title">3. 配对 Chrome 扩展</h2><span className="secondary">需在两端确认</span></div>
-              <form className="inline-form" onSubmit={pair} noValidate>
-                <label htmlFor="profile-name">资料名称<input id="profile-name" value={displayName} onChange={(event) => setDisplayName(event.target.value)} disabled={unavailable || pending.length > 0} /></label>
-                <button type="submit" disabled={unavailable || !state?.port || pending.length > 0 || !!offer}>生成配对串</button>
-              </form>
-              <p className="secondary">复制配对串到扩展选项页，再核对下方的扩展身份。配对串有效期为 120 秒。</p>
-              {offer && <div className="pairing-offer">
-                <label htmlFor="pairing-code">一次性配对串<textarea id="pairing-code" readOnly value={offer.pairingCode} spellCheck={false} /></label>
-                <div className="actions">
-                  <button disabled={busy} onClick={() => { void act(async () => { await navigator.clipboard.writeText(offer.pairingCode); if (mounted.current) setMessage('配对串已复制。请粘贴到扩展选项页。'); }); }}>复制配对串</button>
-                  {!pending.some((candidate) => candidate.profileId === offer.profileId) && <button disabled={busy} onClick={() => { void act(async () => { accept(await cancelPairing(offer.profileId)); if (mounted.current) { setOffer(null); setMessage('配对已取消。可重新生成配对串。'); } }); }}>取消配对</button>}
-                </div>
-              </div>}
-              {pending.map((candidate) => <div className="pending-pair" key={candidate.profileId}>
-                <h3>{candidate.displayName}</h3><p className="secondary">配对有效至 {cacheTime(candidate.expiresAt)}</p>
-                {candidate.instanceId && candidate.origin ? <>
-                  <p>请与扩展选项页显示的身份核对。只有你发起的请求才能确认；不认识的请求请取消配对。</p>
-                  <dl className="identity"><dt>扩展身份</dt><dd>{candidate.instanceId}</dd><dt>扩展来源</dt><dd>{candidate.origin}</dd></dl>
-                  <button disabled={unavailable} onClick={() => { void act(async () => { accept(await confirmPairing(candidate.profileId, candidate.instanceId!)); if (mounted.current) setOffer(null); }); }}>确认此扩展</button>
-                </> : <p>等待扩展连接。请将配对串粘贴到扩展选项页。</p>}
-                <button className="secondary-button" disabled={unavailable} onClick={() => { void act(async () => { accept(await cancelPairing(candidate.profileId)); if (mounted.current) { setOffer(null); setMessage('配对已取消。可重新生成配对串。'); } }); }}>取消配对</button>
-              </div>)}
-            </section>
+  const listenerFault = state != null && state.port == null && state.errorCode != null;
+  const topAlert = message ?? (state?.errorCode && state.port != null ? safeError(state.errorCode) : null);
+
+  const extensionGuide = (
+    <div className="connection-guide">
+      <p>
+        在需要同步的 Chrome 中打开 <code>chrome://extensions</code>，开启开发者模式后点击“加载已解压的扩展程序”，选择 Markbridge 扩展目录（源码构建位于 <code>apps/extension/dist</code>）。
+      </p>
+      <p className="secondary">加载后扩展会自动探测本地端口并同步书签，无需复制配对码或手动启动服务。开发与验收请使用单独的临时 Chrome 资料。</p>
     </div>
   );
-  const sources = (
-    <div key="sources" className="connection-sources">
-            <section className="connection-panel" aria-labelledby="profiles-title" hidden={!state?.profiles.length}>
-              <div className="panel-heading"><h2 id="profiles-title">已配对资料</h2><span className="secondary">{state?.profiles.length ?? 0} 个资料</span></div>
-              {!state?.profiles.length ? <p className="secondary">尚未连接书签来源。完成配对后，可在此查看同步状态和节点计数。</p> : state.profiles.map((profile) => {
-                const isLocal = profile.connection === 'local';
-                return <article className="profile" key={profile.profileId}>
-                  <div className="panel-heading"><h3>{profile.displayName}</h3><span className="source-state">{error === 'event' ? '状态无效 · 只读' : connectionLabels[profile.connection]}</span></div>
-                  <dl className="profile-metrics"><div><dt>缓存节点</dt><dd>{profile.nodeCount}</dd></div><div><dt>来源版本</dt><dd>{profile.revision}</dd></div><div><dt>最近同步</dt><dd>{cacheTime(profile.lastSyncedAt)}</dd></div></dl>
-                  {profile.errorCode && <p className="secondary">{safeError(profile.errorCode)}</p>}
-                  <p className="secondary">{profileNextStep(profile.connection)}</p>
-                  <div className="actions">
-                    <button type="button" disabled={unavailable} onClick={() => onBrowseSource({ kind: 'profile', id: profile.profileId })}>浏览此资料</button>
-                    {!isLocal && <button disabled={unavailable || profile.connection === 'unpaired'} onClick={() => { void act(async () => { accept(await reconnectProfile(profile.profileId)); }); }}>重新连接</button>}
-                    {!isLocal && <button className="secondary-button" disabled={unavailable || profile.connection === 'unpaired'} onClick={() => setRevoke(profile)}>吊销配对</button>}
-                  </div>
-                </article>;
-              })}
-            </section>
-            <section className="connection-panel" aria-labelledby="local-library-title" hidden={onboarding || hasLocalLibrary}>
-              <div className="panel-heading"><h2 id="local-library-title">本地 Skills 书签库</h2><span className="secondary">独立 SQLite 空间</span></div>
-              <p className="secondary">启用本机专属书签空间（Skills 书签），可由项目 Skills 或命令行直接维护，不会同步或写回 Chrome。</p>
-              <div className="actions">
-                <button type="button" disabled={unavailable} onClick={() => {
-                  void act(async () => {
-                    const next = await ensureLocalLibrary();
-                    accept(next);
-                    const created = next.profiles.find((profile) => profile.connection === 'local');
-                    if (created) onBrowseSource({ kind: 'profile', id: created.profileId });
-                  }, '无法启用本地 Skills 书签库。请检查本机存储状态后重试。');
-                }}>启用本地 Skills 书签库</button>
-              </div>
-            </section>
-            <section className="connection-panel" aria-labelledby="mirrors-title" hidden={onboarding && path !== 'readonly'}>
-              <div className="panel-heading"><h2 id="mirrors-title">只读文件来源</h2><span className="secondary">{state?.mirrors.length ?? 0} 个来源</span></div>
-              <p className="secondary">无需扩展，可浏览最后有效的文件缓存。不能写入 Chrome；文件时间不代表实时连接。</p>
-              <details className="connection-advanced" open={onboarding || undefined}><summary>选择只读文件目录</summary>
-              <form className="inline-form" onSubmit={(event) => {
-                event.preventDefault();
-                const path = userDataPath.trim();
-                if (!path) { setMessage('请输入 Chrome 用户数据目录的绝对路径。'); return; }
+
+  return (
+    <div className={`connection-settings ${onboarding ? 'first-connection' : 'settings-connection'}`}>
+      <div className="page-intro">
+        <h2 id="connection-title">{onboarding ? '连接你的 Chrome 书签' : 'Chrome 连接'}</h2>
+        {onboarding && <p className="secondary">安装并加载 Markbridge 扩展后即可自动连接，无需配对码，无需配置 AI。</p>}
+      </div>
+
+      {topAlert && <p className="notice" role="alert">{topAlert}</p>}
+
+      <section className="well-group" aria-labelledby="listener-title">
+        <div className="panel-heading">
+          <h3 id="listener-title">{onboarding ? '1. 安装 Chrome 扩展并自动连接' : '本地连接监听'}</h3>
+          <span className={`status-tag status-tag-${state?.port != null ? 'output' : 'neutral'}`}>
+            {state?.port != null ? '正在监听' : !native ? '浏览器预览' : '未监听'}
+          </span>
+        </div>
+
+        <div className="settings-facts">
+          {state?.port != null ? (
+            <>
+              <span>监听地址 <code>127.0.0.1:{state.port}</code></span>
+              <span>端口段 <code>49153–49160</code></span>
+            </>
+          ) : (
+            <span>{!native ? '浏览器预览仅显示界面，请在桌面应用中启动监听。' : '尚未绑定本地监听端口。'}</span>
+          )}
+        </div>
+
+        {listenerFault && (
+          <p className="notice" role="alert">{listenerErrorMessage(state.errorCode)}</p>
+        )}
+
+        {state?.port == null && (
+          <div className="edit-actions">
+            <button
+              type="button"
+              className="primary-button"
+              disabled={unavailable}
+              onClick={() => {
                 void act(async () => {
-                  const listed = await enumerateChromeUserData(path);
-                  if (!mounted.current) return;
-                  setListedPath(path);
-                  setChoices(listed.profiles);
-                  if (!listed.profiles.length) setMessage('所选目录中没有可接入的 Chrome 资料。请检查 User Data 路径。');
-                }, '无法读取所选 Chrome 目录。请选择本机 User Data 路径后重试。');
-              }} noValidate>
-                <label htmlFor="user-data-path">用户数据目录<input id="user-data-path" value={userDataPath} onChange={(event) => { setUserDataPath(event.target.value); setChoices([]); }} disabled={unavailable} spellCheck={false} /></label>
-                <button type="submit" disabled={unavailable}>枚举资料</button>
-                <button type="button" disabled={unavailable || !state?.mirrors.some((mirror) => mirror.watching)} onClick={() => { void act(async () => { accept(await rescanFileMirrors()); }); }}>重新读取</button>
-              </form>
-              <p className="secondary">只读取 Local State 的资料名称和所选资料的 Bookmarks 文件。文件来源不能写入 Chrome。</p>
-              {choices.length > 0 && <ul className="mirror-tree">{choices.map((choice) => <li key={choice.directoryKey}>
+                  accept(await retryBridgeListener());
+                }, '本地端口 49153–49160 均已被占用或不可用。请关闭占用程序后重试监听。');
+              }}
+            >
+              重试监听
+            </button>
+          </div>
+        )}
+
+        {onboarding ? extensionGuide : (
+          <details className="connection-advanced" open={!chromeProfiles.length || undefined}>
+            <summary>Chrome 扩展安装与连接说明</summary>
+            {extensionGuide}
+          </details>
+        )}
+      </section>
+
+      {state?.profiles.map((profile) => {
+        const isLocal = profile.connection === 'local';
+        const isIgnored = profile.ignored || profile.connection === 'ignored';
+        return (
+          <article className="well-group profile-well" key={profile.profileId}>
+            <div className="panel-heading">
+              <h3>{profile.displayName}</h3>
+              <div className="profile-badges">
+                <span className={`status-tag status-tag-${statusTone(profile, error === 'event')}`}>
+                  {error === 'event' ? '状态无效 · 只读' : connectionLabels[profile.connection]}
+                </span>
+                {profile.writePaused && !isLocal && (
+                  <span className="status-tag status-tag-neutral">已暂停写入（只读保护）</span>
+                )}
+              </div>
+            </div>
+
+            <div className="settings-facts">
+              <span>缓存节点 <span>{profile.nodeCount}</span></span>
+              <span>来源版本 <span>{profile.revision}</span></span>
+              <span>最近同步 <span>{cacheTime(profile.lastSyncedAt)}</span></span>
+            </div>
+
+            {profile.errorCode && <p className="notice" role="alert">{safeError(profile.errorCode)}</p>}
+            <p className="secondary">{profileNextStep(profile.connection, profile.writePaused)}</p>
+
+            {!isLocal && (
+              <ProfileRenameForm
+                profile={profile}
+                unavailable={unavailable}
+                onSubmit={async (profileId, trimmed) => {
+                  const errorText = await act(async () => {
+                    accept(await renameProfile(profileId, trimmed));
+                  }, '未能保存资料名称。请检查名称长度或存储状态后重试。', true);
+                  if (errorText) throw new Error(errorText);
+                }}
+              />
+            )}
+
+            <div className="edit-actions">
+              <button
+                type="button"
+                disabled={unavailable}
+                onClick={() => onBrowseSource({ kind: 'profile', id: profile.profileId })}
+              >
+                浏览此资料
+              </button>
+              {!isLocal && (
+                <>
+                  <button
+                    type="button"
+                    disabled={unavailable || isIgnored}
+                    onClick={() => {
+                      void act(async () => {
+                        accept(await setProfileWritePaused(profile.profileId, !profile.writePaused));
+                      });
+                    }}
+                  >
+                    {profile.writePaused ? '恢复写入' : '暂停写入（只读）'}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={unavailable || isIgnored}
+                    onClick={() => {
+                      void act(async () => {
+                        accept(await reconnectProfile(profile.profileId));
+                      });
+                    }}
+                  >
+                    重新连接
+                  </button>
+                  {isIgnored ? (
+                    <button
+                      type="button"
+                      disabled={unavailable}
+                      onClick={() => {
+                        void act(async () => {
+                          accept(await resumeProfile(profile.profileId));
+                        });
+                      }}
+                    >
+                      恢复连接
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="secondary-button"
+                      disabled={unavailable}
+                      onClick={(event) => {
+                        ignoreTriggerRef.current = event.currentTarget;
+                        setIgnoreTarget(profile);
+                      }}
+                    >
+                      断开并忽略
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+          </article>
+        );
+      })}
+
+      {!hasLocalLibrary && (
+        <section className="well-group" aria-labelledby="local-library-title">
+          <div className="panel-heading">
+            <h3 id="local-library-title">本地 Skills 书签库</h3>
+            <span className="status-tag status-tag-neutral">独立 SQLite 空间</span>
+          </div>
+          <p className="secondary">启用本机专属书签空间（Skills 书签），可由项目 Skills 或命令行直接维护，不会同步或写回 Chrome。</p>
+          <div className="edit-actions">
+            <button
+              type="button"
+              disabled={unavailable}
+              onClick={() => {
+                void act(async () => {
+                  const next = await ensureLocalLibrary();
+                  accept(next);
+                  const created = next.profiles.find((profile) => profile.connection === 'local');
+                  if (created) onBrowseSource({ kind: 'profile', id: created.profileId });
+                }, '无法启用本地 Skills 书签库。请检查本机存储状态后重试。');
+              }}
+            >
+              启用本地 Skills 书签库
+            </button>
+          </div>
+        </section>
+      )}
+
+      <details className="other-sources well-group">
+        <summary>其他接入方式：只读文件来源</summary>
+        <p className="secondary">已接入 {state?.mirrors.length ?? 0} 个只读文件来源。无需扩展，直接读取本机 Chrome 书签文件缓存。不能写入 Chrome；文件时间不代表实时连接。</p>
+        <form
+          className="inline-form"
+          onSubmit={(event) => {
+            event.preventDefault();
+            const trimmedPath = userDataPath.trim();
+            if (!trimmedPath) {
+              setMessage('请输入 Chrome 用户数据目录的绝对路径。');
+              return;
+            }
+            void act(async () => {
+              const listed = await enumerateChromeUserData(trimmedPath);
+              if (!mounted.current) return;
+              setListedPath(trimmedPath);
+              setChoices(listed.profiles);
+              if (!listed.profiles.length) setMessage('所选目录中没有可接入的 Chrome 资料。请检查 User Data 路径。');
+            }, '无法读取所选 Chrome 目录。请选择本机 User Data 路径后重试。');
+          }}
+          noValidate
+        >
+          <label htmlFor="user-data-path">
+            用户数据目录
+            <input
+              id="user-data-path"
+              value={userDataPath}
+              onChange={(event) => {
+                setUserDataPath(event.target.value);
+                setChoices([]);
+              }}
+              disabled={unavailable}
+              spellCheck={false}
+            />
+          </label>
+          <button type="submit" disabled={unavailable}>枚举资料</button>
+          <button
+            type="button"
+            disabled={unavailable || !state?.mirrors.some((mirror) => mirror.watching)}
+            onClick={() => {
+              void act(async () => {
+                accept(await rescanFileMirrors());
+              });
+            }}
+          >
+            重新读取
+          </button>
+        </form>
+        <p className="secondary">只读取 Local State 的资料名称和所选资料的 Bookmarks 文件。文件来源不能写入 Chrome。</p>
+        {choices.length > 0 && (
+          <ul className="mirror-tree">
+            {choices.map((choice) => (
+              <li key={choice.directoryKey}>
                 <span>{choice.displayName}</span>
-                <span className="secondary"> {choice.directoryKey}</span>
-                <button type="button" disabled={unavailable || !choice.bookmarksPresent} onClick={() => { void act(async () => { accept(await attachFileMirror(listedPath, choice.directoryKey)); }); }}>{choice.bookmarksPresent ? '接入只读镜像' : '未找到书签文件'}</button>
-              </li>)}</ul>}
-              </details>
-              {!state?.mirrors.length && <p className="secondary">尚未接入只读文件来源。Chrome 关闭后，已接入的最后有效树仍可浏览。</p>}
-              {state?.mirrors.map((mirror) => <article className="profile" key={mirror.mirrorSourceId}>
-                <div className="panel-heading"><h3>{mirror.displayName}</h3><span className="source-state">{associationLabels[mirror.association]} · {mirror.watching ? '正在监听' : '已停止监听'}</span></div>
-                <dl className="profile-metrics">
-                  <div><dt>文件状态</dt><dd>{fileLabels[mirror.fileStatus]}</dd></div>
-                  <div><dt>缓存节点</dt><dd>{mirror.nodeCount}</dd></div>
-                  <div><dt>缓存版本</dt><dd>{mirror.revision}</dd></div>
-                  <div><dt>最近读取</dt><dd>{cacheTime(mirror.lastSyncedAt)}</dd></div>
-                </dl>
-                {mirror.errorCode && <p className="secondary">{mirrorProblem(mirror.errorCode)}</p>}
-                <p className="secondary">浏览器写入已禁用。在线资料优先于已关联的文件来源。</p>
-                <div className="actions">
-                  <button type="button" disabled={unavailable} onClick={() => onBrowseSource({ kind: 'mirror', id: mirror.mirrorSourceId })}>浏览缓存</button>
-                  <button type="button" className="secondary-button" disabled={unavailable || !mirror.watching} onClick={() => { void act(async () => { accept(await detachFileMirror(mirror.mirrorSourceId)); }); }}>停止监听</button>
-                </div>
-                {pairedChromeProfiles.length > 0 && <form className="inline-form" onSubmit={(event) => {
+                <span className="secondary">{choice.directoryKey}</span>
+                <button
+                  type="button"
+                  disabled={unavailable || !choice.bookmarksPresent}
+                  onClick={() => {
+                    void act(async () => {
+                      accept(await attachFileMirror(listedPath, choice.directoryKey));
+                    });
+                  }}
+                >
+                  {choice.bookmarksPresent ? '接入只读镜像' : '未找到书签文件'}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        {!state?.mirrors.length && (
+          <p className="secondary">尚未接入只读文件来源。Chrome 关闭后，已接入的最后有效树仍可浏览。</p>
+        )}
+        {state?.mirrors.map((mirror) => (
+          <article className="mirror-item" key={mirror.mirrorSourceId}>
+            <div className="panel-heading">
+              <h4>{mirror.displayName}</h4>
+              <div className="profile-badges">
+                <span className="status-tag status-tag-neutral">{associationLabels[mirror.association]}</span>
+                <span className="status-tag status-tag-neutral">{mirror.watching ? '正在监听' : '已停止监听'}</span>
+              </div>
+            </div>
+            <div className="settings-facts">
+              <span>文件状态 <span>{fileLabels[mirror.fileStatus]}</span></span>
+              <span>缓存节点 <span>{mirror.nodeCount}</span></span>
+              <span>缓存版本 <span>{mirror.revision}</span></span>
+              <span>最近读取 <span>{cacheTime(mirror.lastSyncedAt)}</span></span>
+            </div>
+            {mirror.errorCode && <p className="notice" role="alert">{mirrorProblem(mirror.errorCode)}</p>}
+            <p className="secondary">浏览器写入已禁用。在线资料优先于已关联的文件来源。</p>
+            <div className="edit-actions">
+              <button
+                type="button"
+                disabled={unavailable}
+                onClick={() => onBrowseSource({ kind: 'mirror', id: mirror.mirrorSourceId })}
+              >
+                浏览缓存
+              </button>
+              <button
+                type="button"
+                className="secondary-button"
+                disabled={unavailable || !mirror.watching}
+                onClick={() => {
+                  void act(async () => {
+                    accept(await detachFileMirror(mirror.mirrorSourceId));
+                  });
+                }}
+              >
+                停止监听
+              </button>
+            </div>
+            {activeChromeProfiles.length > 0 && (
+              <form
+                className="inline-form"
+                onSubmit={(event) => {
                   event.preventDefault();
-                  if (!profileChoice) { setMessage('请选择要验证的已配对资料。'); return; }
-                  void act(async () => { accept(await associateFileMirror(mirror.mirrorSourceId, profileChoice)); }, '文件与在线资料不一致，保持独立只读。');
-                }}>
-                  <label htmlFor={`associate-${mirror.mirrorSourceId}`}>已配对资料<select id={`associate-${mirror.mirrorSourceId}`} value={profileChoice} onChange={(event) => setProfileChoice(event.target.value)} disabled={unavailable || mirror.fileStatus !== 'current'}>
-                    <option value="">选择已配对资料</option>
-                    {pairedChromeProfiles.map((profile) => <option key={profile.profileId} value={profile.profileId}>{profile.displayName}</option>)}
-                  </select></label>
-                  <button type="submit" disabled={unavailable || mirror.fileStatus !== 'current' || !profileChoice}>验证关联</button>
-                </form>}
-              </article>)}
-            </section>
-    <DiagnosticExport native={native} />
+                  if (!selectedAssociateProfile) {
+                    setMessage('请选择要验证的 Chrome 资料。');
+                    return;
+                  }
+                  void act(async () => {
+                    accept(await associateFileMirror(mirror.mirrorSourceId, selectedAssociateProfile));
+                  }, '文件与在线资料不一致，保持独立只读。');
+                }}
+              >
+                <label htmlFor={`associate-${mirror.mirrorSourceId}`}>
+                  关联 Chrome 资料
+                  <select
+                    id={`associate-${mirror.mirrorSourceId}`}
+                    value={selectedAssociateProfile}
+                    onChange={(event) => setProfileChoice(event.target.value)}
+                    disabled={unavailable || mirror.fileStatus !== 'current'}
+                  >
+                    <option value="">选择 Chrome 资料</option>
+                    {activeChromeProfiles.map((profile) => (
+                      <option key={profile.profileId} value={profile.profileId}>{profile.displayName}</option>
+                    ))}
+                  </select>
+                </label>
+                <button type="submit" disabled={unavailable || mirror.fileStatus !== 'current' || !selectedAssociateProfile}>
+                  验证关联
+                </button>
+              </form>
+            )}
+          </article>
+        ))}
+      </details>
+
+      {!onboarding && <DiagnosticExport native={native} />}
+
+      {ignoreTarget && (
+        <ConfirmDialog
+          title={`断开并忽略“${ignoreTarget.displayName}”？`}
+          confirmLabel="确认断开并忽略"
+          returnFocus={ignoreTriggerRef}
+          onCancel={() => setIgnoreTarget(null)}
+          onConfirm={() => {
+            const id = ignoreTarget.profileId;
+            setIgnoreTarget(null);
+            void act(async () => {
+              accept(await ignoreProfile(id));
+            });
+          }}
+        >
+          <p>将向该扩展发送暂停信号并停止自动重连。Chrome 中的书签、本机缓存、标签和备注都会保留。</p>
+          <p>之后可随时在此点击「恢复连接」，或在扩展弹窗中手动重新连接。</p>
+        </ConfirmDialog>
+      )}
     </div>
   );
-  return <div className={`connection-settings ${hasSources ? 'has-sources' : 'first-connection'}`}>
-    {onboarding && <div className="onboarding-intro">
-      <h2>连接你的 Chrome 书签</h2>
-      <p>连接扩展后可实时查看和管理书签。无需配置 AI。</p>
-      <div className="actions"><button type="button" aria-pressed={path === 'connect'} onClick={() => setPath('connect')}>连接 Chrome</button><button type="button" aria-pressed={path === 'readonly'} onClick={() => setPath('readonly')}>只读浏览文件</button></div>
-    </div>}
-    {(message || state?.errorCode) && <p className="notice" role="alert">{message ?? safeError(state?.errorCode ?? null)}</p>}
-    <div className="connection-columns">{hasSources ? [sources, setup] : [setup, sources]}</div>
-    {revoke && <ConfirmDialog title={`吊销“${revoke.displayName}”的配对？`} confirmLabel="确认吊销配对" onCancel={() => setRevoke(null)} onConfirm={() => {
-      const id = revoke.profileId;
-      setRevoke(null);
-      void act(async () => { accept(await revokePairing(id)); });
-    }}><p>此扩展将不能继续同步或修改这份资料。Chrome 书签、本机缓存、标签和备注都会保留。</p><p>重新连接需要在桌面与扩展重新配对；旧凭据不会恢复。</p></ConfirmDialog>}
-  </div>;
 }

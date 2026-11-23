@@ -89,7 +89,7 @@ export function WebPreviewPanel({ profileId, profileName, chromeId, url, native 
   const failed = sameProfile && (view.phase === 'failed' || view.phase === 'blocked');
 
   return (
-    <section className="web-preview" aria-label="应用内网页">
+    <section className="web-preview well-group" aria-label="应用内网页">
       <h4>应用内网页</h4>
       <p className="secondary">当前资料：{profileName}</p>
       <p className="library-detail-url" tabIndex={0}>选中网址：{url ?? '无'}</p>
@@ -104,7 +104,7 @@ export function WebPreviewPanel({ profileId, profileName, chromeId, url, native 
       {local && <p role="status">{local}</p>}
       {!http && <p className="secondary">仅打开 http 或 https 链接。</p>}
       <div className="edit-actions">
-        <button type="button" disabled={!native || busy || !http} onClick={() => {
+        <button type="button" className="primary-button" disabled={!native || busy || !http} onClick={() => {
           if (!url) return;
           const requestId = `wp${nextRequest}`;
           nextRequest += 1;

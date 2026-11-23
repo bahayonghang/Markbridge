@@ -11,9 +11,9 @@ function pending(item: Summary) { return ['applying', 'rolling_back', 'planned']
 function canUndo(item: Summary) { return item.state === 'applied' || item.state === 'partial'; }
 function date(value: number | null | undefined) { return value == null ? '时间未知' : new Date(value).toLocaleString('zh-CN'); }
 
-type Props = { profileId: string; profileName: string; revision: number; refreshToken?: number; live: boolean; nodes?: BookmarkNode[]; onExport?: () => void };
+type Props = { profileId: string; profileName: string; revision: number; refreshToken?: number; live: boolean; writePaused?: boolean; nodes?: BookmarkNode[]; onExport?: () => void };
 export function HistoryWorkspace(props: Props) { return <HistoryContent key={props.profileId} {...props} />; }
-function HistoryContent({ profileId, profileName, revision, refreshToken, live, nodes = [], onExport }: Props) {
+function HistoryContent({ profileId, profileName, revision, refreshToken, live, writePaused = false, nodes = [], onExport }: Props) {
   const [history, setHistory] = useState<Summary[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
@@ -41,15 +41,17 @@ function HistoryContent({ profileId, profileName, revision, refreshToken, live, 
     return () => { generation.current += 1; window.clearInterval(timer); };
   }, []);
   return <section className="history-workspace" aria-label="操作历史记录">
-    <div className="history-heading"><div><h2>操作历史</h2><p className="secondary">{profileName} · 回执保留在本机，断开连接后仍可查看。</p></div><div className="edit-actions"><button type="button" onClick={() => void pull(true)}>重新查询回执</button>{onExport && <button type="button" onClick={onExport}>备份导出</button>}</div></div>
-    {!live && <p className="history-readonly">当前只读。可以查看差异与导出缓存，连接恢复后才能执行撤销。</p>}
+    <div className="well-group history-header-well">
+      <div className="history-heading"><div><h2>操作历史</h2><div className="settings-facts"><span>{profileName}</span><span>回执保留在本机，断开连接后仍可查看。</span></div></div><div className="edit-actions"><button type="button" onClick={() => void pull(true)}>重新查询回执</button>{onExport && <button type="button" onClick={onExport}>备份导出</button>}</div></div>
+      {!live && <p className="history-readonly">{writePaused ? '已暂停写入（只读保护）。可以查看差异与导出缓存，恢复写入后才能执行撤销。' : '当前只读。可以查看差异与导出缓存，连接恢复后才能执行撤销。'}</p>}
+    </div>
     {error && <p role="alert">无法读取操作记录，请重新查询。</p>}
     {!loaded && !error && <p role="status">正在读取操作记录。</p>}
     {loaded && history.length === 0 && <p className="history-empty">还没有操作记录。</p>}
     {history.length > 0 && <><p className="secondary">最近记录，待核对的结果优先。最多显示 200 条。</p><ol className="history-list" aria-label="操作记录">{history.map((item) => <li key={item.operationId} className={selected === item.operationId ? 'is-selected' : ''}>
       <button className="history-summary" type="button" aria-expanded={selected === item.operationId} onClick={() => { setSelected(selected === item.operationId ? null : item.operationId); setRequest(null); }}>
-        <span><strong>{item.isBatch ? '批量' : ''}{item.kind ? kinds[item.kind] : '书签变更'}</strong><span className="secondary">{date(item.createdAt)} · {item.affected} 项</span></span>
-        <span className={`history-state state-${item.state}`}>{states[item.state]}{item.reviewed ? ' · 已核对' : ''}</span>
+        <span><strong>{item.isBatch ? '批量' : ''}{item.kind ? kinds[item.kind] : '书签变更'}</strong><span className="history-meta secondary"><span>{date(item.createdAt)}</span><span>{item.affected} 项</span></span></span>
+        <span className="history-state-group"><span className={`history-state state-${item.state}`}>{states[item.state]}</span>{item.reviewed && <span className="history-reviewed">已核对</span>}</span>
         <span className="visually-hidden">查看详情</span>
       </button>
       <div className="history-row-actions">
@@ -142,28 +144,30 @@ function HistoryDetail({ profileId, operationId, profileName, revision, refreshT
   const names = new Map(nodes.map((node) => [node.chromeId, node.title]));
   for (const step of preview?.steps ?? []) if (step.payload.kind === 'create') names.set(step.requestId, step.payload.title);
   return <section className="history-detail" aria-label="操作详情">
-    {error && <p role="alert">无法读取记录详情，请重新查询回执。</p>}
-    {!detail && !error && <p role="status">正在读取前后值。</p>}
-    {detail && <>
-      <h3>记录详情</h3>
-      <p>{states[detail.summary.state]}{detail.summary.reviewed ? '，已人工核对' : ''}。{detail.summary.state === 'uncertain' && '未收到可靠结果，不能当作失败重试。'}</p>
-      <details className="history-differences"><summary>查看前后值（{detail.steps.length} 步）</summary><ol>{detail.steps.map((step) => <li key={step.requestId}>
-        <h4>{kinds[step.mutation.kind]} · {step.before?.title || (step.mutation.kind === 'create' ? step.mutation.title : '书签条目')}</h4>
-        <p className="secondary">{step.receipt ? states[step.receipt.state] : '没有确认回执'}</p>
-        <ValuePair before={step.receipt?.before ?? step.before} after={step.receipt?.after ?? null} names={names} unknown={!step.receipt || !['applied', 'rolled_back'].includes(step.receipt.state)} />
-        {!!step.deletedDescendants?.length && <details><summary>删除前的子项（{step.deletedDescendants.length} 项）</summary><ul>{step.deletedDescendants.map((node) => <li key={node.chromeId}><p>{node.title || '未命名'}</p>{node.url && <p className="secondary">{node.url}</p>}</li>)}</ul></details>}
-        {step.receipt?.beforeChildIds && <p>变更前顺序：{step.receipt.beforeChildIds.map((id) => names.get(id) || id).join(' / ')}</p>}
-        {step.receipt?.afterChildIds && <p>观察到的顺序：{step.receipt.afterChildIds.map((id) => names.get(id) || id).join(' / ')}</p>}
-      </li>)}</ol></details>
-      {detail.summary.conflicts.length > 0 && <p className="history-readonly">冲突 {detail.summary.conflicts.length} 项：{detail.summary.conflicts.map((item) => fields[item.field]).join('、')}。外部值保持不变。</p>}
-      {['uncertain', 'partial', 'rollback_conflict'].includes(detail.summary.state) && !detail.summary.reviewed && <div><p className="secondary">核对 Chrome 与逐项回执后，可记录人工核对。此标记不会把未知结果改成成功。</p><button disabled={busy} type="button" onClick={() => void reviewed()}>标记已核对</button></div>}
-      <details className="history-diagnostics"><summary>诊断与恢复关联</summary><p>记录：{operationId}</p><p>来源世代：{detail.sourceEpoch}</p>{detail.undoOf && <p>撤销原记录：{detail.undoOf}</p>}{detail.restored.map((item) => <p key={item.oldChromeId}>恢复 ID：{item.oldChromeId} → {item.newChromeId} · 原本地身份 {item.bookmarkId}</p>)}</details>
-    </>}
+    {(error || !detail || detail) && <div className="output-well">
+      {error && <p role="alert">无法读取记录详情，请重新查询回执。</p>}
+      {!detail && !error && <p role="status">正在读取前后值。</p>}
+      {detail && <>
+        <h3>记录详情</h3>
+        <p>{states[detail.summary.state]}{detail.summary.reviewed ? '，已人工核对' : ''}。{detail.summary.state === 'uncertain' && '未收到可靠结果，不能当作失败重试。'}</p>
+        <details className="history-differences"><summary>查看前后值（{detail.steps.length} 步）</summary><ol>{detail.steps.map((step) => <li key={step.requestId}>
+          <h4>{kinds[step.mutation.kind]}：{step.before?.title || (step.mutation.kind === 'create' ? step.mutation.title : '书签条目')}</h4>
+          <p className="secondary">{step.receipt ? states[step.receipt.state] : '没有确认回执'}</p>
+          <ValuePair before={step.receipt?.before ?? step.before} after={step.receipt?.after ?? null} names={names} unknown={!step.receipt || !['applied', 'rolled_back'].includes(step.receipt.state)} />
+          {!!step.deletedDescendants?.length && <details><summary>删除前的子项（{step.deletedDescendants.length} 项）</summary><ul>{step.deletedDescendants.map((node) => <li key={node.chromeId}><p>{node.title || '未命名'}</p>{node.url && <p className="secondary">{node.url}</p>}</li>)}</ul></details>}
+          {step.receipt?.beforeChildIds && <p>变更前顺序：{step.receipt.beforeChildIds.map((id) => names.get(id) || id).join(' / ')}</p>}
+          {step.receipt?.afterChildIds && <p>观察到的顺序：{step.receipt.afterChildIds.map((id) => names.get(id) || id).join(' / ')}</p>}
+        </li>)}</ol></details>
+        {detail.summary.conflicts.length > 0 && <p className="history-readonly">冲突 {detail.summary.conflicts.length} 项：{detail.summary.conflicts.map((item) => fields[item.field]).join('、')}。外部值保持不变。</p>}
+        {['uncertain', 'partial', 'rollback_conflict'].includes(detail.summary.state) && !detail.summary.reviewed && <div><p className="secondary">核对 Chrome 与逐项回执后，可记录人工核对。此标记不会把未知结果改成成功。</p><button disabled={busy} type="button" onClick={() => void reviewed()}>标记已核对</button></div>}
+        <details className="history-diagnostics"><summary>诊断与恢复关联</summary><p>记录：{operationId}</p><p>来源世代：{detail.sourceEpoch}</p>{detail.undoOf && <p>撤销原记录：{detail.undoOf}</p>}{detail.restored.map((item) => <p key={item.oldChromeId}>恢复 ID：{item.oldChromeId} → {item.newChromeId}（原本机身份 {item.bookmarkId}）</p>)}</details>
+      </>}
+    </div>}
     {reading && <p role="status">正在检查可撤销的变更。</p>}
-    {preview && <section className="undo-review" aria-label="撤销预览">
-      <h3>审查条件撤销</h3><p>{profileName} · 将恢复 {preview.affected} 步</p><p className="secondary">只恢复已确认的变更。遇到外部修改就停止，未执行的批次条目保持原样。</p>
+    {preview && <section className="undo-review output-well" aria-label="撤销预览">
+      <h3>审查条件撤销</h3><div className="settings-facts"><span>{profileName}</span><span>将恢复 {preview.affected} 步</span></div><p className="secondary">只恢复已确认的变更。遇到外部修改就停止，未执行的批次条目保持原样。</p>
       {preview.conflicts.length > 0 && <p role="alert">有 {preview.conflicts.length} 项冲突，将保留外部值。仅处理下列仍符合条件的步骤。</p>}
-      <ol className="undo-steps" tabIndex={0} aria-label="完整撤销差异">{preview.steps.map((step) => <li key={step.requestId}><h4>{kinds[step.payload.kind]} · {step.expectedBefore?.title || (step.payload.kind === 'create' ? step.payload.title : '书签条目')}</h4><PlannedValues step={step} names={names} /></li>)}</ol>
+      <ol className="undo-steps" tabIndex={0} aria-label="完整撤销差异">{preview.steps.map((step) => <li key={step.requestId}><h4>{kinds[step.payload.kind]}：{step.expectedBefore?.title || (step.payload.kind === 'create' ? step.payload.title : '书签条目')}</h4><PlannedValues step={step} names={names} /></li>)}</ol>
       {!preview.writable && <p>当前只读或仍有待核对记录，不能执行撤销。</p>}
       <div className="edit-actions"><button className="primary-button" disabled={!live || !preview.writable || busy} type="button" onClick={() => void confirm()}>确认条件撤销</button><button disabled={busy} type="button" onClick={() => { previewGeneration.current += 1; setPreview(null); }}>取消撤销</button></div>
     </section>}
@@ -176,7 +180,7 @@ function undoNotice(state: Summary['state']) {
 }
 
 function ValuePair({ before, after, names, unknown = false }: { before: BookmarkNode | null | undefined; after: BookmarkNode | null | undefined; names: Map<string, string>; unknown?: boolean }) {
-  function value(node: BookmarkNode | null | undefined) { return node ? <><strong>{node.title || '未命名'}</strong>{node.url && <span>{node.url}</span>}<span>文件夹：{node.parentId ? names.get(node.parentId) || node.parentId : '根目录'} · 位置 {node.position + 1}</span></> : '不存在'; }
+  function value(node: BookmarkNode | null | undefined) { return node ? <><strong>{node.title || '未命名'}</strong>{node.url && <span>{node.url}</span>}<span className="settings-facts"><span>文件夹：{node.parentId ? names.get(node.parentId) || node.parentId : '根目录'}</span><span>位置 {node.position + 1}</span></span></> : '不存在'; }
   return <dl className="history-values"><div><dt>之前</dt><dd>{value(before)}</dd></div><div><dt>之后</dt><dd>{unknown ? '结果未确认' : value(after)}</dd></div></dl>;
 }
 function PlannedValues({ step, names }: { step: UndoPreview['steps'][number]; names: Map<string, string> }) {

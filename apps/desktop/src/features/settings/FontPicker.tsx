@@ -47,7 +47,7 @@ export function FontPicker({ value, fontSizePx, session, returnFocus, onApply, o
   return <dialog ref={dialog} className="font-picker" aria-labelledby="font-picker-title" style={{ fontFamily: stableFont }} onCancel={event => { event.preventDefault(); onCancel(); }}>
     <h2 id="font-picker-title">选择字体</h2>
     <div className="font-picker-body">
-      <section aria-labelledby="font-presets-title"><h3 id="font-presets-title">兼容预设</h3><div className="font-presets" role="group" aria-labelledby="font-presets-title">
+      <section aria-labelledby="font-presets-title"><h3 id="font-presets-title">兼容预设</h3><div className="segmented-control font-presets" role="group" aria-labelledby="font-presets-title">
         {(['system', 'yahei', 'song'] as const).map(preset => <button key={preset} type="button" aria-pressed={candidate.kind === 'preset' && candidate.value === preset} onClick={() => setCandidate({ kind: 'preset', value: preset })}>{fontPresetLabels[preset]}</button>)}
       </div></section>
       <section className="installed-fonts" aria-labelledby="installed-fonts-title">
@@ -58,7 +58,7 @@ export function FontPicker({ value, fontSizePx, session, returnFocus, onApply, o
         {loading ? <p role="status">正在读取本机字体…</p> : catalog?.status === 'unavailable' ? <p role="status">{catalog.reason === 'unsupported_platform' ? '此平台暂不支持读取已安装字体。' : catalog.reason === 'catalog_limit' ? '字体目录超出可处理范围，请继续使用当前字体或兼容预设。' : '无法读取字体列表，请重试。当前字体保持不变。'}</p> : <p className="secondary" role="status">{families.length === 0 ? '未找到已安装字体，可使用兼容预设。' : rows.length === 0 ? '没有匹配的字体。' : `找到 ${rows.length} 个字体族`}</p>}
         <div className="font-catalog-list"><VirtualRows rows={rows} rowHeight={resolveAppearanceMetrics(fontSizePx).bookmarkRow} rowKey={row => row.key} label="已安装字体" role="listbox" itemRole="option" activeKey={active?.key ?? null} resetKey={query} onActive={choose} onKeyDown={navigate} render={row => <span className="font-option"><span>{row.displayName}</span>{row.displayName !== row.family && <small>{row.family}</small>}</span>} /></div>
       </section>
-      <section className="font-picker-sample" aria-labelledby="font-sample-title"><h3 id="font-sample-title">候选字体样例</h3><div style={{ fontFamily: fontFamilyCss(candidate) }}><p lang="zh-CN">让书签与灵感保持相连。</p><p lang="en">Markbridge · Aa Bb Zz 0123456789 !?.,:;</p><p>长书签标题：阅读、设计与日常灵感的收藏与回顾</p></div><p className="secondary">未包含的中文字形会使用备用字体。</p></section>
+      <section className="well-group font-picker-sample" aria-labelledby="font-sample-title"><h3 id="font-sample-title">候选字体样例</h3><div style={{ fontFamily: fontFamilyCss(candidate) }}><p lang="zh-CN">让书签与灵感保持相连。</p><p lang="en">Markbridge Aa Bb Zz 0123456789 !?.,:;</p><p>长书签标题：阅读、设计与日常灵感的收藏与回顾</p></div><p className="secondary">未包含的中文字形会使用备用字体。</p></section>
     </div>
     <div className="actions"><button type="button" onClick={onCancel}>取消</button><button type="button" className="primary-button" disabled={!available || (loading && candidate.kind === 'installed')} onClick={() => onApply(candidate)}>使用此字体</button></div>
   </dialog>;

@@ -45,7 +45,7 @@ impl Bridge {
                 BatchEditAction::Move { parent_id } => Some(path(&profile.nodes, &parent_id)?),
                 BatchEditAction::Delete {} => None,
             }),
-            writable: profile.view.connection == BridgeConnection::Live
+            writable: profile.check_browser_writable().is_ok()
                 && !profile.busy
                 && !profile.writes_blocked
                 && profile.batch_hold.is_none(),
@@ -83,9 +83,7 @@ impl Bridge {
             .profiles
             .get(profile_id.as_str())
             .ok_or(ErrorCode::WrongProfile)?;
-        if profile.view.connection != BridgeConnection::Live {
-            return Err(ErrorCode::ReadOnly);
-        }
+        profile.check_browser_writable()?;
         if profile.busy || profile.writes_blocked || profile.batch_hold.is_some() {
             return Err(ErrorCode::Conflict);
         }
@@ -207,7 +205,7 @@ pub(super) async fn on_receipt(
         .ok_or(ErrorCode::WrongProfile)?;
     let held = profile.batch_hold.as_ref() == Some(operation_id);
     if !held
-        || profile.view.connection != BridgeConnection::Live
+        || profile.check_browser_writable().is_err()
         || now()?.saturating_sub(progress.dispatched_at) >= ACK_TIMEOUT_MS
     {
         return stop(inner, profile_id, operation_id, ErrorCode::UncertainWrite).await;

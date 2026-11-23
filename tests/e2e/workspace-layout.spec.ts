@@ -63,7 +63,7 @@ for (const theme of ['light', 'dark']) for (const [width, height] of [[640, 480]
     await mkdir(output, { recursive: true });
     const file = `${theme}-20-${width}x${height}`;
     await inspect(page, content, 'onboarding', file);
-    await page.getByRole('button', { name: '只读浏览文件' }).click();
+    await page.getByText('其他接入方式：只读文件来源', { exact: true }).click();
     await expect(page.getByLabel('用户数据目录')).toBeVisible();
     await inspect(page, content, 'onboarding-readonly', file);
   });
@@ -92,8 +92,7 @@ for (const theme of ['light', 'dark']) for (const fontSize of [12, 14, 20]) for 
         const folder = page.getByRole('button', { name: '文件夹', exact: true });
         await folder.click();
         const pane = (await page.locator('.folder-pane.is-open').boundingBox())!;
-        const footer = (await page.locator('.status-bar').boundingBox())!;
-        expect(pane.y + pane.height).toBeLessThanOrEqual(footer.y + 1);
+        expect(pane.y + pane.height).toBeLessThanOrEqual(height + 1);
         await page.keyboard.press('Escape'); await expect(folder).toBeFocused();
       }
     }
@@ -127,15 +126,10 @@ for (const theme of ['light', 'dark']) for (const fontSize of [12, 14, 20]) for 
       await expect(panel).toBeVisible();
       measurements.push(await inspect(page, panel, `settings-${name}`, file));
       if (!before) {
-        expect((await panel.boundingBox())!.width).toBeLessThanOrEqual(name === 'Chrome 连接' ? 1440 : 1040);
+        expect((await panel.boundingBox())!.width).toBeLessThanOrEqual(760);
         if (name === 'Chrome 连接') {
-          const connection = (await page.locator('.connection-settings').boundingBox())!;
-          const sources = (await page.locator('.connection-sources').boundingBox())!;
-          const setup = (await page.locator('.connection-setup').boundingBox())!;
-          if (connection.width >= Math.max(960, 64 * fontSize)) {
-            expect(sources.x + sources.width).toBeLessThanOrEqual(setup.x);
-            expect(Math.abs(sources.y - setup.y)).toBeLessThanOrEqual(1);
-          } else expect(sources.y + sources.height).toBeLessThanOrEqual(setup.y);
+          const wells = await panel.locator('.well-group').all();
+          expect(wells.length).toBeGreaterThanOrEqual(3);
         }
         if (name === '通用') {
           const row = panel.locator('.settings-row').first();

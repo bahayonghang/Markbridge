@@ -6,7 +6,7 @@ use markbridge_protocol::{
     BridgeState, ChromeProfileList, ContentPreview, Counter, EditAction, EditDocument, EditPreview,
     ErrorCode, Id, LibraryCount, LibraryDetail, LibraryNodes, LibraryPage, LibrarySearch,
     MaintenanceReport, MirrorTree, OperationList, OrganizationFolder, OrganizationPlan,
-    PairingOffer, SourceEpoch, TagCatalog, TagCommand, TextSearchPage, TitleEncodingPreview,
+    SourceEpoch, TagCatalog, TagCommand, TextSearchPage, TitleEncodingPreview,
 };
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -156,50 +156,50 @@ async fn get_bridge_state(
     Ok(bridge.state().await)
 }
 #[tauri::command]
-async fn start_bridge(
+async fn retry_bridge_listener(
     window: tauri::WebviewWindow,
     bridge: tauri::State<'_, Bridge>,
-    port: u16,
 ) -> Result<BridgeState, ErrorCode> {
     trusted(&window)?;
-    bridge.start(port).await
+    bridge.start_auto().await
 }
 #[tauri::command]
-async fn begin_pairing(
+async fn rename_profile(
     window: tauri::WebviewWindow,
     bridge: tauri::State<'_, Bridge>,
+    profile_id: Id,
     display_name: String,
-) -> Result<PairingOffer, ErrorCode> {
+) -> Result<BridgeState, ErrorCode> {
     trusted(&window)?;
-    bridge.begin_pairing(display_name).await
+    bridge.rename_profile(profile_id, display_name).await
 }
 #[tauri::command]
-async fn confirm_pairing(
+async fn set_profile_write_paused(
     window: tauri::WebviewWindow,
     bridge: tauri::State<'_, Bridge>,
     profile_id: Id,
-    instance_id: Id,
+    paused: bool,
 ) -> Result<BridgeState, ErrorCode> {
     trusted(&window)?;
-    bridge.confirm_pairing(profile_id, instance_id).await
+    bridge.set_write_paused(profile_id, paused).await
 }
 #[tauri::command]
-async fn cancel_pairing(
-    window: tauri::WebviewWindow,
-    bridge: tauri::State<'_, Bridge>,
-    profile_id: Id,
-) -> Result<BridgeState, ErrorCode> {
-    trusted(&window)?;
-    bridge.cancel_pairing(profile_id).await
-}
-#[tauri::command]
-async fn revoke_pairing(
+async fn ignore_profile(
     window: tauri::WebviewWindow,
     bridge: tauri::State<'_, Bridge>,
     profile_id: Id,
 ) -> Result<BridgeState, ErrorCode> {
     trusted(&window)?;
-    bridge.revoke_pairing(profile_id).await
+    bridge.ignore_profile(profile_id).await
+}
+#[tauri::command]
+async fn resume_profile(
+    window: tauri::WebviewWindow,
+    bridge: tauri::State<'_, Bridge>,
+    profile_id: Id,
+) -> Result<BridgeState, ErrorCode> {
+    trusted(&window)?;
+    bridge.resume_profile(profile_id).await
 }
 #[tauri::command]
 async fn reconnect_profile(
@@ -1203,6 +1203,7 @@ fn main() {
                 )),
             )) {
                 Ok(bridge) => {
+                    let _ = tauri::async_runtime::block_on(bridge.start_auto());
                     let mut states = bridge.subscribe();
                     let handle = app.handle().clone();
                     tauri::async_runtime::spawn(async move {
@@ -1240,11 +1241,11 @@ fn main() {
             list_installed_fonts,
             get_startup_state,
             get_bridge_state,
-            start_bridge,
-            begin_pairing,
-            confirm_pairing,
-            cancel_pairing,
-            revoke_pairing,
+            retry_bridge_listener,
+            rename_profile,
+            set_profile_write_paused,
+            ignore_profile,
+            resume_profile,
             reconnect_profile,
             ensure_local_library,
             enumerate_chrome_user_data,

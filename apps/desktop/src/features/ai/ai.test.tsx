@@ -114,10 +114,11 @@ it('sends the edited suggestion only after confirm', async () => {
   vi.mocked(applyAi).mockResolvedValue({
     jobId: 'ai-job', browser: null, tagsApplied: false, summaryApplied: false, failure: null, failureMessage: null,
   });
-  render(<AiSuggest settings={enabledSettings} profileId="profile-a" chromeId="10" url="https://example.com/a" revision={4} />);
+  const { container } = render(<AiSuggest settings={enabledSettings} profileId="profile-a" chromeId="10" url="https://example.com/a" revision={4} />);
   expect(suggestAi).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole('button', { name: '生成建议' }));
   expect(await screen.findByLabelText('建议标题')).toHaveValue('短标题');
+  expect(container.textContent).not.toContain('·');
   expect(screen.getByText(/127\.0\.0\.1:11434\/api\/chat/)).toBeVisible();
   expect(screen.getByText(/不会移动书签/)).toBeVisible();
   fireEvent.change(screen.getByLabelText('建议标题'), { target: { value: '改过的标题' } });
@@ -254,4 +255,48 @@ it('R07 keeps offline AI metadata local and prevents title writes', async () => 
   fireEvent.click(screen.getByRole('button', { name: '确认这条建议' }));
   await waitFor(() => expect(applyAi).toHaveBeenCalledWith(expect.objectContaining({ applyTitle: false, applyTags: true })));
   expect(applyEdit).not.toHaveBeenCalled();
+});
+
+it('groups AI settings inside well-groups, marks a single primary button, preserves disclosures, and avoids middle dots', async () => {
+  vi.mocked(aiSettings).mockResolvedValue(settings);
+  const { container } = render(<AiSettingsPanel native />);
+  expect(await screen.findByText('默认关闭')).toBeVisible();
+  expect(container.querySelectorAll('.well-group').length).toBeGreaterThanOrEqual(2);
+  const primaries = container.querySelectorAll('button.primary-button');
+  expect(primaries).toHaveLength(1);
+  expect(primaries[0]).toHaveTextContent('保存配置');
+  expect(screen.getByRole('button', { name: '保存密钥' })).not.toHaveClass('primary-button');
+  expect(screen.getByRole('button', { name: '清除凭据' })).not.toHaveClass('primary-button');
+  expect(screen.getByRole('button', { name: '测试连接' })).not.toHaveClass('primary-button');
+  expect(screen.getByText(/模型只生成可编辑建议。确认前不写书签。密钥只进入系统凭据存储。/)).toBeVisible();
+  expect(screen.getByText(/保存配置不会连接模型。测试连接仅发送测试提示/)).toBeVisible();
+  expect(container.textContent).not.toContain('·');
+});
+
+it('allows saving local tags and summary during writePaused while disabling Chrome title writes', async () => {
+  vi.mocked(suggestAi).mockResolvedValue(suggestion());
+  vi.mocked(applyAi).mockResolvedValue({ jobId: 'ai-job', browser: null, tagsApplied: false, summaryApplied: true, failure: null, failureMessage: null });
+  render(<AiSuggest settings={enabledSettings} profileId="profile-a" chromeId="10" url="https://example.com/a" revision={4} live={false} writePaused />);
+  expect(screen.getByText(/已暂停写入（只读保护）/)).toBeVisible();
+  fireEvent.click(screen.getByRole('button', { name: '生成建议' }));
+  expect(await screen.findByLabelText('保存标题')).toBeDisabled();
+  expect(screen.getByLabelText('保存标签')).toBeEnabled();
+  expect(screen.getByLabelText('保存摘要')).toBeEnabled();
+  fireEvent.click(screen.getByLabelText('保存摘要'));
+  fireEvent.click(screen.getByRole('button', { name: '确认这条建议' }));
+  await waitFor(() => expect(applyAi).toHaveBeenCalledWith(expect.objectContaining({ applyTitle: false, applySummary: true })));
+});
+
+it('uses h3 heading, separates AiSuggest controls from output-well draft, and keeps max one primary button', async () => {
+  vi.mocked(suggestAi).mockResolvedValue(suggestion());
+  const { container } = render(<AiSuggest settings={enabledSettings} profileId="profile-a" chromeId="10" url="https://example.com/a" revision={4} />);
+  expect(screen.getByRole('heading', { level: 3, name: '单条建议' })).toBeVisible();
+  expect(container.querySelectorAll('.well-group').length).toBeGreaterThanOrEqual(1);
+  expect(container.querySelectorAll('button.primary-button')).toHaveLength(1);
+  expect(container.querySelector('button.primary-button')).toHaveTextContent('生成建议');
+  fireEvent.click(screen.getByRole('button', { name: '生成建议' }));
+  await screen.findByLabelText('建议标题');
+  expect(container.querySelector('.output-well')).not.toBeNull();
+  expect(container.querySelectorAll('button.primary-button')).toHaveLength(1);
+  expect(container.querySelector('button.primary-button')).toHaveTextContent('确认这条建议');
 });

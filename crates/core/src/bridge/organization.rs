@@ -2,8 +2,8 @@
 use std::collections::{HashMap, HashSet};
 
 use markbridge_protocol::{
-    BridgeConnection, Counter, ErrorCode, Id, Mutation, NodeKind, OperationState,
-    OrganizationFolder, OrganizationPlan, SourceEpoch,
+    Counter, ErrorCode, Id, Mutation, NodeKind, OperationState, OrganizationFolder,
+    OrganizationPlan, SourceEpoch,
 };
 use tokio::sync::mpsc;
 
@@ -394,25 +394,17 @@ impl Bridge {
     pub async fn apply_organization(&self, job_id: Id, plan_hash: Id) -> Result<OrganizationPlan> {
         let mut inner = self.inner.lock().await;
         let (_, mut record) = reload(&inner, &job_id).await?;
-        let profile = inner
-            .profiles
-            .get(record.profile_id.as_str())
-            .ok_or(ErrorCode::WrongProfile)?;
-        if matches!(
-            profile.identity.origin,
-            crate::storage::ProfileOrigin::LocalSkills
-        ) {
-            return Err(ErrorCode::ReadOnly);
-        }
-        let live = profile.view.connection == BridgeConnection::Live
-            && profile.session.is_some()
-            && profile.outbound.is_some();
-        if !live {
-            record.failure = Some(org::code_name(ErrorCode::ReadOnly));
-            record.failure_message = Some(org::MSG_OFFLINE.to_owned());
-            store(&inner, &job_id, &record).await?;
-            return present(&inner, &job_id, &record).await;
-        }
+        let profile = match check_writable_or_record_offline(
+            &inner,
+            &record.profile_id.clone(),
+            &job_id,
+            &mut record,
+        )
+        .await?
+        {
+            Ok(profile) => profile,
+            Err(plan) => return Ok(plan),
+        };
         if profile.busy || profile.writes_blocked || profile.batch_hold.is_some() {
             return Err(ErrorCode::Conflict);
         }
@@ -518,25 +510,17 @@ impl Bridge {
             return present(&inner, &job_id, &record).await;
         }
         let profile_id = Id::new(&record.profile_id)?;
-        let profile = inner
-            .profiles
-            .get(profile_id.as_str())
-            .ok_or(ErrorCode::WrongProfile)?;
-        if matches!(
-            profile.identity.origin,
-            crate::storage::ProfileOrigin::LocalSkills
-        ) {
-            return Err(ErrorCode::ReadOnly);
-        }
-        if profile.view.connection != BridgeConnection::Live
-            || profile.session.is_none()
-            || profile.outbound.is_none()
+        let profile = match check_writable_or_record_offline(
+            &inner,
+            profile_id.as_str(),
+            &job_id,
+            &mut record,
+        )
+        .await?
         {
-            record.failure = Some(org::code_name(ErrorCode::ReadOnly));
-            record.failure_message = Some(org::MSG_OFFLINE.to_owned());
-            store(&inner, &job_id, &record).await?;
-            return present(&inner, &job_id, &record).await;
-        }
+            Ok(profile) => profile,
+            Err(plan) => return Ok(plan),
+        };
         if record.phase == "applying" || profile.busy || profile.writes_blocked {
             return Err(ErrorCode::Conflict);
         }
@@ -655,7 +639,7 @@ pub(super) async fn on_receipt(
         .profiles
         .get(profile_id.as_str())
         .ok_or(ErrorCode::WrongProfile)?;
-    if profile.view.connection != BridgeConnection::Live {
+    if profile.check_browser_writable().is_err() {
         return Ok(());
     }
     let Some(session) = profile.session.clone() else {
@@ -1067,4 +1051,37 @@ fn state_name(state: &OperationState) -> &'static str {
         OperationState::RollingBack => "rolling_back",
         OperationState::RolledBack => "rolled_back",
     }
+}
+
+async fn check_writable_or_record_offline<'a>(
+    inner: &'a Inner,
+    profile_id: &str,
+    job_id: &Id,
+    record: &mut Record,
+) -> Result<std::result::Result<&'a super::ActiveProfile, OrganizationPlan>> {
+    let profile = inner
+        .profiles
+        .get(profile_id)
+        .ok_or(ErrorCode::WrongProfile)?;
+    let offline = match profile.check_browser_writable() {
+        Ok(()) => profile.session.is_none() || profile.outbound.is_none(),
+        Err(error @ (ErrorCode::WritePaused | ErrorCode::ProfileIgnored)) => return Err(error),
+        Err(ErrorCode::ReadOnly) => {
+            if matches!(
+                profile.identity.origin,
+                crate::storage::ProfileOrigin::LocalSkills
+            ) {
+                return Err(ErrorCode::ReadOnly);
+            }
+            true
+        }
+        Err(error) => return Err(error),
+    };
+    if offline {
+        record.failure = Some(org::code_name(ErrorCode::ReadOnly));
+        record.failure_message = Some(org::MSG_OFFLINE.to_owned());
+        store(inner, job_id, record).await?;
+        return Ok(Err(present(inner, job_id, record).await?));
+    }
+    Ok(Ok(profile))
 }

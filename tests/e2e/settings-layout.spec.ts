@@ -26,7 +26,7 @@ for (const [width, height] of sizes) {
           return { x, y, width, height, scrollWidth: element.scrollWidth, scrollHeight: element.scrollHeight };
         };
         return { main: box('.app-main'), tabs: box('.settings-tabs'), content: box('.settings-scroll'),
-          connection: box('.connection-settings'), sources: box('.connection-sources'), setup: box('.connection-setup'),
+          connection: box('.connection-settings'),
           export: box('.export-desk'), documentWidth: document.documentElement.scrollWidth, documentHeight: document.documentElement.scrollHeight };
       });
       geometry.push({ tab, ...measurements });
@@ -36,12 +36,8 @@ for (const [width, height] of sizes) {
         await expect(page.getByRole('tablist', { name: '设置分类' })).toHaveAttribute('aria-orientation', 'vertical');
         expect(measurements.tabs!.x + measurements.tabs!.width).toBeLessThanOrEqual(measurements.content!.x);
         if (tab === 'Chrome 连接') {
-          const { connection, sources, setup } = measurements;
-          expect(connection!.width).toBeGreaterThan(0);
-          if (connection!.width >= 960) {
-            expect(sources!.x + sources!.width).toBeLessThanOrEqual(setup!.x);
-            expect(Math.abs(sources!.y - setup!.y)).toBeLessThanOrEqual(1);
-          } else expect(sources!.y + sources!.height).toBeLessThanOrEqual(setup!.y);
+          expect(measurements.connection!.width).toBeGreaterThan(0);
+          expect(measurements.connection!.width).toBeLessThanOrEqual(760);
         }
         const overflow = await panel.evaluate(element => element.scrollWidth > element.clientWidth);
         expect(overflow).toBe(false);
@@ -126,20 +122,17 @@ for (const scenario of ['preview', 'loading'] as const) {
 }
 
 for (const [width, height] of sizes) {
-  test(`S02 pending pairing and long file source ${width}x${height}`, async ({ page }) => {
+  test(`S02 ignored source and long file source ${width}x${height}`, async ({ page }) => {
     await page.setViewportSize({ width, height }); await mockBridge(page, 'sources'); await page.goto('/');
     await expect(page.locator('#library-source')).toBeVisible();
     await page.evaluate(() => {
       const fixture = window as unknown as { __s02state: (patch: unknown) => void; __r07patch: (patch: unknown) => void };
       fixture.__r07patch({ displayName: '资料名称与英文 LongReference'.repeat(4) });
-      fixture.__s02state({ mirrors: [{ mirrorSourceId: 'mirror-long', displayName: '只读文件资料'.repeat(8), association: 'independent', pairedProfileId: null, fileStatus: 'stale', watching: true, nodeCount: 19, revision: 3, lastSyncedAt: null, errorCode: null, canWriteBrowser: false }], pending: [{ profileId: 'pending-fixture', displayName: '接入中的新资料', instanceId: 'fixture-instance', origin: 'chrome-extension://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', expiresAt: Date.now() + 120000 }] });
+      fixture.__s02state({ mirrors: [{ mirrorSourceId: 'mirror-long', displayName: '只读文件资料'.repeat(8), association: 'independent', pairedProfileId: null, fileStatus: 'stale', watching: true, nodeCount: 19, revision: 3, lastSyncedAt: null, errorCode: null, canWriteBrowser: false }] });
     });
     await page.getByRole('button', { name: '设置', exact: true }).click();
     await page.getByRole('tab', { name: 'Chrome 连接', exact: true }).click();
-    await expect(page.locator('.extension-instructions')).toHaveAttribute('open', '');
-    const confirm = page.getByRole('button', { name: '确认此扩展', exact: true });
-    await confirm.scrollIntoViewIfNeeded(); await expect(confirm).toBeVisible();
-    await expect(page.getByRole('button', { name: '生成配对串', exact: true })).toBeDisabled();
+    await page.getByText('其他接入方式：只读文件来源', { exact: true }).click();
     expect(await page.locator('.settings-scroll').evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true);
     await mkdir(evidence, { recursive: true });
     await page.screenshot({ path: join(evidence, `pending-${width}x${height}.png`) });
@@ -152,5 +145,108 @@ for (const [width, height] of sizes) {
     await expect(page.getByRole('button', { name: '导出侧车 JSON' })).toHaveCount(0);
     expect(await page.locator('#library-source').count()).toBe(1);
     await page.screenshot({ path: join(evidence, `mirror-export-${width}x${height}.png`) });
+  });
+}
+
+for (const fontSize of [12, 14, 20]) {
+  test(`T5 typography hierarchy h1 > h2 > h3 > body at ${fontSize}px`, async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.addInitScript(size => localStorage.setItem('markbridge.ui-preferences.v2', JSON.stringify({ version: 2, theme: 'light', font: { kind: 'preset', value: 'system' }, fontSizePx: size })), fontSize);
+    await mockBridge(page, 'sources');
+    await page.goto('/');
+    await page.getByRole('button', { name: '设置', exact: true }).click();
+    for (const tab of ['通用', 'Chrome 连接', 'AI', '语义检索', '备份导出']) {
+      await page.getByRole('tab', { name: tab, exact: true }).click();
+      const sizesMeasured = await page.evaluate(() => {
+        const px = (el: Element | null) => el ? parseFloat(getComputedStyle(el).fontSize) : 0;
+        const h1 = document.querySelector('.workspace-heading h1');
+        const panel = document.querySelector('.settings-content > [role="tabpanel"]:not([hidden])')!;
+        const h2 = panel.querySelector('h2');
+        const h3 = panel.querySelector('h3');
+        return { h1: px(h1), h2: px(h2), h3: px(h3), body: px(document.body) };
+      });
+      expect(sizesMeasured.body, `${tab} body`).toBe(fontSize);
+      expect(sizesMeasured.h1, `${tab} h1 > h2`).toBeGreaterThan(sizesMeasured.h2);
+      expect(sizesMeasured.h2, `${tab} h2 > h3`).toBeGreaterThan(sizesMeasured.h3);
+      expect(sizesMeasured.h3, `${tab} h3 > body`).toBeGreaterThan(sizesMeasured.body);
+    }
+  });
+}
+
+for (const [width, height] of [[1440, 900], [1920, 1080], [2549, 1356]] as const) {
+  test(`T5 transparent rail, 760px left-aligned reading width, well-groups, and zero split gap at ${width}x${height}`, async ({ page }) => {
+    await page.setViewportSize({ width, height });
+    await mockBridge(page, 'sources');
+    await page.goto('/');
+    await page.getByRole('button', { name: '设置', exact: true }).click();
+    const tabsBg = await page.locator('.settings-tabs').evaluate(el => getComputedStyle(el).backgroundColor);
+    expect(tabsBg).toBe('rgba(0, 0, 0, 0)');
+
+    for (const [tab, expectedPrimary] of [['通用', 0], ['Chrome 连接', 0], ['AI', 1], ['语义检索', 1], ['备份导出', 1]] as const) {
+      await page.getByRole('tab', { name: tab, exact: true }).click();
+      const layout = await page.evaluate((tabName) => {
+        const tabs = document.querySelector('.settings-tabs')!.getBoundingClientRect();
+        const content = document.querySelector('.settings-content')!;
+        const contentStyle = getComputedStyle(content);
+        const contentBox = content.getBoundingClientRect();
+        const panel = document.querySelector('.settings-content > [role="tabpanel"]:not([hidden])')!;
+        const wells = [...panel.querySelectorAll('.well-group')].map(el => {
+          const s = getComputedStyle(el);
+          return { bg: s.backgroundColor, border: s.borderTopWidth, radius: s.borderRadius, padding: s.padding };
+        });
+        const rows = [...panel.querySelectorAll('.settings-row')].map(row => {
+          const first = row.firstElementChild!.getBoundingClientRect();
+          const last = row.lastElementChild!.getBoundingClientRect();
+          return { gap: last.x - (first.x + first.width), span: last.x - first.x };
+        });
+        const primaryButtons = panel.querySelectorAll('button.primary-button').length;
+        const autoSubmitNonPrimary = [...panel.querySelectorAll('button[type="submit"]:not(.primary-button)')].length;
+        const targetText = tabName === 'AI'
+          ? (panel.querySelector('.ai-desk')?.textContent ?? '')
+          : tabName === '备份导出'
+            ? (panel.querySelector('.export-desk')?.textContent ?? '')
+            : tabName === 'Chrome 连接'
+              ? [...panel.querySelectorAll('.settings-facts')].map(el => el.textContent ?? '').join(' ')
+              : '';
+        return {
+          tabsRight: tabs.x + tabs.width,
+          contentX: contentBox.x,
+          contentWidth: contentBox.width,
+          maxWidth: contentStyle.maxWidth,
+          marginLeft: contentStyle.marginLeft,
+          wells,
+          rows,
+          primaryButtons,
+          autoSubmitNonPrimary,
+          hasMiddleDot: targetText.includes('·'),
+        };
+      }, tab);
+      expect(layout.maxWidth, tab).toBe('760px');
+      expect(layout.contentWidth, tab).toBeLessThanOrEqual(760);
+      expect(layout.marginLeft, tab).toBe('0px');
+      expect(layout.contentX - layout.tabsRight, `${tab} flush to tabs`).toBeLessThanOrEqual(32);
+      expect(layout.wells.length, `${tab} wells`).toBeGreaterThanOrEqual(1);
+      for (const well of layout.wells) {
+        expect(well.border).toBe('0px');
+        expect(well.radius).toBe('16px');
+        expect(well.padding).toBe('16px 20px');
+      }
+      for (const row of layout.rows) {
+        expect(row.gap, `${tab} row gap`).toBeLessThanOrEqual(32);
+        expect(row.span, `${tab} label+gap span`).toBeLessThanOrEqual(260);
+      }
+      expect(layout.primaryButtons, `${tab} primary count`).toBe(expectedPrimary);
+      if (tab !== 'Chrome 连接') expect(layout.autoSubmitNonPrimary, `${tab} unclassed submit`).toBe(0);
+      expect(layout.hasMiddleDot, `${tab} middle dot`).toBe(false);
+    }
+
+    await page.getByRole('tab', { name: 'Chrome 连接', exact: true }).click();
+    const connectionSubmits = await page.locator('#settings-panel-connection button[type="submit"]').evaluateAll(nodes =>
+      nodes.map(node => getComputedStyle(node).backgroundColor),
+    );
+    expect(connectionSubmits.length).toBeGreaterThan(0);
+    for (const bg of connectionSubmits) {
+      expect(bg).not.toBe('rgb(31, 108, 176)');
+    }
   });
 }

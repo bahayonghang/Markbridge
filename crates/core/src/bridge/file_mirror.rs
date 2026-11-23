@@ -249,11 +249,7 @@ impl Bridge {
             .profiles
             .get(id.as_str())
             .ok_or(ErrorCode::WrongProfile)?;
-        if profile.revoked || profile.view.connection != markbridge_protocol::BridgeConnection::Live
-        {
-            return Err(ErrorCode::ReadOnly);
-        }
-        Ok(())
+        profile.check_browser_writable()
     }
 
     pub(super) async fn stop_watches(&self) {

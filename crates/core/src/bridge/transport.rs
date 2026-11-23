@@ -26,7 +26,6 @@ pub(super) async fn serve(
 ) {
     let permits = Arc::new(Semaphore::new(32));
     let mut connections = JoinSet::new();
-    let mut maintenance = interval(Duration::from_secs(1));
     let mut rate_window = Instant::now();
     let mut accepted = 0;
     loop {
@@ -34,7 +33,6 @@ pub(super) async fn serve(
             biased;
             _ = stopped.changed() => break,
             Some(_) = connections.join_next(), if !connections.is_empty() => {},
-            _ = maintenance.tick() => { bridge.state().await; },
             socket = listener.accept() => {
                 let Ok((socket, peer)) = socket else { break; };
                 if !peer.ip().is_loopback() { continue; }
@@ -63,10 +61,12 @@ async fn connection(bridge: Bridge, socket: TcpStream, mut stopped: watch::Recei
         Ok(addr) => addr.port(),
         Err(_) => return,
     };
+    let allowed_origin = bridge.allowed_origin();
     let handshake = accept_hdr_async_with_config(
         socket,
         HandshakeCheck {
             port,
+            allowed_origin,
             origin: actual_origin,
         },
         Some(
@@ -84,91 +84,82 @@ async fn connection(bridge: Bridge, socket: TcpStream, mut stopped: watch::Recei
     };
     let mut binding = None;
     let mut closed = None;
-    // A successful pair exchange still requires hello. Pending human confirmation closes immediately.
-    for _ in 0..2 {
-        let text = tokio::select! {
-            _ = stopped.changed() => break,
-            result = timeout_at(deadline, read_text(&mut ws)) => match result { Ok(Ok(text)) => text, _ => break },
-        };
-        let message = match parse_frame(text.as_bytes()) {
-            Ok(message) => message,
+    let text = tokio::select! {
+        _ = stopped.changed() => String::new(),
+        result = timeout_at(deadline, read_text(&mut ws)) => match result { Ok(Ok(text)) => text, _ => String::new() },
+    };
+    if !text.is_empty() {
+        match parse_frame(text.as_bytes()) {
+            Ok(message @ WireMessage::Hello { .. }) => {
+                let request = match &message {
+                    WireMessage::Hello { request_id, .. } => request_id.0.clone(),
+                    _ => None,
+                };
+                let (requested_profile, session) = message.identity();
+                let authenticated = tokio::select! {
+                    _ = stopped.changed() => None,
+                    result = timeout_at(deadline, bridge.connect_extension(&origin, &message)) => result.ok(),
+                };
+                if let Some(authenticated) = authenticated {
+                    let (accepted, resolved_profile, display_name, epoch, write_paused, error) =
+                        match &authenticated {
+                            Ok(auth) => (
+                                true,
+                                Some(auth.profile_id.clone()),
+                                Some(auth.display_name.clone()),
+                                auth.source_epoch,
+                                auth.write_paused,
+                                None,
+                            ),
+                            Err(error) => (
+                                false,
+                                None,
+                                None,
+                                SourceEpoch::new(1).expect("constant"),
+                                false,
+                                Some(*error),
+                            ),
+                        };
+                    let envelope_profile = resolved_profile.as_ref().unwrap_or(requested_profile);
+                    let response = envelope(
+                        "hello_result",
+                        envelope_profile,
+                        session,
+                        request,
+                        serde_json::json!({
+                            "accepted": accepted,
+                            "profileId": resolved_profile,
+                            "displayName": display_name,
+                            "sourceEpoch": epoch,
+                            "writePaused": write_paused,
+                            "errorCode": error,
+                        }),
+                    );
+                    if let Ok(auth) = authenticated {
+                        binding = Some((auth.profile_id, session.clone()));
+                        closed = Some(auth.closed);
+                    }
+                    if let Ok(response) = response
+                        && !matches!(
+                            timeout_at(deadline, send(&mut ws, response)).await,
+                            Ok(Ok(()))
+                        )
+                    {
+                        if let Some((ref profile, ref sess)) = binding {
+                            bridge
+                                .disconnected(profile, sess, Some(ErrorCode::ReadOnly))
+                                .await;
+                        }
+                        binding = None;
+                    }
+                }
+            }
+            Ok(_) => {}
             Err(_) => {
                 if let Some(rejection) = unsupported_version_result(&text) {
                     let _ = timeout_at(deadline, send(&mut ws, rejection)).await;
                 }
-                break;
             }
-        };
-        let request = match &message {
-            WireMessage::Pair { request_id, .. } | WireMessage::Hello { request_id, .. } => {
-                request_id.0.clone()
-            }
-            _ => break,
-        };
-        let (profile, session) = message.identity();
-        if matches!(message, WireMessage::Pair { .. }) {
-            let result = tokio::select! {
-                _ = stopped.changed() => break,
-                result = timeout_at(deadline, bridge.pair(&origin, &message)) => match result { Ok(result) => result, Err(_) => break },
-            };
-            let (accepted, credential, error) = match result {
-                Ok(Some(secret)) => (true, Some(secret), None),
-                Ok(None) => (false, None, Some(ErrorCode::Unpaired)),
-                Err(error) => (false, None, Some(error)),
-            };
-            let response = envelope(
-                "pair_result",
-                profile,
-                session,
-                request,
-                serde_json::json!({"accepted":accepted,"credential":credential,"errorCode":error}),
-            );
-            if let Ok(response) = response
-                && !matches!(
-                    timeout_at(deadline, send(&mut ws, response)).await,
-                    Ok(Ok(()))
-                )
-            {
-                break;
-            }
-            if !accepted {
-                break;
-            }
-        } else {
-            let authenticated = tokio::select! {
-                _ = stopped.changed() => break,
-                result = timeout_at(deadline, bridge.authenticate(&origin, &message)) => match result { Ok(result) => result, Err(_) => break },
-            };
-            let (accepted, epoch, error) = match &authenticated {
-                Ok((epoch, _)) => (true, *epoch, None),
-                Err(error) => (false, SourceEpoch::new(1).expect("constant"), Some(*error)),
-            };
-            let response = envelope(
-                "hello_result",
-                profile,
-                session,
-                request,
-                serde_json::json!({"accepted":accepted,"sourceEpoch":epoch,"errorCode":error}),
-            );
-            if let Ok((_, receiver)) = authenticated {
-                binding = Some((profile.clone(), session.clone()));
-                closed = Some(receiver);
-            }
-            if let Ok(response) = response
-                && !matches!(
-                    timeout_at(deadline, send(&mut ws, response)).await,
-                    Ok(Ok(()))
-                )
-            {
-                if binding.is_some() {
-                    bridge
-                        .disconnected(profile, session, Some(ErrorCode::ReadOnly))
-                        .await;
-                }
-                binding = None;
-                break;
-            }
-            break;
         }
     }
     if let (Some((profile, session)), Some(mut closed)) = (binding, closed) {
@@ -217,7 +208,13 @@ async fn authenticated_loop(
             _ = reconcile.tick() => { request_sync(bridge, ws, profile, session).await?; },
             outgoing = outbound_rx.recv(), if outbound_open => {
                 match outgoing {
-                    Some(message) => send(ws, message).await?,
+                    Some(message) => {
+                        let close_after = matches!(message, WireMessage::PauseSync { .. });
+                        send(ws, message).await?;
+                        if close_after {
+                            return Ok(());
+                        }
+                    }
                     None => outbound_open = false,
                 }
             },
@@ -227,21 +224,72 @@ async fn authenticated_loop(
                 if rate_window.elapsed() >= Duration::from_secs(1) { rate_window = Instant::now(); frames = 0; }
                 frames += 1;
                 if frames > 120 { return Err(ErrorCode::LimitExceeded); }
-                if message.identity() != (profile, session) { return Err(ErrorCode::WrongProfile); }
-                // Check current authority for heartbeats as well as cache messages.
-                { bridge.inner.lock().await.authenticated(profile, session)?; }
-                match message {
-                    WireMessage::Ping { request_id, .. } => send(ws, envelope("pong", profile, session, request_id.0, serde_json::json!({}))?).await?,
-                    WireMessage::Pong { .. } => {},
-                    WireMessage::TreeFull { .. } | WireMessage::Event { .. } => {
-                        if bridge.receive(message).await? { request_sync(bridge, ws, profile, session).await?; }
-                    },
-                    WireMessage::ResyncRequired { .. } => { request_sync(bridge, ws, profile, session).await?; },
-                    // An operation receipt is the extension's acknowledgement. Treating it as a command closes the session and freezes the write.
-                    WireMessage::OperationReceipt { .. } => { bridge.receive(message).await?; },
-                    _ => return Err(ErrorCode::ReadOnly),
+                if let Err(err) = handle_incoming_message(bridge, ws, profile, session, message).await {
+                    flush_pause_sync(ws, &mut outbound_rx).await;
+                    return Err(err);
                 }
             }
+        }
+    }
+}
+
+async fn handle_incoming_message(
+    bridge: &Bridge,
+    ws: &mut WebSocketStream<TcpStream>,
+    profile: &Id,
+    session: &Id,
+    message: WireMessage,
+) -> Result<()> {
+    if message.identity() != (profile, session) {
+        return Err(ErrorCode::WrongProfile);
+    }
+    // Check current authority for heartbeats as well as cache messages.
+    bridge
+        .inner
+        .lock()
+        .await
+        .authenticated(profile, session)
+        .map(|_| ())?;
+    match message {
+        WireMessage::Ping { request_id, .. } => {
+            send(
+                ws,
+                envelope(
+                    "pong",
+                    profile,
+                    session,
+                    request_id.0,
+                    serde_json::json!({}),
+                )?,
+            )
+            .await?;
+        }
+        WireMessage::Pong { .. } => {}
+        WireMessage::TreeFull { .. } | WireMessage::Event { .. } => {
+            if bridge.receive(message).await? {
+                request_sync(bridge, ws, profile, session).await?;
+            }
+        }
+        WireMessage::ResyncRequired { .. } => {
+            request_sync(bridge, ws, profile, session).await?;
+        }
+        // An operation receipt is the extension's acknowledgement. Treating it as a command closes the session and freezes the write.
+        WireMessage::OperationReceipt { .. } => {
+            bridge.receive(message).await?;
+        }
+        _ => return Err(ErrorCode::ReadOnly),
+    }
+    Ok(())
+}
+
+async fn flush_pause_sync(
+    ws: &mut WebSocketStream<TcpStream>,
+    outbound_rx: &mut mpsc::UnboundedReceiver<WireMessage>,
+) {
+    while let Ok(message) = outbound_rx.try_recv() {
+        if matches!(message, WireMessage::PauseSync { .. }) {
+            let _ = send(ws, message).await;
+            break;
         }
     }
 }
@@ -260,6 +308,7 @@ async fn request_sync(
 
 struct HandshakeCheck {
     port: u16,
+    allowed_origin: PairedOrigin,
     origin: Arc<StdMutex<Option<PairedOrigin>>>,
 }
 impl Callback for HandshakeCheck {
@@ -268,7 +317,13 @@ impl Callback for HandshakeCheck {
         request: &Request,
         response: Response,
     ) -> std::result::Result<Response, ErrorResponse> {
-        match checked_handshake(self.port, &self.origin, request, response) {
+        match checked_handshake(
+            self.port,
+            &self.allowed_origin,
+            &self.origin,
+            request,
+            response,
+        ) {
             Ok(response) => Ok(response),
             Err(error) => Err(*error),
         }
@@ -276,12 +331,13 @@ impl Callback for HandshakeCheck {
 }
 fn checked_handshake(
     port: u16,
+    allowed_origin: &PairedOrigin,
     actual_origin: &Arc<StdMutex<Option<PairedOrigin>>>,
     request: &Request,
     response: Response,
 ) -> std::result::Result<Response, Box<ErrorResponse>> {
     let reject = || {
-        let mut response = ErrorResponse::new(Some("UNPAIRED".to_owned()));
+        let mut response = ErrorResponse::new(Some("FORBIDDEN".to_owned()));
         *response.status_mut() = tokio_tungstenite::tungstenite::http::StatusCode::FORBIDDEN;
         Box::new(response)
     };
@@ -302,6 +358,9 @@ fn checked_handshake(
         .and_then(|value| value.to_str().ok())
         .and_then(|value| PairedOrigin::new(value).ok())
         .ok_or_else(reject)?;
+    if &parsed != allowed_origin {
+        return Err(reject());
+    }
     *actual_origin.lock().map_err(|_| reject())? = Some(parsed);
     Ok(response)
 }
@@ -316,17 +375,19 @@ fn unsupported_version_result(text: &str) -> Option<WireMessage> {
     }
     let kind = match value.get("type").and_then(|item| item.as_str())? {
         "hello" => "hello_result",
-        "pair" => "pair_result",
         _ => return None,
     };
     let profile = Id::new(value.get("profileId")?.as_str()?).ok()?;
     let session = Id::new(value.get("sessionId")?.as_str()?).ok()?;
     let request = Id::new(value.get("requestId")?.as_str()?).ok()?;
-    let payload = if kind == "hello_result" {
-        serde_json::json!({"accepted":false,"sourceEpoch":1,"errorCode":ErrorCode::UnsupportedVersion})
-    } else {
-        serde_json::json!({"accepted":false,"credential":null,"errorCode":ErrorCode::UnsupportedVersion})
-    };
+    let payload = serde_json::json!({
+        "accepted": false,
+        "profileId": null,
+        "displayName": null,
+        "sourceEpoch": 1,
+        "writePaused": false,
+        "errorCode": ErrorCode::UnsupportedVersion
+    });
     envelope(kind, &profile, &session, Some(request), payload).ok()
 }
 async fn read_text(ws: &mut WebSocketStream<TcpStream>) -> Result<String> {

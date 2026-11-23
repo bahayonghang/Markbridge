@@ -18,8 +18,8 @@ export function DiagnosticExport({ native }: { native: boolean }) {
     } catch { if (alive.current) setError(true); }
     finally { locked.current = false; if (alive.current) setBusy(false); }
   }
-  return <section className="connection-panel" aria-label="诊断导出">
-    <div className="panel-heading"><h2>诊断导出</h2></div>
+  return <section className="well-group diagnostic-export" aria-label="诊断导出">
+    <div className="panel-heading"><h3>诊断导出</h3></div>
     <p className="secondary">保存版本、系统类型和连接状态汇总，无需 Chrome 在线，不自动上传。</p>
     <p className="secondary">不含书签内容、资料名称、本机路径、密钥或模型配置。文件只在本机保存。</p>
     <button type="button" disabled={!native || busy} onClick={() => void save()}>导出诊断 JSON</button>

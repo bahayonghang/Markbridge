@@ -46,7 +46,7 @@ pub fn report(state: &BridgeState) -> DiagnosticReport {
         bridge_listening: state.port.0.is_some(),
         bridge_error_code: state.error_code.clone(),
         connections: DiagnosticConnections {
-            unpaired: connections(BridgeConnection::Unpaired),
+            ignored: connections(BridgeConnection::Ignored),
             connecting: connections(BridgeConnection::Connecting),
             reconciling: connections(BridgeConnection::Reconciling),
             live: connections(BridgeConnection::Live),
@@ -69,12 +69,10 @@ mod tests {
     fn report_keeps_only_fixed_status_counts_and_excludes_private_source_fields() {
         let mut value = serde_json::json!({
             "protocolVersion": 1, "revision": 98301, "port": 54321, "errorCode": "STORAGE_ERROR",
-            "profiles": [], "mirrors": [],
-            "pending": [{ "profileId": "pending-private", "displayName": "sk-pending-secret",
-                "instanceId": "instance-private", "origin": "https://private.example/?token=canary#fragment", "expiresAt": 98302 }]
+            "profiles": [], "mirrors": []
         });
         for connection in [
-            "unpaired",
+            "ignored",
             "connecting",
             "reconciling",
             "live",
@@ -88,6 +86,7 @@ mod tests {
                 .push(serde_json::json!({
                     "profileId": "profile-private", "instanceId": "instance-private",
                     "displayName": "C:\\Private\\raw-bookmark-title", "connection": connection,
+                    "writePaused": false, "ignored": connection == "ignored",
                     "nodeCount": 98303, "revision": 98304, "lastSyncedAt": 98305, "errorCode": null
                 }));
         }
@@ -104,7 +103,7 @@ mod tests {
         assert_eq!(
             actual["connections"],
             serde_json::json!({
-                "unpaired":1, "connecting":1, "reconciling":1, "live":2, "cachedReadOnly":1, "error":1
+                "ignored":1, "connecting":1, "reconciling":1, "live":2, "cachedReadOnly":1, "error":1
             })
         );
         assert_eq!(
@@ -146,10 +145,10 @@ mod tests {
     }
 
     #[test]
-    fn unpaired_diagnostics_do_not_need_a_listener_or_source() {
+    fn idle_diagnostics_do_not_need_a_listener_or_source() {
         let state: BridgeState = serde_json::from_value(serde_json::json!({
             "protocolVersion":1, "revision":0, "port":null, "errorCode":null,
-            "profiles":[], "pending":[], "mirrors":[]
+            "profiles":[], "mirrors":[]
         }))
         .unwrap();
         let report = report(&state);

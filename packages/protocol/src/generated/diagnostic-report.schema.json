@@ -76,19 +76,19 @@
         "error": {
           "$ref": "#/$defs/Counter"
         },
+        "ignored": {
+          "$ref": "#/$defs/Counter"
+        },
         "live": {
           "$ref": "#/$defs/Counter"
         },
         "reconciling": {
           "$ref": "#/$defs/Counter"
-        },
-        "unpaired": {
-          "$ref": "#/$defs/Counter"
         }
       },
       "additionalProperties": false,
       "required": [
-        "unpaired",
+        "ignored",
         "connecting",
         "reconciling",
         "live",
@@ -147,7 +147,10 @@
             "STORAGE_NEWER_SCHEMA",
             "MIGRATION_FAILED",
             "CONFLICT",
-            "CANCELLED"
+            "CANCELLED",
+            "PROFILE_IGNORED",
+            "WRITE_PAUSED",
+            "PORT_EXHAUSTED"
           ]
         },
         {

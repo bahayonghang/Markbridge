@@ -10,7 +10,7 @@ struct Prepared {
     encodings: Vec<EncodingBody>,
     conflicts: Vec<EncodingConflict>,
     enabled: bool,
-    live: bool,
+    write_error: Option<ErrorCode>,
     revision: Counter,
     fatal: Option<ErrorCode>,
 }
@@ -160,8 +160,8 @@ impl Bridge {
         if let Some(error) = prepared.fatal {
             return Err(error);
         }
-        if !prepared.live {
-            return Err(ErrorCode::ReadOnly);
+        if let Some(error) = prepared.write_error {
+            return Err(error);
         }
         if prepared.plan.steps.is_empty() {
             return Err(if prepared.conflicts.is_empty() {
@@ -241,11 +241,20 @@ async fn prepare(
     if expected_revision != profile.view.revision.get() {
         return Err(ErrorCode::StaleProposal);
     }
-    let live = profile.view.connection == BridgeConnection::Live
-        && !profile.writes_blocked
-        && !profile.busy
-        && profile.session.is_some()
-        && profile.outbound.is_some();
+    let write_error = match profile.check_browser_writable() {
+        Ok(()) => {
+            if !profile.writes_blocked
+                && !profile.busy
+                && profile.session.is_some()
+                && profile.outbound.is_some()
+            {
+                None
+            } else {
+                Some(ErrorCode::ReadOnly)
+            }
+        }
+        Err(error) => Some(error),
+    };
     let catalog = inner
         .storage()?
         .tag_catalog(profile_id.clone(), chrome_ids.to_vec(), None)
@@ -341,7 +350,7 @@ async fn prepare(
         encodings,
         conflicts,
         enabled: catalog.encoding_enabled,
-        live,
+        write_error,
         revision: profile.view.revision,
         fatal,
     })
@@ -361,10 +370,17 @@ fn tag_names<'a>(catalog: &'a TagCatalog, entry: &TagEntry) -> Result<Vec<&'a st
 }
 
 fn to_preview(profile_id: &Id, restore: bool, prepared: &Prepared) -> TitleEncodingPreview {
-    let error = prepared.fatal.or(if prepared.conflicts.is_empty() {
-        None
-    } else if prepared.plan.steps.is_empty() {
-        Some(ErrorCode::Conflict)
+    let error = prepared.fatal.or(if !prepared.conflicts.is_empty() {
+        prepared
+            .plan
+            .steps
+            .is_empty()
+            .then_some(ErrorCode::Conflict)
+    } else if matches!(
+        prepared.write_error,
+        Some(ErrorCode::WritePaused | ErrorCode::ProfileIgnored)
+    ) {
+        prepared.write_error
     } else {
         None
     });
@@ -373,7 +389,9 @@ fn to_preview(profile_id: &Id, restore: bool, prepared: &Prepared) -> TitleEncod
         expected_revision: prepared.revision,
         enabled: prepared.enabled,
         restore,
-        writable: prepared.live && prepared.fatal.is_none() && !prepared.plan.steps.is_empty(),
+        writable: prepared.write_error.is_none()
+            && prepared.fatal.is_none()
+            && !prepared.plan.steps.is_empty(),
         error_code: RequiredNullable(error),
         changes: prepared.plan.changes.clone(),
         conflicts: prepared.conflicts.clone(),

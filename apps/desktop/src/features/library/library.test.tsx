@@ -17,11 +17,11 @@ function node(chromeId: string, parentId: string | null, position: number, kind:
 }
 
 function state(profiles: BridgeState['profiles'], mirrors: BridgeState['mirrors'] = [], revision = 1): BridgeState {
-  return { protocolVersion: 1, revision, port: 49153, errorCode: null, profiles, pending: [], mirrors };
+  return { protocolVersion: 1, revision, port: 49153, errorCode: null, profiles, mirrors };
 }
 
 function profile(id: string, name: string, revision = 4, connection: BridgeState['profiles'][number]['connection'] = 'live'): BridgeState['profiles'][number] {
-  return { profileId: id, instanceId: `instance-${id}`, displayName: name, connection, nodeCount: 4, revision, lastSyncedAt: null, errorCode: null };
+  return { profileId: id, instanceId: `instance-${id}`, displayName: name, connection, writePaused: false, ignored: false, nodeCount: 4, revision, lastSyncedAt: null, errorCode: null };
 }
 
 const root = node('0', null, 0, 'folder', '根');
@@ -424,6 +424,8 @@ it('keeps duplicate urls, chinese text, and long titles through the cache reads'
   expect(searchSnapshot(barItems, 'https://example.com/dup', 10)).toHaveLength(2);
   expect(screen.getByText(longTitle)).toHaveClass('library-title');
   expect(screen.getByText(/已加载 4 \/ 4 项/)).toBeVisible();
+  expect(document.querySelector('.library-list-meta')?.textContent).not.toContain('·');
+  expect(document.querySelector('.library-status')?.textContent).not.toContain('·');
   expect(invoke).toHaveBeenCalledWith('cache_tree', { profileId: 'profile-a', folderId: null, depth: 0 });
   expect(invoke).toHaveBeenCalledWith('cache_query', { profileId: 'profile-a', request: expect.objectContaining({ folderId: '1', offset: 0, limit: 200 }) });
   fireEvent.click(screen.getByRole('option', { name: /Alpha/ }));
@@ -813,4 +815,55 @@ it('ignores an old catalog command after switching away and back to the same pro
   await act(async () => { finishOldCommand({ ...catalog, matches: [beta] }); });
   expect(screen.getByRole('listbox', { name: '标签筛选' })).toHaveTextContent('Alpha');
   expect(screen.getByRole('listbox', { name: '标签筛选' })).not.toHaveTextContent('Beta');
+});
+
+it('blocks browser writes and shows writePaused notice while keeping local tags and notes editable', async () => {
+  const paused = { ...profile('profile-a', '资料 A', 4, 'live'), writePaused: true, ignored: false };
+  render(<LibraryWorkspace state={state([paused])} invalid={false} native focusMirrorId={null} />);
+  fireEvent.click(await screen.findByRole('treeitem', { name: /栏/ }));
+  expect(screen.getAllByText(/已暂停写入（只读保护）/).length).toBeGreaterThanOrEqual(1);
+  expect(screen.getByRole('button', { name: '新建' })).toBeDisabled();
+  const alphaRow = await screen.findByRole('option', { name: /Alpha/ });
+  expect(alphaRow).toHaveAttribute('draggable', 'false');
+  fireEvent.keyDown(alphaRow, { key: 'ArrowDown', altKey: true });
+  fireEvent.click(screen.getByRole('checkbox', { name: '选择 Alpha' }));
+  expect(screen.getByRole('button', { name: '移动所选' })).toBeDisabled();
+  expect(screen.getByRole('button', { name: '删除所选' })).toBeDisabled();
+  await waitFor(() => expect(screen.getByRole('button', { name: '详情' })).toBeEnabled());
+  fireEvent.click(screen.getByRole('button', { name: '详情' }));
+  expect(await screen.findByRole('button', { name: '预览修改' })).toBeDisabled();
+  expect(screen.getByRole('button', { name: '移动' })).toBeDisabled();
+  expect(screen.getByRole('button', { name: '预览删除' })).toBeDisabled();
+  fireEvent.click(screen.getByRole('tab', { name: '标签备注' }));
+  await waitFor(() => expect(screen.getByRole('button', { name: '保存备注' })).toBeEnabled());
+  fireEvent.change(screen.getByLabelText('备注'), { target: { value: '暂停写入时可编辑的备注' } });
+  fireEvent.click(screen.getByRole('button', { name: '保存备注' }));
+  await waitFor(() => expect(invoke).toHaveBeenCalledWith('tag_command', expect.objectContaining({
+    command: { kind: 'set_note', chromeIds: ['10'], note: '暂停写入时可编辑的备注' },
+  })));
+  const commands = vi.mocked(invoke).mock.calls.map(([command]) => command);
+  expect(commands).not.toContain('preview_edit');
+  expect(commands).not.toContain('apply_edit');
+  expect(commands).not.toContain('preview_batch_edit');
+  expect(commands).not.toContain('apply_batch_edit');
+  expect(commands).not.toContain('apply_title_encoding');
+});
+
+it('unifies detail tabs with segmented-control, groups controls in well-groups, uses output-well previews, and limits primary buttons', async () => {
+  install((command) => {
+    if (command === 'preview_edit') return editPreview();
+    return undefined;
+  });
+  const { container } = render(<LibraryWorkspace state={state([profile('profile-a', '资料 A')])} invalid={false} native focusMirrorId={null} />);
+  fireEvent.click(await screen.findByRole('treeitem', { name: /栏/ }));
+  fireEvent.click(await screen.findByRole('option', { name: /Alpha/ }));
+  const detailPane = container.querySelector('.detail-pane')!;
+  expect(detailPane.querySelector('.detail-tabs .segmented-control[role="tablist"]')).not.toBeNull();
+  expect(detailPane.querySelectorAll('.well-group').length).toBeGreaterThanOrEqual(2);
+  expect(detailPane.querySelectorAll('#detail-panel-info .primary-button, .edit-desk .primary-button')).toHaveLength(1);
+  fireEvent.change(await screen.findByLabelText('新标题'), { target: { value: 'Alpha 2' } });
+  fireEvent.click(screen.getByRole('button', { name: '预览修改' }));
+  const dialog = await screen.findByRole('dialog', { name: '确认变更' });
+  expect(dialog).toHaveClass('output-well');
+  expect(detailPane.querySelectorAll('.edit-desk button.primary-button')).toHaveLength(1);
 });

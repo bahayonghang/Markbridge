@@ -1,8 +1,19 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { readFile, readdir, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+export const OFFICIAL_EXTENSION_ID = 'dfgpiejnjammdmmmdpdaembpclmgdbpf';
+export function extensionIdFromKey(base64Key) {
+  assert.equal(typeof base64Key, 'string', 'manifest.key must be a base64 string');
+  const der = Buffer.from(base64Key, 'base64');
+  assert.ok(der.length > 0 && der.toString('base64') === base64Key, 'manifest.key must be canonical base64');
+  const digest = createHash('sha256').update(der).digest().subarray(0, 16);
+  return [...digest].map((byte) => String.fromCharCode(97 + (byte >> 4), 97 + (byte & 0x0f))).join('');
+}
+
+async function runCheck() {
 const roots = ['apps/desktop/dist', 'apps/extension/dist'];
 async function inspect(directory) {
   for (const item of await readdir(directory, { withFileTypes: true })) {
@@ -23,6 +34,7 @@ for (const name of await readdir(desktopAssets)) {
 const extension = new URL('../apps/extension/dist/', import.meta.url);
 const manifest = JSON.parse(await readFile(new URL('manifest.json', extension), 'utf8'));
 assert.equal(manifest.manifest_version, 3);
+assert.equal(extensionIdFromKey(manifest.key), OFFICIAL_EXTENSION_ID);
 assert.deepEqual(manifest.permissions, ['bookmarks', 'storage', 'alarms', 'scripting', 'activeTab']);
 assert.equal(manifest.host_permissions, undefined);
 assert.deepEqual(manifest.background, { service_worker: 'worker.js', type: 'module' });
@@ -30,4 +42,9 @@ await readFile(new URL(manifest.action.default_popup, extension));
 await readFile(new URL(manifest.options_ui.page, extension));
 const worker = await readFile(new URL(manifest.background.service_worker, extension), 'utf8');
 assert.doesNotMatch(worker, /\beval\s*\(|\bFunction\s*\(/);
-console.log('Production assets: MV3 popup/options/worker present; permissions are bookmarks, storage, alarms, scripting, and activeTab; no source maps, dynamic code, known secret patterns, or absolute machine paths.');
+console.log('Production assets: MV3 fixed identity, popup/options/worker present; permissions are bookmarks, storage, alarms, scripting, and activeTab; no source maps, dynamic code, known secret patterns, or absolute machine paths.');
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  await runCheck();
+}

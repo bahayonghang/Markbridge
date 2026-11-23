@@ -10,8 +10,8 @@ let nextRequest = 0;
 const phases: Record<OrganizationPlan['phase'], string> = { folders: '审查目录', reviewed: '目录已审查', assigning: '正在生成分配', ready: '等待确认应用', applying: '执行中，等待回执', applied: '已完成', partial: '部分完成', paused: '已暂停', cancelled: '已取消', failed: '未完成', invalid: '方案已过期' };
 function countSteps(ranges: OrganizationPlan['applied']) { return ranges.reduce((total, range) => total + range.end - range.start, 0); }
 
-export function OrganizationDesk({ profileId, revision, sourceEpoch, live, chromeIds, settings = null, onSettings, onHistory }: {
-  profileId: string; revision: number; sourceEpoch?: number; live: boolean; chromeIds: string[];
+export function OrganizationDesk({ profileId, revision, sourceEpoch, live, writePaused = false, chromeIds, settings = null, onSettings, onHistory }: {
+  profileId: string; revision: number; sourceEpoch?: number; live: boolean; writePaused?: boolean; chromeIds: string[];
   settings?: AiSettings | null; onSettings?: () => void; onHistory?: () => void;
 }) {
   const [plan, setPlan] = useState<OrganizationPlan | null>(null);
@@ -85,22 +85,24 @@ export function OrganizationDesk({ profileId, revision, sourceEpoch, live, chrom
   const ready = plan?.phase === 'ready' && live && fresh;
   const generating = pending.current === 'generation';
   return <section className="org-desk" aria-label="批量整理">
-    <h3>AI 文件夹整理</h3>
-    <p className="secondary">先审查目录，再逐项查看分配。模型建议不会自动移动书签。</p>
-    <AiDisclosure settings={settings} batch count={chromeIds.length} onSettings={onSettings} />
-    {!live && <p className="notice">当前只读。可以审查方案，连接恢复后才能应用或删除空目录。</p>}
-    {chromeIds.length > 900 && <p role="alert">AI 整理每次最多 900 个书签，请缩小范围。不会截取部分书签应用。</p>}
-    <div className="edit-actions">
-      <button type="button" disabled={busy || !settings?.enabled || chromeIds.length === 0 || chromeIds.length > 900} onClick={() => {
-        request.current = 'org' + Date.now() + '-' + nextRequest++;
-        void run(() => proposeOrganization(profileId, chromeIds, request.current!), '无法提出文件夹。没有应用方案。', 'generation');
-      }}>提出文件夹</button>
-      <button type="button" disabled={pending.current === 'write' || (!generating && !plan)} onClick={() => void cancel()}>{plan?.operationId ? '停止剩余步骤' : '取消'}</button>
+    <div className="well-group">
+      <h3>AI 文件夹整理</h3>
+      <p className="secondary">模型建议不会自动移动书签。</p>
+      <AiDisclosure settings={settings} batch count={chromeIds.length} onSettings={onSettings} />
+      {!live && <p className="notice">{writePaused ? '已暂停写入（只读保护）。可以审查方案，恢复写入后才能应用或删除空目录。' : '当前只读。可以审查方案，连接恢复后才能应用或删除空目录。'}</p>}
+      {chromeIds.length > 900 && <p role="alert">AI 整理每次最多 900 个书签，请缩小范围。不会截取部分书签应用。</p>}
+      <div className="edit-actions">
+        <button type="button" className={!plan ? 'primary-button' : undefined} disabled={busy || !settings?.enabled || chromeIds.length === 0 || chromeIds.length > 900} onClick={() => {
+          request.current = 'org' + Date.now() + '-' + nextRequest++;
+          void run(() => proposeOrganization(profileId, chromeIds, request.current!), '无法提出文件夹。没有应用方案。', 'generation');
+        }}>提出文件夹</button>
+        <button type="button" disabled={pending.current === 'write' || (!generating && !plan)} onClick={() => void cancel()}>{plan?.operationId ? '停止剩余步骤' : '取消'}</button>
+      </div>
+      {generating && <p role="status">正在生成建议，可以返回书签，稍后查看结果。</p>}
+      {message && <p role="status">{message}</p>}
     </div>
-    {generating && <p role="status">正在生成建议，可以返回书签，稍后查看结果。</p>}
-    {message && <p role="status">{message}</p>}
-    {plan && <div className="organization-review">
-      <div className="organize-result-heading"><h4>{phases[plan.phase]}</h4><span>范围 {plan.scopeCount} 个书签 · 影响 {plan.impact} 步</span></div>
+    {plan && <div className="organization-review output-well">
+      <div className="organize-result-heading"><h4>{phases[plan.phase]}</h4><div className="settings-facts"><span>范围 {plan.scopeCount} 个书签</span><span>影响 {plan.impact} 步</span></div></div>
       {!fresh && !plan.operationId && <p className="notice">资料已变化。旧方案不能应用。</p>}
       <div className="organization-folders">{plan.folders.map((folder) => <label key={folder.folderId}>目录名称<input aria-label={'目录名称 ' + folder.folderId} value={folder.name} disabled={busy || !fresh || plan.phase !== 'folders'} onChange={(event) => setPlan({ ...plan, folders: plan.folders.map((item) => item.folderId === folder.folderId ? { ...item, name: event.target.value } : item) })} /></label>)}</div>
       <div className="edit-actions">
@@ -120,7 +122,7 @@ export function OrganizationDesk({ profileId, revision, sourceEpoch, live, chrom
         <button type="button" disabled={busy} onClick={() => void run(() => organizationPlan(plan.jobId), '无法刷新，请稍后重试。')}>刷新</button>
         <button type="button" disabled={busy || !live || plan.phase !== 'applied'} onClick={() => setConfirmDelete(true)}>清理空文件夹</button>
       </div>
-      {plan.operationId && <div className="organize-operation"><p>已完成 {countSteps(plan.applied)} 步 · 待处理 {countSteps(plan.pending)} 步 · 不确定 {countSteps(plan.uncertain)} 步 · 失败 {countSteps(plan.failed)} 步</p>{onHistory && <button type="button" onClick={onHistory}>前往操作历史</button>}</div>}
+      {plan.operationId && <div className="organize-operation"><div className="settings-facts organize-operation-stats" role="status"><span>已完成 {countSteps(plan.applied)} 步</span><span>待处理 {countSteps(plan.pending)} 步</span><span>不确定 {countSteps(plan.uncertain)} 步</span><span>失败 {countSteps(plan.failed)} 步</span></div>{onHistory && <button type="button" onClick={onHistory}>前往操作历史</button>}</div>}
       {confirmDelete && <div className="cleanup-review"><p>只清理这次整理留下的空目录。删除前仍会备份并核对目录状态。</p><div className="edit-actions"><button type="button" disabled={busy} onClick={() => setConfirmDelete(false)}>取消清理空目录</button><button type="button" className="danger-button" disabled={busy || !live} onClick={() => void run(() => cleanupOrganization(plan.jobId, true, false), '未收到清理结果，请查看操作历史。', 'write')}>确认删除空文件夹</button>{plan.failure === 'LIMIT_EXCEEDED' && <button type="button" className="danger-button" disabled={busy || !live} onClick={() => void run(() => cleanupOrganization(plan.jobId, true, true), '未收到清理结果，请查看操作历史。', 'write')}>再次确认删除空文件夹</button>}</div></div>}
     </div>}
   </section>;

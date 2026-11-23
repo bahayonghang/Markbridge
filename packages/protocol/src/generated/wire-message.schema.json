@@ -6,80 +6,6 @@
       "type": "object",
       "properties": {
         "payload": {
-          "$ref": "#/$defs/PairPayload"
-        },
-        "profileId": {
-          "$ref": "#/$defs/Id"
-        },
-        "protocolVersion": {
-          "$ref": "#/$defs/Version"
-        },
-        "requestId": {
-          "$ref": "#/$defs/RequiredNullable"
-        },
-        "seq": {
-          "$ref": "#/$defs/RequiredNullable2"
-        },
-        "sessionId": {
-          "$ref": "#/$defs/Id"
-        },
-        "type": {
-          "type": "string",
-          "const": "pair"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "type",
-        "protocolVersion",
-        "profileId",
-        "sessionId",
-        "requestId",
-        "seq",
-        "payload"
-      ]
-    },
-    {
-      "type": "object",
-      "properties": {
-        "payload": {
-          "$ref": "#/$defs/PairResultPayload"
-        },
-        "profileId": {
-          "$ref": "#/$defs/Id"
-        },
-        "protocolVersion": {
-          "$ref": "#/$defs/Version"
-        },
-        "requestId": {
-          "$ref": "#/$defs/RequiredNullable"
-        },
-        "seq": {
-          "$ref": "#/$defs/RequiredNullable2"
-        },
-        "sessionId": {
-          "$ref": "#/$defs/Id"
-        },
-        "type": {
-          "type": "string",
-          "const": "pair_result"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "type",
-        "protocolVersion",
-        "profileId",
-        "sessionId",
-        "requestId",
-        "seq",
-        "payload"
-      ]
-    },
-    {
-      "type": "object",
-      "properties": {
-        "payload": {
           "$ref": "#/$defs/HelloPayload"
         },
         "profileId": {
@@ -137,6 +63,80 @@
         "type": {
           "type": "string",
           "const": "hello_result"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "protocolVersion",
+        "profileId",
+        "sessionId",
+        "requestId",
+        "seq",
+        "payload"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "payload": {
+          "$ref": "#/$defs/PauseSyncPayload"
+        },
+        "profileId": {
+          "$ref": "#/$defs/Id"
+        },
+        "protocolVersion": {
+          "$ref": "#/$defs/Version"
+        },
+        "requestId": {
+          "$ref": "#/$defs/RequiredNullable"
+        },
+        "seq": {
+          "$ref": "#/$defs/RequiredNullable2"
+        },
+        "sessionId": {
+          "$ref": "#/$defs/Id"
+        },
+        "type": {
+          "type": "string",
+          "const": "pause_sync"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "protocolVersion",
+        "profileId",
+        "sessionId",
+        "requestId",
+        "seq",
+        "payload"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "payload": {
+          "$ref": "#/$defs/WritePolicyPayload"
+        },
+        "profileId": {
+          "$ref": "#/$defs/Id"
+        },
+        "protocolVersion": {
+          "$ref": "#/$defs/Version"
+        },
+        "requestId": {
+          "$ref": "#/$defs/RequiredNullable"
+        },
+        "seq": {
+          "$ref": "#/$defs/RequiredNullable2"
+        },
+        "sessionId": {
+          "$ref": "#/$defs/Id"
+        },
+        "type": {
+          "type": "string",
+          "const": "write_policy"
         }
       },
       "additionalProperties": false,
@@ -773,11 +773,6 @@
       "maximum": 9007199254740991,
       "minimum": 0
     },
-    "Credential": {
-      "type": "string",
-      "maxLength": 1024,
-      "minLength": 32
-    },
     "DisplayName": {
       "type": "string",
       "maxLength": 128,
@@ -809,7 +804,10 @@
             "STORAGE_NEWER_SCHEMA",
             "MIGRATION_FAILED",
             "CONFLICT",
-            "CANCELLED"
+            "CANCELLED",
+            "PROFILE_IGNORED",
+            "WRITE_PAUSED",
+            "PORT_EXHAUSTED"
           ]
         },
         {
@@ -847,17 +845,27 @@
     "HelloPayload": {
       "type": "object",
       "properties": {
-        "credential": {
-          "$ref": "#/$defs/Credential"
+        "displayNameHint": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DisplayName"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "instanceId": {
           "$ref": "#/$defs/Id"
+        },
+        "userInitiated": {
+          "type": "boolean",
+          "default": false
         }
       },
       "additionalProperties": false,
       "required": [
-        "instanceId",
-        "credential"
+        "instanceId"
       ]
     },
     "HelloResultPayload": {
@@ -865,6 +873,9 @@
       "properties": {
         "accepted": {
           "type": "boolean"
+        },
+        "displayName": {
+          "$ref": "#/$defs/RequiredNullable3"
         },
         "errorCode": {
           "anyOf": [
@@ -876,14 +887,23 @@
             }
           ]
         },
+        "profileId": {
+          "$ref": "#/$defs/RequiredNullable"
+        },
         "sourceEpoch": {
           "$ref": "#/$defs/SourceEpoch"
+        },
+        "writePaused": {
+          "type": "boolean"
         }
       },
       "additionalProperties": false,
       "required": [
         "accepted",
-        "sourceEpoch"
+        "profileId",
+        "displayName",
+        "sourceEpoch",
+        "writePaused"
       ]
     },
     "Id": {
@@ -1098,56 +1118,16 @@
         "payload"
       ]
     },
-    "PairPayload": {
+    "PauseSyncPayload": {
       "type": "object",
       "properties": {
-        "credential": {
-          "$ref": "#/$defs/Credential"
-        },
-        "displayName": {
-          "$ref": "#/$defs/DisplayName"
-        },
-        "instanceId": {
-          "$ref": "#/$defs/Id"
+        "reason": {
+          "$ref": "#/$defs/ErrorCode"
         }
       },
       "additionalProperties": false,
       "required": [
-        "instanceId",
-        "credential",
-        "displayName"
-      ]
-    },
-    "PairResultPayload": {
-      "type": "object",
-      "properties": {
-        "accepted": {
-          "type": "boolean"
-        },
-        "credential": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/Credential"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "errorCode": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/ErrorCode"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "accepted"
+        "reason"
       ]
     },
     "Position": {
@@ -1242,6 +1222,17 @@
       "anyOf": [
         {
           "$ref": "#/$defs/Counter"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "RequiredNullable3": {
+      "description": "A required JSON field whose value can be null. Unlike Option, absence is rejected.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/DisplayName"
         },
         {
           "type": "null"
@@ -1350,6 +1341,18 @@
       "format": "uint64",
       "maximum": 1,
       "minimum": 1
+    },
+    "WritePolicyPayload": {
+      "type": "object",
+      "properties": {
+        "writePaused": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "writePaused"
+      ]
     }
   }
 }

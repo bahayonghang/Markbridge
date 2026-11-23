@@ -120,8 +120,10 @@ it('R07 shows 403, 429 and timeout as unknown and cannot confirm a stale or offl
   const view = render(<MaintenanceDesk profileId="profile-a" revision={4} live={false} chromeIds={['10', '11']} />);
   fireEvent.click(screen.getByRole('button', { name: '检查链接' }));
   expect(await screen.findAllByText('状态未知')).toHaveLength(3);
+  expect(view.container.textContent).not.toContain('·');
   fireEvent.click(screen.getByRole('button', { name: '检查重复' }));
   fireEvent.click(await screen.findByRole('radio', { name: '保留页' }));
+  expect(view.container.textContent).not.toContain('·');
   fireEvent.click(screen.getByRole('button', { name: '预览清理' }));
   await screen.findByText('保留项 保留页');
   expect(screen.getByRole('button', { name: '确认清理' })).toBeDisabled();
@@ -142,4 +144,35 @@ it('R07 ignores a preview returning after revision changes', async () => {
   await act(async () => finish(preview()));
   expect(screen.getByRole('button', { name: '确认清理' })).toBeDisabled();
   expect(screen.queryByText('保留项 保留页')).not.toBeInTheDocument();
+});
+
+it('shows writePaused notice and disables cleanup confirmation while allowing duplicate inspection', async () => {
+  vi.mocked(inspectLibrary).mockResolvedValue(report());
+  vi.mocked(previewCleanup).mockResolvedValue(preview());
+  render(<MaintenanceDesk profileId="profile-a" revision={4} live={false} writePaused chromeIds={['10', '11']} />);
+  expect(screen.getByText(/已暂停写入（只读保护）/)).toBeVisible();
+  fireEvent.click(screen.getByRole('button', { name: '检查重复' }));
+  fireEvent.click(await screen.findByRole('radio', { name: '保留页' }));
+  fireEvent.click(screen.getByRole('button', { name: '预览清理' }));
+  await screen.findByText('保留项 保留页');
+  expect(screen.getByRole('button', { name: '确认清理' })).toBeDisabled();
+  expect(confirmCleanup).not.toHaveBeenCalled();
+});
+
+it('uses borderless well-groups for actions/duplicates and output-well for link results and cleanup review', async () => {
+  vi.mocked(inspectLibrary).mockResolvedValue(report());
+  vi.mocked(previewCleanup).mockResolvedValue(preview());
+  vi.mocked(checkLinks).mockResolvedValue({ ...report(), links: [{ bookmarkId: 'bm-1', chromeId: '10', url: 'https://example.com/a', verdict: 'alive', checks: 1, httpStatus: 200 }] });
+  const { container } = render(<MaintenanceDesk profileId="profile-a" revision={4} live chromeIds={['10', '11']} />);
+  expect(container.querySelectorAll('.well-group').length).toBeGreaterThanOrEqual(1);
+  fireEvent.click(screen.getByRole('button', { name: '检查重复' }));
+  const dupGroup = await screen.findByRole('group');
+  expect(dupGroup).toHaveClass('well-group');
+  fireEvent.click(screen.getByRole('radio', { name: '保留页' }));
+  fireEvent.click(screen.getByRole('button', { name: '预览清理' }));
+  const cleanup = await screen.findByLabelText('清理差异');
+  expect(cleanup).toHaveClass('output-well');
+  fireEvent.click(screen.getByRole('button', { name: '检查链接' }));
+  const linkList = await screen.findByRole('list', { name: '链接检查结果' });
+  expect(linkList.closest('.output-well')).not.toBeNull();
 });

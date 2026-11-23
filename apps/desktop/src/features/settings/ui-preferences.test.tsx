@@ -51,6 +51,20 @@ describe('local appearance v2 preferences', () => {
   it('pins the accepted boundary metrics', () => {
     expect([12, 14, 20].map(n => { const m = resolveAppearanceMetrics(n); return [m.folderRow, m.bookmarkRow, m.control]; })).toEqual([[40, 52, 40], [40, 56, 40], [48, 76, 48]]);
   });
+  it('maintains strict descending typography tokens at 12, 14, and 20px', () => {
+    for (const size of [12, 14, 20]) {
+      const m = resolveAppearanceMetrics(size);
+      expect(m.heading).toBeGreaterThan(m.section);
+      expect(m.section).toBeGreaterThan(m.listTitle);
+      expect(m.listTitle).toBeGreaterThan(m.text);
+      const root = document.createElement('div');
+      applyUiPreferences({ ...DEFAULT_UI_PREFERENCES, fontSizePx: size }, false, root);
+      const px = (name: string) => parseFloat(root.style.getPropertyValue(name));
+      expect(px('--text-heading')).toBeGreaterThan(px('--text-section'));
+      expect(px('--text-section')).toBeGreaterThan(px('--text-label'));
+      expect(px('--text-label')).toBeGreaterThan(px('--text-size'));
+    }
+  });
   it('applies system color and truthfully reports unavailable read/write storage', () => {
     const root = document.createElement('div'); applyUiPreferences(DEFAULT_UI_PREFERENCES, true, root);
     expect(root.dataset.theme).toBe('dark');

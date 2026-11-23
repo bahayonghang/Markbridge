@@ -70,7 +70,7 @@ Markbridge 连接现有书签树。Floccus 等工具继续负责跨设备同步�
 
 | 词 | 含义 |
 |---|---|
-| `profileId` | 应用拥有的已配对 Profile 身份 |
+| `profileId` | 应用拥有的 Chrome 资料身份 |
 | `chromeId` | 浏览器节点 ID，只在一个 Profile 内有效，类型为字符串 |
 | `bookmarkId` | 本地持久身份 |
 | `sourceEpoch` | 一次身份重置的世代 |
@@ -81,7 +81,7 @@ Markbridge 连接现有书签树。Floccus 等工具继续负责跨设备同步�
 | snapshot | 执行前状态 |
 | receipt | 观察到的执行结果 |
 
-显示名只用于界面。认证看 `profileId`、扩展 `instanceId` 和已配对 Origin。快照记录执行前状态；回滚成功要看回执和恢复后的树。
+显示名只用于界面。认证看固定扩展身份（`manifest.key` 锁定的官方 `chrome-extension://` Origin）、扩展持久 `instanceId` 与应用分配的 `profileId`。快照记录执行前状态；回滚成功要看回执和恢复后的树。
 
 ## 硬约束
 
@@ -90,10 +90,11 @@ Markbridge 连接现有书签树。Floccus 等工具继续负责跨设备同步�
 - 根节点、带 `folderType` 的节点、managed 节点及其不可写后代，禁止移动或删除。
 - 预览、模型输出和草稿都不能当作写入授权。写入 Chrome 前必须有用户确认的 apply。
 - 标签默认只写入 SQLite。标题编码 `名称 | tag1 | tag2` 要由用户显式启用，并先展示完整差异。用户尚未认领的原有竖线保持原样。
-- 未配对、扩展断开或状态不是 live 时，只能只读。首版不把离线浏览器写命令排队，重连后也不隐式回放。
+- 已忽略、扩展断开、开启「暂停写入（`writePaused`）」或状态不是 live 时，只能只读。首版不把离线浏览器写命令排队，重连后也不隐式回放。
+- 桌面启动即自动监听 `127.0.0.1` 的 `49153–49160` 空闲回环端口并只接受官方固定扩展身份（Fixed Extension Identity）的直连握手；扩展私钥严禁入库。
 - 同一 Profile 的写操作串行执行。冲突或结果不确定时停止后续步骤。丢失 ack 不能当成失败。发送成功不能当成已应用。
 - 批量写入前先写 snapshot、Netscape HTML 备份和侧车 JSON 备份。备份失败则取消这次浏览器变更。
-- 桌面只监听 `127.0.0.1`。凭据不进入 URL、日志或导出。不把 Tauri 图形进程注册为 Native Messaging host。
+- 桌面只监听 `127.0.0.1`。凭据与内部标识不进入 URL、日志或导出。不把 Tauri 图形进程注册为 Native Messaging host。
 - 远程网页放在独立的 `preview-*` WebviewWindow 中，不授予应用 IPC。桌面按钮不能授予扩展 `activeTab`。
 - 公共网页抓取拒绝 loopback、私网、链路本地、组播和云元数据地址。用户配置的 Ollama loopback 走单独端点，不复用公共抓取权限。
 - AI 默认关闭。页面文本和模型输出按不可信数据处理。模型没有工具执行权。
@@ -133,7 +134,7 @@ Windows 首版是子任务 01–13，对应 M1–M4。子任务 14 和 15 属于
 
 文档检查、单元测试、浏览器测试、原生桌面测试和外部同步测试分别记录。未运行的项标 `NOT_RUN` 或 `UNVERIFIED`。只完成编译时，原生项保持 `NOT_RUN`。
 
-3 秒同步指标只在应用和 Chrome 都在运行、配对有效、状态为 live 时适用。系统休眠、浏览器关闭、扩展暂停和网页加载时间不计入。恢复过程显示真实状态。
+3 秒同步指标只在应用和 Chrome 都在运行、连接有效、状态为 live 时适用。系统休眠、浏览器关闭、扩展暂停或资料被忽略和网页加载时间不计入。恢复过程显示真实状态。
 
 实验使用单独的临时 Profile 和应用数据目录。日常书签库不作为试验对象。
 
@@ -144,3 +145,17 @@ Windows 首版是子任务 01–13，对应 M1–M4。子任务 14 和 15 属于
 - 共享身份、schema 和 DTO 归子任务 02。浏览器写入、回执和撤销归子任务 06。受限 fetch 归子任务 08。远程网页权限归子任务 09。
 - 命令、脚本或验收门槛变化时，更新父执行计划和受影响的子任务。
 - 稳定下来的新约定写回 `.trellis/spec/`。重大边界变化同时更新本文件。
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues (`bahayonghang/Markbridge`, via `gh` CLI). See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Five canonical triage labels (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context layout (`GLOSSARY.md` and `docs/adr/` at repo root). See `docs/agents/domain.md`.

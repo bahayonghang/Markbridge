@@ -102,6 +102,35 @@ it('R07 does not claim cancellation during confirmed apply and counts receipt ra
   view.rerender(<OrganizationDesk settings={modelSettings} profileId="profile-a" revision={5} live chromeIds={['10']} />);
   expect(screen.getByRole('button', { name: '取消' })).toBeDisabled();
   await act(async () => finish({ ...plan(), operationId: 'operation-a', phase: 'partial', applied: [{ start: 0, end: 40 }], pending: [{ start: 41, end: 61 }], uncertain: [{ start: 40, end: 41 }] }));
-  await waitFor(() => expect(screen.getByText(/已完成 40 步 · 待处理 20 步 · 不确定 1 步/)).toBeVisible());
+  await waitFor(() => expect(screen.getByText('已完成 40 步')).toBeVisible());
+  expect(screen.getByText('待处理 20 步')).toBeVisible();
+  expect(screen.getByText('不确定 1 步')).toBeVisible();
+  expect(screen.getByText('失败 0 步')).toBeVisible();
+  expect(view.container.textContent).not.toContain('·');
   expect(cancelOrganization).not.toHaveBeenCalled();
+});
+
+it('shows writePaused notice and blocks Chrome apply/cleanup when writePaused is active', async () => {
+  vi.mocked(proposeOrganization).mockResolvedValue(plan());
+  render(<OrganizationDesk settings={modelSettings} profileId="profile-a" revision={4} live={false} writePaused chromeIds={['10']} />);
+  expect(screen.getByText(/已暂停写入（只读保护）/)).toBeVisible();
+  fireEvent.click(screen.getByRole('button', { name: '提出文件夹' }));
+  await screen.findByLabelText('目标 Alpha');
+  expect(screen.getByRole('button', { name: '应用' })).toBeDisabled();
+  expect(applyOrganization).not.toHaveBeenCalled();
+});
+
+it('separates organization controls in well-groups from output-well review and receipt without nested wells', async () => {
+  vi.mocked(proposeOrganization).mockResolvedValue(plan());
+  vi.mocked(applyOrganization).mockResolvedValue({ ...plan(), operationId: 'op-1', phase: 'applied', applied: [{ start: 0, end: 2 }] });
+  const { container } = render(<OrganizationDesk settings={modelSettings} profileId="profile-a" revision={4} live chromeIds={['10']} />);
+  expect(container.querySelectorAll('.well-group').length).toBeGreaterThanOrEqual(1);
+  expect(container.querySelectorAll('button.primary-button')).toHaveLength(1);
+  fireEvent.click(screen.getByRole('button', { name: '提出文件夹' }));
+  await screen.findByLabelText('目标 Alpha');
+  const review = container.querySelector('.organization-review');
+  expect(review).toHaveClass('output-well');
+  expect(review?.closest('.well-group')).toBeNull();
+  expect(container.querySelectorAll('button.primary-button')).toHaveLength(1);
+  expect(container.querySelector('button.primary-button')).toHaveTextContent('应用');
 });

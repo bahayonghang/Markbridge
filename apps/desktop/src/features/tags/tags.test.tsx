@@ -39,8 +39,8 @@ const beta = node('11', '1', 1, 'Beta');
 
 function profile(connection: BridgeState['profiles'][number]['connection'] = 'cached_read_only'): BridgeState {
   return {
-    protocolVersion: 1, revision: 1, port: 49153, errorCode: null, pending: [], mirrors: [],
-    profiles: [{ profileId: 'profile-a', instanceId: 'instance-profile-a', displayName: '资料 A', connection, nodeCount: 4, revision: 4, lastSyncedAt: null, errorCode: null }],
+    protocolVersion: 1, revision: 1, port: 49153, errorCode: null, mirrors: [],
+    profiles: [{ profileId: 'profile-a', instanceId: 'instance-profile-a', displayName: '资料 A', connection, writePaused: false, ignored: false, nodeCount: 4, revision: 4, lastSyncedAt: null, errorCode: null }],
   };
 }
 
@@ -397,4 +397,24 @@ it('R05 cannot save the prior clean note while the new epoch catalog is loading'
   expect(screen.getByRole('button', { name: '保存备注' })).toBeEnabled();
   expect(screen.getByLabelText('备注')).toHaveValue('新身份内容');
   expect(screen.getByLabelText('备注')).not.toHaveAttribute('readonly');
+});
+
+it('groups tag controls in well-groups, marks a single primary button, and renders title diffs in output-well', async () => {
+  vi.mocked(invoke).mockImplementation(async (command) => {
+    if (command === 'tag_state') return catalog({ encodingEnabled: true });
+    if (command === 'preview_title_encoding') return encodingPreview([{ before: 'Alpha', after: 'Alpha | Work' }]);
+    return catalog({ encodingEnabled: true });
+  });
+  const { container } = render(<TagDesk sourceEpoch={1} profileId="profile-a" revision={4} live chromeIds={['10']} filterTagId={null} onFilter={() => {}} onCatalog={() => {}} />);
+  await waitFor(() => expect(screen.getByRole('button', { name: '保存备注' })).toBeEnabled());
+  expect(container.querySelectorAll('.well-group').length).toBeGreaterThanOrEqual(2);
+  expect(container.querySelectorAll('button.primary-button')).toHaveLength(1);
+  expect(container.querySelector('button.primary-button')).toHaveTextContent('保存备注');
+  expect(container.textContent).not.toContain('·');
+  fireEvent.click(screen.getByText('可选：将标签写入标题'));
+  fireEvent.click(screen.getByRole('button', { name: '预览标题差异' }));
+  const diff = await screen.findByRole('dialog', { name: '标题差异' });
+  expect(diff).toHaveClass('output-well');
+  expect(container.querySelectorAll('button.primary-button')).toHaveLength(1);
+  expect(container.querySelector('button.primary-button')).toHaveTextContent('确认写入标题');
 });

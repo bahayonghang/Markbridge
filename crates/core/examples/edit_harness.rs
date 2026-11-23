@@ -108,25 +108,9 @@ async fn dispatch(
     let profile = || Id::new(string("profileId")?);
     match request.command.as_str() {
         "state" => serde_json::to_value(bridge.state().await).map_err(|_| ErrorCode::StorageError),
-        "start_bridge" => {
-            let port = request
-                .args
-                .get("port")
-                .and_then(Value::as_u64)
-                .and_then(|value| u16::try_from(value).ok())
-                .ok_or(ErrorCode::InvalidMessage)?;
-            serde_json::to_value(bridge.start(port).await?).map_err(|_| ErrorCode::StorageError)
+        "start_auto" | "retry_bridge_listener" => {
+            serde_json::to_value(bridge.start_auto().await?).map_err(|_| ErrorCode::StorageError)
         }
-        "begin_pairing" => {
-            serde_json::to_value(bridge.begin_pairing(string("displayName")?).await?)
-                .map_err(|_| ErrorCode::StorageError)
-        }
-        "confirm_pairing" => serde_json::to_value(
-            bridge
-                .confirm_pairing(profile()?, Id::new(string("instanceId")?)?)
-                .await?,
-        )
-        .map_err(|_| ErrorCode::StorageError),
         "reconnect_profile" => serde_json::to_value(bridge.reconnect_profile(profile()?).await?)
             .map_err(|_| ErrorCode::StorageError),
         "digest" => Ok(digest(&bridge.cache(profile()?).await?.0)),

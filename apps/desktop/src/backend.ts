@@ -8,7 +8,7 @@ import type {
   BatchEditPreview, BatchEditStatus, ApplyResult, BridgeState, ChromeProfileList, ContentPreview, EditDocument, EditPreview,
   LibraryCount, LibraryDetail, LibraryNodes, LibraryPage, LibrarySearch, LibraryQuery, LibraryQueryPage,
   AiApplyResult, AiConnection, AiSettings, AiSuggestion, MaintenanceReport, MirrorTree, OperationList,
-  OrganizationFolder, OrganizationPlan, PairingOffer, StartupState, TagCatalog, TextSearchPage, TitleEncodingPreview, WebPreviewState,
+  OrganizationFolder, OrganizationPlan, StartupState, TagCatalog, TextSearchPage, TitleEncodingPreview, WebPreviewState,
 } from '@markbridge/protocol';
 
 const loadStartup = () => import('@markbridge/protocol/startup');
@@ -127,7 +127,7 @@ export async function getBridgeState(): Promise<BridgeState> {
   const { parseBridgeState } = await loadBridge();
   const value: unknown = isTauri()
     ? await invoke('get_bridge_state')
-    : { protocolVersion: 1, revision: 0, port: null, errorCode: null, profiles: [], pending: [], mirrors: [] };
+    : { protocolVersion: 1, revision: 0, port: null, errorCode: null, profiles: [], mirrors: [] };
   return parseBridgeState(value);
 }
 
@@ -148,26 +148,24 @@ async function bridgeCommand(command: string, args: Record<string, unknown>): Pr
   return parseBridgeState(await invoke<unknown>(command, args));
 }
 
-export function startBridge(port: number): Promise<BridgeState> {
-  return bridgeCommand('start_bridge', { port });
+export function retryBridgeListener(): Promise<BridgeState> {
+  return bridgeCommand('retry_bridge_listener', {});
 }
 
-export async function beginPairing(displayName: string): Promise<PairingOffer> {
-  if (!isTauri()) throw new Error('NATIVE_BRIDGE_UNAVAILABLE');
-  const { parsePairingOffer } = await loadBridge();
-  return parsePairingOffer(await invoke<unknown>('begin_pairing', { displayName }));
+export function renameProfile(profileId: string, displayName: string): Promise<BridgeState> {
+  return bridgeCommand('rename_profile', { profileId, displayName });
 }
 
-export function confirmPairing(profileId: string, instanceId: string): Promise<BridgeState> {
-  return bridgeCommand('confirm_pairing', { profileId, instanceId });
+export function setProfileWritePaused(profileId: string, paused: boolean): Promise<BridgeState> {
+  return bridgeCommand('set_profile_write_paused', { profileId, paused });
 }
 
-export function cancelPairing(profileId: string): Promise<BridgeState> {
-  return bridgeCommand('cancel_pairing', { profileId });
+export function ignoreProfile(profileId: string): Promise<BridgeState> {
+  return bridgeCommand('ignore_profile', { profileId });
 }
 
-export function revokePairing(profileId: string): Promise<BridgeState> {
-  return bridgeCommand('revoke_pairing', { profileId });
+export function resumeProfile(profileId: string): Promise<BridgeState> {
+  return bridgeCommand('resume_profile', { profileId });
 }
 
 export function reconnectProfile(profileId: string): Promise<BridgeState> {

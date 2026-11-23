@@ -75,7 +75,7 @@ it('renders all 61 reviewed steps, cancels without writes and disables confirmat
   fireEvent.click(await screen.findByRole('button', { name: '撤销此记录' }));
   const differences = await screen.findByRole('list', { name: '完整撤销差异' });
   expect(within(differences).getAllByRole('listitem')).toHaveLength(61);
-  expect(within(differences).getByRole('heading', { name: '新建 · 恢复条目 60' })).toBeVisible();
+  expect(within(differences).getByRole('heading', { name: '新建：恢复条目 60' })).toBeVisible();
   fireEvent.click(screen.getByRole('button', { name: '取消撤销' }));
   expect(backend.applyEdit).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole('button', { name: '撤销此记录' }));
@@ -115,10 +115,12 @@ it('records manual review without relabeling an unknown result as success', asyn
   vi.mocked(backend.listOperations).mockResolvedValue({ operations: [unknown] });
   vi.mocked(backend.operationDetail).mockResolvedValue({ ...detail(), summary: unknown });
   vi.mocked(backend.reviewOperation).mockImplementation(async () => { vi.mocked(backend.listOperations).mockResolvedValue({ operations: [{ ...unknown, reviewed: true }] }); return { operations: [{ ...unknown, reviewed: true }] }; });
-  render(<HistoryWorkspace profileId="p" profileName="A" revision={4} live={false} />);
+  const { container } = render(<HistoryWorkspace profileId="p" profileName="A" revision={4} live={false} />);
   fireEvent.click(await screen.findByRole('button', { name: /查看详情/ }));
   fireEvent.click(await screen.findByRole('button', { name: '标记已核对' }));
-  expect(await screen.findByText('结果不确定 · 已核对')).toBeVisible();
+  expect(await screen.findByText('结果不确定')).toBeVisible();
+  expect(screen.getByText('已核对')).toBeVisible();
+  expect(container.textContent).not.toContain('·');
   expect(screen.queryByText('已完成')).toBeNull();
   await waitFor(() => expect(backend.reviewOperation).toHaveBeenCalledWith('p', 'op-a'));
 });
@@ -137,4 +139,55 @@ it.each(['rolled_back', 'rollback_conflict'] as const)('finishes an async undo n
   fireEvent.click(screen.getByRole('button', { name: '重新查询回执' }));
   await waitFor(() => expect(screen.queryByText('已发送撤销，正在等待回执。')).toBeNull(), { timeout: 2000 });
   expect(screen.getByText(state === 'rolled_back' ? '撤销回执已确认。' : '撤销存在冲突，外部值保持不变。')).toBeVisible();
+});
+
+it('groups export desk in well-groups without middle dots, uses h3 headings, and marks a single primary action', async () => {
+  vi.mocked(backend.saveExport).mockResolvedValueOnce(result('saved'));
+  const { container } = render(<ExportDesk source={{ kind: 'profile', id: 'p' }} name="研究资料" cachedAt={1791800000000} />);
+  expect(container.querySelectorAll('.well-group').length).toBeGreaterThanOrEqual(1);
+  expect(container.querySelectorAll('h4')).toHaveLength(0);
+  expect(screen.getByRole('heading', { level: 3, name: '书签 HTML' })).toBeVisible();
+  expect(screen.getByRole('heading', { level: 3, name: '本地侧车 JSON' })).toBeVisible();
+  const primaries = container.querySelectorAll('button.primary-button');
+  expect(primaries).toHaveLength(1);
+  expect(primaries[0]).toHaveTextContent('导出 HTML');
+  expect(screen.getByRole('button', { name: '导出侧车 JSON' })).not.toHaveClass('primary-button');
+  expect(screen.getByText(/它不是全库恢复文件/)).toBeVisible();
+  expect(screen.getByText(/保存时捕获完整缓存，不需要连接 Chrome/)).toBeVisible();
+  expect(container.textContent).not.toContain('·');
+  fireEvent.click(primaries[0]!);
+  await screen.findByText('文件已保存到所选位置。');
+  expect(container.textContent).not.toContain('·');
+});
+
+it('shows writePaused notice and disables Chrome undo while keeping details and review usable', async () => {
+  const unknown = { ...summary, operationId: 'op-u', state: 'uncertain' as const };
+  vi.mocked(backend.listOperations).mockResolvedValue({ operations: [summary, unknown] });
+  vi.mocked(backend.operationDetail).mockResolvedValue({ ...detail(), summary: unknown });
+  vi.mocked(backend.reviewOperation).mockResolvedValue({ operations: [summary, { ...unknown, reviewed: true }] });
+  render(<HistoryWorkspace profileId="p" profileName="A" revision={4} live={false} writePaused />);
+  expect(await screen.findByText(/已暂停写入（只读保护）/)).toBeVisible();
+  for (const button of screen.getAllByRole('button', { name: '撤销此记录' })) expect(button).toBeDisabled();
+  fireEvent.click(screen.getAllByRole('button', { name: /查看详情/ })[1]!);
+  fireEvent.click(await screen.findByRole('button', { name: '标记已核对' }));
+  await waitFor(() => expect(backend.reviewOperation).toHaveBeenCalledWith('p', 'op-u'));
+  expect(backend.applyEdit).not.toHaveBeenCalled();
+});
+
+it('groups history header in well-group, uses output-well for history detail and undo review, and keeps one primary button', async () => {
+  const { container } = render(<HistoryWorkspace profileId="p" profileName="A" revision={4} live />);
+  expect(await screen.findByRole('button', { name: '撤销此记录' })).toBeEnabled();
+  expect(container.querySelectorAll('.well-group')).toHaveLength(1);
+  expect(container.querySelectorAll('button.primary-button')).toHaveLength(0);
+  fireEvent.click(screen.getByRole('button', { name: '撤销此记录' }));
+  const undoReview = await screen.findByRole('region', { name: '撤销预览' });
+  expect(undoReview).toHaveClass('output-well');
+  const detailCard = container.querySelector('.history-detail > div');
+  expect(detailCard).toHaveClass('output-well');
+  expect(detailCard).not.toHaveClass('well-group');
+  expect(container.querySelectorAll('.well-group')).toHaveLength(1);
+  expect(container.querySelectorAll('.output-well')).toHaveLength(2);
+  expect(undoReview.closest('.well-group')).toBeNull();
+  expect(container.querySelectorAll('button.primary-button')).toHaveLength(1);
+  expect(container.querySelector('button.primary-button')).toHaveTextContent('确认条件撤销');
 });

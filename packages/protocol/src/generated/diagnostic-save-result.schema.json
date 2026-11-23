@@ -38,7 +38,10 @@
             "STORAGE_NEWER_SCHEMA",
             "MIGRATION_FAILED",
             "CONFLICT",
-            "CANCELLED"
+            "CANCELLED",
+            "PROFILE_IGNORED",
+            "WRITE_PAUSED",
+            "PORT_EXHAUSTED"
           ]
         },
         {

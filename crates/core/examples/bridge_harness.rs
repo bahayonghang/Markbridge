@@ -82,11 +82,11 @@ async fn dispatch(
     };
     match request.command.as_str() {
         "state" => serde_json::to_value(bridge.state().await),
-        "start_bridge" => serde_json::to_value(bridge.start(request.args.get("port").and_then(Value::as_u64).and_then(|value| u16::try_from(value).ok()).ok_or(ErrorCode::InvalidMessage)?).await?),
-        "begin_pairing" => serde_json::to_value(bridge.begin_pairing(string("displayName")?).await?),
-        "confirm_pairing" => serde_json::to_value(bridge.confirm_pairing(Id::new(string("profileId")?)?, Id::new(string("instanceId")?)?).await?),
-        "cancel_pairing" => serde_json::to_value(bridge.cancel_pairing(Id::new(string("profileId")?)?).await?),
-        "revoke_pairing" => serde_json::to_value(bridge.revoke_pairing(Id::new(string("profileId")?)?).await?),
+        "retry_bridge_listener" | "start_auto" => serde_json::to_value(bridge.start_auto().await?),
+        "rename_profile" => serde_json::to_value(bridge.rename_profile(Id::new(string("profileId")?)?, string("displayName")?).await?),
+        "set_profile_write_paused" => serde_json::to_value(bridge.set_write_paused(Id::new(string("profileId")?)?, request.args.get("paused").and_then(Value::as_bool).ok_or(ErrorCode::InvalidMessage)?).await?),
+        "ignore_profile" => serde_json::to_value(bridge.ignore_profile(Id::new(string("profileId")?)?).await?),
+        "resume_profile" => serde_json::to_value(bridge.resume_profile(Id::new(string("profileId")?)?).await?),
         "reconnect_profile" => serde_json::to_value(bridge.reconnect_profile(Id::new(string("profileId")?)?).await?),
         "cache" => {
             let profile = Id::new(string("profileId")?)?;

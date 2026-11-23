@@ -25,6 +25,9 @@ export type ErrorCode =
       | 'MIGRATION_FAILED'
       | 'CONFLICT'
       | 'CANCELLED'
+      | 'PROFILE_IGNORED'
+      | 'WRITE_PAUSED'
+      | 'PORT_EXHAUSTED'
     )
   | 'PATH_UNAVAILABLE';
 export type Counter = number;
@@ -47,9 +50,9 @@ export interface DiagnosticConnections {
   cachedReadOnly: Counter;
   connecting: Counter;
   error: Counter;
+  ignored: Counter;
   live: Counter;
   reconciling: Counter;
-  unpaired: Counter;
 }
 export interface DiagnosticMirrors {
   current: Counter;

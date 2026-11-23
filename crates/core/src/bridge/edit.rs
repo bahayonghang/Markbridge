@@ -30,7 +30,7 @@ impl Bridge {
         action: EditAction,
     ) -> Result<EditPreview> {
         let inner = self.inner.lock().await;
-        let (nodes, writable, revision) = {
+        let (nodes, write_check, writable, revision) = {
             let profile = inner
                 .profiles
                 .get(profile_id.as_str())
@@ -38,15 +38,28 @@ impl Bridge {
             if expected_revision != profile.view.revision.get() {
                 return Err(ErrorCode::StaleProposal);
             }
-            let writable = profile.view.connection == BridgeConnection::Live
-                && !profile.writes_blocked
-                && !profile.busy;
-            (profile.nodes.clone(), writable, profile.view.revision)
+            let write_check = profile.check_browser_writable();
+            let writable = write_check.is_ok() && !profile.writes_blocked && !profile.busy;
+            (
+                profile.nodes.clone(),
+                write_check,
+                writable,
+                profile.view.revision,
+            )
         };
         let stored = stored_for(&inner, &profile_id, &action).await?;
         let planned = editing::plan(&nodes, &action, &stored.1, stored.0.as_ref());
         match planned {
-            Ok(plan) => Ok(preview_of(&profile_id, revision, &plan, writable)),
+            Ok(plan) => {
+                let mut preview = preview_of(&profile_id, revision, &plan, writable);
+                if preview.error_code.0.is_none()
+                    && let Err(error @ (ErrorCode::WritePaused | ErrorCode::ProfileIgnored)) =
+                        write_check
+                {
+                    preview.error_code.0 = Some(error);
+                }
+                Ok(preview)
+            }
             Err(error) => Ok(EditPreview {
                 profile_id,
                 expected_revision: Counter::new(expected_revision)?,
@@ -72,9 +85,7 @@ impl Bridge {
                 .profiles
                 .get(profile_id.as_str())
                 .ok_or(ErrorCode::WrongProfile)?;
-            if profile.view.connection != BridgeConnection::Live {
-                return Err(ErrorCode::ReadOnly);
-            }
+            profile.check_browser_writable()?;
             if profile.writes_blocked || profile.busy {
                 return Err(ErrorCode::Conflict);
             }

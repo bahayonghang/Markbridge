@@ -104,17 +104,28 @@ describe('versioned wire contract', () => {
     for (const size of [0, 31, 32, 1024, 1025]) {
       values.push({ protocolVersion: 1, type: 'hello', profileId: 'p', sessionId: 's', requestId: 'r', seq: null, payload: { instanceId: 'i', credential: '🦢'.repeat(size) } });
     }
-    for (const type of ['pair', 'pair_result', 'hello_result', 'ping', 'pong', 'get_tree', 'resync_required', 'get_operation_status', 'operation_receipt']) {
+    for (const type of ['pair', 'pair_result', 'hello_result', 'pause_sync', 'write_policy', 'ping', 'pong', 'get_tree', 'resync_required', 'get_operation_status', 'operation_receipt']) {
       const payloads: Record<string, unknown> = {
         pair: { instanceId: 'i', credential: 'x'.repeat(32), displayName: 'Synthetic' },
         pair_result: { accepted: false, credential: null, errorCode: 'UNPAIRED' },
         hello_result: { accepted: true, sourceEpoch: 1, errorCode: null },
+        pause_sync: { reason: 'PROFILE_IGNORED' },
+        write_policy: { writePaused: true },
         ping: {}, pong: {}, get_tree: {}, resync_required: { reason: 'CONFLICT' },
         get_operation_status: { operationId: 'o' },
         operation_receipt: { operationId: 'o', requestId: 'r', state: 'uncertain', before: null, after: null, errorCode: 'UNCERTAIN_WRITE' },
       };
       values.push({ protocolVersion: 1, type, profileId: 'p', sessionId: 's', requestId: type === 'resync_required' ? null : 'r', seq: null, payload: payloads[type] });
     }
+    for (const paused of [true, false]) {
+      const policy: WireMessage = { protocolVersion: 1, type: 'write_policy', profileId: 'p', sessionId: 's', requestId: 'r-wp', seq: null, payload: { writePaused: paused } };
+      expect(parseWireFrame(encodeWireFrame(policy))).toEqual(policy);
+      values.push(policy);
+    }
+    values.push({ protocolVersion: 1, type: 'write_policy', profileId: 'p', sessionId: 's', requestId: null, seq: null, payload: { writePaused: true } });
+    values.push({ protocolVersion: 1, type: 'write_policy', profileId: 'p', sessionId: 's', requestId: 'r-wp', seq: 1, payload: { writePaused: true } });
+    values.push({ protocolVersion: 1, type: 'write_policy', profileId: 'p', sessionId: 's', requestId: 'r-wp', seq: null, payload: { writePaused: true, extra: true } });
+    values.push({ protocolVersion: 1, type: 'write_policy', profileId: 'p', sessionId: 's', requestId: 'r-wp', seq: null, payload: {} });
     const reorder = {
       protocolVersion: 1, type: 'apply_operation', profileId: 'p', sessionId: 's', requestId: 'r', seq: null,
       payload: { operationId: 'o', sourceEpoch: 1, expectedRevision: 1, steps: [
