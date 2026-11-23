@@ -56,10 +56,13 @@ function ProfileRenameForm({ profile, unavailable, onSubmit }: {
 }) {
   const [draft, setDraft] = useState(profile.displayName);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const lastDisplayName = useRef(profile.displayName);
   const inputId = `rename-${profile.profileId}`;
   const errorId = `rename-error-${profile.profileId}`;
 
   useEffect(() => {
+    if (lastDisplayName.current === profile.displayName) return;
+    lastDisplayName.current = profile.displayName;
     setDraft(profile.displayName);
     setValidationError(null);
   }, [profile.displayName]);
