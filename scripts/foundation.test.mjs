@@ -44,6 +44,58 @@ test('native dev preserves JSON arguments, desktop cwd, port and CLI exit status
   }
 });
 
+async function setupNativeDevWorkspace(t) {
+  const root = await mkdtemp(join(tmpdir(), 'markbridge dev & '));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const desktop = join(root, 'apps/desktop');
+  await mkdir(desktop, { recursive: true });
+  await mkdir(join(root, 'scripts'));
+  for (const name of ['tauri-dev.mjs', 'dev-port.mjs', 'run-command.mjs']) {
+    await copyFile(new URL(name, import.meta.url), join(root, 'scripts', name));
+  }
+  const run = () => spawnSync(process.execPath, [join(root, 'scripts/tauri-dev.mjs')], {
+    cwd: tmpdir(),
+    env: { ...process.env, MARKBRIDGE_DEV_PORT: '' },
+    encoding: 'utf8',
+    timeout: 15_000,
+  });
+  return { root, desktop, run };
+}
+
+test('native dev reports an actionable install hint when @tauri-apps/cli is missing', async (t) => {
+  const { run } = await setupNativeDevWorkspace(t);
+  const result = run();
+  assert.ifError(result.error);
+  assert.equal(result.status, 1);
+  assert.equal(result.stdout, '');
+  assert.match(result.stderr, /pnpm install --frozen-lockfile/);
+  assert.doesNotMatch(result.stderr, /MODULE_NOT_FOUND/);
+});
+
+test('native dev falls back to workspace root hoisted @tauri-apps/cli', async (t) => {
+  const { root, desktop, run } = await setupNativeDevWorkspace(t);
+  const cliDirectory = join(root, 'node_modules/@tauri-apps/cli');
+  await mkdir(cliDirectory, { recursive: true });
+  await writeFile(join(cliDirectory, 'tauri.js'), `
+    console.log(JSON.stringify({
+      args: process.argv.slice(2), cwd: process.cwd(), port: process.env.MARKBRIDGE_DEV_PORT,
+    }));
+    process.exit(0);
+  `);
+  const result = run();
+  assert.ifError(result.error);
+  assert.equal(result.status, 0, result.stderr);
+  const received = JSON.parse(result.stdout);
+  assert.equal(await realpath(received.cwd), await realpath(desktop));
+  assert.deepEqual(received.args.slice(0, 2), ['dev', '--config']);
+  assert.equal(received.args.length, 3);
+  assert.deepEqual(JSON.parse(received.args[2]), {
+    build: { devUrl: `http://127.0.0.1:${received.port}` },
+  });
+  assert.ok(Number(received.port) > 0);
+  assert.equal(result.stderr, '');
+});
+
 test('MV3 read-only bridge has bounded permissions and local worker', async () => {
   const manifest = await readJson('apps/extension/public/manifest.json');
   assert.equal(manifest.manifest_version, 3);
