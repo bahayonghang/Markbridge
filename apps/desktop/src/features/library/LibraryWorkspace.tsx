@@ -61,13 +61,14 @@ function neighbor(ids: string[], current: string | null, delta: number): string 
   return ids[next] ?? null;
 }
 
-export function LibraryWorkspace({ state, invalid, native, focusMirrorId, section = 'library', active = true, sidebarHost, exportHost, onSettings, onLibrary, onExport, onOrganize, onAiSettings, onSemanticSettings, onHistory, sourceRequest, onCurrentSource }: {
+export function LibraryWorkspace({ state, invalid, native, focusMirrorId, section = 'library', active = true, sidebarCollapsed = false, sidebarHost, exportHost, onSettings, onLibrary, onExport, onOrganize, onAiSettings, onSemanticSettings, onHistory, sourceRequest, onCurrentSource }: {
   state: BridgeState | null;
   invalid: boolean;
   native: boolean;
   focusMirrorId: string | null;
   section?: 'library' | 'organize' | 'semantic' | 'history' | 'export';
   active?: boolean;
+  sidebarCollapsed?: boolean;
   sidebarHost?: HTMLDivElement | null;
   exportHost?: HTMLDivElement | null;
   onSettings?: () => void;
@@ -93,6 +94,11 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
   const [batchRequest, setBatchRequest] = useState<BatchRequest | null>(null);
   const [editingBatch, setEditingBatch] = useState(false);
   const [foldersOpen, setFoldersOpen] = useState(false);
+  const prevSidebarCollapsed = useRef(sidebarCollapsed);
+  useEffect(() => {
+    if (prevSidebarCollapsed.current && !sidebarCollapsed) setFoldersOpen(false);
+    prevSidebarCollapsed.current = sidebarCollapsed;
+  }, [sidebarCollapsed]);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const detailTrigger = useRef<HTMLButtonElement>(null);
   const detailReturn = useRef<HTMLButtonElement>(null);

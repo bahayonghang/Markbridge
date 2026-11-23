@@ -1,4 +1,4 @@
-export type IconName = 'bookmark' | 'folder' | 'organize' | 'search' | 'history' | 'settings' | 'connection' | 'back' | 'detail' | 'close' | 'chevron';
+export type IconName = 'bookmark' | 'folder' | 'organize' | 'search' | 'history' | 'settings' | 'connection' | 'back' | 'detail' | 'close' | 'chevron' | 'sidebar-collapse' | 'sidebar-expand';
 
 const paths: Record<IconName, string> = {
   bookmark: 'M6 3h12v18l-6-4-6 4V3Z',
@@ -12,6 +12,8 @@ const paths: Record<IconName, string> = {
   detail: 'M3 4h18v16H3V4ZM15 4v16',
   close: 'm6 6 12 12M18 6 6 18',
   chevron: 'm9 5 7 7-7 7',
+  'sidebar-collapse': 'M3 4h18v16H3V4ZM9 4v16m7-11-3 3 3 3',
+  'sidebar-expand': 'M3 4h18v16H3V4ZM9 4v16M13 9l3 3-3 3',
 };
 
 export function WorkspaceIcon({ name }: { name: IconName }) {
