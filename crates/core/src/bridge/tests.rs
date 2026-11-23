@@ -14,7 +14,7 @@ use tokio_tungstenite::{
 };
 
 #[derive(Default)]
-struct MemoryCredentials(StdMutex<HashMap<String, String>>);
+pub(super) struct MemoryCredentials(StdMutex<HashMap<String, String>>);
 impl CredentialStore for MemoryCredentials {
     fn get(&self, reference: &str) -> Result<String> {
         self.0
@@ -2816,6 +2816,9 @@ async fn open_leaves_an_unacked_edit_create_uncertain_and_does_not_replay() {
 #[cfg(windows)]
 #[path = "b100.rs"]
 mod b100;
+#[cfg(windows)]
+#[path = "chrome_zero_click.rs"]
+mod chrome_zero_click;
 
 fn assert_no_bookmarks_bak(root: &std::path::Path) {
     let mut pending = vec![root.to_path_buf()];

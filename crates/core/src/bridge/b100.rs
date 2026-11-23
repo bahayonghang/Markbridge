@@ -679,7 +679,7 @@ async fn ready_plan(
     current
 }
 
-async fn wait_first_live(bridge: &Bridge) -> Id {
+pub(super) async fn wait_first_live(bridge: &Bridge) -> Id {
     loop {
         let state = bridge.state().await;
         if let Some(item) = state
@@ -717,7 +717,12 @@ async fn wait_phase(bridge: &Bridge, job: &Id, phase: OrganizationPhase) {
     }
 }
 
-async fn wait_operation(bridge: &Bridge, profile: &Id, operation: &Id, state: OperationState) {
+pub(super) async fn wait_operation(
+    bridge: &Bridge,
+    profile: &Id,
+    operation: &Id,
+    state: OperationState,
+) {
     loop {
         let list = bridge.list_operations(profile.clone()).await.unwrap();
         if list
@@ -731,7 +736,7 @@ async fn wait_operation(bridge: &Bridge, profile: &Id, operation: &Id, state: Op
     }
 }
 
-async fn revision_of(bridge: &Bridge, profile: &Id) -> u64 {
+pub(super) async fn revision_of(bridge: &Bridge, profile: &Id) -> u64 {
     bridge
         .state()
         .await
@@ -743,7 +748,7 @@ async fn revision_of(bridge: &Bridge, profile: &Id) -> u64 {
         .get()
 }
 
-async fn title_of(bridge: &Bridge, profile: &Id, chrome: &str) -> Option<String> {
+pub(super) async fn title_of(bridge: &Bridge, profile: &Id, chrome: &str) -> Option<String> {
     bridge
         .cache(profile.clone())
         .await
@@ -754,7 +759,7 @@ async fn title_of(bridge: &Bridge, profile: &Id, chrome: &str) -> Option<String>
         .map(|node| node.title.as_str().to_owned())
 }
 
-fn bar_id(nodes: &[BookmarkNode]) -> String {
+pub(super) fn bar_id(nodes: &[BookmarkNode]) -> String {
     nodes
         .iter()
         .find(|node| node.folder_type == Some(FolderType::BookmarksBar))
@@ -986,7 +991,7 @@ fn state_name(state: &OperationState) -> &'static str {
     }
 }
 
-fn free_port() -> u16 {
+pub(super) fn free_port() -> u16 {
     std::net::TcpListener::bind("127.0.0.1:0")
         .unwrap()
         .local_addr()
@@ -1108,7 +1113,7 @@ fn model_response(body: &[u8]) -> Vec<u8> {
     bytes
 }
 
-async fn browser_socket(port: u16) -> Option<(String, String)> {
+pub(super) async fn browser_socket(port: u16) -> Option<(String, String)> {
     loop {
         if let Ok(response) = reqwest::get(format!("http://127.0.0.1:{port}/json/version")).await
             && let Ok(value) = response.json::<serde_json::Value>().await
@@ -1123,7 +1128,7 @@ async fn browser_socket(port: u16) -> Option<(String, String)> {
     }
 }
 
-async fn find_page(port: u16, extension_id: &str) -> Option<String> {
+pub(super) async fn find_page(port: u16, extension_id: &str) -> Option<String> {
     let needle = format!("chrome-extension://{extension_id}/");
     loop {
         if let Ok(response) = reqwest::get(format!("http://127.0.0.1:{port}/json/list")).await
@@ -1144,7 +1149,7 @@ async fn find_page(port: u16, extension_id: &str) -> Option<String> {
     }
 }
 
-struct Cdp {
+pub(super) struct Cdp {
     socket: tokio_tungstenite::WebSocketStream<
         tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>,
     >,
@@ -1152,12 +1157,16 @@ struct Cdp {
 }
 
 impl Cdp {
-    async fn connect(url: &str) -> Self {
+    pub(super) async fn connect(url: &str) -> Self {
         let (socket, _) = connect_async(url).await.unwrap();
         Self { socket, id: 0 }
     }
 
-    async fn call(&mut self, method: &str, params: serde_json::Value) -> serde_json::Value {
+    pub(super) async fn call(
+        &mut self,
+        method: &str,
+        params: serde_json::Value,
+    ) -> serde_json::Value {
         self.id += 1;
         let id = self.id;
         let text = serde_json::json!({"id": id, "method": method, "params": params}).to_string();
@@ -1178,7 +1187,7 @@ impl Cdp {
         }
     }
 
-    async fn eval(&mut self, expression: &str) -> Result<serde_json::Value, String> {
+    pub(super) async fn eval(&mut self, expression: &str) -> Result<serde_json::Value, String> {
         let result = self
             .call(
                 "Runtime.evaluate",
@@ -1196,22 +1205,31 @@ impl Cdp {
     }
 }
 
-struct Chrome {
+pub(super) struct Chrome {
     child: Child,
     dir: tempfile::TempDir,
     pids: Vec<u32>,
 }
 
 impl Chrome {
-    fn launch(port: u16) -> Self {
+    pub(super) fn launch(port: u16) -> Self {
+        Self::launch_with_flags(port, &[])
+    }
+
+    pub(super) fn launch_with_flags(port: u16, extra_flags: &[&str]) -> Self {
         let dir = tempfile::tempdir().unwrap();
-        let child = Command::new(r"C:\Program Files\Google\Chrome\Application\chrome.exe")
+        let mut command = Command::new(r"C:\Program Files\Google\Chrome\Application\chrome.exe");
+        command
             .arg(format!("--user-data-dir={}", dir.path().display()))
             .arg(format!("--remote-debugging-port={port}"))
             .arg("--remote-allow-origins=*")
             .arg("--no-first-run")
             .arg("--no-default-browser-check")
-            .arg("--disable-sync")
+            .arg("--disable-sync");
+        for flag in extra_flags {
+            command.arg(flag);
+        }
+        let child = command
             .arg("--new-window")
             .arg("about:blank")
             .stdin(Stdio::null())
@@ -1223,7 +1241,7 @@ impl Chrome {
         Self { child, dir, pids }
     }
 
-    fn capture(&mut self) {
+    pub(super) fn capture(&mut self) {
         let mut pids = family(self.child.id());
         if pids.len() < 2 {
             let marker = self
@@ -1247,6 +1265,7 @@ impl Chrome {
 
 impl Drop for Chrome {
     fn drop(&mut self) {
+        self.capture();
         let mut pids = self.pids.clone();
         for pid in family(self.child.id()) {
             if !pids.contains(&pid) {
@@ -1257,6 +1276,7 @@ impl Drop for Chrome {
         let _ = self.child.kill();
         terminate_pids(&pids);
         let _ = self.child.wait();
+        std::thread::sleep(Duration::from_millis(200));
     }
 }
 
