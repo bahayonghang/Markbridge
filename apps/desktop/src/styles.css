@@ -59,6 +59,7 @@
   --sheet-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 12px 40px -16px rgba(30, 60, 90, 0.14);
   --backdrop: #24303a66;
   --splitter-indicator: rgba(31, 108, 176, 0.48);
+  --tree-guide: rgba(36, 48, 58, 0.12);
   --floating-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), 0 24px 64px -24px rgba(30, 60, 90, 0.22);
   --segmented-shadow: 0 1px 3px rgba(36, 48, 58, 0.10);
   --radius: 12px;
@@ -127,6 +128,7 @@
   --sheet-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 12px 40px -16px rgba(0, 0, 0, 0.45);
   --backdrop: #10181db3;
   --splitter-indicator: rgba(130, 192, 255, 0.56);
+  --tree-guide: rgba(231, 237, 243, 0.14);
   --floating-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 24px 64px -24px rgba(0, 0, 0, 0.6);
   --segmented-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
 }
@@ -252,6 +254,18 @@ dd { margin: 0; overflow-wrap: anywhere; }
 .library-row:focus-visible { outline-offset: -2px; }
 .library-label { display: flex; align-items: center; gap: 10px; min-width: 0; width: 100%; }
 .library-kind, .tree-icon { flex: none; color: var(--muted); }
+.folder-pane-actions { display: inline-flex; align-items: center; gap: 4px; flex: none; }
+.icon-button.folder-tree-action { width: 28px; height: 28px; min-width: 28px; min-height: 28px; padding: 4px; border-radius: var(--radius); color: var(--muted); }
+.icon-button.folder-tree-action:hover:enabled { color: var(--ink); }
+.tree-row-content { position: relative; display: flex; align-items: center; gap: 4px; min-width: 0; width: 100%; height: 100%; }
+.tree-indent-guides { position: absolute; inset: 0; pointer-events: none; }
+.tree-indent-guide { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--tree-guide); }
+.tree-chevron { width: 24px; height: 24px; min-width: 24px; min-height: 24px; flex: none; padding: 0; border-radius: 6px; background: transparent; color: var(--muted); }
+.tree-chevron:hover:enabled { background: var(--control-fill-hover); color: var(--ink); }
+.tree-chevron:active:enabled { background: var(--control-fill-pressed); }
+.tree-chevron .workspace-icon { width: 14px; height: 14px; flex: 0 0 14px; transition: transform var(--press-duration); }
+.tree-chevron[aria-expanded="true"] .workspace-icon { transform: rotate(90deg); }
+.tree-chevron-spacer { width: 24px; height: 24px; flex: none; }
 .library-row-text { display: flex; flex-direction: column; min-width: 0; }
 .library-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--text-label); font-weight: 500; line-height: 1.6; }
 .folder-pane .library-title { font-size: 1rem; font-weight: 400; }
@@ -719,6 +733,7 @@ button.danger-button:active:enabled { background: var(--pressed); border-color: 
     --floating-shadow: none;
     --segmented-shadow: none;
     --splitter-indicator: ButtonText;
+    --tree-guide: CanvasText;
   }
   .workspace, .app-sidebar, .app-main { backdrop-filter: none; }
   .sidebar-splitter::after { forced-color-adjust: none; }
@@ -735,7 +750,11 @@ button.danger-button:active:enabled { background: var(--pressed); border-color: 
   }
   .library-row.is-active .library-url,
   .library-row:has(input:checked) .library-url,
+  .library-row.is-active .tree-chevron,
+  .library-row.is-active .tree-icon,
   .is-selected > .history-summary .secondary,
   .is-selected > .history-summary .history-state,
   .is-selected > .history-summary .history-reviewed { color: HighlightText; }
+  .tree-indent-guide { forced-color-adjust: none; }
+  .library-row.is-active .tree-indent-guide { background: HighlightText; }
 }

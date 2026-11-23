@@ -147,6 +147,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
   const detailGen = useRef(0);
   const mirrorGen = useRef(0);
   const treeGen = useRef(0);
+  const expandedInitializedFor = useRef<string | null>(null);
 
   if (seenKey !== sourceKey) {
     sourceGeneration.current += 1;
@@ -165,6 +166,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
     setFolderId(null);
     setBookmarkId(null);
     setExpanded(new Set());
+    expandedInitializedFor.current = null;
     setPhase('loading');
     setGap(false);
     setOpenFailed(false);
@@ -240,7 +242,11 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
       setPhase('ready');
       const flat = indexFlat(tree.nodes);
       const roots = rootFolders(flat).map((node) => node.chromeId);
-      setExpanded((current) => current.size ? current : new Set(roots));
+      const loadKey = `profile:${profile.profileId}`;
+      if (expandedInitializedFor.current !== loadKey && roots.length > 0) {
+        expandedInitializedFor.current = loadKey;
+        setExpanded(new Set(roots));
+      }
       setFolderId((current) => current && flat.nodes.get(current)?.kind === 'folder' ? current : roots[0] ?? null);
       setPicked((current) => new Set([...current].filter((id) => flat.nodes.has(id))));
       setBookmarkId((current) => current && flat.nodes.has(current) ? current : null);
@@ -280,7 +286,11 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
         setPhase('ready');
         const flat = indexFlat(tree.nodes);
         const roots = rootFolders(flat).map((node) => node.chromeId);
-        setExpanded((current) => current.size > 0 ? current : new Set(roots));
+        const loadKey = `mirror:${mirror.mirrorSourceId}`;
+        if (expandedInitializedFor.current !== loadKey && roots.length > 0) {
+          expandedInitializedFor.current = loadKey;
+          setExpanded(new Set(roots));
+        }
         setFolderId((current) => current && flat.nodes.get(current)?.kind === 'folder' ? current : roots[0] ?? null);
         setPicked((current) => new Set([...current].filter((id) => flat.nodes.has(id))));
         setBookmarkId((current) => current && flat.nodes.has(current) ? current : !roots.length ? looseBookmarks(tree.nodes)[0]?.chromeId ?? null : null);
@@ -293,6 +303,16 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
 
   const activeIndex = useMemo(() => indexFlat(profile ? nodes : mirrorNodes), [profile != null, nodes, mirrorNodes]);
   const folders = useMemo(() => folderRows(activeIndex, expanded), [activeIndex, expanded]);
+  const expandableFolderIds = useMemo(() => {
+    const ids: string[] = [];
+    for (const node of activeIndex.nodes.values()) {
+      if (node.kind !== 'folder') continue;
+      const childFolders = (activeIndex.children.get(node.chromeId) ?? []).filter((child) => activeIndex.nodes.get(child)?.kind === 'folder');
+      if (!activeIndex.fetched.has(node.chromeId) || childFolders.length > 0) ids.push(node.chromeId);
+    }
+    return ids;
+  }, [activeIndex]);
+  const anyExpanded = expandableFolderIds.some((id) => expanded.has(id));
   const searching = query.length > 0;
   const filtering = profile != null && filterTagId != null;
   const folderScope = searching || filtering ? scope : 'children';
@@ -395,15 +415,26 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
     requestAnimationFrame(() => detailTrigger.current?.focus());
   }
 
-  function chooseFolder(chromeId: string, resetScope = false) {
+  function chooseFolder(chromeId: string, options?: { resetScope?: boolean; expandAncestors?: boolean }) {
+    const resetScope = options?.resetScope ?? false;
+    const expandAncestors = options?.expandAncestors ?? false;
     leaveMetadata(() => {
-    setCreating(false);
-    setFolderId(chromeId);
-    if (resetScope) setScope('all');
-    setBookmarkId(null);
-    setQuery('');
-    setFilterTagId(null);
-    setExpanded((current) => new Set([...current, ...folderPath(activeIndex, chromeId).map((node) => node.chromeId)]));
+      setCreating(false);
+      setFolderId(chromeId);
+      if (resetScope) setScope('all');
+      setBookmarkId(null);
+      setQuery('');
+      setFilterTagId(null);
+      if (expandAncestors) {
+        const ancestors = folderPath(activeIndex, chromeId).slice(0, -1).map((node) => node.chromeId);
+        if (ancestors.length > 0) {
+          setExpanded((current) => {
+            const next = new Set(current);
+            for (const id of ancestors) next.add(id);
+            return next;
+          });
+        }
+      }
     });
   }
 
@@ -412,19 +443,26 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
   }
 
   function onTreeKey(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.target instanceof HTMLButtonElement) return;
     const ids = folders.map((row) => row.chromeId);
     const current = chromeFromTarget(event, 'library-row-folder:') ?? folderId;
+    const moveTreeSelection = (nextId: string) => {
+      chooseFolder(nextId);
+      if (nextId === folderId && !metadataDirty) {
+        document.getElementById(`library-row-folder:${nextId}`)?.focus();
+      }
+    };
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault();
       const next = neighbor(ids, current, event.key === 'ArrowDown' ? 1 : -1);
-      if (next) chooseFolder(next);
+      if (next) moveTreeSelection(next);
     } else if (event.key === 'Home' || event.key === 'End') {
       event.preventDefault();
       const next = event.key === 'Home' ? ids[0] : ids[ids.length - 1];
-      if (next) chooseFolder(next);
+      if (next) moveTreeSelection(next);
     } else if (event.key === 'Enter' && current) {
       event.preventDefault();
-      chooseFolder(current);
+      moveTreeSelection(current);
       if (foldersOpen) closeFolders();
     } else if (event.key === 'ArrowRight' && current) {
       event.preventDefault();
@@ -432,7 +470,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
       if (row?.expandable && !row.expanded) void toggleFolder(current);
       else if (row?.expanded) {
         const children = (activeIndex.children.get(current) ?? []).filter((id) => activeIndex.nodes.get(id)?.kind === 'folder');
-        if (children[0]) chooseFolder(children[0]);
+        if (children[0]) moveTreeSelection(children[0]);
       }
     } else if (event.key === 'ArrowLeft' && current) {
       event.preventDefault();
@@ -445,7 +483,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
         });
       } else {
         const parent = activeIndex.nodes.get(current)?.parentId;
-        if (parent && activeIndex.nodes.get(parent)?.kind === 'folder') chooseFolder(parent);
+        if (parent && activeIndex.nodes.get(parent)?.kind === 'folder') moveTreeSelection(parent);
       }
     }
   }
@@ -488,7 +526,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
       const current = visible.find((row) => row.chromeId === (currentId ?? ids[0]));
       if (!current) return;
       if (current.kind === 'folder') {
-        chooseFolder(current.chromeId);
+        chooseFolder(current.chromeId, { expandAncestors: true });
       } else {
         leaveMetadata(() => {
           selectBookmark(current.chromeId);
@@ -543,7 +581,23 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
 
   const folderPane = source && native && !invalid ? (
         <div className={`library-pane folder-pane ${foldersOpen ? 'is-open' : ''}`} hidden={!active || section !== 'library'} onKeyDown={(event) => { if (event.key === 'Escape' && foldersOpen) { event.stopPropagation(); closeFolders(); } }}>
-          <div className="pane-heading"><h3>文件夹</h3><button className="folder-return" type="button" onClick={closeFolders}>返回列表</button></div>
+          <div className="pane-heading">
+            <h3>文件夹</h3>
+            <div className="folder-pane-actions">
+              {expandableFolderIds.length > 0 && (
+                <button
+                  type="button"
+                  className="icon-button folder-tree-action"
+                  aria-label={anyExpanded ? '全部收起' : '全部展开'}
+                  title={anyExpanded ? '全部收起' : '全部展开'}
+                  onClick={() => setExpanded(anyExpanded ? new Set() : new Set(expandableFolderIds))}
+                >
+                  <WorkspaceIcon name={anyExpanded ? 'collapse-all' : 'expand-all'} />
+                </button>
+              )}
+              <button className="folder-return" type="button" onClick={closeFolders}>返回列表</button>
+            </div>
+          </div>
           {(phase === 'loading' && folders.length === 0) || waitingForCache ? <p role="status">正在读取书签。</p> : folders.length === 0 ? <p>{visible.length > 0 ? '没有文件夹。' : phase === 'error' ? '没有可显示的文件夹。' : '此资料还没有书签。'}</p> : (
             <VirtualRows
               rows={folders}
@@ -552,12 +606,44 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
               role="tree"
               itemRole="treeitem"
               activeKey={folderId ? rowKey('folder', folderId) : null}
+              activateOnFocus={false}
               onActive={(key, reason) => { chooseFolder(key.slice('folder:'.length)); if (reason === 'pointer' && foldersOpen) closeFolders(); }}
+              onActivate={(row) => { if (row.expandable) void toggleFolder(row.chromeId); }}
               onKeyDown={onTreeKey}
-              rowProps={(row: FolderRow) => ({ 'aria-level': row.depth + 1, 'aria-posinset': row.positionInSet, 'aria-setsize': row.setSize, ...(row.expandable ? { 'aria-expanded': row.expanded } : {}) })}
+              rowProps={(row: FolderRow) => ({ 'aria-label': row.title, 'aria-level': row.depth + 1, 'aria-posinset': row.positionInSet, 'aria-setsize': row.setSize, ...(row.expandable ? { 'aria-expanded': row.expanded } : {}) })}
               dragId={canWriteBrowser ? (row) => row.chromeId : undefined}
               onDropRow={canWriteBrowser ? (row, sourceId) => dropBookmark(row.chromeId, sourceId) : undefined}
-              render={(row) => <span className="library-label" title={row.title} style={{ paddingLeft: Math.min(row.depth, 5) * 12 }}><span className="tree-icon"><WorkspaceIcon name="folder" /></span><span className="library-title">{row.title}</span></span>}
+              render={(row) => {
+                const indentLevel = Math.min(row.depth, 8);
+                return (
+                  <span className="tree-row-content" title={row.title} style={{ paddingLeft: indentLevel * 14 }}>
+                    {indentLevel > 0 && (
+                      <span className="tree-indent-guides" aria-hidden="true">
+                        {Array.from({ length: indentLevel }, (_, level) => (
+                          <span key={level} className="tree-indent-guide" style={{ left: level * 14 + 11 }} />
+                        ))}
+                      </span>
+                    )}
+                    {row.expandable ? (
+                      <button
+                        type="button"
+                        className="tree-chevron"
+                        tabIndex={-1}
+                        aria-label={row.expanded ? `收起 ${row.title}` : `展开 ${row.title}`}
+                        aria-expanded={row.expanded}
+                        onClick={(event) => { event.stopPropagation(); void toggleFolder(row.chromeId); }}
+                        onDoubleClick={(event) => event.stopPropagation()}
+                      >
+                        <WorkspaceIcon name="chevron" />
+                      </button>
+                    ) : (
+                      <span className="tree-chevron-spacer" aria-hidden="true" />
+                    )}
+                    <span className="tree-icon"><WorkspaceIcon name="folder" /></span>
+                    <span className="library-title">{row.title}</span>
+                  </span>
+                );
+              }}
             />
           )}
         </div>
@@ -628,7 +714,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
           {!sidebarHost && folderPane}
         <div className="library-pane list-pane">
           <div className="browse-actions">
-          <div className="pane-heading browse-heading" aria-hidden={pickedIds.length > 0} inert={pickedIds.length > 0}><nav ref={breadcrumbs} className="library-breadcrumbs" aria-label="当前目录"><button type="button" onClick={() => { const root = rootFolders(activeIndex)[0]; if (root) chooseFolder(root.chromeId, true); }}>书签</button>{folderPath(activeIndex, folderId).map((node) => <button type="button" key={node.chromeId} title={displayTitle(node.title)} aria-current={node.chromeId === folderId ? 'location' : undefined} onClick={() => chooseFolder(node.chromeId)}>{displayTitle(node.title)}</button>)}</nav>
+          <div className="pane-heading browse-heading" aria-hidden={pickedIds.length > 0} inert={pickedIds.length > 0}><nav ref={breadcrumbs} className="library-breadcrumbs" aria-label="当前目录"><button type="button" onClick={() => { const root = rootFolders(activeIndex)[0]; if (root) chooseFolder(root.chromeId, { resetScope: true, expandAncestors: true }); }}>书签</button>{folderPath(activeIndex, folderId).map((node) => <button type="button" key={node.chromeId} title={displayTitle(node.title)} aria-current={node.chromeId === folderId ? 'location' : undefined} onClick={() => chooseFolder(node.chromeId, { expandAncestors: true })}>{displayTitle(node.title)}</button>)}</nav>
           <h2 className="visually-hidden">{filtering ? '标签筛选' : searching ? '搜索结果' : '书签列表'}</h2><button type="button" aria-expanded={filtersOpen} aria-controls="library-filters" onClick={() => setFiltersOpen((value) => !value)}>筛选</button>{!isLocalProfile && <button type="button" disabled={!canWriteBrowser || !folderId} onClick={() => leaveMetadata(() => { setBookmarkId(null); setCreating(true); setEditingBatch(false); showDetail(); requestAnimationFrame(() => document.getElementById('edit-title')?.focus()); })}>新建</button>}{(searching || filtering) && <button type="button" onClick={() => leaveMetadata(() => { setQuery(''); setFilterTagId(null); setIncludeNote(false); setIncludeSummary(false); })}>清空筛选</button>}{hasMore && <button type="button" disabled={busy} onClick={() => void loadMore()}>加载下一页</button>}</div>
           {pickedIds.length > 0 && <div className="selection-toolbar" aria-label="所选项目操作"><details className="selection-path" onKeyDown={(event) => { if (event.key === 'Escape') { event.stopPropagation(); event.currentTarget.open = false; event.currentTarget.querySelector('summary')?.focus(); } }}><summary aria-label="查看当前目录完整路径" title={currentFolderPath.join(' / ')}>{currentFolderPath.at(-1) ?? '全部书签'}</summary><p tabIndex={0}>{currentFolderPath.join(' / ') || '全部书签'}</p></details><span>{pickedIds.length} 项待处理</span>{!isLocalProfile && (['move', 'delete'] as const).map((kind) => <button key={kind} type="button" disabled={!canWriteBrowser} onClick={() => leaveMetadata(() => { setCreating(false); setEditingBatch(true); setBatchRequest({ id: ++editSeq.current, kind, chromeIds: [...pickedIds] }); showDetail(); })}>{kind === 'move' ? '移动所选' : '删除所选'}</button>)}<button type="button" onClick={() => { setEditingBatch(false); setDetailTab('metadata'); showDetail(); requestAnimationFrame(() => document.getElementById('tag-name')?.focus()); }}>标签</button><button type="button" onClick={() => leaveMetadata(() => setPicked(new Set()))}>取消选择</button></div>}
           </div>
@@ -661,7 +747,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
                 }
                 else if (chromeId !== bookmarkId && !metadataDirty) setBookmarkId(chromeId);
               }}
-              onActivate={(row) => { if (row.kind === 'folder') chooseFolder(row.chromeId); else if (row.url && isHttpUrl(row.url)) void open(row.url); }}
+              onActivate={(row) => { if (row.kind === 'folder') chooseFolder(row.chromeId, { expandAncestors: true }); else if (row.url && isHttpUrl(row.url)) void open(row.url); }}
               selectedKeys={new Set(pickedIds.map((id) => rowKey(sourceKey, id)))}
               total={total}
               onKeyDown={onListKey}
@@ -769,6 +855,16 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
               if (!node || node.kind !== 'bookmark') return false;
               leaveMetadata(() => {
                 setFolderId(node.parentId ?? folderId); setQuery(''); setFilterTagId(null);
+                if (node.parentId) {
+                  const ancestors = folderPath(activeIndex, node.parentId).map((item) => item.chromeId);
+                  if (ancestors.length > 0) {
+                    setExpanded((current) => {
+                      const next = new Set(current);
+                      for (const id of ancestors) next.add(id);
+                      return next;
+                    });
+                  }
+                }
                 selectBookmark(chromeId); onLibrary?.();
               }, [chromeId]);
               return true;
