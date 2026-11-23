@@ -13,6 +13,10 @@ set windows-shell := ["cmd.exe", "/c"]
 default:
     @just --list
 
+# List recipes in workflow order.
+help:
+    @just --list --unsorted
+
 # Install from the lockfile.
 install:
     pnpm install --frozen-lockfile
@@ -60,6 +64,18 @@ test-rust:
 # Frontend and extension production build, then artifact scan.
 build:
     pnpm build
+
+# Unpacked Chrome extension (apps/extension/dist) + portable ZIP (apps/extension/dist-extension/).
+build-extension *args:
+    node scripts/build-extension.mjs {{args}}
+
+# Signed Chrome CRX3 package in apps/extension/dist-crx/ (requires local key; blocked off-store on Windows Chrome).
+build-crx *args:
+    node scripts/build-crx.mjs {{args}}
+
+# Generate local gitignored CRX private key and rotate fixed extension ID across the repo.
+crx-rotate-key *args:
+    node scripts/build-crx.mjs --rotate-key {{args}}
 
 # Windows release executable and scan. Does not create an installer.
 build-native:

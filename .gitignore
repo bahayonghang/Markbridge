@@ -36,6 +36,10 @@ __pycache__/
 node_modules/
 /apps/desktop/dist/
 /apps/extension/dist/
+/apps/extension/dist-crx/
+/apps/extension/dist-extension/
+/apps/extension/.keys/
+*.pem
 /apps/desktop/src-tauri/gen/
 /test-results/
 /playwright-report/
