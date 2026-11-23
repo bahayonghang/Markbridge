@@ -148,8 +148,8 @@ async function bridgeCommand(command: string, args: Record<string, unknown>): Pr
   return parseBridgeState(await invoke<unknown>(command, args));
 }
 
-export function startBridge(port: number): Promise<BridgeState> {
-  return bridgeCommand('start_bridge', { port });
+export function retryBridgeListener(): Promise<BridgeState> {
+  return bridgeCommand('retry_bridge_listener', {});
 }
 
 export function renameProfile(profileId: string, displayName: string): Promise<BridgeState> {
@@ -166,10 +166,6 @@ export function ignoreProfile(profileId: string): Promise<BridgeState> {
 
 export function resumeProfile(profileId: string): Promise<BridgeState> {
   return bridgeCommand('resume_profile', { profileId });
-}
-
-export function revokePairing(profileId: string): Promise<BridgeState> {
-  return bridgeCommand('revoke_pairing', { profileId });
 }
 
 export function reconnectProfile(profileId: string): Promise<BridgeState> {

@@ -4,7 +4,7 @@ import { DiagnosticExport } from './DiagnosticExport';
 import {
   associateFileMirror, attachFileMirror,
   detachFileMirror, ensureLocalLibrary, enumerateChromeUserData,
-  reconnectProfile, rescanFileMirrors, revokePairing, startBridge,
+  ignoreProfile, reconnectProfile, rescanFileMirrors, retryBridgeListener,
 } from '../../backend';
 
 import { cacheTime, connectionLabels, fileLabels, profileNextStep, type SourceTarget } from './source-status';
@@ -36,7 +36,6 @@ export function ConnectionSettings({ state, error, native, accept, onBrowseSourc
   onBrowseSource: (source: SourceTarget) => void;
   onboarding?: boolean;
 }) {
-  const [port, setPort] = useState('49153');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [userDataPath, setUserDataPath] = useState('');
@@ -69,12 +68,7 @@ export function ConnectionSettings({ state, error, native, accept, onBrowseSourc
 
   function start(event: FormEvent) {
     event.preventDefault();
-    const value = Number(port);
-    if (!/^\d+$/.test(port) || !Number.isInteger(value) || value < 1024 || value > 65535) {
-      setMessage('端口必须是 1024–65535 之间的整数。');
-      return;
-    }
-    void act(async () => { accept(await startBridge(value)); }, '无法启动本机连接。请检查端口是否占用，或更换端口后重试。');
+    void act(async () => { accept(await retryBridgeListener()); }, '无法启动本机连接。请检查端口是否占用，或更换端口后重试。');
   }
 
   const pairedChromeProfiles = state?.profiles.filter((profile) => profile.connection !== 'local') ?? [];
@@ -93,7 +87,7 @@ export function ConnectionSettings({ state, error, native, accept, onBrowseSourc
             <section className="connection-panel" aria-labelledby="listener-title">
               <div className="panel-heading"><h2 id="listener-title">2. 启动本机连接</h2><span className="secondary">{state?.port ? `127.0.0.1:${state.port}` : '监听尚未启动'}</span></div>
               <form className="inline-form" onSubmit={start} noValidate>
-                <details className="connection-advanced"><summary>高级：连接端口</summary><label htmlFor="bridge-port">端口<input id="bridge-port" inputMode="numeric" value={state?.port?.toString() ?? port} onChange={(event) => setPort(event.target.value)} disabled={unavailable || state?.port != null} /></label></details>
+                <details className="connection-advanced"><summary>高级：连接端口</summary><label htmlFor="bridge-port">端口<input id="bridge-port" inputMode="numeric" value={state?.port?.toString() ?? '49153'} readOnly disabled /></label></details>
                 <button disabled={unavailable || state?.port != null} type="submit">{state?.port ? '连接已启动' : '启动连接'}</button>
               </form>
               <p className="secondary">默认端口 49153。端口占用时，更换端口后重试。</p>
@@ -202,7 +196,7 @@ export function ConnectionSettings({ state, error, native, accept, onBrowseSourc
     {revoke && <ConfirmDialog title={`吊销“${revoke.displayName}”的配对？`} confirmLabel="确认吊销配对" onCancel={() => setRevoke(null)} onConfirm={() => {
       const id = revoke.profileId;
       setRevoke(null);
-      void act(async () => { accept(await revokePairing(id)); });
+      void act(async () => { accept(await ignoreProfile(id)); });
     }}><p>此扩展将不能继续同步或修改这份资料。Chrome 书签、本机缓存、标签和备注都会保留。</p><p>重新连接需要在桌面与扩展重新配对；旧凭据不会恢复。</p></ConfirmDialog>}
   </div>;
 }

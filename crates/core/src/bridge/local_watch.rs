@@ -100,7 +100,7 @@ impl Bridge {
             ActiveProfile {
                 identity,
                 view,
-                revoked: false,
+                ignored: false,
                 session: None,
                 close: None,
                 nodes,

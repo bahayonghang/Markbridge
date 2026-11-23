@@ -38,6 +38,7 @@ const MIGRATIONS: &[&str] = &[
     include_str!("migrations/006_organization.sql"),
     include_str!("migrations/007_maintenance.sql"),
     include_str!("migrations/008_semantic.sql"),
+    include_str!("migrations/009_zero_click_profiles.sql"),
 ];
 pub const SCHEMA_VERSION: u32 = MIGRATIONS.len() as u32;
 type Result<T> = std::result::Result<T, ErrorCode>;
@@ -81,7 +82,8 @@ impl From<Profile> for StoredIdentity {
 #[derive(Debug, Clone)]
 pub struct StoredProfile {
     pub profile: StoredIdentity,
-    pub revoked: bool,
+    pub write_paused: bool,
+    pub ignored: bool,
     pub last_synced_at: Option<Counter>,
 }
 /// Origin comes from the authenticated transport header, never from a hello payload.
@@ -213,15 +215,17 @@ impl Storage {
     }
     pub async fn profiles(&self) -> Result<Vec<StoredProfile>> {
         self.call(|conn| {
-            let mut statement = conn.prepare("SELECT id,instance_id,source_epoch,display_name,paired_origin,credential_reference,pairing_state,last_synced_at FROM profiles ORDER BY id").map_err(storage_error)?;
-            let rows = statement.query_map([], |row| Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?, row.get::<_, i64>(2)?, row.get::<_, String>(3)?, row.get::<_, String>(4)?, row.get::<_, Option<String>>(5)?, row.get::<_, String>(6)?, row.get::<_, Option<i64>>(7)?))).map_err(storage_error)?;
+            let mut statement = conn.prepare("SELECT id,instance_id,source_epoch,display_name,paired_origin,credential_reference,pairing_state,last_synced_at,write_paused,ignored FROM profiles ORDER BY id").map_err(storage_error)?;
+            let rows = statement.query_map([], |row| Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?, row.get::<_, i64>(2)?, row.get::<_, String>(3)?, row.get::<_, String>(4)?, row.get::<_, Option<String>>(5)?, row.get::<_, String>(6)?, row.get::<_, Option<i64>>(7)?, row.get::<_, i64>(8)?, row.get::<_, i64>(9)?))).map_err(storage_error)?;
             rows.map(|row| {
-                let (id, instance, epoch, name, origin, reference, state, synced) = row.map_err(storage_error)?;
+                let (id, instance, epoch, name, origin, reference, state, synced, write_paused, ignored) = row.map_err(storage_error)?;
                 let parsed_origin = if origin == local_space::LOCAL_SKILLS_ORIGIN {
                     if id != local_space::LOCAL_SKILLS_PROFILE_ID
                         || instance != local_space::LOCAL_SKILLS_INSTANCE_ID
                         || reference.is_some()
                         || state != "paired"
+                        || write_paused != 0
+                        || ignored != 0
                     {
                         return Err(ErrorCode::InvalidMessage);
                     }
@@ -241,21 +245,75 @@ impl Storage {
                         origin: parsed_origin,
                         credential_reference: reference.map(Id::new).transpose()?,
                     },
-                    revoked: state == "revoked",
+                    write_paused: write_paused != 0,
+                    ignored: ignored != 0,
                     last_synced_at: synced.map(|value| Counter::new(value as u64)).transpose()?,
                 })
             }).collect()
         }).await
     }
-    /// Revocation preserves cache and local metadata. The OS credential is removed by Bridge.
-    pub async fn revoke_profile(&self, profile_id: Id) -> Result<()> {
+    pub async fn rename_profile(&self, profile_id: Id, display_name: DisplayName) -> Result<()> {
+        if profile_id.as_str() == local_space::LOCAL_SKILLS_PROFILE_ID {
+            return Err(ErrorCode::ReadOnly);
+        }
+        let trimmed = display_name.as_str().trim().to_owned();
+        if trimmed == local_space::LOCAL_SKILLS_PROFILE_ID {
+            return Err(ErrorCode::InvalidMessage);
+        }
+        let display_name = DisplayName::new(trimmed)?;
+        self.call(move |conn| {
+            if conn
+                .execute(
+                    "UPDATE profiles SET display_name=?2 WHERE id=?1",
+                    params![profile_id.as_str(), display_name.as_str()],
+                )
+                .map_err(storage_error)?
+                != 1
+            {
+                return Err(ErrorCode::WrongProfile);
+            }
+            Ok(())
+        })
+        .await
+    }
+    pub async fn set_write_paused(&self, profile_id: Id, paused: bool) -> Result<()> {
         if profile_id.as_str() == local_space::LOCAL_SKILLS_PROFILE_ID {
             return Err(ErrorCode::ReadOnly);
         }
         self.call(move |conn| {
-            if conn.execute("UPDATE profiles SET pairing_state='revoked',credential_reference=NULL WHERE id=?1", [profile_id.as_str()]).map_err(storage_error)? != 1 { return Err(ErrorCode::WrongProfile); }
+            if conn
+                .execute(
+                    "UPDATE profiles SET write_paused=?2 WHERE id=?1",
+                    params![profile_id.as_str(), i64::from(paused)],
+                )
+                .map_err(storage_error)?
+                != 1
+            {
+                return Err(ErrorCode::WrongProfile);
+            }
             Ok(())
-        }).await
+        })
+        .await
+    }
+    /// Ignoring preserves cache and local metadata.
+    pub async fn set_ignored(&self, profile_id: Id, ignored: bool) -> Result<()> {
+        if profile_id.as_str() == local_space::LOCAL_SKILLS_PROFILE_ID {
+            return Err(ErrorCode::ReadOnly);
+        }
+        self.call(move |conn| {
+            if conn
+                .execute(
+                    "UPDATE profiles SET ignored=?2, pairing_state=CASE WHEN ?2=0 THEN 'paired' ELSE pairing_state END WHERE id=?1",
+                    params![profile_id.as_str(), i64::from(ignored)],
+                )
+                .map_err(storage_error)?
+                != 1
+            {
+                return Err(ErrorCode::WrongProfile);
+            }
+            Ok(())
+        })
+        .await
     }
     /// Identity reset is explicit. Old cache and sidecar rows remain available for review.
     pub async fn reset_source_epoch(&self, profile_id: Id, epoch: SourceEpoch) -> Result<()> {

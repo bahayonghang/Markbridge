@@ -2,7 +2,7 @@ import { afterEach, expect, it, vi } from 'vitest';
 import { invoke, isTauri } from '@tauri-apps/api/core';
 import { listen, type Event } from '@tauri-apps/api/event';
 import { saveDiagnostics, ensureLocalLibrary } from './backend';
-import { aiSettings, applyAi, applyEdit, applyTitleEncoding, cancelAi, clearAiCredential, clearWebPreviewSession, enumerateChromeUserData, exportHtml, getBridgeState, getMirrorTree, ignoreProfile, openHttpUrl, openWebPreview, previewEdit, previewTitleEncoding, readCacheCount, readCacheList, readCacheNode, readCacheSearch, readCacheTree, readTagState, renameProfile, resumeProfile, saveAiConfig, setAiCredential, setProfileWritePaused, startBridge, subscribeBridgeState, subscribeWebPreview, suggestAi, tagCommand, testAiConnection, webPreviewAction, webPreviewState } from './backend';
+import { aiSettings, applyAi, applyEdit, applyTitleEncoding, cancelAi, clearAiCredential, clearWebPreviewSession, enumerateChromeUserData, exportHtml, getBridgeState, getMirrorTree, ignoreProfile, openHttpUrl, openWebPreview, previewEdit, previewTitleEncoding, readCacheCount, readCacheList, readCacheNode, readCacheSearch, readCacheTree, readTagState, renameProfile, resumeProfile, retryBridgeListener, saveAiConfig, setAiCredential, setProfileWritePaused, subscribeBridgeState, subscribeWebPreview, suggestAi, tagCommand, testAiConnection, webPreviewAction, webPreviewState } from './backend';
 
 vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn(), isTauri: vi.fn() }));
 vi.mock('@tauri-apps/api/event', () => ({ listen: vi.fn() }));
@@ -14,7 +14,7 @@ it('browser preview never invokes or subscribes to native endpoints', async () =
   await expect(saveDiagnostics()).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
   expect(await getBridgeState()).toMatchObject({ profiles: [], port: null });
   await subscribeBridgeState(vi.fn(), vi.fn());
-  await expect(startBridge(49153)).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
+  await expect(retryBridgeListener()).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
   await expect(renameProfile('profile-a', '工作')).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
   await expect(setProfileWritePaused('profile-a', true)).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
   await expect(ignoreProfile('profile-a')).rejects.toThrow('NATIVE_BRIDGE_UNAVAILABLE');
@@ -56,6 +56,8 @@ it('validates unknown IPC responses before exposing bridge state', async () => {
   vi.mocked(invoke).mockResolvedValue({ ...state, credential: 'unexpected-secret' });
   await expect(getBridgeState()).rejects.toThrow('INVALID_BRIDGE_STATE');
   vi.mocked(invoke).mockResolvedValue({ ...state, revision: 2 });
+  expect(await retryBridgeListener()).toEqual({ ...state, revision: 2 });
+  expect(invoke).toHaveBeenCalledWith('retry_bridge_listener', {});
   expect(await renameProfile('profile-a', '工作')).toEqual({ ...state, revision: 2 });
   expect(await setProfileWritePaused('profile-a', true)).toEqual({ ...state, revision: 2 });
   expect(await ignoreProfile('profile-a')).toEqual({ ...state, revision: 2 });

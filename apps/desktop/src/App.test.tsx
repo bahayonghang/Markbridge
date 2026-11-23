@@ -9,8 +9,8 @@ import { DEFAULT_UI_PREFERENCES, UI_PREFERENCES_KEY } from './features/settings/
 vi.mock('./backend', () => ({
   getStartupState: vi.fn(), getBridgeState: vi.fn(), subscribeBridgeState: vi.fn(),
   listInstalledFonts: vi.fn(async () => ({ status: 'ready', families: [] })),
-  hasNativeBridge: vi.fn(), startBridge: vi.fn(), renameProfile: vi.fn(),
-  setProfileWritePaused: vi.fn(), ignoreProfile: vi.fn(), resumeProfile: vi.fn(), revokePairing: vi.fn(), reconnectProfile: vi.fn(), ensureLocalLibrary: vi.fn(),
+  hasNativeBridge: vi.fn(), retryBridgeListener: vi.fn(), renameProfile: vi.fn(),
+  setProfileWritePaused: vi.fn(), ignoreProfile: vi.fn(), resumeProfile: vi.fn(), reconnectProfile: vi.fn(), ensureLocalLibrary: vi.fn(),
   readCacheQuery: vi.fn(async () => ({ items: [], total: 0, offset: 0, nextOffset: null, sourceEpoch: 1, revision: 1 })),
   readTagState: vi.fn(async () => ({ affected: 0, encodingEnabled: false, entries: [], filterTagId: null, journalId: null, matches: [], mergeRequired: false, profileId: 'local-skills', sourceTagId: null, tags: [], targetTagId: null })),
   tagCommand: vi.fn(),
@@ -102,7 +102,7 @@ it('applies failed saves for the session and resets only appearance without writ
   expect(localStorage.getItem('unrelated-preference')).toBe('keep');
   expect(screen.queryByRole('alert')).toBeNull();
   expect(backend.saveAiConfig).not.toHaveBeenCalled();
-  expect(backend.startBridge).not.toHaveBeenCalled();
+  expect(backend.retryBridgeListener).not.toHaveBeenCalled();
 });
 
 it('portals export into one settings panel without duplicating the source owner or accepting a late source result', async () => {
@@ -198,7 +198,7 @@ it('keeps browser preview unpaired and disables native actions', async () => {
   expect(await screen.findByText('未连接 · 只读')).toBeVisible();
   expect(screen.getByText(/浏览器预览 · 仅显示界面/)).toBeVisible();
   expect(screen.getByRole('button', { name: '启动连接' })).toBeDisabled();
-  expect(backend.startBridge).not.toHaveBeenCalled();
+  expect(backend.retryBridgeListener).not.toHaveBeenCalled();
 });
 
 it('shows safe startup failure without raw details', async () => {
@@ -227,20 +227,15 @@ it('subscribes before hydration and ignores older hydrate and command replies', 
   expect(screen.getByText('实时同步')).toBeVisible();
 });
 
-it('validates port locally and sends a corrected port once', async () => {
+it('retries the local bridge listener once and disables the trigger once bound', async () => {
   render(<App />);
   fireEvent.click(screen.getByRole('button', { name: '设置' }));
   fireEvent.click(screen.getByRole('tab', { name: 'Chrome 连接' }));
   await screen.findByText('未连接 · 只读');
-  fireEvent.change(screen.getByLabelText('端口'), { target: { value: '0' } });
-  fireEvent.click(screen.getByRole('button', { name: '启动连接' }));
-  expect(screen.getByRole('alert')).toHaveTextContent('1024–65535');
-  expect(backend.startBridge).not.toHaveBeenCalled();
-  vi.mocked(backend.startBridge).mockResolvedValue({ ...initial, revision: 2, port: 49154 });
-  fireEvent.change(screen.getByLabelText('端口'), { target: { value: '49154' } });
+  vi.mocked(backend.retryBridgeListener).mockResolvedValue({ ...initial, revision: 2, port: 49154 });
   fireEvent.click(screen.getByRole('button', { name: '启动连接' }));
   expect(await screen.findByText('127.0.0.1:49154')).toBeVisible();
-  expect(backend.startBridge).toHaveBeenCalledExactlyOnceWith(49154);
+  expect(backend.retryBridgeListener).toHaveBeenCalledExactlyOnceWith();
   expect(screen.getByLabelText('端口')).toBeDisabled();
   expect(screen.getByRole('button', { name: '连接已启动' })).toBeDisabled();
 });
@@ -248,7 +243,7 @@ it('validates port locally and sends a corrected port once', async () => {
 it('shows reconciling and ignored cache as read-only', async () => {
   vi.mocked(backend.getBridgeState).mockResolvedValue({ ...initial, profiles: [profile] });
   vi.mocked(backend.reconnectProfile).mockResolvedValue({ ...initial, revision: 2, profiles: [{ ...profile, connection: 'reconciling' }] });
-  vi.mocked(backend.revokePairing).mockResolvedValue({ ...initial, revision: 3, profiles: [{ ...profile, connection: 'ignored', ignored: true }] });
+  vi.mocked(backend.ignoreProfile).mockResolvedValue({ ...initial, revision: 3, profiles: [{ ...profile, connection: 'ignored', ignored: true }] });
   render(<App />);
   fireEvent.click(screen.getByRole('button', { name: '设置' }));
   fireEvent.click(screen.getByRole('tab', { name: 'Chrome 连接' }));
@@ -256,10 +251,10 @@ it('shows reconciling and ignored cache as read-only', async () => {
   fireEvent.click(screen.getByRole('button', { name: '重新连接' }));
   expect(await screen.findByRole('status')).toHaveTextContent('核对中 · 只读');
   fireEvent.click(screen.getByRole('button', { name: '吊销配对' }));
-  expect(backend.revokePairing).not.toHaveBeenCalled();
+  expect(backend.ignoreProfile).not.toHaveBeenCalled();
   expect(screen.getByRole('dialog')).toHaveTextContent('本机缓存、标签和备注都会保留');
   fireEvent.click(screen.getByRole('button', { name: '留在当前页面' }));
-  expect(backend.revokePairing).not.toHaveBeenCalled();
+  expect(backend.ignoreProfile).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole('button', { name: '吊销配对' }));
   fireEvent.click(screen.getByRole('button', { name: '确认吊销配对' }));
   await waitFor(() => expect(document.querySelector('.workspace-heading .connection')).toHaveTextContent('已忽略 · 只读'));
@@ -308,7 +303,7 @@ it('development remount subscribes safely without duplicate actions', async () =
   await screen.findByText('未连接 · 只读');
   expect(backend.subscribeBridgeState).toHaveBeenCalledTimes(2);
   expect(unsubscribe).toHaveBeenCalledOnce();
-  expect(backend.startBridge).not.toHaveBeenCalled();
+  expect(backend.retryBridgeListener).not.toHaveBeenCalled();
   view.unmount();
   expect(unsubscribe).toHaveBeenCalledTimes(2);
 });
@@ -320,7 +315,7 @@ it('introduces extension and read-only routes without AI or automatic directory 
   expect(screen.getByLabelText('端口')).not.toBeVisible();
   expect(screen.getByRole('button', { name: '启动连接' })).toBeEnabled();
   expect(backend.aiSettings).not.toHaveBeenCalled();
-  expect(backend.startBridge).not.toHaveBeenCalled();
+  expect(backend.retryBridgeListener).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole('button', { name: '只读浏览文件' }));
   expect(screen.getByLabelText('用户数据目录')).toBeVisible();
   expect(screen.getByRole('button', { name: '枚举资料' })).toBeEnabled();

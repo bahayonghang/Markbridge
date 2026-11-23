@@ -34,10 +34,11 @@ export async function mockBridge(page: Page, scenario: 'connected' | 'startup-er
         receive?.(state);
         return state;
       }
-      export async function startBridge(port) {
+      export async function retryBridgeListener() {
         starts += 1;
-        ${scenario === 'port-conflict' ? "if (starts === 1) throw 'CONFLICT';" : ''}
-        state = { ...state, revision: state.revision + 1, port };
+        ${scenario === 'port-conflict' ? "if (starts === 1) throw 'PORT_EXHAUSTED';" : ''}
+        state = { ...state, revision: state.revision + 1, port: 49153, errorCode: null };
+        receive?.(state);
         return state;
       }
       export async function renameProfile(profileId, displayName) {
@@ -64,10 +65,6 @@ export async function mockBridge(page: Page, scenario: 'connected' | 'startup-er
         state = { ...state, revision: state.revision + 1, profiles: [{ ...profile, connection: 'reconciling' }] };
         receive?.(state);
         return initial;
-      }
-      export async function revokePairing() {
-        state = { ...state, revision: state.revision + 1, profiles: [{ ...profile, connection: 'ignored', ignored: true }] };
-        return state;
       }
       export async function ensureLocalLibrary() {
         const localProfile = { profileId: 'local-skills', instanceId: 'local-skills', displayName: 'Skills 书签库', connection: 'local', writePaused: false, ignored: false, nodeCount: 1, revision: 1, lastSyncedAt: 1791800000000, errorCode: null };

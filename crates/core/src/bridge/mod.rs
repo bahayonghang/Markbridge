@@ -54,11 +54,12 @@ pub struct Bridge {
     preview: Gate,
     links: Gate,
     link_net: Arc<std::sync::Mutex<Arc<dyn crate::preview::Network>>>,
+    allowed_origin: Arc<std::sync::Mutex<PairedOrigin>>,
 }
 struct ActiveProfile {
     identity: StoredIdentity,
     view: BridgeProfile,
-    revoked: bool,
+    ignored: bool,
     session: Option<Id>,
     close: Option<watch::Sender<bool>>,
     nodes: Vec<BookmarkNode>,
@@ -79,6 +80,7 @@ struct Inner {
     profiles: BTreeMap<String, ActiveProfile>,
     mirrors: BTreeMap<String, file_mirror::ActiveMirror>,
     listener: Option<Listener>,
+    retired_closes: Vec<watch::Sender<bool>>,
     revision: u64,
     port: Option<u16>,
     error: Option<ErrorCode>,
@@ -163,11 +165,11 @@ impl Bridge {
                 display_name: profile.display_name.clone(),
                 connection: match &profile.origin {
                     ProfileOrigin::LocalSkills => BridgeConnection::Local,
-                    ProfileOrigin::Chrome(_) if stored.revoked => BridgeConnection::Ignored,
+                    ProfileOrigin::Chrome(_) if stored.ignored => BridgeConnection::Ignored,
                     ProfileOrigin::Chrome(_) => BridgeConnection::CachedReadOnly,
                 },
-                write_paused: false,
-                ignored: stored.revoked,
+                write_paused: stored.write_paused,
+                ignored: stored.ignored,
                 node_count: Counter::new(nodes.len() as u64)?,
                 revision: cursor
                     .as_ref()
@@ -180,7 +182,7 @@ impl Bridge {
                 ActiveProfile {
                     identity: profile,
                     view,
-                    revoked: stored.revoked,
+                    ignored: stored.ignored,
                     session: None,
                     close: None,
                     nodes,
@@ -200,6 +202,7 @@ impl Bridge {
             profiles,
             mirrors,
             listener: None,
+            retired_closes: Vec::new(),
             revision: 0,
             port: None,
             error: None,
@@ -223,9 +226,36 @@ impl Bridge {
             link_net: Arc::new(std::sync::Mutex::new(Arc::new(
                 crate::preview::SystemNetwork,
             ))),
+            allowed_origin: Arc::new(std::sync::Mutex::new(PairedOrigin::new(
+                OFFICIAL_EXTENSION_ORIGIN,
+            )?)),
         };
         bridge.arm_saved_watches().await;
         bridge.arm_local_watch(path).await;
+        Ok(bridge)
+    }
+    pub(super) fn allowed_origin(&self) -> PairedOrigin {
+        self.allowed_origin
+            .lock()
+            .unwrap_or_else(|error| error.into_inner())
+            .clone()
+    }
+    #[cfg(test)]
+    pub(crate) fn set_allowed_origin(&self, origin: PairedOrigin) {
+        *self
+            .allowed_origin
+            .lock()
+            .unwrap_or_else(|error| error.into_inner()) = origin;
+    }
+    #[cfg(test)]
+    #[allow(dead_code)]
+    pub(crate) async fn open_with_allowed_origin(
+        path: impl AsRef<Path>,
+        credentials: Arc<dyn CredentialStore>,
+        origin: PairedOrigin,
+    ) -> Result<Self> {
+        let bridge = Self::open(path, credentials).await?;
+        bridge.set_allowed_origin(origin);
         Ok(bridge)
     }
     pub fn subscribe(&self) -> watch::Receiver<BridgeState> {
@@ -237,6 +267,57 @@ impl Bridge {
     fn publish(&self, inner: &mut Inner) {
         inner.revision += 1;
         self.state.send_replace(inner.view());
+    }
+    pub async fn start_auto(&self) -> Result<BridgeState> {
+        let _lifecycle = self.lifecycle.lock().await;
+        {
+            let inner = self.inner.lock().await;
+            if inner.storage.is_none() {
+                return Err(ErrorCode::Cancelled);
+            }
+            if inner.listener.is_some() {
+                return Ok(inner.view());
+            }
+        }
+        let candidates = match std::env::var("MARKBRIDGE_BRIDGE_PORT") {
+            Ok(raw) if !raw.trim().is_empty() => match raw.trim().parse::<u16>() {
+                Ok(port) if port != 0 => vec![port],
+                _ => {
+                    let mut inner = self.inner.lock().await;
+                    inner.port = None;
+                    inner.error = Some(ErrorCode::InvalidMessage);
+                    self.publish(&mut inner);
+                    return Err(ErrorCode::InvalidMessage);
+                }
+            },
+            Ok(_) | Err(std::env::VarError::NotPresent) => {
+                (BRIDGE_PORT_START..=BRIDGE_PORT_END).collect()
+            }
+            Err(_) => {
+                let mut inner = self.inner.lock().await;
+                inner.port = None;
+                inner.error = Some(ErrorCode::InvalidMessage);
+                self.publish(&mut inner);
+                return Err(ErrorCode::InvalidMessage);
+            }
+        };
+        let mut bound = None;
+        for port in candidates {
+            if let Ok(socket) =
+                tokio::net::TcpListener::bind((std::net::Ipv4Addr::LOCALHOST, port)).await
+            {
+                bound = Some((port, socket));
+                break;
+            }
+        }
+        let Some((port, socket)) = bound else {
+            let mut inner = self.inner.lock().await;
+            inner.port = None;
+            inner.error = Some(ErrorCode::PortExhausted);
+            self.publish(&mut inner);
+            return Err(ErrorCode::PortExhausted);
+        };
+        Ok(self.spawn_listener(port, socket).await)
     }
     pub async fn start(&self, port: u16) -> Result<BridgeState> {
         let _lifecycle = self.lifecycle.lock().await;
@@ -265,6 +346,9 @@ impl Bridge {
                     return Err(ErrorCode::Conflict);
                 }
             };
+        Ok(self.spawn_listener(port, socket).await)
+    }
+    async fn spawn_listener(&self, port: u16, socket: tokio::net::TcpListener) -> BridgeState {
         let mut inner = self.inner.lock().await;
         let (stop, stopped) = watch::channel(false);
         let bridge = self.clone();
@@ -275,25 +359,36 @@ impl Bridge {
         inner.port = Some(port);
         inner.error = None;
         self.publish(&mut inner);
-        Ok(inner.view())
-    }
-    pub async fn revoke_pairing(&self, profile_id: Id) -> Result<BridgeState> {
-        self.ignore_profile(profile_id).await
+        inner.view()
     }
     pub async fn rename_profile(
         &self,
         profile_id: Id,
         display_name: String,
     ) -> Result<BridgeState> {
-        let display_name = DisplayName::new(display_name.trim())?;
+        let trimmed = display_name.trim().to_owned();
+        if trimmed == crate::storage::LOCAL_SKILLS_PROFILE_ID {
+            return Err(ErrorCode::InvalidMessage);
+        }
+        let display_name = DisplayName::new(trimmed)?;
         let mut inner = self.inner.lock().await;
+        {
+            let profile = inner
+                .profiles
+                .get(profile_id.as_str())
+                .ok_or(ErrorCode::WrongProfile)?;
+            if matches!(profile.identity.origin, ProfileOrigin::LocalSkills) {
+                return Err(ErrorCode::ReadOnly);
+            }
+        }
+        inner
+            .storage()?
+            .rename_profile(profile_id.clone(), display_name.clone())
+            .await?;
         let profile = inner
             .profiles
             .get_mut(profile_id.as_str())
             .ok_or(ErrorCode::WrongProfile)?;
-        if matches!(profile.identity.origin, ProfileOrigin::LocalSkills) {
-            return Err(ErrorCode::ReadOnly);
-        }
         profile.identity.display_name = display_name.clone();
         profile.view.display_name = display_name;
         self.publish(&mut inner);
@@ -301,56 +396,104 @@ impl Bridge {
     }
     pub async fn set_write_paused(&self, profile_id: Id, paused: bool) -> Result<BridgeState> {
         let mut inner = self.inner.lock().await;
+        {
+            let profile = inner
+                .profiles
+                .get(profile_id.as_str())
+                .ok_or(ErrorCode::WrongProfile)?;
+            if matches!(profile.identity.origin, ProfileOrigin::LocalSkills) {
+                return Err(ErrorCode::ReadOnly);
+            }
+        }
+        inner
+            .storage()?
+            .set_write_paused(profile_id.clone(), paused)
+            .await?;
         let profile = inner
             .profiles
             .get_mut(profile_id.as_str())
             .ok_or(ErrorCode::WrongProfile)?;
-        if matches!(profile.identity.origin, ProfileOrigin::LocalSkills) {
-            return Err(ErrorCode::ReadOnly);
-        }
         profile.view.write_paused = paused;
         self.publish(&mut inner);
         Ok(inner.view())
     }
     pub async fn ignore_profile(&self, profile_id: Id) -> Result<BridgeState> {
         let mut inner = self.inner.lock().await;
-        let profile = inner
-            .profiles
-            .get_mut(profile_id.as_str())
-            .ok_or(ErrorCode::WrongProfile)?;
-        if matches!(profile.identity.origin, ProfileOrigin::LocalSkills) {
-            return Err(ErrorCode::ReadOnly);
+        {
+            let profile = inner
+                .profiles
+                .get(profile_id.as_str())
+                .ok_or(ErrorCode::WrongProfile)?;
+            if matches!(profile.identity.origin, ProfileOrigin::LocalSkills) {
+                return Err(ErrorCode::ReadOnly);
+            }
         }
-        profile.revoked = true;
-        profile.view.ignored = true;
-        profile.disconnect();
-        let reference = profile.identity.credential_reference.clone();
-        self.publish(&mut inner);
-        // In-memory authority ends before either persistent operation can fail.
-        inner.storage()?.revoke_profile(profile_id.clone()).await?;
         inner
-            .profiles
-            .get_mut(profile_id.as_str())
-            .ok_or(ErrorCode::WrongProfile)?
-            .identity
-            .credential_reference = None;
-        if let Some(reference) = reference {
-            self.delete_credential(reference).await?;
+            .storage()?
+            .set_ignored(profile_id.clone(), true)
+            .await?;
+        inner.retired_closes.retain(|tx| !tx.is_closed());
+        let mut retired = None;
+        {
+            let profile = inner
+                .profiles
+                .get_mut(profile_id.as_str())
+                .ok_or(ErrorCode::WrongProfile)?;
+            profile.ignored = true;
+            profile.view.ignored = true;
+            profile.view.connection = BridgeConnection::Ignored;
+            profile.view.error_code.0 = None;
+            profile.identity.credential_reference = None;
+            if let (Some(session), Some(sender)) = (profile.session.take(), profile.outbound.take())
+            {
+                let pause = envelope(
+                    "pause_sync",
+                    &profile_id,
+                    &session,
+                    Some(random_id("pause")?),
+                    serde_json::json!({ "reason": ErrorCode::ProfileIgnored }),
+                )?;
+                let _ = sender.send(pause);
+                // Keep `close` alive until `authenticated_loop` flushes `PauseSync` and exits.
+                retired = profile.close.take();
+                profile.awaiting_tree = None;
+                profile.busy = false;
+            } else {
+                profile.disconnect();
+            }
         }
+        if let Some(close) = retired {
+            inner.retired_closes.push(close);
+        }
+        self.publish(&mut inner);
         Ok(inner.view())
     }
     pub async fn resume_profile(&self, profile_id: Id) -> Result<BridgeState> {
         let mut inner = self.inner.lock().await;
+        {
+            let profile = inner
+                .profiles
+                .get(profile_id.as_str())
+                .ok_or(ErrorCode::WrongProfile)?;
+            if matches!(profile.identity.origin, ProfileOrigin::LocalSkills) {
+                return Err(ErrorCode::ReadOnly);
+            }
+        }
+        inner
+            .storage()?
+            .set_ignored(profile_id.clone(), false)
+            .await?;
         let profile = inner
             .profiles
             .get_mut(profile_id.as_str())
             .ok_or(ErrorCode::WrongProfile)?;
-        if matches!(profile.identity.origin, ProfileOrigin::LocalSkills) {
-            return Err(ErrorCode::ReadOnly);
-        }
-        profile.revoked = false;
+        let was_ignored = profile.ignored || profile.view.ignored;
+        profile.ignored = false;
         profile.view.ignored = false;
-        profile.view.connection = BridgeConnection::CachedReadOnly;
+        if was_ignored {
+            profile.view.connection = BridgeConnection::CachedReadOnly;
+            profile.view.error_code.0 = None;
+        }
         self.publish(&mut inner);
         Ok(inner.view())
     }
@@ -363,8 +506,8 @@ impl Bridge {
         if matches!(profile.identity.origin, ProfileOrigin::LocalSkills) {
             return Err(ErrorCode::ReadOnly);
         }
-        if profile.revoked {
-            return Err(ErrorCode::Unpaired);
+        if profile.ignored {
+            return Err(ErrorCode::ProfileIgnored);
         }
         // Explicit reconnect closes the old session. The extension reconnects with a new session.
         profile.disconnect();
@@ -414,6 +557,9 @@ impl Bridge {
         let listener = {
             let mut inner = self.inner.lock().await;
             inner.port = None;
+            for close in inner.retired_closes.drain(..) {
+                close.send_replace(true);
+            }
             for profile in inner.profiles.values_mut() {
                 profile.disconnect();
             }
@@ -511,17 +657,12 @@ impl Bridge {
         let inner = self.inner.lock().await;
         read_count(profile_nodes(&inner, &profile_id)?, folder_id.as_ref())
     }
-    async fn delete_credential(&self, reference: Id) -> Result<()> {
-        let store = self.credentials.clone();
-        tokio::task::spawn_blocking(move || store.delete(reference.as_str()))
-            .await
-            .map_err(|_| ErrorCode::StorageError)?
-    }
-    async fn authenticate(
+    async fn connect_extension(
         &self,
         origin: &PairedOrigin,
         message: &WireMessage,
     ) -> Result<AuthSession> {
+        let _keep_credentials_field_live = &self.credentials;
         let WireMessage::Hello {
             profile_id,
             session_id,
@@ -546,20 +687,15 @@ impl Bridge {
             }
             key
         } else {
-            if profile_id.as_str() != "pending" && inner.profiles.contains_key(profile_id.as_str())
+            if profile_id.as_str() == crate::storage::LOCAL_SKILLS_PROFILE_ID
+                || (profile_id.as_str() != "pending"
+                    && inner.profiles.contains_key(profile_id.as_str()))
             {
                 return Err(ErrorCode::WrongProfile);
             }
             let new_profile_id = random_id("p")?;
-            let chrome_count = inner
-                .profiles
-                .values()
-                .filter(|item| !matches!(item.identity.origin, ProfileOrigin::LocalSkills))
-                .count()
-                + 1;
-            let display_name = payload.display_name_hint.clone().unwrap_or_else(|| {
-                DisplayName::new(format!("Chrome 资料 {chrome_count}")).expect("default name")
-            });
+            let display_name =
+                pick_chrome_display_name(&inner.profiles, payload.display_name_hint.as_ref());
             let identity = Profile {
                 id: new_profile_id.clone(),
                 instance_id: payload.instance_id.clone(),
@@ -587,7 +723,7 @@ impl Bridge {
                 ActiveProfile {
                     identity: identity.into(),
                     view,
-                    revoked: false,
+                    ignored: false,
                     session: None,
                     close: None,
                     nodes: vec![],
@@ -601,15 +737,33 @@ impl Bridge {
             );
             key
         };
+        let (ignored_now, profile_origin, stored_id) = {
+            let profile = inner
+                .profiles
+                .get(&resolved_key)
+                .ok_or(ErrorCode::WrongProfile)?;
+            (
+                profile.ignored,
+                profile.identity.origin.clone(),
+                profile.identity.id.clone(),
+            )
+        };
+        if profile_origin != ProfileOrigin::Chrome(origin.clone()) {
+            return Err(ErrorCode::WrongProfile);
+        }
+        if ignored_now {
+            if !payload.user_initiated {
+                return Err(ErrorCode::ProfileIgnored);
+            }
+            inner.storage()?.set_ignored(stored_id, false).await?;
+        }
         let profile = inner
             .profiles
             .get_mut(&resolved_key)
             .ok_or(ErrorCode::WrongProfile)?;
-        if profile.identity.origin != ProfileOrigin::Chrome(origin.clone()) {
-            return Err(ErrorCode::WrongProfile);
-        }
-        if profile.revoked {
-            return Err(ErrorCode::ProfileIgnored);
+        if ignored_now && payload.user_initiated {
+            profile.ignored = false;
+            profile.view.ignored = false;
         }
         // A session ID cannot be reused by a second transport.
         if profile.session.as_ref() == Some(session_id) {
@@ -788,6 +942,21 @@ impl Bridge {
     }
 }
 impl ActiveProfile {
+    pub(super) fn check_browser_writable(&self) -> Result<()> {
+        if matches!(self.identity.origin, ProfileOrigin::LocalSkills) {
+            return Err(ErrorCode::ReadOnly);
+        }
+        if self.ignored || self.view.ignored {
+            return Err(ErrorCode::ProfileIgnored);
+        }
+        if self.view.write_paused {
+            return Err(ErrorCode::WritePaused);
+        }
+        if self.view.connection != BridgeConnection::Live {
+            return Err(ErrorCode::ReadOnly);
+        }
+        Ok(())
+    }
     fn disconnect(&mut self) {
         if let Some(close) = self.close.take() {
             close.send_replace(true);
@@ -796,7 +965,7 @@ impl ActiveProfile {
         self.awaiting_tree = None;
         self.outbound = None;
         self.busy = false;
-        self.view.connection = if self.revoked {
+        self.view.connection = if self.ignored {
             BridgeConnection::Ignored
         } else {
             BridgeConnection::CachedReadOnly
@@ -812,7 +981,7 @@ impl Inner {
             .profiles
             .get_mut(profile_id.as_str())
             .ok_or(ErrorCode::Unpaired)?;
-        if profile.revoked || profile.session.as_ref() != Some(session_id) {
+        if profile.ignored || profile.session.as_ref() != Some(session_id) {
             return Err(ErrorCode::WrongProfile);
         }
         Ok(profile)
@@ -847,6 +1016,34 @@ fn random_secret() -> Result<String> {
 }
 fn random_id(prefix: &str) -> Result<Id> {
     Id::new(format!("{prefix}:{}", random_secret()?))
+}
+fn pick_chrome_display_name(
+    profiles: &BTreeMap<String, ActiveProfile>,
+    hint: Option<&DisplayName>,
+) -> DisplayName {
+    let used: HashSet<&str> = profiles
+        .values()
+        .filter(|item| !matches!(item.identity.origin, ProfileOrigin::LocalSkills))
+        .map(|item| item.identity.display_name.as_str())
+        .collect();
+    if let Some(hint) = hint {
+        let trimmed = hint.as_str().trim();
+        if !trimmed.is_empty()
+            && trimmed != crate::storage::LOCAL_SKILLS_PROFILE_ID
+            && !used.contains(trimmed)
+            && let Ok(valid) = DisplayName::new(trimmed)
+        {
+            return valid;
+        }
+    }
+    let mut index = 1_usize;
+    loop {
+        let candidate = format!("Chrome 资料 {index}");
+        if !used.contains(candidate.as_str()) {
+            return DisplayName::new(candidate).expect("default name fits 128 chars");
+        }
+        index += 1;
+    }
 }
 fn profile_nodes<'a>(inner: &'a Inner, profile_id: &Id) -> Result<&'a [BookmarkNode]> {
     inner

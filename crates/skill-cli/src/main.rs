@@ -1737,12 +1737,12 @@ mod tests {
         // Lazy status before init
         let st0 = run_ok(&app_data, &["status"]).await;
         assert_eq!(st0["status"]["initialized"], false);
-        assert_eq!(st0["status"]["schemaVersion"], 8);
+        assert_eq!(st0["status"]["schemaVersion"], SCHEMA_VERSION);
 
         // Init creates local-skills and skills-root idempotently
         let init1 = run_ok(&app_data, &["init"]).await;
         assert_eq!(init1["status"]["initialized"], true);
-        assert_eq!(init1["status"]["schemaVersion"], 8);
+        assert_eq!(init1["status"]["schemaVersion"], SCHEMA_VERSION);
         assert_eq!(init1["status"]["revision"], 1);
         assert_eq!(init1["status"]["folderCount"], 1);
         assert_eq!(init1["status"]["bookmarkCount"], 0);
@@ -2217,7 +2217,7 @@ mod tests {
         .unwrap();
 
         let backup_res = live.backup_database(backup_file.clone()).await.unwrap();
-        assert_eq!(backup_res.schema_version, 8);
+        assert_eq!(backup_res.schema_version, SCHEMA_VERSION);
         assert!(backup_res.bytes > 0);
         // Second backup to same path must fail with CONFLICT (never overwrite)
         assert_eq!(

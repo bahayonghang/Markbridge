@@ -1402,12 +1402,29 @@ mod tests {
 
         let status = storage.ensure_local_skills_space().await.unwrap();
         assert!(status.initialized);
-        assert_eq!(status.schema_version, 8);
+        assert_eq!(status.schema_version, SCHEMA_VERSION);
         assert_eq!(status.folder_count, 1);
 
         let local_id = Id::new(LOCAL_SKILLS_PROFILE_ID).unwrap();
         assert_eq!(
-            storage.revoke_profile(local_id.clone()).await.unwrap_err(),
+            storage
+                .set_ignored(local_id.clone(), true)
+                .await
+                .unwrap_err(),
+            ErrorCode::ReadOnly
+        );
+        assert_eq!(
+            storage
+                .set_write_paused(local_id.clone(), true)
+                .await
+                .unwrap_err(),
+            ErrorCode::ReadOnly
+        );
+        assert_eq!(
+            storage
+                .rename_profile(local_id.clone(), DisplayName::new("Other").unwrap())
+                .await
+                .unwrap_err(),
             ErrorCode::ReadOnly
         );
         assert_eq!(

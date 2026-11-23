@@ -2,8 +2,8 @@
 use std::collections::{HashMap, HashSet};
 
 use markbridge_protocol::{
-    BridgeConnection, Counter, ErrorCode, Id, Mutation, NodeKind, OperationState,
-    OrganizationFolder, OrganizationPlan, SourceEpoch,
+    Counter, ErrorCode, Id, Mutation, NodeKind, OperationState, OrganizationFolder,
+    OrganizationPlan, SourceEpoch,
 };
 use tokio::sync::mpsc;
 
@@ -398,16 +398,26 @@ impl Bridge {
             .profiles
             .get(record.profile_id.as_str())
             .ok_or(ErrorCode::WrongProfile)?;
-        if matches!(
-            profile.identity.origin,
-            crate::storage::ProfileOrigin::LocalSkills
-        ) {
-            return Err(ErrorCode::ReadOnly);
+        match profile.check_browser_writable() {
+            Ok(()) => {}
+            Err(error @ (ErrorCode::WritePaused | ErrorCode::ProfileIgnored)) => {
+                return Err(error);
+            }
+            Err(ErrorCode::ReadOnly) => {
+                if matches!(
+                    profile.identity.origin,
+                    crate::storage::ProfileOrigin::LocalSkills
+                ) {
+                    return Err(ErrorCode::ReadOnly);
+                }
+                record.failure = Some(org::code_name(ErrorCode::ReadOnly));
+                record.failure_message = Some(org::MSG_OFFLINE.to_owned());
+                store(&inner, &job_id, &record).await?;
+                return present(&inner, &job_id, &record).await;
+            }
+            Err(error) => return Err(error),
         }
-        let live = profile.view.connection == BridgeConnection::Live
-            && profile.session.is_some()
-            && profile.outbound.is_some();
-        if !live {
+        if profile.session.is_none() || profile.outbound.is_none() {
             record.failure = Some(org::code_name(ErrorCode::ReadOnly));
             record.failure_message = Some(org::MSG_OFFLINE.to_owned());
             store(&inner, &job_id, &record).await?;
@@ -522,16 +532,26 @@ impl Bridge {
             .profiles
             .get(profile_id.as_str())
             .ok_or(ErrorCode::WrongProfile)?;
-        if matches!(
-            profile.identity.origin,
-            crate::storage::ProfileOrigin::LocalSkills
-        ) {
-            return Err(ErrorCode::ReadOnly);
+        match profile.check_browser_writable() {
+            Ok(()) => {}
+            Err(error @ (ErrorCode::WritePaused | ErrorCode::ProfileIgnored)) => {
+                return Err(error);
+            }
+            Err(ErrorCode::ReadOnly) => {
+                if matches!(
+                    profile.identity.origin,
+                    crate::storage::ProfileOrigin::LocalSkills
+                ) {
+                    return Err(ErrorCode::ReadOnly);
+                }
+                record.failure = Some(org::code_name(ErrorCode::ReadOnly));
+                record.failure_message = Some(org::MSG_OFFLINE.to_owned());
+                store(&inner, &job_id, &record).await?;
+                return present(&inner, &job_id, &record).await;
+            }
+            Err(error) => return Err(error),
         }
-        if profile.view.connection != BridgeConnection::Live
-            || profile.session.is_none()
-            || profile.outbound.is_none()
-        {
+        if profile.session.is_none() || profile.outbound.is_none() {
             record.failure = Some(org::code_name(ErrorCode::ReadOnly));
             record.failure_message = Some(org::MSG_OFFLINE.to_owned());
             store(&inner, &job_id, &record).await?;
@@ -655,7 +675,7 @@ pub(super) async fn on_receipt(
         .profiles
         .get(profile_id.as_str())
         .ok_or(ErrorCode::WrongProfile)?;
-    if profile.view.connection != BridgeConnection::Live {
+    if profile.check_browser_writable().is_err() {
         return Ok(());
     }
     let Some(session) = profile.session.clone() else {
