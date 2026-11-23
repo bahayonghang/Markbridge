@@ -1,8 +1,0 @@
-{"file":".trellis/spec/project-baseline.md","reason":"浏览器写回隔离、窗口权限控制与安全基线"}
-{"file":".trellis/spec/backend/directory-structure.md","reason":"Bridge、file_mirror notify 监听模式与 main-only Tauri 命令守卫"}
-{"file":".trellis/spec/frontend/index.md","reason":"前端总体规范入口"}
-{"file":".trellis/spec/frontend/component-guidelines.md","reason":"工作台导航、连接设置、首次引导与无障碍交互规范"}
-{"file":".trellis/spec/frontend/hook-guidelines.md","reason":"订阅取消与异步竞态防护"}
-{"file":".trellis/spec/frontend/state-management.md","reason":"BridgeState revision 驱动缓存与查询刷新约定"}
-{"file":".trellis/spec/frontend/type-safety.md","reason":"crates/protocol 与 packages/protocol 同步生成与静态校验"}
-{"file":".trellis/tasks/11-13-mb-skill-bookmark-db/research/architecture-analysis.md","reason":"Bridge 内存树热重载与 UI 适配锚点"}

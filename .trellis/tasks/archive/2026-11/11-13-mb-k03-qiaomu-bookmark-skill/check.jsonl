@@ -1,3 +1,0 @@
-{"file":".trellis/spec/project-baseline.md","reason":"核验未污染日常库、未篡改既有任务状态、未越权提交发布"}
-{"file":".trellis/spec/backend/quality-guidelines.md","reason":"核验端到端证据诚实记录与 missing evidence 声明"}
-{"file":".trellis/tasks/11-13-mb-skill-bookmark-db/research/qiaomu-skill-prior-art.md","reason":"核验单一根 SKILL.md、interface.yaml、trigger-eval、skill-ir 与 release_check 全量通过"}

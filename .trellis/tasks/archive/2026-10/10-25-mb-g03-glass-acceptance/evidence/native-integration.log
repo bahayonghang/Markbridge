@@ -1,6 +1,0 @@
-{"name":"ordinary_general_does_not_enumerate_or_persist","status":"PASS"}
-{"name":"real_local_font_catalog_crosschecked_cjk_latin","status":"PASS"}
-{"name":"real_candidate_glyphs_cancel_apply_and_focus","status":"PASS"}
-{"name":"shared_native_font_and_row_metrics","status":"PASS"}
-{"name":"native_hidden_list_anchor_bottom_checkbox_and_draft","status":"PASS"}
-{"runId":"run-1792930019448-038bd533","status":"FAIL","stage":"actual-monitor-dpi","output":"D:\\Documents\\Code\\Tauri\\Markbridge\\.trellis\\tasks\\10-25-mb-g03-glass-acceptance\\evidence\\native\\run-1792930019448-038bd533"}

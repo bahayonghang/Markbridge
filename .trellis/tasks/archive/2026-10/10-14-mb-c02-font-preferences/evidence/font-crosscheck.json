@@ -1,8 +1,0 @@
-{
-  "date": "2026-10-14",
-  "method": "Read-only System.Drawing.Text.InstalledFontCollection",
-  "familyCount": 753,
-  "selectedExistingFamilies": ["Arial", "Microsoft YaHei UI", "Segoe UI", "Times New Roman", "SimSun", "Microsoft YaHei"],
-  "fontInstallationOrRemoval": "NOT_RUN",
-  "purpose": "Independent local inventory for subsequent DirectWrite/main-window cross-check; this is not yet proof of product enumeration or rendering."
-}

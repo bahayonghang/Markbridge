@@ -1,5 +1,0 @@
-{"file":".trellis/spec/project-baseline.md","reason":"核验未改写 Chrome 文件、未触碰日常库与凭据"}
-{"file":".trellis/spec/backend/database-guidelines.md","reason":"核验 SCHEMA_VERSION=8、外键、FTS5 trigram、008_semantic 触发器与在线备份完整性"}
-{"file":".trellis/spec/backend/error-handling.md","reason":"核验越界写、受保护节点与非法 URL 的错误码返回"}
-{"file":".trellis/spec/backend/quality-guidelines.md","reason":"核验后端测试覆盖与证据记录标准"}
-{"file":".trellis/spec/guides/code-reuse-thinking-guide.md","reason":"核验复用现有 Storage 查询、标签、摘要与拓扑校验逻辑"}

@@ -1,6 +1,0 @@
-{"file":".trellis/spec/project-baseline.md","reason":"产品及授权安全边界，旧13/15门槛不改变"}
-{"file":".trellis/spec/frontend/component-guidelines.md","reason":"现有页面、focus、sticky、来源和确认合同；视觉段落仅获批后替换"}
-{"file":".trellis/spec/frontend/ui-preferences.md","reason":"主题/字体/v2迁移/虚拟行几何保持"}
-{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"浏览器与当前Windows原生、DPI及证据边界"}
-{"file":".trellis/tasks/archive/2026-10/10-25-mb-airy-glass-refactor/research/current-state.md","reason":"当前源码锚点、全部页面、目录冲突和风险"}
-{"file":".trellis/tasks/archive/2026-10/10-25-mb-airy-glass-refactor/research/catalog/DESIGN.md","reason":"style:airy-glass原始目录与来源；以父设计为项目适配提案"}
