@@ -144,3 +144,17 @@ Windows 首版是子任务 01–13，对应 M1–M4。子任务 14 和 15 属于
 - 共享身份、schema 和 DTO 归子任务 02。浏览器写入、回执和撤销归子任务 06。受限 fetch 归子任务 08。远程网页权限归子任务 09。
 - 命令、脚本或验收门槛变化时，更新父执行计划和受影响的子任务。
 - 稳定下来的新约定写回 `.trellis/spec/`。重大边界变化同时更新本文件。
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues (`bahayonghang/Markbridge`, via `gh` CLI). See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Five canonical triage labels (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context layout (`GLOSSARY.md` and `docs/adr/` at repo root). See `docs/agents/domain.md`.
