@@ -53,6 +53,8 @@ pnpm --filter @markbridge/desktop tauri dev
 | `pnpm typecheck` | 桌面、扩展、协议和测试工具的严格类型检查 |
 | `pnpm test` | Vitest 启动/协议行为与双语言互通；Node manifest、capability、生成漂移和原生产物扫描反例 |
 | `pnpm build` | 前端和扩展生产构建，协议消费者检查，产物扫描 |
+| `just build-extension` | 构建并校验已解压 Chrome 扩展到 `apps/extension/dist`，并生成可携式 ZIP 到 `apps/extension/dist-extension/` |
+| `just build-crx` | 构建扩展并签名生成 Chrome CRX3 包到 `apps/extension/dist-crx/`，校验产物与官方扩展 ID 一致 |
 | `pnpm build:native` | 当前原生 host 的 release 程序构建、格式/架构检查、路径映射及 UTF-8/UTF-16 扫描；不生成安装包 |
 | `pnpm build:package` | 先执行 `build:native`，再生成当前 host 包并核对/扫描实际包内程序；不安装或发布 |
 | `just install-app` | 先执行 `build-package`，再将当前 Windows NSIS 包以 `/S` 安装到当前用户默认目录；会创建正常注册项和快捷方式 |
@@ -67,6 +69,10 @@ pnpm --filter @markbridge/desktop tauri dev
 首次浏览器测试需先运行 `pnpm exec playwright install chromium`，下载 Playwright 的专用测试浏览器。浏览器数据不使用日常 Chrome Profile。
 
 `just ci` 通过 `scripts/ci.mjs` 调用现有单项 recipe，顺序与 `.github/workflows/ci.yml` 的 Windows job 一致，回归测试会检查两者是否漂移。等待提示只表示进程仍在运行，不表示检查已通过。协议生成先用 `cargo build --locked` 构建当前源码的导出器，再按 Cargo 本轮报告的实际可执行文件路径逐项导出，并显示 schema 名称；漂移测试的一组临时文件反例共用一次新生成的基线，避免反复启动 Cargo。`pnpm protocol:check` 仍独立重新生成全部 schema、类型和静态校验器，不使用跨运行缓存。
+
+`just build-extension` 无需私钥，直接构建并校验可直接加载的已解压 Chrome 扩展目录 `apps/extension/dist`，同时输出便于拷贝/分发的 `apps/extension/dist-extension/markbridge-extension-<version>.zip`。Windows 稳定版 Chrome 会自动禁用非 Chrome Web Store 上架的本地 `.crx` 安装包；本机日常使用应执行 `just build-extension`，然后在 `chrome://extensions` 开启开发者模式并「加载已解压的扩展程序」指向 `apps/extension/dist`（或解压 `apps/extension/dist-extension/markbridge-extension-<version>.zip`）。
+
+`just build-crx` 使用纯 Node.js（零新增外部依赖）为 `apps/extension/dist` 生成签名 CRX3 安装包并完成签名与内容自检。CRX3 私钥默认读取 `apps/extension/.keys/extension.pem`（也可通过 `--key` 或 `MARKBRIDGE_CRX_KEY` 指定）；私钥、`apps/extension/dist-extension/` 与 `apps/extension/dist-crx/` 均被 `.gitignore` 忽略且严禁入库。首次本地初始化或需要轮换固定扩展 ID 时运行 `just crx-rotate-key`（会同步更新 `manifest.json` 与 Rust/TS 协议常量，之后需同步重建桌面端与扩展）。
 
 本轮卡顿分析、协议测试前后对照和完整本地 CI 结果见 [2026-10-17 CI 验证记录](docs/ci-workflow-2026-10-17.md)。
 
