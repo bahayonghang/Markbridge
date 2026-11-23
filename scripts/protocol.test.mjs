@@ -66,6 +66,10 @@ test('generated validators run with string code generation disabled, as required
     assert.equal(wire({...fixture, protocolVersion:2}), false);
     assert.equal(wire({protocolVersion:1,type:'hello',profileId:'pending',sessionId:'s1',requestId:'r1',seq:null,payload:{instanceId:'inst-1',displayNameHint:'Chrome',userInitiated:true}}), true);
     assert.equal(wire({protocolVersion:1,type:'pause_sync',profileId:'p1',sessionId:'s1',requestId:'r2',seq:null,payload:{reason:'PROFILE_IGNORED'}}), true);
+    assert.equal(wire({protocolVersion:1,type:'write_policy',profileId:'p1',sessionId:'s1',requestId:'r2b',seq:null,payload:{writePaused:true}}), true);
+    assert.equal(wire({protocolVersion:1,type:'write_policy',profileId:'p1',sessionId:'s1',requestId:'r2c',seq:null,payload:{writePaused:false}}), true);
+    assert.equal(wire({protocolVersion:1,type:'write_policy',profileId:'p1',sessionId:'s1',requestId:'r2d',seq:null,payload:{writePaused:true,extra:1}}), false);
+    assert.equal(wire({protocolVersion:1,type:'write_policy',profileId:'p1',sessionId:'s1',requestId:'r2e',seq:null,payload:{}}), false);
     assert.equal(wire({protocolVersion:1,type:'pair',profileId:'p1',sessionId:'s1',requestId:'r3',seq:null,payload:{instanceId:'i',credential:'x'.repeat(32),displayName:'Chrome'}}), false);
     assert.equal(bridge({protocolVersion:1,revision:0,port:49153,errorCode:null,profiles:[{profileId:'p1',instanceId:'i1',displayName:'Chrome 资料 1',connection:'ignored',writePaused:false,ignored:true,nodeCount:0,revision:0,lastSyncedAt:null,errorCode:null}],mirrors:[]}), true);
     assert.equal(bridge({protocolVersion:1,revision:0,port:49153,errorCode:null,profiles:[],pending:[],mirrors:[]}), false);

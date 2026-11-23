@@ -117,6 +117,43 @@
       "type": "object",
       "properties": {
         "payload": {
+          "$ref": "#/$defs/WritePolicyPayload"
+        },
+        "profileId": {
+          "$ref": "#/$defs/Id"
+        },
+        "protocolVersion": {
+          "$ref": "#/$defs/Version"
+        },
+        "requestId": {
+          "$ref": "#/$defs/RequiredNullable"
+        },
+        "seq": {
+          "$ref": "#/$defs/RequiredNullable2"
+        },
+        "sessionId": {
+          "$ref": "#/$defs/Id"
+        },
+        "type": {
+          "type": "string",
+          "const": "write_policy"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "protocolVersion",
+        "profileId",
+        "sessionId",
+        "requestId",
+        "seq",
+        "payload"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "payload": {
           "$ref": "#/$defs/EmptyPayload"
         },
         "profileId": {
@@ -1304,6 +1341,18 @@
       "format": "uint64",
       "maximum": 1,
       "minimum": 1
+    },
+    "WritePolicyPayload": {
+      "type": "object",
+      "properties": {
+        "writePaused": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "writePaused"
+      ]
     }
   }
 }

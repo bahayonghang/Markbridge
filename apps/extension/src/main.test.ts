@@ -67,6 +67,38 @@ describe('extension status UI (popup & options)', () => {
     expect(document.querySelector('#pause')).not.toBeDisabled();
   });
 
+  it('toggles #write-paused badge when live status updates writePaused true -> false -> true', async () => {
+    vi.resetModules();
+    vi.useFakeTimers();
+    mountBody(indexHtml);
+    let current: ExtensionStatus = {
+      state: 'connected',
+      profileId: 'p-1',
+      displayName: '工作资料',
+      instanceId: 'synthetic-instance',
+      port: 49155,
+      nodeCount: 42,
+      writePaused: true,
+      errorCode: null,
+    };
+    const sendMessage = vi.fn(async () => current);
+    vi.stubGlobal('chrome', { runtime: { id: 'synthetic-origin', sendMessage, openOptionsPage: vi.fn() } });
+    await import('./main');
+    await vi.advanceTimersByTimeAsync(0);
+    expect(document.querySelector('#write-paused')).toBeVisible();
+    expect(document.querySelector('#details')).toHaveTextContent('写入保护：仅只读');
+
+    current = { ...current, writePaused: false };
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(document.querySelector('#write-paused')).not.toBeVisible();
+    expect(document.querySelector('#details')).not.toHaveTextContent('只读');
+
+    current = { ...current, writePaused: true };
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(document.querySelector('#write-paused')).toBeVisible();
+    expect(document.querySelector('#details')).toHaveTextContent('写入保护：仅只读');
+  });
+
   it('renders connecting, paused, disconnected, and error states cleanly and triggers #reconnect / #pause', async () => {
     vi.resetModules();
     vi.useFakeTimers();

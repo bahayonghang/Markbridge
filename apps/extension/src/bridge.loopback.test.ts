@@ -300,6 +300,14 @@ describe('real loopback WebSocket joint integration', () => {
 
     const localData: Record<string, unknown> = {};
     const api = createMockChrome(localData);
+    api.bookmarks.create.mockImplementation(async (details: chrome.bookmarks.CreateDetails) => ({
+      id: '9',
+      parentId: details.parentId,
+      index: details.index,
+      title: details.title,
+      url: details.url,
+      syncing: false,
+    }));
     const probedUrls: string[] = [];
     const bridge = new ExtensionBridge(api as unknown as typeof chrome, url => {
       probedUrls.push(url);
@@ -395,6 +403,82 @@ describe('real loopback WebSocket joint integration', () => {
     });
     expect(api.bookmarks.create).not.toHaveBeenCalled();
 
+    // Live write_policy unpauses without reconnect and allows apply_operation over the same socket.
+    conn1.send({
+      protocolVersion: 1,
+      type: 'write_policy',
+      profileId,
+      sessionId: hello.sessionId,
+      requestId: 'wp-loop-1',
+      seq: null,
+      payload: { writePaused: false },
+    });
+    await waitForStatus(bridge, s => s.state === 'connected' && s.writePaused === false && s.errorCode === null);
+    conn1.send({
+      protocolVersion: 1,
+      type: 'apply_operation',
+      profileId,
+      sessionId: hello.sessionId,
+      requestId: 'op-req-2',
+      seq: null,
+      payload: {
+        operationId: 'op-loop-unpaused',
+        sourceEpoch: 1,
+        expectedRevision: 0,
+        steps: [{
+          requestId: 'step-loop-unpaused',
+          target: null,
+          expectedBefore: null,
+          expectedChildIds: null,
+          payload: { kind: 'create', parentId: '1', position: 0, title: 'Allowed', url: 'https://allowed.test/' },
+        }],
+      },
+    });
+    const receipt2 = await conn1.nextMessage();
+    expect(receipt2).toMatchObject({
+      type: 'operation_receipt',
+      payload: { operationId: 'op-loop-unpaused', requestId: 'step-loop-unpaused', state: 'applied', errorCode: null },
+    });
+    expect(api.bookmarks.create).toHaveBeenCalledTimes(1);
+
+    // Live write_policy(true) re-pauses without reconnect and blocks apply_operation with WRITE_PAUSED.
+    conn1.send({
+      protocolVersion: 1,
+      type: 'write_policy',
+      profileId,
+      sessionId: hello.sessionId,
+      requestId: 'wp-loop-2',
+      seq: null,
+      payload: { writePaused: true },
+    });
+    await waitForStatus(bridge, s => s.state === 'connected' && s.writePaused === true);
+    conn1.send({
+      protocolVersion: 1,
+      type: 'apply_operation',
+      profileId,
+      sessionId: hello.sessionId,
+      requestId: 'op-req-3',
+      seq: null,
+      payload: {
+        operationId: 'op-loop-repaused',
+        sourceEpoch: 1,
+        expectedRevision: 0,
+        steps: [{
+          requestId: 'step-loop-repaused',
+          target: null,
+          expectedBefore: null,
+          expectedChildIds: null,
+          payload: { kind: 'create', parentId: '1', position: 0, title: 'Blocked Again', url: 'https://blocked2.test/' },
+        }],
+      },
+    });
+    const receipt3 = await conn1.nextMessage();
+    expect(receipt3).toMatchObject({
+      type: 'operation_receipt',
+      payload: { operationId: 'op-loop-repaused', requestId: 'step-loop-repaused', state: 'failed', errorCode: 'WRITE_PAUSED' },
+    });
+    expect(api.bookmarks.create).toHaveBeenCalledTimes(1);
+
     // PauseSync anti-bounce + immediate close transitions cleanly to paused without bouncing back.
     conn1.send({
       protocolVersion: 1,
@@ -473,6 +557,14 @@ describe('real loopback WebSocket joint integration', () => {
 
     const localData: Record<string, unknown> = {};
     const api = createMockChrome(localData);
+    api.bookmarks.create.mockImplementation(async (details: chrome.bookmarks.CreateDetails) => ({
+      id: '9',
+      parentId: details.parentId,
+      index: details.index,
+      title: details.title,
+      url: details.url,
+      syncing: false,
+    }));
     const probedUrls: string[] = [];
     const bridge = new ExtensionBridge(api as unknown as typeof chrome, url => {
       probedUrls.push(url);

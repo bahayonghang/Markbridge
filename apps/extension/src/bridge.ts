@@ -450,6 +450,7 @@ export class ExtensionBridge {
       // The desktop follows this notice with its correlated get_tree command.
       case 'resync_required': this.reconciliationRequested = true; this.snapshotSent = false; this.setStatus('reconciling'); return;
       case 'pause_sync': await this.enterPaused(message.payload.reason); return;
+      case 'write_policy': this.writePaused = message.payload.writePaused; this.setStatus(this.status.state); return;
       case 'ping': this.send({ ...this.envelope('pong', message.requestId), payload: {} }); return;
       case 'pong': return;
       case 'apply_operation': await this.applyWrites(message); return;

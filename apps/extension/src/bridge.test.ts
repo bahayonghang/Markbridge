@@ -33,7 +33,7 @@ class Socket {
     }
     this.onmessage?.({ data: encodeWireFrame(message) });
   }
-  reply(type: 'hello_result' | 'get_tree' | 'ping' | 'pong' | 'resync_required' | 'pause_sync', payload: unknown = {}) {
+  reply(type: 'hello_result' | 'get_tree' | 'ping' | 'pong' | 'resync_required' | 'pause_sync' | 'write_policy', payload: unknown = {}) {
     const base = type === 'pong'
       ? [...this.sent].reverse().find(message => message.type === 'ping')!
       : this.sent.at(-1)!;
@@ -41,9 +41,11 @@ class Socket {
       ? null
       : type === 'pause_sync'
         ? 'pause-1'
-        : type === 'get_tree'
-          ? (base.requestId ?? 'tree-1')
-          : base.requestId;
+        : type === 'write_policy'
+          ? 'wp-1'
+          : type === 'get_tree'
+            ? (base.requestId ?? 'tree-1')
+            : base.requestId;
     this.receive({ ...base, profileId: this.resolvedProfileId ?? base.profileId, type, requestId, seq: null, payload } as WireMessage);
   }
 }
@@ -428,6 +430,78 @@ describe('zero-click port probing and anti-bounce', () => {
     expect(socket.sent.at(-1)).toMatchObject({
       type: 'operation_receipt',
       payload: { operationId: 'op-wp', requestId: 'step-wp', state: 'failed', errorCode: 'WRITE_PAUSED' },
+    });
+  });
+
+  it('toggles writePaused live via write_policy without reconnect (true -> false -> true)', async () => {
+    const ctx = setup({}, { openPorts: [49153] });
+    ctx.api.bookmarks.create.mockImplementation(async (details: chrome.bookmarks.CreateDetails) => ({
+      id: '9',
+      parentId: details.parentId,
+      index: details.index,
+      title: details.title,
+      url: details.url,
+      syncing: false,
+    }));
+    const socket = await synchronize(ctx, { writePaused: true, profileId: 'p-wp-live', displayName: '读写切换资料' });
+    expect(ctx.bridge.getStatus()).toMatchObject({ state: 'connected', writePaused: true });
+
+    const step = (requestId: string) => ({
+      requestId,
+      target: null,
+      expectedBefore: null,
+      expectedChildIds: null,
+      payload: { kind: 'create' as const, parentId: '1', position: 0, title: 'Live Policy', url: 'https://policy.test/' },
+    });
+
+    socket.receive({
+      ...socket.sent[0]!,
+      profileId: socket.resolvedProfileId!,
+      type: 'apply_operation',
+      payload: { expectedRevision: 0, operationId: 'op-wp-1', sourceEpoch: 1, steps: [step('step-wp-1')] },
+    });
+    await flush();
+    expect(ctx.api.bookmarks.create).not.toHaveBeenCalled();
+    expect(socket.sent.at(-1)).toMatchObject({
+      type: 'operation_receipt',
+      payload: { operationId: 'op-wp-1', requestId: 'step-wp-1', state: 'failed', errorCode: 'WRITE_PAUSED' },
+    });
+
+    // Live write_policy(false) unpauses writes on the same connection without reconnect.
+    socket.reply('write_policy', { writePaused: false });
+    await flush();
+    expect(ctx.sockets).toHaveLength(1);
+    expect(ctx.bridge.getStatus()).toMatchObject({ state: 'connected', writePaused: false, errorCode: null });
+
+    socket.receive({
+      ...socket.sent[0]!,
+      profileId: socket.resolvedProfileId!,
+      type: 'apply_operation',
+      payload: { expectedRevision: 0, operationId: 'op-wp-2', sourceEpoch: 1, steps: [step('step-wp-2')] },
+    });
+    await flush();
+    expect(ctx.api.bookmarks.create).toHaveBeenCalledTimes(1);
+    expect(socket.sent.at(-1)).toMatchObject({
+      type: 'operation_receipt',
+      payload: { operationId: 'op-wp-2', requestId: 'step-wp-2', state: 'applied', errorCode: null },
+    });
+
+    // Live write_policy(true) re-pauses writes on the same connection.
+    socket.reply('write_policy', { writePaused: true });
+    await flush();
+    expect(ctx.bridge.getStatus()).toMatchObject({ state: 'connected', writePaused: true, errorCode: null });
+
+    socket.receive({
+      ...socket.sent[0]!,
+      profileId: socket.resolvedProfileId!,
+      type: 'apply_operation',
+      payload: { expectedRevision: 0, operationId: 'op-wp-3', sourceEpoch: 1, steps: [step('step-wp-3')] },
+    });
+    await flush();
+    expect(ctx.api.bookmarks.create).toHaveBeenCalledTimes(1);
+    expect(socket.sent.at(-1)).toMatchObject({
+      type: 'operation_receipt',
+      payload: { operationId: 'op-wp-3', requestId: 'step-wp-3', state: 'failed', errorCode: 'WRITE_PAUSED' },
     });
   });
 

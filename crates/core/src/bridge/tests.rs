@@ -6037,6 +6037,14 @@ async fn write_paused_persists_keeps_live_sync_and_blocks_all_seven_write_module
         .unwrap();
     assert!(paused_profile.write_paused);
     assert_eq!(paused_profile.connection, BridgeConnection::Live);
+    let WireMessage::WritePolicy {
+        payload: pause_policy,
+        ..
+    } = next_frame(&mut ws).await
+    else {
+        panic!("expected write_policy(true) over live WebSocket");
+    };
+    assert!(pause_policy.write_paused);
 
     // Incoming Event MUST still update bookmarks_cache while write_paused == true.
     let incoming_ev = serde_json::from_value::<WireMessage>(serde_json::json!({
@@ -6350,11 +6358,19 @@ async fn write_paused_persists_keeps_live_sync_and_blocks_all_seven_write_module
         "TreeFull While Paused"
     );
 
-    // Unpause restores browser writes.
+    // Unpause restores browser writes and pushes live write_policy(false) without reconnect.
     reopened
         .set_write_paused(profile.clone(), false)
         .await
         .unwrap();
+    let WireMessage::WritePolicy {
+        payload: unpause_policy,
+        ..
+    } = next_frame(&mut ws2).await
+    else {
+        panic!("expected write_policy(false) after unpause");
+    };
+    assert!(!unpause_policy.write_paused);
     let rev2 = revision_of(&reopened, &profile).await;
     let writable_preview = reopened
         .preview_edit(

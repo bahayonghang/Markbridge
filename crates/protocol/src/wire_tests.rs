@@ -349,6 +349,31 @@ fn fixed_extension_identity_constants_and_zero_click_wire_contract() {
     invalid_pause_sync["requestId"] = Value::Null;
     assert!(parse(&invalid_pause_sync).is_err());
 
+    let write_policy = json!({
+        "protocolVersion": 1,
+        "type": "write_policy",
+        "profileId": "profile-1",
+        "sessionId": "session-1",
+        "requestId": "req-write-policy",
+        "seq": null,
+        "payload": {
+            "writePaused": true
+        }
+    });
+    assert!(parse(&write_policy).is_ok());
+
+    let mut invalid_write_policy = write_policy.clone();
+    invalid_write_policy["requestId"] = Value::Null;
+    assert!(parse(&invalid_write_policy).is_err());
+
+    let mut write_policy_with_seq = write_policy.clone();
+    write_policy_with_seq["seq"] = json!(1);
+    assert!(parse(&write_policy_with_seq).is_err());
+
+    let mut write_policy_extra = write_policy.clone();
+    write_policy_extra["payload"]["extra"] = json!(true);
+    assert!(parse(&write_policy_extra).is_err());
+
     let bridge_state: BridgeState = serde_json::from_value(json!({
         "protocolVersion": 1,
         "revision": 2,

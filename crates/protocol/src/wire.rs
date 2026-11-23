@@ -422,6 +422,11 @@ pub struct HelloResultPayload {
 pub struct PauseSyncPayload {
     pub reason: ErrorCode,
 }
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct WritePolicyPayload {
+    pub write_paused: bool,
+}
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
 pub struct EmptyPayload {}
@@ -500,6 +505,7 @@ macro_rules! wire_message {
 }
 wire_message! {
     Hello(HelloPayload), HelloResult(HelloResultPayload), PauseSync(PauseSyncPayload),
+    WritePolicy(WritePolicyPayload),
     Ping(EmptyPayload), Pong(EmptyPayload), GetTree(EmptyPayload), TreeFull(TreeSnapshot), Event(EventPayload),
     ResyncRequired(ResyncPayload), ApplyOperation(ApplyPayload), OperationReceipt(Box<Receipt>), GetOperationStatus(StatusPayload),
 }

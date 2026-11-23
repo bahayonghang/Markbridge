@@ -414,6 +414,16 @@ impl Bridge {
             .get_mut(profile_id.as_str())
             .ok_or(ErrorCode::WrongProfile)?;
         profile.view.write_paused = paused;
+        if let (Some(session), Some(sender)) = (&profile.session, &profile.outbound) {
+            let policy = envelope(
+                "write_policy",
+                &profile_id,
+                session,
+                Some(random_id("wp")?),
+                serde_json::json!({ "writePaused": paused }),
+            )?;
+            let _ = sender.send(policy);
+        }
         self.publish(&mut inner);
         Ok(inner.view())
     }

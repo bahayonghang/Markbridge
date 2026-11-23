@@ -29,6 +29,15 @@ export type WireMessage =
       type: 'pause_sync';
     }
   | {
+      payload: WritePolicyPayload;
+      profileId: Id;
+      protocolVersion: Version;
+      requestId: RequiredNullable;
+      seq: RequiredNullable2;
+      sessionId: Id;
+      type: 'write_policy';
+    }
+  | {
       payload: EmptyPayload;
       profileId: Id;
       protocolVersion: Version;
@@ -255,6 +264,9 @@ export interface HelloResultPayload {
 }
 export interface PauseSyncPayload {
   reason: ErrorCode;
+}
+export interface WritePolicyPayload {
+  writePaused: boolean;
 }
 export interface EmptyPayload {}
 export interface TreeSnapshot {

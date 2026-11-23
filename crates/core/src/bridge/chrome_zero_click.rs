@@ -293,6 +293,22 @@ async fn disposable_chrome_zero_click_e2e_loop() {
         .unwrap();
     assert!(wp_view.write_paused);
     assert_eq!(wp_view.connection, BridgeConnection::Live);
+    timeout(Duration::from_secs(5), async {
+        loop {
+            let status = page_cdp_1
+                .eval("chrome.runtime.sendMessage({ type: 'status' })")
+                .await
+                .unwrap();
+            if status["state"].as_str() == Some("connected")
+                && status["writePaused"].as_bool() == Some(true)
+            {
+                return;
+            }
+            sleep(Duration::from_millis(50)).await;
+        }
+    })
+    .await
+    .expect("extension updated writePaused=true live without reconnect");
 
     let rev_paused = revision_of(&reopened, &profile1).await;
     let paused_preview = reopened
@@ -354,6 +370,22 @@ async fn disposable_chrome_zero_click_e2e_loop() {
         .set_write_paused(profile1.clone(), false)
         .await
         .unwrap();
+    timeout(Duration::from_secs(5), async {
+        loop {
+            let status = page_cdp_1
+                .eval("chrome.runtime.sendMessage({ type: 'status' })")
+                .await
+                .unwrap();
+            if status["state"].as_str() == Some("connected")
+                && status["writePaused"].as_bool() == Some(false)
+            {
+                return;
+            }
+            sleep(Duration::from_millis(50)).await;
+        }
+    })
+    .await
+    .expect("extension updated writePaused=false live without reconnect");
     let rev_restored = revision_of(&reopened, &profile1).await;
     let writable_preview = reopened
         .preview_edit(
@@ -406,6 +438,112 @@ async fn disposable_chrome_zero_click_e2e_loop() {
         Some("AC1 Restored Write")
     );
     println!("AC1_WRITE_PAUSED_SYNC_MS={paused_sync_ms} AC1_UNPAUSED_WRITE=applied");
+
+    // Reconnect while write_paused is already true so HelloResult carries writePaused=true,
+    // then unpause live via WritePolicy without reconnecting and verify apply_edit succeeds.
+    reopened
+        .set_write_paused(profile1.clone(), true)
+        .await
+        .unwrap();
+    reopened.reconnect_profile(profile1.clone()).await.unwrap();
+    timeout(Duration::from_secs(10), async {
+        loop {
+            let live_paused = reopened.state().await.profiles.iter().any(|p| {
+                p.profile_id == profile1 && p.write_paused && p.connection == BridgeConnection::Live
+            });
+            let status = page_cdp_1
+                .eval("chrome.runtime.sendMessage({ type: 'status' })")
+                .await
+                .unwrap();
+            if live_paused
+                && status["state"].as_str() == Some("connected")
+                && status["writePaused"].as_bool() == Some(true)
+            {
+                return;
+            }
+            sleep(Duration::from_millis(50)).await;
+        }
+    })
+    .await
+    .expect("reconnected with HelloResult writePaused=true");
+    let rev_hello_paused = revision_of(&reopened, &profile1).await;
+    assert_eq!(
+        reopened
+            .apply_edit(
+                profile1.clone(),
+                rev_hello_paused,
+                EditAction::Update {
+                    chrome_id: Id::new(&created_id).unwrap(),
+                    title: Some(Title::new("Blocked After Hello").unwrap()),
+                    url: None,
+                },
+                false,
+            )
+            .await
+            .unwrap_err(),
+        ErrorCode::WritePaused
+    );
+    reopened
+        .set_write_paused(profile1.clone(), false)
+        .await
+        .unwrap();
+    timeout(Duration::from_secs(5), async {
+        loop {
+            let status = page_cdp_1
+                .eval("chrome.runtime.sendMessage({ type: 'status' })")
+                .await
+                .unwrap();
+            if status["state"].as_str() == Some("connected")
+                && status["writePaused"].as_bool() == Some(false)
+            {
+                return;
+            }
+            sleep(Duration::from_millis(50)).await;
+        }
+    })
+    .await
+    .expect("live write_policy unpaused after HelloResult(writePaused=true) without reconnect");
+    let rev_after_hello_unpause = revision_of(&reopened, &profile1).await;
+    let applied_after_hello = reopened
+        .apply_edit(
+            profile1.clone(),
+            rev_after_hello_unpause,
+            EditAction::Update {
+                chrome_id: Id::new(&created_id).unwrap(),
+                title: Some(Title::new("AC1 Unpaused After Hello").unwrap()),
+                url: None,
+            },
+            false,
+        )
+        .await
+        .unwrap();
+    timeout(
+        Duration::from_secs(10),
+        wait_operation(
+            &reopened,
+            &profile1,
+            &applied_after_hello.operation_id,
+            OperationState::Applied,
+        ),
+    )
+    .await
+    .expect("apply_edit succeeded after live write_policy unpause");
+    let chrome_title_after_hello = page_cdp_1
+        .eval(&format!(
+            "(async () => (await chrome.bookmarks.get({}))[0].title)()",
+            serde_json::to_string(&created_id).unwrap()
+        ))
+        .await
+        .unwrap();
+    assert_eq!(
+        chrome_title_after_hello.as_str(),
+        Some("AC1 Unpaused After Hello")
+    );
+    assert_eq!(
+        title_of(&reopened, &profile1, &created_id).await.as_deref(),
+        Some("AC1 Unpaused After Hello")
+    );
+    println!("AC1_LIVE_WRITE_POLICY_SYNC=true AC1_UNPAUSED_AFTER_HELLO_WRITE=applied");
 
     // Sub-item 6: ignore_profile -> PauseSync -> extension stays paused without bouncing back; user reconnect restores Live.
     let ignored_state = reopened.ignore_profile(profile1.clone()).await.unwrap();
