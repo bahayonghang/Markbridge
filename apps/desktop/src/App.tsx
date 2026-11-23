@@ -75,6 +75,14 @@ export function App({ initialPreferences }: { initialPreferences?: UiPreferences
     saveLayoutPreferences(next);
   }
 
+  function clearActiveDrag() {
+    if (dragRef.current) {
+      releaseDragCapture(dragRef.current);
+      dragRef.current = null;
+    }
+    setDragWidth(null);
+  }
+
   useEffect(() => {
     const onResize = () => setViewport({ width: window.innerWidth, height: window.innerHeight });
     window.addEventListener('resize', onResize);
@@ -86,10 +94,7 @@ export function App({ initialPreferences }: { initialPreferences?: UiPreferences
       if (event.key === 'Escape' && dragRef.current) {
         event.preventDefault();
         event.stopPropagation();
-        const drag = dragRef.current;
-        dragRef.current = null;
-        releaseDragCapture(drag);
-        setDragWidth(null);
+        clearActiveDrag();
         return;
       }
       if ((event.ctrlKey || event.metaKey) && !event.altKey && !event.shiftKey && event.key.toLowerCase() === 'b') {
@@ -137,10 +142,8 @@ export function App({ initialPreferences }: { initialPreferences?: UiPreferences
   function handleSplitterPointerUp(event: ReactPointerEvent<HTMLDivElement>) {
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== event.pointerId) return;
-    dragRef.current = null;
-    releaseDragCapture(drag);
+    clearActiveDrag();
     const finalWidth = clampSidebarWidth(drag.startWidth + (event.clientX - drag.startX), window.innerWidth);
-    setDragWidth(null);
     if (finalWidth !== drag.startWidth) {
       commitLayoutPrefs((current) => ({ ...current, sidebarWidthPx: finalWidth }));
     }
@@ -149,17 +152,11 @@ export function App({ initialPreferences }: { initialPreferences?: UiPreferences
   function handleSplitterPointerCancel(event: ReactPointerEvent<HTMLDivElement>) {
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== event.pointerId) return;
-    dragRef.current = null;
-    releaseDragCapture(drag);
-    setDragWidth(null);
+    clearActiveDrag();
   }
 
   function handleSplitterDoubleClick() {
-    if (dragRef.current) {
-      releaseDragCapture(dragRef.current);
-      dragRef.current = null;
-    }
-    setDragWidth(null);
+    clearActiveDrag();
     const resetWidth = clampSidebarWidth(DEFAULT_SIDEBAR_WIDTH_PX, window.innerWidth);
     commitLayoutPrefs((current) => ({ ...current, sidebarWidthPx: resetWidth }));
   }

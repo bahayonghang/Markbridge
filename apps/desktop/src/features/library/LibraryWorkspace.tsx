@@ -232,6 +232,22 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
     setGap(previous != null && revision > previous + 1);
   }, [sourceKey, profile?.revision, mirror?.revision]);
 
+  function initializeRootExpansion(loadKey: string, roots: string[]) {
+    if (expandedInitializedFor.current !== loadKey && roots.length > 0) {
+      expandedInitializedFor.current = loadKey;
+      setExpanded(new Set(roots));
+    }
+  }
+
+  function expandFolderIds(ids: string[]) {
+    if (ids.length === 0) return;
+    setExpanded((current) => {
+      const next = new Set(current);
+      for (const id of ids) next.add(id);
+      return next;
+    });
+  }
+
   useEffect(() => {
     if (!profile || !native || invalid) return;
     const generation = ++treeGen.current;
@@ -242,11 +258,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
       setPhase('ready');
       const flat = indexFlat(tree.nodes);
       const roots = rootFolders(flat).map((node) => node.chromeId);
-      const loadKey = `profile:${profile.profileId}`;
-      if (expandedInitializedFor.current !== loadKey && roots.length > 0) {
-        expandedInitializedFor.current = loadKey;
-        setExpanded(new Set(roots));
-      }
+      initializeRootExpansion(`profile:${profile.profileId}`, roots);
       setFolderId((current) => current && flat.nodes.get(current)?.kind === 'folder' ? current : roots[0] ?? null);
       setPicked((current) => new Set([...current].filter((id) => flat.nodes.has(id))));
       setBookmarkId((current) => current && flat.nodes.has(current) ? current : null);
@@ -286,11 +298,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
         setPhase('ready');
         const flat = indexFlat(tree.nodes);
         const roots = rootFolders(flat).map((node) => node.chromeId);
-        const loadKey = `mirror:${mirror.mirrorSourceId}`;
-        if (expandedInitializedFor.current !== loadKey && roots.length > 0) {
-          expandedInitializedFor.current = loadKey;
-          setExpanded(new Set(roots));
-        }
+        initializeRootExpansion(`mirror:${mirror.mirrorSourceId}`, roots);
         setFolderId((current) => current && flat.nodes.get(current)?.kind === 'folder' ? current : roots[0] ?? null);
         setPicked((current) => new Set([...current].filter((id) => flat.nodes.has(id))));
         setBookmarkId((current) => current && flat.nodes.has(current) ? current : !roots.length ? looseBookmarks(tree.nodes)[0]?.chromeId ?? null : null);
@@ -426,14 +434,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
       setQuery('');
       setFilterTagId(null);
       if (expandAncestors) {
-        const ancestors = folderPath(activeIndex, chromeId).slice(0, -1).map((node) => node.chromeId);
-        if (ancestors.length > 0) {
-          setExpanded((current) => {
-            const next = new Set(current);
-            for (const id of ancestors) next.add(id);
-            return next;
-          });
-        }
+        expandFolderIds(folderPath(activeIndex, chromeId).slice(0, -1).map((node) => node.chromeId));
       }
     });
   }
@@ -863,14 +864,7 @@ export function LibraryWorkspace({ state, invalid, native, focusMirrorId, sectio
               leaveMetadata(() => {
                 setFolderId(node.parentId ?? folderId); setQuery(''); setFilterTagId(null);
                 if (node.parentId) {
-                  const ancestors = folderPath(activeIndex, node.parentId).map((item) => item.chromeId);
-                  if (ancestors.length > 0) {
-                    setExpanded((current) => {
-                      const next = new Set(current);
-                      for (const id of ancestors) next.add(id);
-                      return next;
-                    });
-                  }
+                  expandFolderIds(folderPath(activeIndex, node.parentId).map((item) => item.chromeId));
                 }
                 selectBookmark(chromeId); onLibrary?.();
               }, [chromeId]);
